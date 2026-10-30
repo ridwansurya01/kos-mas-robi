@@ -1,0 +1,755 @@
+/* ==========================================================================
+   KOS MAS ROBI — ULTRA MODERN DARK MODE (LUXURY MIDNIGHT SLATE)
+   ========================================================================== */
+
+/* ── Global Dark Theme Tokens ── */
+[data-theme="dark"] {
+  --tp-bg-primary:       #0b0f19;
+  --tp-bg-card:          #121a2d;
+  --tp-bg-surface:       #172136;
+  --tp-bg-surface-hover: #1e2c47;
+  --tp-bg-subtle:        #141d31;
+
+  --tp-border:           #1f2c47;
+  --tp-border-subtle:    #18233a;
+
+  --tp-text-primary:     #f8fafc;
+  --tp-text-secondary:   #94a3b8;
+  --tp-text-muted:       #64748b;
+
+  --tp-blue-primary:     #3b82f6;
+  --tp-blue-hover:       #2563eb;
+  --tp-blue-light:       #60a5fa;
+  --tp-blue-soft:        #152444;
+  --tp-blue-border:      #253b68;
+
+  --tp-navy-dark:        #060911;
+  --tp-navy-surface:     #0f172a;
+
+  --tp-green-bg:         #062d1d;
+  --tp-green-text:       #34d399;
+  --tp-green-border:     #059669;
+
+  --tp-amber-bg:         #2d1d05;
+  --tp-amber-text:       #fbbf24;
+  --tp-amber-border:     #d97706;
+
+  --tp-red-bg:           #341118;
+  --tp-red-text:         #f87171;
+  --tp-red-border:       #dc2626;
+
+  --tp-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --tp-shadow-md: 0 8px 25px -4px rgba(0, 0, 0, 0.6);
+  --tp-shadow-lg: 0 20px 45px -8px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] body,
+[data-theme="dark"] .tp-main,
+[data-theme="dark"] .tp-portal-tab-content {
+  background-color: #0b0f19 !important;
+  color: #e2e8f0 !important;
+}
+
+/* ==========================================================================
+   1. NAVBAR & CENTER TABS PILL (DARK GLASS AESTHETIC)
+   ========================================================================== */
+[data-theme="dark"] .tp-navbar {
+  background: rgba(11, 15, 25, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid #1a253c !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .tp-brand-name { color: #f8fafc !important; }
+[data-theme="dark"] .tp-brand-tag  { color: #60a5fa !important; }
+
+/* The Center Tabs Container (Replaces white pill in dark mode!) */
+[data-theme="dark"] .tp-navbar-nav-tabs {
+  background: #141d31 !important;
+  border: 1.5px solid #233454 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+}
+[data-theme="dark"] .tp-tab-btn {
+  color: #94a3b8 !important;
+  background: transparent !important;
+}
+[data-theme="dark"] .tp-tab-btn:hover {
+  color: #f8fafc !important;
+  background: #1c2844 !important;
+}
+[data-theme="dark"] .tp-tab-btn.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45) !important;
+}
+[data-theme="dark"] .tp-tab-btn:not(.active) .tp-tab-count {
+  background: #1b263e !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .tp-tab-btn.active .tp-tab-count {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+[data-theme="dark"] .tp-tab-room-pill {
+  background: rgba(16, 185, 129, 0.2) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.4) !important;
+}
+
+/* Navbar buttons */
+[data-theme="dark"] .tp-btn-profile {
+  background: #141d31 !important;
+  border: 1px solid #233454 !important;
+  color: #f8fafc !important;
+}
+[data-theme="dark"] .tp-btn-profile:hover {
+  background: #1c2844 !important;
+  border-color: #3b82f6 !important;
+}
+[data-theme="dark"] .tp-btn-profile-name { color: #f8fafc !important; }
+[data-theme="dark"] .tp-btn-profile-room { color: #94a3b8 !important; }
+[data-theme="dark"] .tp-icon-btn {
+  background: #141d31 !important;
+  border: 1px solid #233454 !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .tp-icon-btn:hover {
+  background: #1c2844 !important;
+  color: #38bdf8 !important;
+  border-color: #38bdf8 !important;
+}
+[data-theme="dark"] .tp-btn-logout {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #f87171 !important;
+}
+[data-theme="dark"] .tp-btn-logout:hover {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   2. WELCOME BANNER & PROFILE CARD
+   ========================================================================== */
+[data-theme="dark"] .tp-welcome-banner {
+  background: linear-gradient(135deg, #121a2d 0%, #152038 100%) !important;
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .tp-welcome-greeting { color: #94a3b8 !important; }
+[data-theme="dark"] .tp-welcome-name     { color: #f8fafc !important; }
+[data-theme="dark"] .tp-chip {
+  background: #1a253d !important;
+  color: #cbd5e1 !important;
+  border: 1px solid #283756 !important;
+}
+[data-theme="dark"] .tp-chip.green {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+}
+
+/* ==========================================================================
+   3. SHOWCASE / CURRENT ROOM SECTION (KAMARKU)
+   ========================================================================== */
+[data-theme="dark"] .tp-showcase-container {
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.6) !important;
+  background: #121a2d !important;
+}
+[data-theme="dark"] .tp-showcase-details {
+  background: #121a2d !important;
+  border-left: 1px solid #1f2c47 !important;
+}
+[data-theme="dark"] .tp-showcase-sub { color: #38bdf8 !important; }
+[data-theme="dark"] .tp-showcase-room-name { color: #f8fafc !important; }
+
+/* THE BILL / DUE DATE BOX — REPLACES GLARING WHITE BOX IN SCREENSHOT! */
+[data-theme="dark"] .tp-price-banner {
+  background: linear-gradient(135deg, #132244 0%, #0d1527 100%) !important;
+  border: 1.5px solid #233b6b !important;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+}
+[data-theme="dark"] .tp-price-lbl {
+  color: #93c5fd !important;
+}
+[data-theme="dark"] .tp-price-val {
+  color: #60a5fa !important;
+  text-shadow: 0 0 24px rgba(96, 165, 250, 0.3) !important;
+}
+[data-theme="dark"] .tp-price-cycle { color: #94a3b8 !important; }
+[data-theme="dark"] .tp-due-lbl { color: #94a3b8 !important; }
+[data-theme="dark"] .tp-due-date {
+  color: #f8fafc !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] .tp-desc-heading { color: #f8fafc !important; }
+[data-theme="dark"] .tp-desc-body { color: #94a3b8 !important; }
+
+/* Facilities pills inside showcase */
+[data-theme="dark"] .tp-fac-pill {
+  background: #172136 !important;
+  border: 1px solid #25334f !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .tp-fac-text { color: #cbd5e1 !important; }
+
+/* Showcase action buttons */
+[data-theme="dark"] .tp-btn-pay {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.45) !important;
+}
+[data-theme="dark"] .tp-btn-wa-green {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4) !important;
+}
+
+/* ==========================================================================
+   4. ROOM STATS & INFO HUNIAN SECTION
+   ========================================================================== */
+[data-theme="dark"] .tp-info-card,
+[data-theme="dark"] .tp-stat-box {
+  background: #121a2d !important;
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.45) !important;
+}
+[data-theme="dark"] .tp-metric-card {
+  background: #172136 !important;
+  border: 1px solid #23314c !important;
+}
+[data-theme="dark"] .tp-metric-val { color: #f8fafc !important; }
+[data-theme="dark"] .tp-metric-lbl { color: #94a3b8 !important; }
+
+[data-theme="dark"] .tp-roominfo-item {
+  background: #172136 !important;
+  border: 1px solid #23314c !important;
+}
+[data-theme="dark"] .tp-roominfo-val { color: #f8fafc !important; }
+[data-theme="dark"] .tp-roominfo-key { color: #94a3b8 !important; }
+
+/* ==========================================================================
+   5. QUICK ACCESS SECTION (AKSES & LAYANAN CEPAT)
+   ========================================================================== */
+[data-theme="dark"] .tp-section-ttl { color: #f8fafc !important; }
+[data-theme="dark"] .tp-section-sub { color: #94a3b8 !important; }
+
+[data-theme="dark"] .tp-quick-tile {
+  background: #121a2d !important;
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.45) !important;
+}
+[data-theme="dark"] .tp-quick-tile:hover {
+  background: #17223b !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.22) !important;
+  transform: translateY(-4px) !important;
+}
+[data-theme="dark"] .tp-quick-ttl { color: #f8fafc !important; }
+[data-theme="dark"] .tp-quick-desc { color: #94a3b8 !important; }
+[data-theme="dark"] .tp-quick-arrow { color: #38bdf8 !important; }
+
+/* The icon circles inside quick tiles — No more harsh solid white spots! */
+[data-theme="dark"] .tp-quick-ico.blue {
+  background: rgba(37, 99, 235, 0.16) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: #60a5fa !important;
+}
+[data-theme="dark"] .tp-quick-ico.purple {
+  background: rgba(147, 51, 234, 0.16) !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  color: #c084fc !important;
+}
+[data-theme="dark"] .tp-quick-ico.amber {
+  background: rgba(217, 119, 6, 0.16) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
+}
+[data-theme="dark"] .tp-quick-ico.green {
+  background: rgba(5, 150, 105, 0.16) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34d399 !important;
+}
+[data-theme="dark"] .tp-quick-ico.teal {
+  background: rgba(13, 148, 136, 0.16) !important;
+  border: 1px solid rgba(20, 184, 166, 0.35) !important;
+  color: #2dd4bf !important;
+}
+
+/* ==========================================================================
+   6. CATALOG VIEW & ROOM CARDS (REPLACES WHITE CARDS IN SCREENSHOT 2!)
+   ========================================================================== */
+[data-theme="dark"] .tp-catalog-header {
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
+}
+[data-theme="dark"] .tp-catalog-header::after {
+  background: linear-gradient(135deg, rgba(11, 15, 25, 0.94) 0%, rgba(18, 26, 45, 0.9) 100%) !important;
+}
+[data-theme="dark"] .tp-catalog-title { color: #f8fafc !important; }
+[data-theme="dark"] .tp-catalog-desc  { color: #94a3b8 !important; }
+
+/* Filter buttons in catalog */
+[data-theme="dark"] .tp-filter-btn {
+  background: #141d31 !important;
+  border: 1px solid #233454 !important;
+  color: #94a3b8 !important;
+}
+[data-theme="dark"] .tp-filter-btn:hover {
+  background: #1e2c4a !important;
+  color: #f8fafc !important;
+  border-color: #3b82f6 !important;
+}
+[data-theme="dark"] .tp-filter-btn.active {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.45) !important;
+}
+
+/* THE ROOM CARDS — ULTRA SLEEK DARK LUXURY CARDS */
+[data-theme="dark"] .tp-room-card {
+  background: #121a2d !important;
+  border: 1px solid #1f2c47 !important;
+  border-radius: 22px !important;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.6) !important;
+}
+[data-theme="dark"] .tp-room-card:hover {
+  transform: translateY(-8px) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(59, 130, 246, 0.22) !important;
+}
+[data-theme="dark"] .tp-room-card-body {
+  background: transparent !important;
+}
+[data-theme="dark"] .tp-room-card-title {
+  color: #f8fafc !important;
+  font-weight: 800 !important;
+}
+[data-theme="dark"] .tp-room-card-floor {
+  background: #1a253d !important;
+  color: #94a3b8 !important;
+  border: 1px solid #283756 !important;
+}
+[data-theme="dark"] .tp-room-card-type {
+  color: #38bdf8 !important;
+  font-weight: 700 !important;
+}
+[data-theme="dark"] .tp-room-card-facility-pill {
+  background: #172136 !important;
+  border: 1px solid #25334f !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .tp-room-card-foot {
+  border-top: 1px solid #1f2c47 !important;
+}
+[data-theme="dark"] .tp-room-card-price-label {
+  color: #64748b !important;
+}
+[data-theme="dark"] .tp-room-card-price-val {
+  color: #f8fafc !important;
+  font-weight: 800 !important;
+}
+[data-theme="dark"] .tp-room-card-price-unit {
+  color: #94a3b8 !important;
+}
+
+/* Action button inside catalog card */
+[data-theme="dark"] .tp-room-card-action-btn {
+  background: rgba(37, 99, 235, 0.14) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+}
+[data-theme="dark"] .tp-room-card-action-btn:hover {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.45) !important;
+}
+[data-theme="dark"] .tp-room-card-action-btn.is-my-room {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+  color: #ffffff !important;
+  border-color: #10b981 !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35) !important;
+}
+
+/* ==========================================================================
+   7. MODALS & POP-UPS (PAYMENT, RECEIPT, TRANSFERS, LOGOUT)
+   ========================================================================== */
+[data-theme="dark"] .modal-overlay {
+  background: rgba(6, 9, 17, 0.78) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+[data-theme="dark"] .modal-box {
+  background: #121a2d !important;
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 24px 60px -10px rgba(0, 0, 0, 0.8) !important;
+}
+[data-theme="dark"] .modal-title   { color: #f8fafc !important; }
+[data-theme="dark"] .modal-subtitle { color: #94a3b8 !important; }
+[data-theme="dark"] .modal-hdr { border-bottom: 1px solid #1f2c47 !important; }
+[data-theme="dark"] .modal-ftr { border-top: 1px solid #1f2c47 !important; }
+[data-theme="dark"] .modal-close {
+  color: #94a3b8 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+[data-theme="dark"] .modal-close:hover {
+  background: #1e2c47 !important;
+  color: #f8fafc !important;
+}
+
+/* Form Controls */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] select.form-control,
+[data-theme="dark"] textarea.form-control {
+  background: #0b101c !important;
+  border: 1px solid #233454 !important;
+  color: #f8fafc !important;
+}
+[data-theme="dark"] .form-control:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22) !important;
+}
+[data-theme="dark"] .form-label { color: #cbd5e1 !important; }
+[data-theme="dark"] .form-label-hint { color: #64748b !important; }
+
+/* Bank Info Box inside Pay Modal */
+[data-theme="dark"] .bank-info-box {
+  background: #141f36 !important;
+  border: 1px solid #2b4578 !important;
+}
+[data-theme="dark"] .bank-badge { color: #93c5fd !important; }
+[data-theme="dark"] .bank-acct-num { color: #38bdf8 !important; }
+[data-theme="dark"] .bank-acct-name { color: #94a3b8 !important; }
+
+/* Proof upload box */
+[data-theme="dark"] .tp-proof-upload-box {
+  background: #141f36 !important;
+  border-color: #2b4578 !important;
+}
+[data-theme="dark"] .tp-proof-label { color: #94a3b8 !important; }
+
+/* Tables inside modals (Receipts list) */
+[data-theme="dark"] table th {
+  background: #172136 !important;
+  color: #94a3b8 !important;
+  border-color: #1f2c47 !important;
+}
+[data-theme="dark"] table td {
+  border-color: #1f2c47 !important;
+  color: #f8fafc !important;
+}
+[data-theme="dark"] table tr:hover td {
+  background: #17223b !important;
+}
+
+/* WiFi Info Modal */
+[data-theme="dark"] .tp-wifi-box {
+  background: #172136 !important;
+  border: 1px solid #23314c !important;
+}
+[data-theme="dark"] .tp-wifi-key { color: #94a3b8 !important; }
+[data-theme="dark"] .tp-wifi-val { color: #f8fafc !important; }
+[data-theme="dark"] .tp-wifi-row { border-bottom: 1px solid #23314c !important; }
+
+/* Digital Receipt Paper in Modal */
+[data-theme="dark"] #modalDigitalReceiptDetail .receipt-paper {
+  background: #141d31 !important;
+  border: 1px solid #233454 !important;
+  color: #f8fafc !important;
+}
+
+/* ==========================================================================
+   8. KMR THEME SWITCH (DAY / NIGHT SLIDING PILL SWITCH - GAMBAR 1)
+   ========================================================================== */
+.kmr-theme-switch {
+  position: relative;
+  width: 124px;
+  height: 38px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
+}
+.kmr-theme-switch:active {
+  transform: scale(0.96);
+}
+
+.kmr-theme-switch .kmr-switch-bg {
+  position: absolute;
+  inset: 0;
+  transition: background 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 9999px;
+}
+[data-theme="light"] .kmr-theme-switch .kmr-switch-bg,
+:root:not([data-theme="dark"]) .kmr-theme-switch .kmr-switch-bg {
+  background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+}
+[data-theme="dark"] .kmr-theme-switch .kmr-switch-bg {
+  background: linear-gradient(135deg, #1e293b 0%, #090d16 100%);
+}
+
+.kmr-theme-switch .kmr-switch-label {
+  position: absolute;
+  font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+[data-theme="light"] .kmr-theme-switch .day-lbl,
+:root:not([data-theme="dark"]) .kmr-theme-switch .day-lbl {
+  right: 14px;
+  opacity: 1;
+  transform: translateX(0);
+}
+[data-theme="light"] .kmr-theme-switch .night-lbl,
+:root:not([data-theme="dark"]) .kmr-theme-switch .night-lbl {
+  left: 14px;
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+[data-theme="dark"] .kmr-theme-switch .day-lbl {
+  right: 14px;
+  opacity: 0;
+  transform: translateX(10px);
+}
+[data-theme="dark"] .kmr-theme-switch .night-lbl {
+  left: 14px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.kmr-theme-switch .kmr-switch-knob {
+  position: absolute;
+  top: 3px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.38s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease;
+  z-index: 2;
+}
+
+[data-theme="light"] .kmr-theme-switch .kmr-switch-knob,
+:root:not([data-theme="dark"]) .kmr-theme-switch .kmr-switch-knob {
+  left: 4px;
+  background: radial-gradient(circle, #fde047 30%, #eab308 100%);
+  box-shadow: 0 0 12px rgba(250, 204, 21, 0.7), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+[data-theme="light"] .kmr-theme-switch .kmr-knob-sun,
+:root:not([data-theme="dark"]) .kmr-theme-switch .kmr-knob-sun {
+  display: flex;
+}
+[data-theme="light"] .kmr-theme-switch .kmr-knob-moon,
+:root:not([data-theme="dark"]) .kmr-theme-switch .kmr-knob-moon {
+  display: none;
+}
+
+[data-theme="dark"] .kmr-theme-switch .kmr-switch-knob {
+  left: 88px;
+  background: #ffffff;
+  box-shadow: 0 0 14px rgba(147, 197, 253, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+[data-theme="dark"] .kmr-theme-switch .kmr-knob-sun {
+  display: none;
+}
+[data-theme="dark"] .kmr-theme-switch .kmr-knob-moon {
+  display: flex;
+}
+
+/* ==========================================================================
+   9. MODERN LOGOUT MODAL WITH ANIMATION
+   ========================================================================== */
+.kmr-logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 9, 17, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.kmr-logout-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.kmr-logout-card {
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 34px 28px 28px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 24px 60px -8px rgba(15, 23, 42, 0.35), 0 0 1px 1px rgba(255, 255, 255, 0.1);
+  transform: scale(0.75) translateY(28px);
+  opacity: 0;
+  transition: transform 0.36s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.kmr-logout-overlay.open .kmr-logout-card {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+[data-theme="dark"] .kmr-logout-card {
+  background: #121a2d !important;
+  border: 1px solid #1f2c47 !important;
+  box-shadow: 0 24px 60px -8px rgba(0, 0, 0, 0.8) !important;
+}
+
+.kmr-logout-icon-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.kmr-logout-pulse-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.15);
+  animation: kmrPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes kmrPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.2); opacity: 0.2; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+.kmr-logout-icon-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #fef2f2;
+  border: 2px solid #fecaca;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+[data-theme="dark"] .kmr-logout-icon-circle {
+  background: #341118 !important;
+  border-color: #8e1519 !important;
+}
+
+.kmr-logout-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+[data-theme="dark"] .kmr-logout-title {
+  color: #f8fafc !important;
+}
+
+.kmr-logout-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin-bottom: 26px;
+}
+[data-theme="dark"] .kmr-logout-subtitle {
+  color: #94a3b8 !important;
+}
+
+.kmr-logout-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.kmr-logout-btn-cancel {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.kmr-logout-btn-cancel:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+[data-theme="dark"] .kmr-logout-btn-cancel {
+  background: #172136 !important;
+  border-color: #23314c !important;
+  color: #cbd5e1 !important;
+}
+[data-theme="dark"] .kmr-logout-btn-cancel:hover {
+  background: #1e2c47 !important;
+  color: #ffffff !important;
+}
+
+.kmr-logout-btn-confirm {
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-size: 0.94rem;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+  transition: all 0.2s ease;
+}
+.kmr-logout-btn-confirm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.45);
+}
+.kmr-logout-btn-confirm:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================================
+   10. ROOM TRANSFER STATUS BADGES
+   ========================================================================== */
+.tp-transfer-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.tp-transfer-status-badge.pending  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
+.tp-transfer-status-badge.approved { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+.tp-transfer-status-badge.rejected { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+[data-theme="dark"] .tp-transfer-status-badge.pending  { background: #2d1d05; color: #fbbf24; border-color: #d97706; }
+[data-theme="dark"] .tp-transfer-status-badge.approved { background: #062d1d; color: #34d399; border-color: #059669; }
+[data-theme="dark"] .tp-transfer-status-badge.rejected { background: #341118; color: #f87171; border-color: #dc2626; }

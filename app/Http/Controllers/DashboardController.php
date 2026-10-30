@@ -1,0 +1,451 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Models\Room;
+use App\Models\Tenant;
+use App\Models\Finance;
+use App\Models\MaintenanceTicket;
+use App\Models\Setting;
+use App\Models\RoomTransfer;
+use Illuminate\Support\Facades\Artisan;
+
+class DashboardController extends Controller
+{
+    /**
+     * Display the main responsive dashboard.
+     * Automatically detects the client's device (Mobile, Tablet, Desktop)
+     * and passes it to the view.
+     */
+    public function index(Request $request)
+    {
+        $deviceType = $this->detectDevice($request->userAgent());
+        
+        $setting = Setting::first() ?? new Setting([
+            'kos_name' => 'Kos Mas Robi - Kampus Terpadu',
+            'owner_name' => 'Mas Robi',
+            'owner_phone' => '6281234567890',
+            'kos_address' => 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta',
+            'bank_name' => 'Bank Central Asia (BCA)',
+            'bank_account' => '8830192831',
+            'bank_holder' => 'Robi Suryanto',
+        ]);
+
+        $rooms = Room::with('activeTenant')->orderBy('number')->get();
+        $totalRooms = $rooms->count();
+        $occupiedRooms = $rooms->whereIn('status', ['occupied', 'due'])->count();
+        $availableRooms = $rooms->where('status', 'available')->count();
+        $dueRooms = $rooms->where('status', 'due')->count();
+
+        $occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0;
+
+        $monthlyIncome = Finance::where('type', 'income')->sum('amount');
+        $dueAmount = $rooms->where('status', 'due')->sum('price');
+
+        $activeTickets = MaintenanceTicket::where('status', '!=', 'done')->count();
+
+        $roomTransfers = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+        $pendingTransfersCount = $roomTransfers->where('status', 'pending')->count();
+
+        return view('dashboard', compact(
+            'deviceType',
+            'setting',
+            'rooms',
+            'totalRooms',
+            'occupiedRooms',
+            'availableRooms',
+            'dueRooms',
+            'occupancyRate',
+            'monthlyIncome',
+            'dueAmount',
+            'activeTickets',
+            'roomTransfers',
+            'pendingTransfersCount'
+        ));
+    }
+
+    /**
+     * Helper to detect device from User-Agent string.
+     */
+    private function detectDevice(?string $userAgent): string
+    {
+        if (empty($userAgent)) {
+            return 'desktop';
+        }
+
+        $ua = strtolower($userAgent);
+
+        if (preg_match('/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i', $ua)) {
+            return 'tablet';
+        }
+
+        if (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i', $ua)) {
+            return 'mobile';
+        }
+
+        return 'desktop';
+    }
+
+    /**
+     * Return all data in JSON for reactive frontend syncing.
+     */
+    public function getJsonData(): JsonResponse
+    {
+        $setting = Setting::first();
+        $rooms = Room::with('activeTenant')->orderBy('number')->get();
+        $finances = Finance::orderBy('date', 'desc')->get();
+        $maintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
+        $roomTransfers = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'settings' => $setting,
+            'rooms' => $rooms,
+            'finances' => $finances,
+            'maintenance' => $maintenance,
+            'room_transfers' => $roomTransfers,
+        ]);
+    }
+
+    /**
+     * Store or update a room.
+     */
+    public function saveRoom(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'id' => 'nullable|integer',
+            'number' => 'required|string',
+            'floor' => 'required|integer',
+            'type' => 'required|string',
+            'price' => 'required|numeric',
+            'facilities' => 'nullable|array',
+            'status' => 'required|in:available,occupied,due,repair',
+            'image' => 'nullable|string',
+            'images' => 'nullable|array',
+            'custom_interior_request' => 'nullable|string',
+            'custom_interior_budget' => 'nullable|numeric|min:0',
+            'custom_interior_status' => 'nullable|string|in:none,pending,approved,in_progress,completed,rejected',
+            'custom_interior_admin_notes' => 'nullable|string',
+        ]);
+
+        // Support array of 3 slide images
+        if ($request->has('images') && is_array($request->input('images'))) {
+            $imgs = array_values(array_filter($request->input('images')));
+            if (!empty($imgs)) {
+                $validated['images'] = $imgs;
+                $validated['image'] = $imgs[0];
+            }
+        } elseif ($request->filled('image')) {
+            $validated['image'] = $request->input('image');
+        }
+
+        if ($request->hasFile('image_file')) {
+            $file = $request->file('image_file');
+            $filename = 'room_' . time() . '_' . rand(10, 99) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/images/rooms'), $filename);
+            $validated['image'] = 'assets/images/rooms/' . $filename;
+            if (isset($validated['images']) && is_array($validated['images'])) {
+                $validated['images'][0] = $validated['image'];
+            } else {
+                $validated['images'] = [$validated['image']];
+            }
+        }
+
+        if (!empty($validated['id'])) {
+            $room = Room::findOrFail($validated['id']);
+            $room->update($validated);
+        } else {
+            if (empty($validated['image'])) {
+                $validated['image'] = 'assets/images/rooms/room_1.jpg';
+            }
+            if (empty($validated['images'])) {
+                $validated['images'] = [
+                    'assets/images/rooms/room_1.jpg',
+                    'assets/images/rooms/room_2.jpg',
+                    'assets/images/rooms/room_3.jpg',
+                ];
+            }
+            $room = Room::create($validated);
+        }
+
+        return response()->json(['success' => true, 'room' => $room]);
+    }
+
+    /**
+     * Quick status update for a room.
+     */
+    public function updateRoomStatus(Request $request, $id): JsonResponse
+    {
+        $room = Room::where('number', $id)->orWhere('id', $id)->firstOrFail();
+        $status = $request->input('status');
+
+        if (in_array($status, ['available', 'occupied', 'due', 'repair'])) {
+            $room->status = $status;
+            $room->save();
+            return response()->json(['success' => true, 'room' => $room]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Status tidak valid'], 422);
+    }
+
+    /**
+     * Admin updates custom interior request, budget, status, notes.
+     */
+    public function updateCustomInterior(Request $request, $id): JsonResponse
+    {
+        $room = Room::where('number', $id)->orWhere('id', $id)->firstOrFail();
+
+        $validated = $request->validate([
+            'custom_interior_budget' => 'nullable|numeric|min:0',
+            'custom_interior_status' => 'required|in:none,pending,approved,in_progress,completed,rejected',
+            'custom_interior_admin_notes' => 'nullable|string|max:1000',
+            'custom_interior_request' => 'nullable|string|max:1000',
+        ]);
+
+        $room->custom_interior_budget = $validated['custom_interior_budget'] ?? $room->custom_interior_budget;
+        $room->custom_interior_status = $validated['custom_interior_status'];
+        if (isset($validated['custom_interior_admin_notes'])) {
+            $room->custom_interior_admin_notes = $validated['custom_interior_admin_notes'];
+        }
+        if (isset($validated['custom_interior_request'])) {
+            $room->custom_interior_request = $validated['custom_interior_request'];
+        }
+        $room->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data custom interior kamar #' . $room->number . ' berhasil diperbarui!',
+            'room' => $room->fresh()
+        ]);
+    }
+
+    /**
+     * Store new tenant and assign to room.
+     */
+    public function saveTenant(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string',
+            'phone' => 'required|string',
+            'id_card' => 'nullable|string',
+            'room_id' => 'required|exists:rooms,id',
+            'start_date' => 'required|date',
+            'due_day' => 'required|integer|min:1|max:31',
+            'rent_amount' => 'required|numeric',
+            'emergency_contact' => 'nullable|string',
+        ]);
+
+        $tenant = Tenant::create(array_merge($validated, ['status' => 'active']));
+
+        $room = Room::find($validated['room_id']);
+        if ($room) {
+            $room->status = 'occupied';
+            $room->save();
+        }
+
+        // Record initial rent payment
+        Finance::create([
+            'transaction_code' => 'TRX-' . rand(100, 999),
+            'room_id' => $room?->id,
+            'date' => $validated['start_date'],
+            'type' => 'income',
+            'category' => 'Sewa Pertama / Masuk',
+            'amount' => $validated['rent_amount'],
+            'description' => 'Pembayaran Sewa Masuk Kamar #' . $room?->number . ' (' . $validated['name'] . ')',
+            'payment_method' => 'Transfer BCA',
+        ]);
+
+        return response()->json(['success' => true, 'tenant' => $tenant]);
+    }
+
+    /**
+     * Process checkout for tenant.
+     */
+    public function checkoutTenant(Request $request, $roomId): JsonResponse
+    {
+        $room = Room::where('number', $roomId)->orWhere('id', $roomId)->firstOrFail();
+        
+        Tenant::where('room_id', $room->id)->where('status', 'active')->update(['status' => 'inactive']);
+        
+        $room->status = 'available';
+        $room->save();
+
+        return response()->json(['success' => true, 'message' => 'Kamar berhasil dikosongkan']);
+    }
+
+    /**
+     * Record a new finance transaction.
+     */
+    public function saveFinance(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:income,expense',
+            'date' => 'required|date',
+            'room_id' => 'nullable|exists:rooms,id',
+            'description' => 'required|string',
+            'amount' => 'required|numeric',
+            'payment_method' => 'required|string',
+        ]);
+
+        $code = 'TRX-' . rand(100, 999);
+        $category = $validated['type'] === 'income' ? 'Sewa Kamar' : 'Operasional Kos';
+
+        $finance = Finance::create(array_merge($validated, [
+            'transaction_code' => $code,
+            'category' => $category,
+        ]));
+
+        if (!empty($validated['room_id']) && $validated['type'] === 'income') {
+            $room = Room::find($validated['room_id']);
+            if ($room && $room->status === 'due') {
+                $room->status = 'occupied';
+                $room->save();
+            }
+        }
+
+        return response()->json(['success' => true, 'finance' => $finance]);
+    }
+
+    /**
+     * Create maintenance ticket.
+     */
+    public function saveMaintenance(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'priority' => 'required|string',
+            'issue_description' => 'required|string',
+        ]);
+
+        $room = Room::with('activeTenant')->find($validated['room_id']);
+        $reporter = $room?->activeTenant?->name ?? 'Pengelola';
+
+        $ticket = MaintenanceTicket::create([
+            'ticket_code' => 'TK-' . rand(100, 999),
+            'room_id' => $room->id,
+            'reporter_name' => $reporter,
+            'issue_description' => $validated['issue_description'],
+            'report_date' => now()->toDateString(),
+            'priority' => $validated['priority'],
+            'status' => 'pending',
+        ]);
+
+        return response()->json(['success' => true, 'ticket' => $ticket]);
+    }
+
+    /**
+     * Update ticket status.
+     */
+    public function updateMaintenanceStatus(Request $request, $id): JsonResponse
+    {
+        $ticket = MaintenanceTicket::where('ticket_code', $id)->orWhere('id', $id)->firstOrFail();
+        $status = $request->input('status');
+
+        if (in_array($status, ['pending', 'progress', 'done'])) {
+            $ticket->status = $status;
+            $ticket->save();
+            return response()->json(['success' => true, 'ticket' => $ticket]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Status tidak valid'], 422);
+    }
+
+    /**
+     * Save Kos Settings.
+     */
+    public function saveSettings(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'kos_name' => 'nullable|string',
+            'owner_name' => 'nullable|string',
+            'owner_phone' => 'nullable|string',
+            'kos_address' => 'nullable|string',
+            'bank_name' => 'nullable|string',
+            'bank_account' => 'nullable|string',
+            'bank_holder' => 'nullable|string',
+        ]);
+
+        $setting = Setting::first() ?? new Setting();
+        $setting->fill($validated);
+        $setting->save();
+
+        return response()->json(['success' => true, 'setting' => $setting]);
+    }
+
+    /**
+     * Export all data as JSON file download.
+     */
+    public function exportData()
+    {
+        $data = [
+            'settings' => Setting::first(),
+            'rooms' => Room::with('activeTenant')->get(),
+            'finances' => Finance::all(),
+            'maintenance' => MaintenanceTicket::all(),
+            'exported_at' => now()->toIso8601String(),
+        ];
+
+        return response()->json($data, 200, [
+            'Content-Disposition' => 'attachment; filename="kos_mas_robi_backup_' . date('Y-m-d') . '.json"',
+        ]);
+    }
+
+    /**
+     * Reset database back to default seed.
+     */
+    public function resetData(): JsonResponse
+    {
+        Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
+        return response()->json(['success' => true, 'message' => 'Data berhasil dikembalikan ke sampel default']);
+    }
+
+    /**
+     * Review/Approve/Reject room transfer request.
+     */
+    public function updateRoomTransferStatus(Request $request, $id): JsonResponse
+    {
+        $transfer = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])->findOrFail($id);
+
+        $validated = $request->validate([
+            'status' => 'required|in:approved,rejected',
+            'admin_note' => 'nullable|string|max:500',
+        ]);
+
+        $transfer->status = $validated['status'];
+        if (isset($validated['admin_note'])) {
+            $transfer->admin_note = $validated['admin_note'];
+        }
+
+        if ($validated['status'] === 'approved') {
+            if ($transfer->target_room_id) {
+                if ($transfer->currentRoom) {
+                    $transfer->currentRoom->status = 'available';
+                    $transfer->currentRoom->save();
+                }
+                if ($transfer->targetRoom) {
+                    $transfer->targetRoom->status = 'occupied';
+                    $transfer->targetRoom->save();
+                }
+                if ($transfer->tenant) {
+                    $transfer->tenant->room_id = $transfer->target_room_id;
+                    $transfer->tenant->save();
+                }
+                if ($transfer->user) {
+                    $transfer->user->room_id = $transfer->target_room_id;
+                    $transfer->user->save();
+                }
+            }
+        }
+
+        $transfer->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status pengajuan pindah kamar berhasil diubah menjadi ' . ($transfer->status === 'approved' ? 'DISETUJUI' : 'DITOLAK'),
+            'transfer' => $transfer->fresh(['user', 'tenant', 'currentRoom', 'targetRoom']),
+        ]);
+    }
+}
