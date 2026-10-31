@@ -78,12 +78,15 @@
           id: f.transaction_code,
           dbId: f.id,
           date: f.date,
+          paymentTime: f.formatted_payment_full || (f.date + ', ' + (f.formatted_payment_time || '12:00:00 WIB')),
+          timezone: f.timezone || 'WIB',
           type: f.type,
           category: f.category,
           amount: Number(f.amount),
           desc: f.description,
           method: f.payment_method,
-          roomId: f.room_id ? String(f.room_id) : null
+          roomId: f.room_id ? String(f.room_id) : null,
+          proofImage: f.proof_image ? ('/' + f.proof_image.replace(/^\//, '')) : null
         }));
         appData.maintenance = (json.maintenance || []).map(m => ({
           id: m.ticket_code,
@@ -150,6 +153,7 @@
     function applyTheme(theme) {
       root.setAttribute('data-theme', theme);
       localStorage.setItem(THEME_KEY, theme);
+      localStorage.setItem('kosTheme', theme);
       if (icon) {
         icon.textContent = theme === 'dark' ? '🌙' : '☀️';
       }
@@ -170,13 +174,16 @@
     const panes = document.querySelectorAll('.tab-pane');
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
+    const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
 
     const titles = {
-      'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian dan operasional Kos Mas Robi' },
+      'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
       'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
       'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
-      'tab-finances': { title: 'Keuangan & Tagihan', sub: 'Pencatatan uang masuk, pengeluaran, dan kuitansi digital' },
+      'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
+      'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
       'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
+      'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
       'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
     };
 
@@ -194,8 +201,13 @@
       });
 
       if (titles[tabId]) {
-        pageTitle.textContent = titles[tabId].title;
-        pageSubtitle.textContent = titles[tabId].sub;
+        if (pageTitle) pageTitle.textContent = titles[tabId].title;
+        if (pageSubtitle) pageSubtitle.textContent = titles[tabId].sub;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = titles[tabId].title;
+      }
+
+      if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
+        setTimeout(window.drawRevenueCurve, 80);
       }
 
       document.getElementById('appSidebar')?.classList.remove('open');
@@ -553,6 +565,11 @@
         <td style="font-weight:700;color:${colorClass};">${prefix}${formatRupiah(trx.amount)}</td>
         <td>${trx.method}</td>
         <td>
+          ${trx.proofImage ? `
+            <a href="${trx.proofImage}" target="_blank" class="btn-secondary" style="padding:3px 8px;font-size:0.75rem;color:#2563eb;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-right:4px;">
+              📎 Foto Bukti
+            </a>
+          ` : ''}
           <button type="button" class="btn-secondary" style="padding:3px 8px;font-size:0.75rem;" onclick="window.kosApp.showReceiptModal('${trx.id}')">
             🧾 Kuitansi
           </button>
@@ -805,6 +822,51 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           <option value="repair" ${room.status === 'repair' ? 'selected' : ''}>🔴 Dalam Perbaikan / Servis</option>
         </select>
       </div>
+
+      <!-- Custom Interior & Dynamic Budget Admin Section -->
+      <div style="background: rgba(37,99,235,0.04); border: 1px solid rgba(37,99,235,0.2); border-radius: var(--border-radius-md); padding: 14px; margin-top: 14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <h4 style="font-size:0.88rem;font-weight:700;color:#1e40af;margin:0;display:flex;align-items:center;gap:6px;">
+            <span>🎨</span> Custom Interior & Anggaran
+          </h4>
+          <span style="font-size:0.72rem;padding:2px 8px;border-radius:999px;font-weight:700;background:#dbeafe;color:#1e40af;">
+            ${(room.custom_interior_status || 'NONE').toUpperCase()}
+          </span>
+        </div>
+
+        ${room.custom_interior_request ? `
+          <div style="font-size:0.82rem;color:var(--text-secondary);background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:10px;">
+            <strong>Permintaan Pelanggan (${room.booked_by_name || 'Penghuni'}):</strong><br>${room.custom_interior_request}
+          </div>
+        ` : `<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">Belum ada catatan custom interior khusus dari penyewa.</p>`}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
+          <div>
+            <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">Atur Anggaran / Budget (Rp):</label>
+            <input type="number" id="detailRoomCustomBudget" class="form-control" value="${room.custom_interior_budget || 0}" step="10000" style="padding:6px 10px;font-size:0.84rem;">
+          </div>
+          <div>
+            <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">Status Custom Interior:</label>
+            <select id="detailRoomCustomStatus" class="form-control" style="padding:6px 10px;font-size:0.84rem;">
+              <option value="none" ${(!room.custom_interior_status || room.custom_interior_status === 'none') ? 'selected' : ''}>Tidak Ada (None)</option>
+              <option value="pending" ${room.custom_interior_status === 'pending' ? 'selected' : ''}>⏳ Menunggu Review</option>
+              <option value="approved" ${room.custom_interior_status === 'approved' ? 'selected' : ''}>✅ Disetujui (Approved)</option>
+              <option value="in_progress" ${room.custom_interior_status === 'in_progress' ? 'selected' : ''}>🛠️ Dikerjakan</option>
+              <option value="completed" ${room.custom_interior_status === 'completed' ? 'selected' : ''}>🎉 Selesai</option>
+              <option value="rejected" ${room.custom_interior_status === 'rejected' ? 'selected' : ''}>❌ Ditolak</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">Catatan Mas Robi untuk Pelanggan:</label>
+          <input type="text" id="detailRoomCustomNotes" class="form-control" value="${room.custom_interior_admin_notes || ''}" placeholder="Catatan respons terkait bahan/waktu pengerjaan..." style="padding:6px 10px;font-size:0.84rem;margin-bottom:8px;">
+        </div>
+
+        <button type="button" class="btn-primary" style="font-size:0.78rem;padding:7px 12px;width:100%;margin-top:2px;" onclick="window.kosApp.saveCustomInteriorDirect('${room.number}')">
+          💾 Simpan Anggaran & Status Custom Interior
+        </button>
+      </div>
     `;
 
     footer.innerHTML = `
@@ -841,6 +903,50 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     showToast(`Status Kamar #${roomNumber} diperbarui jadi ${newStatus}!`, 'success');
   }
 
+  async function saveCustomInteriorDirect(roomNumber) {
+    const room = appData.rooms.find(r => r.number === roomNumber);
+    if (!room) return;
+
+    const budget = Number(document.getElementById('detailRoomCustomBudget')?.value || 0);
+    const status = document.getElementById('detailRoomCustomStatus')?.value || 'none';
+    const notes = document.getElementById('detailRoomCustomNotes')?.value?.trim() || '';
+
+    try {
+      const res = await fetch(`/api/rooms/${roomNumber}/custom-interior`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken()
+        },
+        body: JSON.stringify({
+          custom_interior_budget: budget,
+          custom_interior_status: status,
+          custom_interior_admin_notes: notes
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        room.custom_interior_budget = budget;
+        room.custom_interior_status = status;
+        room.custom_interior_admin_notes = notes;
+        renderAllViews();
+        closeModal('modalRoomDetail');
+        showToast(`Anggaran Custom Interior Kamar #${roomNumber} berhasil disimpan: Rp ${budget.toLocaleString('id-ID')} (${status})`, 'success');
+        return;
+      }
+    } catch (e) {
+      console.warn('API error, saving locally', e);
+    }
+
+    room.custom_interior_budget = budget;
+    room.custom_interior_status = status;
+    room.custom_interior_admin_notes = notes;
+    renderAllViews();
+    closeModal('modalRoomDetail');
+    showToast(`Data Custom Interior Kamar #${roomNumber} disimpan secara lokal!`, 'success');
+  }
+
   // --- ADD / EDIT ROOM MODAL ---
   function fillDefaultRoomImages() {
     const defaultImgs = [
@@ -869,6 +975,16 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     document.getElementById('roomPriceInput').value = room.price;
     document.getElementById('roomFacilitiesInput').value = (room.facilities || []).join(', ');
     document.getElementById('roomStatusInput').value = room.status;
+
+    // Populate Custom Interior & Budget fields
+    const customStatus = document.getElementById('roomCustomInteriorStatusInput');
+    const customBudget = document.getElementById('roomCustomInteriorBudgetInput');
+    const customReq = document.getElementById('roomCustomInteriorRequestInput');
+    const customNotes = document.getElementById('roomCustomInteriorNotesInput');
+    if (customStatus) customStatus.value = room.custom_interior_status || 'none';
+    if (customBudget) customBudget.value = room.custom_interior_budget || 0;
+    if (customReq) customReq.value = room.custom_interior_request || '';
+    if (customNotes) customNotes.value = room.custom_interior_admin_notes || '';
 
     // Populate 3 images
     const imgs = (room.images && room.images.length > 0) ? room.images : (room.images_list || [
@@ -901,6 +1017,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       document.getElementById('roomPriceInput').value = '1500000';
       document.getElementById('roomFacilitiesInput').value = 'AC, Springbed, Lemari, Meja Belajar, KM Dalam';
       document.getElementById('roomStatusInput').value = 'available';
+      const customStatus = document.getElementById('roomCustomInteriorStatusInput');
+      const customBudget = document.getElementById('roomCustomInteriorBudgetInput');
+      const customReq = document.getElementById('roomCustomInteriorRequestInput');
+      const customNotes = document.getElementById('roomCustomInteriorNotesInput');
+      if (customStatus) customStatus.value = 'none';
+      if (customBudget) customBudget.value = 0;
+      if (customReq) customReq.value = '';
+      if (customNotes) customNotes.value = '';
       fillDefaultRoomImages();
       openModal('modalAddRoom');
     });
@@ -920,6 +1044,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const img3 = document.getElementById('roomImageInput3')?.value.trim() || 'assets/images/rooms/room_3.jpg';
       const images = [img1, img2, img3];
 
+      const custom_interior_status = document.getElementById('roomCustomInteriorStatusInput')?.value || 'none';
+      const custom_interior_budget = Number(document.getElementById('roomCustomInteriorBudgetInput')?.value || 0);
+      const custom_interior_request = document.getElementById('roomCustomInteriorRequestInput')?.value.trim() || null;
+      const custom_interior_admin_notes = document.getElementById('roomCustomInteriorNotesInput')?.value.trim() || null;
+
       try {
         const res = await fetch('/api/rooms', {
           method: 'POST',
@@ -936,7 +1065,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             facilities,
             status,
             image: img1,
-            images
+            images,
+            custom_interior_status,
+            custom_interior_budget,
+            custom_interior_request,
+            custom_interior_admin_notes
           })
         });
 
@@ -1228,12 +1361,23 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     }
 
     document.getElementById('recNumber').textContent = `NO: ${trx.id}`;
-    document.getElementById('recDate').textContent = trx.date;
+    document.getElementById('recDate').textContent = trx.paymentTime || (trx.date + ', ' + (trx.time || '12:00:00') + ' ' + (trx.timezone || 'WIB'));
     document.getElementById('recTenant').textContent = tenantName;
     document.getElementById('recRoom').textContent = roomLabel;
     document.getElementById('recDesc').textContent = trx.desc;
     document.getElementById('recMethod').textContent = trx.method;
     document.getElementById('recAmount').textContent = formatRupiah(trx.amount);
+
+    const proofRow = document.getElementById('recProofRow');
+    const proofImg = document.getElementById('recProofImg');
+    if (proofRow && proofImg) {
+      if (trx.proofImage) {
+        proofRow.style.display = 'block';
+        proofImg.src = trx.proofImage;
+      } else {
+        proofRow.style.display = 'none';
+      }
+    }
 
     openModal('modalReceipt');
   }
@@ -1341,12 +1485,61 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const btnExport = document.getElementById('btnExportData');
     const btnReset = document.getElementById('btnResetData');
 
+    // Live update Google Maps preview & test button
+    const setGmapsUrlInput = document.getElementById('setGmapsUrl');
+    const setGmapsEmbedInput = document.getElementById('setGmapsEmbed');
+    const setKosAddressInput = document.getElementById('setKosAddress');
+    const gmapsPreviewIframe = document.getElementById('gmapsPreviewIframe');
+    const btnTestGmapsUrl = document.getElementById('btnTestGmapsUrl');
+
+    function updateGmapsPreview() {
+      if (!gmapsPreviewIframe) return;
+      let embedVal = setGmapsEmbedInput?.value.trim() || '';
+      if (embedVal.includes('<iframe')) {
+        const match = embedVal.match(/src="([^"]+)"/);
+        if (match && match[1]) embedVal = match[1];
+      }
+      if (!embedVal && setKosAddressInput) {
+        const addr = setKosAddressInput.value.trim() || 'Kos Mas Robi Sleman Yogyakarta';
+        embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+      }
+      if (embedVal) {
+        gmapsPreviewIframe.src = embedVal;
+      }
+    }
+
+    setGmapsEmbedInput?.addEventListener('input', updateGmapsPreview);
+    setKosAddressInput?.addEventListener('change', () => {
+      if (!setGmapsEmbedInput?.value.trim()) {
+        updateGmapsPreview();
+      }
+    });
+
+    setGmapsUrlInput?.addEventListener('input', () => {
+      if (btnTestGmapsUrl) {
+        const urlVal = setGmapsUrlInput.value.trim();
+        btnTestGmapsUrl.href = urlVal || '#';
+      }
+    });
+
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const kosName = document.getElementById('setKosName').value.trim();
       const ownerName = document.getElementById('setOwnerName').value.trim();
       const ownerPhone = document.getElementById('setOwnerPhone').value.trim();
       const kosAddress = document.getElementById('setKosAddress').value.trim();
+      const gmapsUrl = setGmapsUrlInput ? setGmapsUrlInput.value.trim() : '';
+      const gmapsEmbed = setGmapsEmbedInput ? setGmapsEmbedInput.value.trim() : '';
+
+      // Collect 4 location highlights (from Gambar 1)
+      const highlightItems = [];
+      const editContainers = document.querySelectorAll('#locationHighlightsEditorList .highlight-edit-item');
+      editContainers.forEach(item => {
+        const icon = item.querySelector('.hl-icon')?.value.trim() || '📍';
+        const title = item.querySelector('.hl-title')?.value.trim() || '';
+        const desc = item.querySelector('.hl-desc')?.value.trim() || '';
+        highlightItems.push({ icon, title, desc });
+      });
 
       try {
         await fetch('/api/settings', {
@@ -1359,13 +1552,16 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             kos_name: kosName,
             owner_name: ownerName,
             owner_phone: ownerPhone,
-            kos_address: kosAddress
+            kos_address: kosAddress,
+            gmaps_url: gmapsUrl,
+            gmaps_embed: gmapsEmbed,
+            location_highlights: highlightItems
           })
         });
-        showToast('Profil properti kos berhasil disimpan di Laravel!', 'success');
-        document.getElementById('bannerPropertyName').textContent = kosName;
-        document.getElementById('bannerPropertyAddress').textContent = '📍 ' + kosAddress;
-        document.getElementById('profileOwnerName').textContent = ownerName;
+        showToast('Profil kos, peta, dan 4 poin keunggulan lokasi berhasil disimpan!', 'success');
+        if (document.getElementById('bannerPropertyName')) document.getElementById('bannerPropertyName').textContent = kosName;
+        if (document.getElementById('bannerPropertyAddress')) document.getElementById('bannerPropertyAddress').textContent = '📍 ' + kosAddress;
+        if (document.getElementById('profileOwnerName')) document.getElementById('profileOwnerName').textContent = ownerName;
       } catch (err) {
         showToast('Gagal menyimpan profil ke server', 'warning');
       }
@@ -1525,6 +1721,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   window.kosApp = {
     openRoomDetailModal,
     changeRoomStatusDirect,
+    saveCustomInteriorDirect,
     editRoom,
     fillDefaultRoomImages,
     sendWhatsAppReminder,

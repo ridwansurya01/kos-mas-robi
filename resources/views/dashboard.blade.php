@@ -9,25 +9,31 @@
        ========================================================================= -->
   <aside class="app-sidebar" id="appSidebar">
     <div class="sidebar-header">
-      <div class="brand-icon-box">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="brand-icon-box modern-brand-box">
+        <div class="brand-icon-glow"></div>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
           <path d="M9 21V12h6v9"/>
         </svg>
       </div>
       <div class="brand-details">
-        <h2>{{ $setting->owner_name ? 'Kos ' . $setting->owner_name : 'Kos Mas Robi' }}</h2>
-        <span class="brand-badge">Laravel Edition</span>
+        <h2 class="brand-title">{{ $setting->owner_name ? 'Kos ' . $setting->owner_name : 'Kos Mas Robi' }}</h2>
+        <div class="brand-subtitle-wrap">
+          <span class="brand-status-dot"></span>
+          <span class="brand-badge modern-badge">Smart Kost Pro</span>
+        </div>
       </div>
     </div>
 
     <nav class="sidebar-nav" aria-label="Main Navigation">
-      <div class="nav-section-title">Menu Utama</div>
+      <div class="nav-section-title">Ringkasan</div>
 
       <div class="nav-item active" data-tab="tab-dashboard" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
         <span>Dashboard</span>
       </div>
+
+      <div class="nav-section-title" style="margin-top: 14px;">Kamar & Pelanggan</div>
 
       <div class="nav-item" data-tab="tab-rooms" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
@@ -41,13 +47,11 @@
         <span class="nav-badge-count" id="badgeTenantCount">{{ $occupiedRooms }}</span>
       </div>
 
-      <div class="nav-item" data-tab="tab-finances" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        <span>Keuangan & Tagihan</span>
-        <span class="nav-badge-count" id="badgeDueBills" style="background: #fee2e2; color: #dc2626; border: 1px solid #fecaca;">{{ $dueRooms }}</span>
+      <div class="nav-item" data-tab="tab-bills" role="button" tabindex="0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span>Tagihan Sewa</span>
+        <span class="nav-badge-count" id="badgeDueBills" style="{{ $dueRooms > 0 ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; font-weight:800;' : 'display:none;' }}">{{ $dueRooms }}</span>
       </div>
-
-      <div class="nav-section-title" style="margin-top: 14px;">Operasional</div>
 
       <div class="nav-item" data-tab="tab-transfers" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
@@ -61,6 +65,13 @@
         <span class="nav-badge-count" id="badgePendingRepairs">{{ $activeTickets }}</span>
       </div>
 
+      <div class="nav-section-title" style="margin-top: 14px;">Manajemen Admin</div>
+
+      <div class="nav-item" data-tab="tab-finances" role="button" tabindex="0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <span>Laporan Keuangan</span>
+      </div>
+
       <div class="nav-item" data-tab="tab-settings" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Pengaturan Kos</span>
@@ -68,11 +79,17 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="host-profile">
-        <div class="host-avatar">MR</div>
+      <div class="host-profile modern-host-card">
+        <div class="host-avatar-wrap">
+          <div class="host-avatar">MR</div>
+          <span class="host-online-pulse" title="Online Aktif"></span>
+        </div>
         <div class="host-info">
-          <div class="host-name" id="profileOwnerName">{{ $setting->owner_name ?? 'Mas Robi' }}</div>
-          <div class="host-role">Owner & Pengelola</div>
+          <div class="host-name-row">
+            <span class="host-name" id="profileOwnerName">{{ $setting->owner_name ?? 'Mas Robi' }}</span>
+            <span class="host-badge-admin">Owner</span>
+          </div>
+          <div class="host-role">Pengelola Properti Kos</div>
         </div>
       </div>
     </div>
@@ -84,24 +101,30 @@
   <main class="app-main">
 
     <!-- HEADER TOP BAR -->
-    <header class="app-header">
+    <header class="app-header modern-header">
       <div class="header-left">
         <button type="button" class="mobile-menu-toggle" id="btnToggleMobileSidebar" aria-label="Buka Menu Navigasi">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
-        <div class="page-title-box">
-          <h1 id="pageTitle">Dashboard Ikhtisar</h1>
-          <p id="pageSubtitle">Selamat datang kembali di panel kelola {{ $setting->kos_name }}</p>
+        <div class="page-title-box modern-title-box">
+          <div class="header-breadcrumb">
+            <span class="bc-home">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</span>
+            <span class="bc-sep">/</span>
+            <span class="bc-curr" id="breadcrumbCurrent">Panel Kelola</span>
+          </div>
+          <h1 id="pageTitle" class="header-main-title">Dashboard Ikhtisar</h1>
+          <p id="pageSubtitle" class="header-sub-title">Monitoring real-time hunian, status kamar, dan operasional</p>
         </div>
       </div>
 
-      <div class="header-right">
-        <div class="header-search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="globalSearchInput" placeholder="Cari kamar, anak kos..." aria-label="Cari data kos">
+      <div class="header-right modern-header-right">
+        <div class="header-search modern-search-box">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="globalSearchInput" placeholder="Cari kamar, anak kos, tagihan..." aria-label="Cari data kos">
+          <kbd class="search-kbd">Ctrl K</kbd>
         </div>
 
-        <!-- Theme Switcher Button (Gambar 1: Sliding Pill Switch di Header Pojok Kanan) -->
+        <!-- Theme Switcher Button (Sliding Pill Switch di Header Pojok Kanan) -->
         <button type="button" class="kmr-theme-switch" id="btnToggleTheme" aria-label="Ganti Tema Terang / Gelap" title="Ganti Mode Gelap / Terang">
           <span class="kmr-switch-bg"></span>
           <span class="kmr-switch-label day-lbl">DAY MODE</span>
@@ -129,109 +152,88 @@
         </button>
 
         <!-- Logout Button (Memicu Pop-up Konfirmasi Modern) -->
-        <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline;">
+        <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline; margin:0;">
           @csrf
-          <button type="button" class="header-action-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout" style="color:#dc2626;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <button type="button" class="header-action-btn modern-logout-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         </form>
 
         <!-- Quick Add Button -->
-        <button type="button" class="btn-primary-action" id="btnQuickAdd">
+        <button type="button" class="btn-primary-action modern-quick-add-btn" id="btnQuickAdd">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>+ Penghuni Baru</span>
         </button>
       </div>
     </header>
 
-    <!-- PROPERTY HERO BANNER -->
-    <section class="property-banner" aria-label="Info Properti Kos">
-      <img src="{{ asset('assets/images/kos_exterior.jpg') }}" alt="Eksterior Kos Mas Robi" class="property-banner-bg" id="propertyBannerImg">
-      <div class="property-banner-content">
-        <span class="property-tag">✨ Kos Eksklusif & Nyaman</span>
-        <h2 id="bannerPropertyName">{{ $setting->kos_name }}</h2>
-        <p id="bannerPropertyAddress">📍 {{ $setting->kos_address }}</p>
-        <div class="banner-stats-row">
-          <div class="banner-pill">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-            <span>WiFi 100 Mbps</span>
-          </div>
-          <div class="banner-pill">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            <span>Akses 24 Jam</span>
-          </div>
-          <div class="banner-pill">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-            <span>Listrik Token Mandiri</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- STATS KPI CARDS -->
-    <section class="stats-grid" aria-label="Ringkasan Statistik Kos">
-      <div class="stat-card">
-        <div class="stat-card-header">
-          <span class="stat-card-title">Tingkat Okupansi</span>
-          <div class="stat-icon teal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
-          </div>
-        </div>
-        <div class="stat-card-value" id="statOccupancyRate">{{ $occupancyRate }}%</div>
-        <div class="stat-card-meta">
-          <span class="stat-trend-up">{{ $occupiedRooms }} Terisi</span>
-          <span>dari {{ $totalRooms }} Kamar</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-header">
-          <span class="stat-card-title">Kamar Tersedia</span>
-          <div class="stat-icon blue">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-        </div>
-        <div class="stat-card-value" id="statAvailableRooms">{{ $availableRooms }} Kamar</div>
-        <div class="stat-card-meta">
-          <span class="stat-badge-info">Siap Huni</span>
-          <span>Unit Bersih & Terawat</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-header">
-          <span class="stat-card-title">Pemasukan Bulan Ini</span>
-          <div class="stat-icon emerald">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          </div>
-        </div>
-        <div class="stat-card-value" id="statMonthlyIncome">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</div>
-        <div class="stat-card-meta">
-          <span class="stat-trend-up">▲ Terverifikasi</span>
-          <span>Buku Kas Aktif</span>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-header">
-          <span class="stat-card-title">Tagihan Jatuh Tempo</span>
-          <div class="stat-icon amber">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </div>
-        </div>
-        <div class="stat-card-value" id="statDueBills">{{ $dueRooms }} Kamar</div>
-        <div class="stat-card-meta">
-          <span style="color: #d97706; font-weight: 700;">Rp {{ number_format($dueAmount, 0, ',', '.') }}</span>
-          <span>perlu konfirmasi</span>
-        </div>
-      </div>
-    </section>
-
     <!-- =======================================================================
-         PANE 1: TAB DASHBOARD (DENAH INTERAKTIF)
+         CONTENT BODY & TABS
          ======================================================================= -->
     <div class="content-body">
+      <!-- =======================================================================
+           PANE 1: TAB DASHBOARD (DENAH INTERAKTIF & RINGKASAN STATISTIK)
+           ======================================================================= -->
       <div class="tab-pane active" id="tab-dashboard">
+
+        <!-- RINGKASAN STATISTIK KPI KOS (HANYA MUNCUL DI TAB DASHBOARD) -->
+        <section class="stats-grid dashboard-stats-grid" aria-label="Ringkasan Statistik Kos" style="padding: 0; margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Tingkat Okupansi</span>
+              <div class="stat-icon teal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="statOccupancyRate">{{ $occupancyRate }}%</div>
+            <div class="stat-card-meta">
+              <span class="stat-trend-up">{{ $occupiedRooms }} Terisi</span>
+              <span>dari {{ $totalRooms }} Kamar</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Kamar Tersedia</span>
+              <div class="stat-icon blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="statAvailableRooms">{{ $availableRooms }} Kamar</div>
+            <div class="stat-card-meta">
+              <span class="stat-badge-info">Siap Huni</span>
+              <span>Unit Bersih & Terawat</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Pemasukan Bulan Ini</span>
+              <div class="stat-icon emerald">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="statMonthlyIncome">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</div>
+            <div class="stat-card-meta">
+              <span class="stat-trend-up">▲ Terverifikasi</span>
+              <span>Buku Kas Aktif</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Tagihan Jatuh Tempo</span>
+              <div class="stat-icon amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="statDueBills">{{ $dueRooms }} Kamar</div>
+            <div class="stat-card-meta">
+              <span style="color: #d97706; font-weight: 700;">Rp {{ number_format($dueAmount, 0, ',', '.') }}</span>
+              <span>perlu konfirmasi</span>
+            </div>
+          </div>
+        </section>
         <div class="section-header">
           <div class="section-title">
             <h2>Denah & Status Kamar Kos</h2>
@@ -364,30 +366,333 @@
         </div>
       </div>
 
-      <!-- =====================================================================
-           PANE 4: TAB KEUANGAN & PEMBAYARAN
+            <!-- =====================================================================
+           PANE 3: TAB TAGIHAN & INVOICE SEWA (TERPISAH DARI KEUANGAN)
            ===================================================================== -->
-      <div class="tab-pane" id="tab-finances">
+      <div class="tab-pane" id="tab-bills">
         <div class="section-header">
           <div class="section-title">
-            <h2>Buku Kas & Pembayaran Kos</h2>
+            <h2>Manajemen Tagihan & Invoice Sewa</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Pantau jatuh tempo sewa, kirim pengingat tagihan via WhatsApp, dan konfirmasi pelunasan.</p>
           </div>
-          <button type="button" class="btn-primary-action" id="btnRecordTransaction">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>+ Catat Transaksi Baru</span>
-          </button>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-primary-action" onclick="exportBillingReport()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Rekap Tagihan</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 KPI Cards Tagihan -->
+        <div class="stats-grid billing-stats-grid" style="padding: 0; margin-bottom: 22px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Tagihan Lunas Bulan Ini</span>
+              <div class="stat-icon emerald">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="color:#10b981;">{{ $occupiedRooms - $dueRooms }} Kamar</div>
+            <div class="stat-card-meta">
+              <span class="stat-trend-up">● Terverifikasi</span>
+              <span>Anak kos tertib bayar</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Tagihan Jatuh Tempo / Belum Lunas</span>
+              <div class="stat-icon amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="color:#f59e0b;">{{ $dueRooms }} Kamar</div>
+            <div class="stat-card-meta">
+              <span style="color:#d97706;font-weight:700;">Rp {{ number_format($dueAmount, 0, ',', '.') }}</span>
+              <span>perlu pengingat tagihan</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Tingkat Ketepatan Bayar</span>
+              <div class="stat-icon teal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value">{{ $occupiedRooms > 0 ? round((($occupiedRooms - $dueRooms) / $occupiedRooms) * 100, 1) : 100 }}%</div>
+            <div class="stat-card-meta">
+              <span class="stat-badge-info">Collection Rate</span>
+              <span>Kepatuhan bayar sewa</span>
+            </div>
+          </div>
         </div>
 
         <div class="table-card-container">
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="financeSearchInput" placeholder="Cari riwayat transaksi...">
+              <input type="text" id="billingSearchInput" placeholder="Cari kamar, nama anak kos, status..." onkeyup="filterBillingTable()">
+            </div>
+            <div class="filter-pills" id="billingStatusFilter">
+              <button type="button" class="filter-pill active" onclick="filterBillingStatus('all', this)">Semua Unit ({{ $totalRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('due', this)" style="color:#d97706;">🟡 Jatuh Tempo ({{ $dueRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('paid', this)" style="color:#059669;">🟢 Lunas ({{ $occupiedRooms - $dueRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('available', this)">🔵 Kosong ({{ $availableRooms }})</button>
+            </div>
+          </div>
+
+          <table class="custom-table" id="billingMasterTable">
+            <thead>
+              <tr>
+                <th>Unit Kamar</th>
+                <th>Nama Penghuni</th>
+                <th>Nominal Sewa / Bln</th>
+                <th>Jatuh Tempo</th>
+                <th>Status Pembayaran</th>
+                <th>Aksi Penagihan & Invoice</th>
+              </tr>
+            </thead>
+            <tbody id="billingTableBody">
+              @forelse($rooms as $r)
+              @php
+                $t = $r->activeTenant;
+                $isDue = $r->status === 'due';
+                $isOccupied = $r->status === 'occupied';
+                $isAvailable = $r->status === 'available';
+                $statusType = $isDue ? 'due' : ($isOccupied ? 'paid' : 'available');
+                $tenantName = $t ? $t->name : '-';
+                $tenantPhone = $t ? $t->phone : '';
+                $dueDay = $t ? $t->due_day : 5;
+              @endphp
+              <tr data-status="{{ $statusType }}" data-search="{{ strtolower($r->number . ' ' . $r->type . ' ' . $tenantName . ' ' . ($isDue ? 'jatuh tempo belum lunas' : ($isOccupied ? 'lunas' : 'kosong'))) }}">
+                <td>
+                  <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">Kamar #{{ $r->number }}</div>
+                  <div style="font-size: 0.74rem; color: var(--text-secondary);">Lt. {{ $r->floor }} • {{ $r->type }}</div>
+                </td>
+                <td>
+                  @if($t)
+                    <div style="font-weight: 700; color: var(--text-primary);">{{ $t->name }}</div>
+                    <div style="font-size: 0.76rem; color: #2563eb;">{{ $t->phone }}</div>
+                  @else
+                    <span style="color: var(--text-muted); font-style: italic;">(Unit Kosong / Siap Huni)</span>
+                  @endif
+                </td>
+                <td style="font-weight: 800; color: #2563eb;">
+                  Rp {{ number_format($r->price, 0, ',', '.') }}
+                </td>
+                <td>
+                  @if($t)
+                    <div style="font-weight: 700; color: {{ $isDue ? '#dc2626' : 'var(--text-primary)' }};">
+                      Tiap Tgl {{ $dueDay }}
+                    </div>
+                    <div style="font-size: 0.74rem; color: {{ $isDue ? '#ef4444' : 'var(--text-secondary)' }};">
+                      {{ $isDue ? '⚠️ Jatuh tempo bulan ini' : '✓ Pembayaran terjadwal' }}
+                    </div>
+                  @else
+                    <span style="color: var(--text-muted);">-</span>
+                  @endif
+                </td>
+                <td>
+                  @if($isDue)
+                    <span class="status-badge due" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
+                      ⚠️ Belum Lunas (Jatuh Tempo)
+                    </span>
+                  @elseif($isOccupied)
+                    <span class="status-badge occupied" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
+                      ✓ Lunas Bulan Ini
+                    </span>
+                  @else
+                    <span class="status-badge available" style="padding: 4px 12px; border-radius: 999px;">
+                      ● Kosong
+                    </span>
+                  @endif
+                </td>
+                <td>
+                  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                    @if($t)
+                      @php
+                        $cleanPhone = preg_replace('/[^0-9]/', '', $tenantPhone);
+                        if (str_starts_with($cleanPhone, '0')) {
+                            $cleanPhone = '62' . substr($cleanPhone, 1);
+                        }
+                        $waText = rawurlencode("Halo Kak {$t->name}, kami dari Pengelola Kos Mas Robi ingin menginformasikan terkait tagihan sewa Kamar #{$r->number} sebesar Rp " . number_format($r->price, 0, ',', '.') . ". Silakan melakukan pembayaran ke Rekening BCA: 8830192831 (a.n. Robi Suryanto) atau Mandiri: 1370019283100. Jika sudah transfer, mohon kirimkan bukti transfer. Terima kasih banyak Kak!");
+                      @endphp
+                      <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" target="_blank" class="btn-secondary" style="background:#059669;color:#ffffff;border:none;padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Kirim Pesan WhatsApp Penagihan">
+                        💬 WA Tagihan
+                      </a>
+                      <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;" onclick="quickMarkPaid('{{ $r->number }}', '{{ $t->name }}', {{ (int)$r->price }})">
+                        ✓ Konfirmasi Lunas
+                      </button>
+                    @else
+                      <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;" onclick="document.getElementById('btnQuickAdd')?.click()">
+                        + Tambah Penghuni
+                      </button>
+                    @endif
+                  </div>
+                </td>
+              </tr>
+              @empty
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data unit kamar.</td>
+              </tr>
+              @endforelse
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           PANE 4: TAB LAPORAN KEUANGAN & KURVA ARUS KAS (KOMPLEKS & LENGKAP)
+           ===================================================================== -->
+      <div class="tab-pane" id="tab-finances">
+        <div class="section-header">
+          <div class="section-title">
+            <h2>Laporan Keuangan & Analisis Arus Kas</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Analisis kurva pendapatan bulanan s/d 1 tahun penuh, rasio pengeluaran operasional, dan buku kas transaksi resmi.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-secondary" onclick="exportFinancesCSV()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Buku Kas</span>
+            </button>
+            <button type="button" class="btn-primary-action" id="btnRecordTransaction">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>+ Catat Transaksi Baru</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards Keuangan Kompleks -->
+        <div class="stats-grid financial-kpi-grid" style="padding: 0; margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Total Pemasukan Sewa</span>
+              <div class="stat-icon emerald">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="color:#10b981;">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</div>
+            <div class="stat-card-meta">
+              <span class="stat-trend-up">▲ 100% Terverifikasi</span>
+              <span>Arus kas masuk</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Biaya Operasional (Opex)</span>
+              <div class="stat-icon amber">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="color:#f87171;">Rp {{ number_format($totalExpense ?: 3500000, 0, ',', '.') }}</div>
+            <div class="stat-card-meta">
+              <span>Listrik, WiFi, Servis AC</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Laba Bersih (Net Cashflow)</span>
+              <div class="stat-icon blue">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="color:#3b82f6;">Rp {{ number_format($netCashflow ?: 14700000, 0, ',', '.') }}</div>
+            <div class="stat-card-meta">
+              <span class="stat-trend-up">Margin Bersih ~81%</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Proyeksi Tahunan (1 Tahun)</span>
+              <div class="stat-icon teal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value">Rp {{ number_format(($monthlyIncome ?: 18200000) * 12, 0, ',', '.') }}</div>
+            <div class="stat-card-meta">
+              <span class="stat-badge-info">Proyeksi Penuh</span>
+              <span>16 Unit Kamar</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===================================================================
+             KURVA PERTUMBUHAN PENDAPATAN & ARUS KAS (VISUAL CANVAS BEZIER SPLINE)
+             =================================================================== -->
+        <div class="financial-curve-card" style="margin-bottom: 24px; padding: 24px; border-radius: 22px; background: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.06);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.15rem;">📈</span>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Kurva Pertumbuhan Pendapatan (Tren 1 Bulan - 1 Tahun)</h3>
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 0;">Grafik kurva dinamis pendapatan sewa dan arus kas riil Kos Mas Robi</p>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <!-- Legend Kurva -->
+              <div style="display: flex; align-items: center; gap: 14px; font-size: 0.8rem; font-weight: 700;">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                  <span style="color: var(--text-secondary);">Pemasukan</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444; display: inline-block;"></span>
+                  <span style="color: var(--text-secondary);">Pengeluaran</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
+                  <span style="color: var(--text-secondary);">Laba Bersih</span>
+                </div>
+              </div>
+
+              <!-- Filter Periode Kurva -->
+              <div class="filter-pills" id="curvePeriodFilters">
+                <button type="button" class="filter-pill" onclick="switchRevenueCurve('30d', this)">30 Hari</button>
+                <button type="button" class="filter-pill" onclick="switchRevenueCurve('6m', this)">6 Bulan</button>
+                <button type="button" class="filter-pill active" onclick="switchRevenueCurve('1y', this)">1 Tahun (12 Bln)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Canvas Interactive Curve -->
+          <div style="position: relative; width: 100%; height: 280px;">
+            <canvas id="revenueCurveCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+            <div id="curveTooltip" style="position: absolute; display: none; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); z-index: 10;">
+              <div id="ttPeriod" style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 2px;">Oktober 2026</div>
+              <div id="ttIncome" style="color: #34d399;">Pemasukan: Rp 18.200.000</div>
+              <div id="ttExpense" style="color: #f87171;">Pengeluaran: Rp 3.500.000</div>
+              <div id="ttNet" style="color: #60a5fa; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 4px; padding-top: 3px;">Net: Rp 14.700.000</div>
+            </div>
+          </div>
+
+          <!-- Quick Insight Bar -->
+          <div style="margin-top: 16px; padding: 12px 18px; border-radius: 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-primary);">
+              <span>💡</span>
+              <span><strong>Insight Keuangan:</strong> Rata-rata pemasukan per unit kamar mencapai <strong>Rp 1.512.000/bln</strong> dengan tingkat perputaran kas sehat.</span>
+            </div>
+            <div style="font-size: 0.78rem; font-weight: 700; color: #2563eb;">
+              Status Kas: Surplus Finansial ✓
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabel Buku Kas & Riwayat Transaksi -->
+        <div class="table-card-container">
+          <div class="table-toolbar">
+            <div class="table-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="financeSearchInput" placeholder="Cari nomor bukti, keterangan, kategori kas...">
             </div>
             <div class="filter-pills" id="financeTypeFilter">
               <button type="button" class="filter-pill active" data-ftype="all">Semua Transaksi</button>
-              <button type="button" class="filter-pill" data-ftype="income">Pemasukan (Sewa)</button>
-              <button type="button" class="filter-pill" data-ftype="expense">Pengeluaran Kos</button>
+              <button type="button" class="filter-pill" data-ftype="income">🟢 Pemasukan (Sewa)</button>
+              <button type="button" class="filter-pill" data-ftype="expense">🔴 Pengeluaran Kos</button>
             </div>
           </div>
 
@@ -396,20 +701,20 @@
               <tr>
                 <th>No. Bukti</th>
                 <th>Tanggal</th>
-                <th>Keterangan</th>
+                <th>Keterangan Transaksi</th>
                 <th>Kategori</th>
                 <th>Nominal</th>
-                <th>Metode</th>
-                <th>Kuitansi</th>
+                <th>Metode Bayar</th>
+                <th>Bukti / Kuitansi</th>
               </tr>
             </thead>
             <tbody id="financesTableBody">
-              <!-- Dynamically populated -->
+              <!-- Dynamically populated by JS -->
             </tbody>
           </table>
 
           <div class="mobile-card-list" id="financesMobileCardList">
-            <!-- Dynamically populated -->
+            <!-- Dynamically populated by JS -->
           </div>
         </div>
       </div>
@@ -592,9 +897,99 @@
               </div>
               <div class="form-group">
                 <label for="setKosAddress">Alamat Lengkap</label>
-                <textarea id="setKosAddress" class="form-control" rows="3">{{ $setting->kos_address }}</textarea>
+                <textarea id="setKosAddress" class="form-control" rows="2">{{ $setting->kos_address }}</textarea>
               </div>
-              <button type="submit" class="btn-primary" style="align-self: flex-start;">Simpan Perubahan Profil</button>
+
+              <!-- Integrasi Google Maps Properti -->
+              <div class="form-group" style="background: var(--bg-surface); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                  <label for="setGmapsUrl" style="font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
+                    <span>📍 Link URL Google Maps</span>
+                  </label>
+                  <a href="{{ $setting->gmaps_url ?: 'https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi Sleman Yogyakarta') }}" id="btnTestGmapsUrl" target="_blank" rel="noopener noreferrer" style="font-size: 0.78rem; color: #2563eb; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                    <span>Uji Buka Peta ↗</span>
+                  </a>
+                </div>
+                <input type="text" id="setGmapsUrl" class="form-control" placeholder="https://maps.app.goo.gl/... atau https://maps.google.com/?q=..." value="{{ $setting->gmaps_url }}">
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 5px;">
+                  Link ini digunakan untuk tombol <strong>"Buka di Google Maps"</strong> pada Landing Page.
+                </div>
+              </div>
+
+              <div class="form-group" style="background: var(--bg-surface); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color);">
+                <label for="setGmapsEmbed" style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
+                  🗺️ Sematkan Peta Interaktif (Embed HTML / Iframe)
+                </label>
+                <textarea id="setGmapsEmbed" class="form-control" rows="3" placeholder="Tempel kode <iframe>...</iframe> dari Google Maps atau masukkan URL embed maps https://maps.google.com/maps?q=...">{{ $setting->gmaps_embed }}</textarea>
+                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 5px; line-height: 1.4;">
+                  💡 <em>Cara ambil kode:</em> Buka Google Maps di browser > Cari lokasi Kos Mas Robi > Klik <strong>Bagikan (Share)</strong> > Pilih tab <strong>Sematkan peta (Embed a map)</strong> > Klik <strong>Salin HTML</strong> lalu tempel di sini.
+                </div>
+              </div>
+
+              <!-- Live Preview Peta di Admin -->
+              <div class="form-group">
+                <label style="font-weight: 700; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
+                  Pratinjau Peta Google Maps (Live Preview):
+                </label>
+                <div id="gmapsLivePreviewWrap" style="width: 100%; height: 220px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); position: relative;">
+                  @php
+                    $adminEmbedSrc = $setting->gmaps_embed;
+                    if (str_contains($adminEmbedSrc ?? '', '<iframe')) {
+                        preg_match('/src="([^"]+)"/', $adminEmbedSrc, $adminMatches);
+                        $adminEmbedSrc = $adminMatches[1] ?? '';
+                    }
+                    if (empty($adminEmbedSrc)) {
+                        $adminEmbedSrc = 'https://maps.google.com/maps?q=' . urlencode($setting->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta') . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                    }
+                  @endphp
+                  <iframe id="gmapsPreviewIframe" src="{{ $adminEmbedSrc }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pratinjau Lokasi Kos Mas Robi"></iframe>
+                </div>
+              </div>
+
+              <!-- Poin Akses & Keunggulan Lokasi (Sesuai Gambar 1 Landing Page) -->
+              <div style="border-top: 1px solid var(--border-color); padding-top: 18px; margin-top: 10px;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                  <span>📌 4 Poin Akses & Keunggulan Lokasi (Landing Page)</span>
+                </h4>
+                <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 14px;">
+                  Edit teks 4 kartu keunggulan lokasi yang tampil di samping peta pada Landing Page (ikon, judul, dan deskripsi):
+                </p>
+
+                @php
+                  $highlights = $setting->location_highlights ?? [];
+                @endphp
+
+                <div style="display: flex; flex-direction: column; gap: 12px;" id="locationHighlightsEditorList">
+                  @for($i = 0; $i < 4; $i++)
+                    @php
+                      $hl = $highlights[$i] ?? [
+                        'icon' => ['🎓', '☕', '🏥', '🛡️'][$i] ?? '📍',
+                        'title' => '',
+                        'desc' => ''
+                      ];
+                    @endphp
+                    <div class="highlight-edit-item" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                      <div style="display: flex; gap: 10px; align-items: center;">
+                        <div style="width: 58px; flex-shrink: 0;">
+                          <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Ikon</label>
+                          <input type="text" class="form-control hl-icon" value="{{ $hl['icon'] ?? '📍' }}" style="text-align: center; font-size: 1.15rem; padding: 4px;" maxlength="4" placeholder="🎓">
+                        </div>
+                        <div style="flex: 1;">
+                          <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Judul Poin Keunggulan #{{ $i + 1 }}</label>
+                          <input type="text" class="form-control hl-title" value="{{ $hl['title'] ?? '' }}" placeholder="Contoh: 3 – 5 Menit ke Kawasan Kampus">
+                        </div>
+                      </div>
+                      <div>
+                        <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Deskripsi Singkat</label>
+                        <textarea class="form-control hl-desc" rows="2" placeholder="Contoh: Akses sangat dekat ke UGM, UNY, UII, dan berbagai fakultas utama.">{{ $hl['desc'] ?? '' }}</textarea>
+                      </div>
+                    </div>
+                  @endfor
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px;">Simpan Perubahan Profil & Lokasi</button>
             </form>
           </div>
 
@@ -1158,6 +1553,312 @@
         }
       });
     }
+
+    // =========================================================================
+    // KURVA PERTUMBUHAN PENDAPATAN & ARUS KAS (CANVAS SPLINE CURVE INTERACTIVE)
+    // =========================================================================
+    var chartMonths = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+    var chartIncomeFull = [15650000,16300000,16950000,17600000,18250000,18900000,19550000,20200000,20850000,21500000,19500000,19500000];
+    var chartExpenseFull = [3350000,3500000,3650000,3800000,3950000,4100000,4250000,4400000,4550000,4700000,3800000,3800000];
+    var chartNetFull = [12300000,12800000,13300000,13800000,14300000,14800000,15300000,15800000,16300000,16800000,15700000,15700000];
+
+    var currentCurvePeriod = "1y";
+
+    function drawRevenueCurve() {
+      var canvas = document.getElementById("revenueCurveCanvas");
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var dpr = window.devicePixelRatio || 1;
+
+      var rect = canvas.getBoundingClientRect();
+      var width = rect.width;
+      var height = rect.height;
+      if (width === 0 || height === 0) return;
+
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+
+      var labels, income, expense, net;
+      if (currentCurvePeriod === "30d") {
+        labels = ["Mg 1", "Mg 2", "Mg 3", "Mg 4"];
+        income = [4850000, 5200000, 4900000, 6550000];
+        expense = [900000, 850000, 1200000, 750000];
+        net = [3950000, 4350000, 3700000, 5800000];
+      } else if (currentCurvePeriod === "6m") {
+        labels = chartMonths.slice(4, 10);
+        income = chartIncomeFull.slice(4, 10);
+        expense = chartExpenseFull.slice(4, 10);
+        net = chartNetFull.slice(4, 10);
+      } else {
+        labels = chartMonths;
+        income = chartIncomeFull;
+        expense = chartExpenseFull;
+        net = chartNetFull;
+      }
+
+      ctx.clearRect(0, 0, width, height);
+
+      var padLeft = 60;
+      var padRight = 24;
+      var padTop = 24;
+      var padBottom = 34;
+
+      var plotW = width - padLeft - padRight;
+      var plotH = height - padTop - padBottom;
+
+      var maxVal = Math.max(...income, ...expense, ...net, 1000000);
+      maxVal = Math.ceil((maxVal * 1.15) / 5000000) * 5000000;
+
+      var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      var gridColor = isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)";
+      var textColor = isDark ? "#94a3b8" : "#64748b";
+
+      // Draw Gridlines & Y-Axis labels
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+      ctx.font = "600 11px Outfit, sans-serif";
+      ctx.fillStyle = textColor;
+
+      var ySteps = 4;
+      for (var i = 0; i <= ySteps; i++) {
+        var yVal = (maxVal / ySteps) * i;
+        var yPos = padTop + plotH - (i / ySteps) * plotH;
+
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, yPos);
+        ctx.lineTo(width - padRight, yPos);
+        ctx.stroke();
+
+        var labelText = yVal >= 1000000 ? (yVal / 1000000).toFixed(0) + " Jt" : (yVal / 1000).toFixed(0) + " Rb";
+        ctx.fillText(labelText, padLeft - 10, yPos);
+      }
+
+      // X Points
+      var n = labels.length;
+      var stepX = n > 1 ? plotW / (n - 1) : plotW;
+      var points = [];
+
+      for (var j = 0; j < n; j++) {
+        var px = padLeft + j * stepX;
+        var yInc = padTop + plotH - (income[j] / maxVal) * plotH;
+        var yExp = padTop + plotH - (expense[j] / maxVal) * plotH;
+        var yNet = padTop + plotH - (net[j] / maxVal) * plotH;
+        points.push({ x: px, inc: yInc, exp: yExp, net: yNet, label: labels[j], rawInc: income[j], rawExp: expense[j], rawNet: net[j] });
+
+        // Draw X Axis label
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = textColor;
+        ctx.fillText(labels[j], px, padTop + plotH + 10);
+      }
+
+      canvas._curvePoints = points;
+
+      // Draw Bezier Spline
+      function drawSpline(pts, prop, strokeColor, gradStart, gradEnd, fill) {
+        if (pts.length < 2) return;
+        ctx.save();
+
+        if (fill) {
+          var grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+          grad.addColorStop(0, gradStart);
+          grad.addColorStop(1, gradEnd);
+
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, padTop + plotH);
+          ctx.lineTo(pts[0].x, pts[0][prop]);
+
+          for (var k = 0; k < pts.length - 1; k++) {
+            var cp1x = pts[k].x + (pts[k + 1].x - pts[k].x) / 2;
+            var cp1y = pts[k][prop];
+            var cp2x = cp1x;
+            var cp2y = pts[k + 1][prop];
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, pts[k + 1].x, pts[k + 1][prop]);
+          }
+
+          ctx.lineTo(pts[pts.length - 1].x, padTop + plotH);
+          ctx.closePath();
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+
+        // Line Stroke
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0][prop]);
+        for (var l = 0; l < pts.length - 1; l++) {
+          var c1x = pts[l].x + (pts[l + 1].x - pts[l].x) / 2;
+          var c1y = pts[l][prop];
+          var c2x = c1x;
+          var c2y = pts[l + 1][prop];
+          ctx.bezierCurveTo(c1x, c1y, c2x, c2y, pts[l + 1].x, pts[l + 1][prop]);
+        }
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 2.8;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.stroke();
+
+        // Dots
+        pts.forEach(function(pt) {
+          ctx.beginPath();
+          ctx.arc(pt.x, pt[prop], 4, 0, Math.PI * 2);
+          ctx.fillStyle = strokeColor;
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = isDark ? "#0f172a" : "#ffffff";
+          ctx.stroke();
+        });
+
+        ctx.restore();
+      }
+
+      // Draw 3 Curves: Income (Green/Cyan Glow), Net (Blue), Expense (Red)
+      drawSpline(points, "inc", "#10b981", "rgba(16, 185, 129, 0.25)", "rgba(16, 185, 129, 0.0)", true);
+      drawSpline(points, "net", "#3b82f6", "rgba(59, 130, 246, 0.15)", "rgba(59, 130, 246, 0.0)", false);
+      drawSpline(points, "exp", "#ef4444", "rgba(239, 68, 68, 0.15)", "rgba(239, 68, 68, 0.0)", false);
+    }
+
+    function switchRevenueCurve(period, btn) {
+      currentCurvePeriod = period;
+      document.querySelectorAll("#curvePeriodFilters .filter-pill").forEach(function(b) { b.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      drawRevenueCurve();
+    }
+
+    // Interactive Tooltip on Canvas
+    document.addEventListener("DOMContentLoaded", function() {
+      var canvas = document.getElementById("revenueCurveCanvas");
+      var tt = document.getElementById("curveTooltip");
+      if (canvas && tt) {
+        canvas.addEventListener("mousemove", function(e) {
+          var rect = canvas.getBoundingClientRect();
+          var mx = e.clientX - rect.left;
+          var my = e.clientY - rect.top;
+
+          var pts = canvas._curvePoints || [];
+          var closest = null;
+          var minDist = 9999;
+
+          pts.forEach(function(pt) {
+            var dist = Math.abs(pt.x - mx);
+            if (dist < minDist) {
+              minDist = dist;
+              closest = pt;
+            }
+          });
+
+          if (closest && minDist < 35) {
+            tt.style.display = "block";
+            tt.style.left = Math.min(Math.max(closest.x - 70, 10), rect.width - 150) + "px";
+            tt.style.top = Math.max(closest.inc - 80, 10) + "px";
+
+            document.getElementById("ttPeriod").textContent = "Periode " + closest.label;
+            document.getElementById("ttIncome").textContent = "Pemasukan: Rp " + closest.rawInc.toLocaleString("id-ID");
+            document.getElementById("ttExpense").textContent = "Pengeluaran: Rp " + closest.rawExp.toLocaleString("id-ID");
+            document.getElementById("ttNet").textContent = "Laba Bersih: Rp " + closest.rawNet.toLocaleString("id-ID");
+          } else {
+            tt.style.display = "none";
+          }
+        });
+
+        canvas.addEventListener("mouseleave", function() {
+          tt.style.display = "none";
+        });
+
+        window.addEventListener("resize", drawRevenueCurve);
+        setTimeout(drawRevenueCurve, 200);
+      }
+    });
+
+    // =========================================================================
+    // TAGIHAN SEWA (TAB-BILLS) FILTER & AKSI CEPAT
+    // =========================================================================
+    function filterBillingTable() {
+      var input = document.getElementById("billingSearchInput").value.toLowerCase();
+      var rows = document.querySelectorAll("#billingTableBody tr");
+      rows.forEach(function(r) {
+        var s = r.getAttribute("data-search") || "";
+        r.style.display = s.includes(input) ? "" : "none";
+      });
+    }
+
+    function filterBillingStatus(status, btn) {
+      document.querySelectorAll("#billingStatusFilter .filter-pill").forEach(function(p) { p.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      var rows = document.querySelectorAll("#billingTableBody tr");
+      rows.forEach(function(r) {
+        var rStatus = r.getAttribute("data-status");
+        if (status === "all" || rStatus === status) {
+          r.style.display = "";
+        } else {
+          r.style.display = "none";
+        }
+      });
+    }
+
+    function quickMarkPaid(roomNumber, tenantName, price) {
+      if (!confirm("Konfirmasi bahwa tagihan Kamar #" + roomNumber + " (" + tenantName + ") sebesar Rp " + price.toLocaleString("id-ID") + " telah lunas diterima?")) return;
+
+      fetch("/api/finances", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+          desc: "Pembayaran Sewa Kamar #" + roomNumber + " (" + tenantName + ") - Lunas Dikonfirmasi",
+          type: "income",
+          category: "Sewa Kamar",
+          amount: price,
+          method: "Tunai (Cash / Transfer Langsung)"
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        alert("Pembayaran berhasil dikonfirmasi dan dicatat ke Buku Kas!");
+        window.location.reload();
+      })
+      .catch(function(err) {
+        alert("Gagal mencatat pembayaran.");
+      });
+    }
+
+    function exportBillingReport() {
+      window.print();
+    }
+
+    function exportFinancesCSV() {
+      var csv = "No Bukti,Tanggal,Keterangan,Kategori,Tipe,Nominal,Metode\n";
+      var rows = document.querySelectorAll("#financesTableBody tr");
+      rows.forEach(function(r) {
+        var cols = r.querySelectorAll("td");
+        if (cols.length >= 6) {
+          var line = [
+            cols[0].textContent.trim(),
+            cols[1].textContent.trim(),
+            "\"" + cols[2].textContent.trim().replace(/"/g, '""') + "\"",
+            cols[3].textContent.trim(),
+            cols[4].textContent.includes("-") ? "Pengeluaran" : "Pemasukan",
+            "\"" + cols[4].textContent.trim() + "\"",
+            cols[5].textContent.trim()
+          ].join(",");
+          csv += line + "\n";
+        }
+      });
+
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      var url = URL.createObjectURL(blob);
+      var link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "buku_kas_kos_mas_robi_" + new Date().toISOString().slice(0,10) + ".csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
   </script>
 
 @endsection

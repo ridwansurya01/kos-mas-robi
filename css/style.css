@@ -4145,3 +4145,682 @@ body:has(.tp-page) {
 .kmr-logout-btn-confirm:active {
   transform: scale(0.97);
 }
+
+/* ==========================================================================
+   ADVANCED MODERN DARK MODE OVERRIDES — KOS MAS ROBI ADMIN PANEL
+   ========================================================================== */
+
+/* 1. SIDEBAR & NAVIGATION */
+[data-theme="dark"] .app-sidebar {
+  background: #0b0f19 !important;
+  border-right: 1px solid #1c273e !important;
+}
+
+[data-theme="dark"] .brand-details h2 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .brand-badge {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+[data-theme="dark"] .nav-section-title {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .nav-item {
+  color: #94a3b8 !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+}
+
+[data-theme="dark"] .nav-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .nav-item.active {
+  background: rgba(37, 99, 235, 0.18) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: #60a5fa !important;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.2) !important;
+}
+
+[data-theme="dark"] .nav-item.active svg {
+  color: #60a5fa !important;
+}
+
+[data-theme="dark"] .nav-badge-count {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .sidebar-footer {
+  background: #080d19 !important;
+  border: 1px solid #1c273e !important;
+}
+
+[data-theme="dark"] .host-avatar {
+  background: rgba(37, 99, 235, 0.2) !important;
+  color: #60a5fa !important;
+  border-color: #2563eb !important;
+}
+
+[data-theme="dark"] .host-name {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .host-role {
+  color: #94a3b8 !important;
+}
+
+/* 2. TOP HEADER BAR */
+[data-theme="dark"] .app-header {
+  background: rgba(11, 15, 25, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid #1c273e !important;
+}
+
+[data-theme="dark"] .page-title-box h1 {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .page-title-box p {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .header-search {
+  background: #111827 !important;
+  border: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .header-search input {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .header-search input::placeholder {
+  color: #64748b !important;
+}
+
+[data-theme="dark"] .header-action-btn {
+  background: #111827 !important;
+  border: 1px solid #1f2c47 !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .header-action-btn:hover {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* 3. PROPERTY BANNER */
+[data-theme="dark"] .property-banner {
+  border: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .property-tag {
+  background: rgba(37, 99, 235, 0.35) !important;
+  border: 1px solid rgba(147, 197, 253, 0.35) !important;
+  color: #bfdbfe !important;
+}
+
+[data-theme="dark"] .banner-pill {
+  background: rgba(11, 15, 25, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #e2e8f0 !important;
+}
+
+/* 4. STAT KPI CARDS (4 KARTU IKHTISAR ATAS) */
+[data-theme="dark"] .stat-card {
+  background: #111827 !important;
+  border: 1px solid #1f2c47 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .stat-card:hover {
+  background: #141d30 !important;
+  border-color: #2563eb !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 16px 36px -8px rgba(37, 99, 235, 0.25) !important;
+}
+
+[data-theme="dark"] .stat-card-title {
+  color: #94a3b8 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+}
+
+[data-theme="dark"] .stat-card-value {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+[data-theme="dark"] .stat-card-meta {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .stat-badge-info {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+}
+
+[data-theme="dark"] .stat-trend-up {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .stat-icon.teal,
+[data-theme="dark"] .stat-icon.blue {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+[data-theme="dark"] .stat-icon.emerald {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .stat-icon.amber {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* 5. FILTER PILLS & SECTION CONTROLS */
+[data-theme="dark"] .section-title h2 {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] .filter-pill {
+  background: #111827 !important;
+  border: 1px solid #1f2c47 !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .filter-pill:hover {
+  background: #1e293b !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-pill.active {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+}
+
+[data-theme="dark"] .floor-badge {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+/* 6. ROOM CARDS (DENAH STATUS KAMAR KOS) */
+[data-theme="dark"] .room-card {
+  background: #111827 !important;
+  border: 1px solid #1f2c47 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.6) !important;
+  transition: all 0.25s ease !important;
+}
+
+[data-theme="dark"] .room-card:hover {
+  background: #141d30 !important;
+  border-color: #3b82f6 !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 36px -6px rgba(37, 99, 235, 0.25) !important;
+}
+
+[data-theme="dark"] .room-number {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+[data-theme="dark"] .room-type-tag {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .room-details {
+  background: #080d19 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+}
+
+[data-theme="dark"] .room-tenant-name {
+  color: #f8fafc !important;
+  font-weight: 700 !important;
+}
+
+[data-theme="dark"] .room-due-info {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .room-due-info strong {
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .feature-pill {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 6px !important;
+}
+
+[data-theme="dark"] .room-card-bottom {
+  border-top: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .room-price {
+  color: #60a5fa !important;
+  font-weight: 800 !important;
+  font-size: 0.96rem !important;
+}
+
+[data-theme="dark"] .room-price span {
+  color: #94a3b8 !important;
+  font-weight: 500 !important;
+}
+
+[data-theme="dark"] .btn-icon-sm {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #cbd5e1 !important;
+  border-radius: 10px !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-theme="dark"] .btn-icon-sm:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: #ffffff !important;
+  transform: scale(1.05) !important;
+}
+
+[data-theme="dark"] .btn-icon-sm.whatsapp {
+  color: #34d399 !important;
+}
+
+[data-theme="dark"] .btn-icon-sm.whatsapp:hover {
+  background: #059669 !important;
+  border-color: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* 7. STATUS BADGES */
+[data-theme="dark"] .status-badge.occupied {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge.available {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge.due {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #fbbf24 !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+[data-theme="dark"] .status-badge.repair {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+/* 8. TABLES & MASTER CONTAINERS */
+[data-theme="dark"] .table-card-container {
+  background: #111827 !important;
+  border: 1px solid #1f2c47 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .table-toolbar {
+  border-bottom: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .table-search {
+  background: #080d19 !important;
+  border: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .table-search input {
+  background: transparent !important;
+  color: #f8fafc !important;
+}
+
+[data-theme="dark"] .custom-table th {
+  background: #0d1424 !important;
+  color: #94a3b8 !important;
+  border-bottom: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .custom-table td {
+  background: transparent !important;
+  color: #f8fafc !important;
+  border-bottom: 1px solid #1c273e !important;
+}
+
+[data-theme="dark"] .custom-table tr:hover td {
+  background: rgba(30, 41, 59, 0.5) !important;
+}
+
+/* 9. ADMIN MODALS */
+[data-theme="dark"] .modal-backdrop {
+  background: rgba(4, 7, 15, 0.82) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+[data-theme="dark"] .modal-dialog {
+  background: #101726 !important;
+  border: 1px solid #1f2c47 !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.85) !important;
+}
+
+[data-theme="dark"] .modal-header {
+  background: #101726 !important;
+  border-bottom: 1px solid #1f2c47 !important;
+}
+
+[data-theme="dark"] .modal-header h3 {
+  color: #ffffff !important;
+  font-family: 'Outfit', sans-serif !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] .modal-close-btn {
+  color: #cbd5e1 !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .modal-close-btn:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .modal-footer {
+  background: #101726 !important;
+  border-top: 1px solid #1f2c47 !important;
+}
+
+
+/* ==========================================================================
+   MODERN ADMIN HEADER, POLISHED BREADCRUMBS, SEARCH & UI REFINEMENT
+   ========================================================================== */
+.app-header.modern-header {
+  min-height: 74px;
+  height: auto;
+  padding: 12px 28px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+[data-theme="dark"] .app-header.modern-header {
+  background: rgba(16, 23, 38, 0.95);
+  border-bottom: 1px solid #1f2c47;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.modern-title-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.modern-title-box .header-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.modern-title-box .header-breadcrumb .bc-home {
+  color: var(--brand-primary);
+  font-weight: 800;
+}
+
+.modern-title-box .header-breadcrumb .bc-sep {
+  opacity: 0.4;
+  font-size: 0.75rem;
+}
+
+.modern-title-box .header-breadcrumb .bc-curr {
+  color: var(--text-secondary);
+}
+
+.modern-title-box .header-main-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.025em;
+  font-family: 'Outfit', sans-serif;
+}
+
+.modern-title-box .header-sub-title {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 520px;
+}
+
+.modern-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Modern Pill Search Box with KBD badge */
+.header-search.modern-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.header-search.modern-search-box input {
+  width: 100%;
+  height: 38px;
+  padding: 0 54px 0 36px;
+  border-radius: 9999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.header-search.modern-search-box input:focus {
+  background: var(--bg-elevated);
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px var(--brand-glow);
+  width: 275px;
+}
+
+.header-search.modern-search-box .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+  width: 16px;
+  height: 16px;
+}
+
+.header-search.modern-search-box .search-kbd {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: inherit;
+  pointer-events: none;
+  line-height: 1.2;
+}
+
+[data-theme="dark"] .header-search.modern-search-box input {
+  background: #0b0f19;
+  border-color: #273553;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .header-search.modern-search-box .search-kbd {
+  background: #1e293b;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+/* Modern Logout Circular Action Button */
+.header-action-btn.modern-logout-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.header-action-btn.modern-logout-btn:hover {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #b91c1c;
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.18);
+}
+
+[data-theme="dark"] .header-action-btn.modern-logout-btn {
+  background: #1e293b;
+  border-color: #2b3a56;
+  color: #f87171;
+}
+
+[data-theme="dark"] .header-action-btn.modern-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.22);
+  border-color: rgba(220, 38, 38, 0.45);
+  color: #fca5a5;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
+}
+
+/* Modern Primary Action Button (+ Penghuni Baru) */
+.btn-primary-action.modern-quick-add-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.btn-primary-action.modern-quick-add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38);
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.btn-primary-action.modern-quick-add-btn:active {
+  transform: scale(0.97);
+}
+
+/* Polish on stats grid inside tab-dashboard */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+@media (max-width: 1024px) {
+  .header-search.modern-search-box {
+    width: 180px;
+  }
+  .header-search.modern-search-box input:focus {
+    width: 200px;
+  }
+  .modern-title-box .header-sub-title {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header.modern-header {
+    padding: 10px 16px;
+  }
+  .header-search.modern-search-box {
+    display: none;
+  }
+  .modern-title-box .header-sub-title {
+    display: none;
+  }
+}

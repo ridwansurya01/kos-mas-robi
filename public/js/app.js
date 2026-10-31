@@ -174,13 +174,16 @@
     const panes = document.querySelectorAll('.tab-pane');
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
+    const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
 
     const titles = {
-      'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian dan operasional Kos Mas Robi' },
+      'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
       'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
       'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
-      'tab-finances': { title: 'Keuangan & Tagihan', sub: 'Pencatatan uang masuk, pengeluaran, dan kuitansi digital' },
+      'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
+      'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
       'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
+      'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
       'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
     };
 
@@ -198,8 +201,13 @@
       });
 
       if (titles[tabId]) {
-        pageTitle.textContent = titles[tabId].title;
-        pageSubtitle.textContent = titles[tabId].sub;
+        if (pageTitle) pageTitle.textContent = titles[tabId].title;
+        if (pageSubtitle) pageSubtitle.textContent = titles[tabId].sub;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = titles[tabId].title;
+      }
+
+      if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
+        setTimeout(window.drawRevenueCurve, 80);
       }
 
       document.getElementById('appSidebar')?.classList.remove('open');
@@ -1477,12 +1485,61 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const btnExport = document.getElementById('btnExportData');
     const btnReset = document.getElementById('btnResetData');
 
+    // Live update Google Maps preview & test button
+    const setGmapsUrlInput = document.getElementById('setGmapsUrl');
+    const setGmapsEmbedInput = document.getElementById('setGmapsEmbed');
+    const setKosAddressInput = document.getElementById('setKosAddress');
+    const gmapsPreviewIframe = document.getElementById('gmapsPreviewIframe');
+    const btnTestGmapsUrl = document.getElementById('btnTestGmapsUrl');
+
+    function updateGmapsPreview() {
+      if (!gmapsPreviewIframe) return;
+      let embedVal = setGmapsEmbedInput?.value.trim() || '';
+      if (embedVal.includes('<iframe')) {
+        const match = embedVal.match(/src="([^"]+)"/);
+        if (match && match[1]) embedVal = match[1];
+      }
+      if (!embedVal && setKosAddressInput) {
+        const addr = setKosAddressInput.value.trim() || 'Kos Mas Robi Sleman Yogyakarta';
+        embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+      }
+      if (embedVal) {
+        gmapsPreviewIframe.src = embedVal;
+      }
+    }
+
+    setGmapsEmbedInput?.addEventListener('input', updateGmapsPreview);
+    setKosAddressInput?.addEventListener('change', () => {
+      if (!setGmapsEmbedInput?.value.trim()) {
+        updateGmapsPreview();
+      }
+    });
+
+    setGmapsUrlInput?.addEventListener('input', () => {
+      if (btnTestGmapsUrl) {
+        const urlVal = setGmapsUrlInput.value.trim();
+        btnTestGmapsUrl.href = urlVal || '#';
+      }
+    });
+
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const kosName = document.getElementById('setKosName').value.trim();
       const ownerName = document.getElementById('setOwnerName').value.trim();
       const ownerPhone = document.getElementById('setOwnerPhone').value.trim();
       const kosAddress = document.getElementById('setKosAddress').value.trim();
+      const gmapsUrl = setGmapsUrlInput ? setGmapsUrlInput.value.trim() : '';
+      const gmapsEmbed = setGmapsEmbedInput ? setGmapsEmbedInput.value.trim() : '';
+
+      // Collect 4 location highlights (from Gambar 1)
+      const highlightItems = [];
+      const editContainers = document.querySelectorAll('#locationHighlightsEditorList .highlight-edit-item');
+      editContainers.forEach(item => {
+        const icon = item.querySelector('.hl-icon')?.value.trim() || '📍';
+        const title = item.querySelector('.hl-title')?.value.trim() || '';
+        const desc = item.querySelector('.hl-desc')?.value.trim() || '';
+        highlightItems.push({ icon, title, desc });
+      });
 
       try {
         await fetch('/api/settings', {
@@ -1495,13 +1552,16 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             kos_name: kosName,
             owner_name: ownerName,
             owner_phone: ownerPhone,
-            kos_address: kosAddress
+            kos_address: kosAddress,
+            gmaps_url: gmapsUrl,
+            gmaps_embed: gmapsEmbed,
+            location_highlights: highlightItems
           })
         });
-        showToast('Profil properti kos berhasil disimpan di Laravel!', 'success');
-        document.getElementById('bannerPropertyName').textContent = kosName;
-        document.getElementById('bannerPropertyAddress').textContent = '📍 ' + kosAddress;
-        document.getElementById('profileOwnerName').textContent = ownerName;
+        showToast('Profil kos, peta, dan 4 poin keunggulan lokasi berhasil disimpan!', 'success');
+        if (document.getElementById('bannerPropertyName')) document.getElementById('bannerPropertyName').textContent = kosName;
+        if (document.getElementById('bannerPropertyAddress')) document.getElementById('bannerPropertyAddress').textContent = '📍 ' + kosAddress;
+        if (document.getElementById('profileOwnerName')) document.getElementById('profileOwnerName').textContent = ownerName;
       } catch (err) {
         showToast('Gagal menyimpan profil ke server', 'warning');
       }

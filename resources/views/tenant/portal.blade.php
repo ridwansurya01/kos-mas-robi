@@ -517,8 +517,6 @@
           </div>
           <div class="tp-quick-footer"><span></span><span class="tp-quick-arrow">→</span></div>
         </button>
-          <div class="tp-quick-footer"><span></span><span class="tp-quick-arrow">→</span></div>
-        </button>
 
       </div>
     </div>
@@ -694,20 +692,20 @@
           </div>
 
           <!-- Keterangan Khusus QRIS / Cash -->
-          <div id="payDestInstructions" style="display: none; font-size: 0.82rem; color: #1e3a8a; line-height: 1.5; margin: 8px 0; background: rgba(255,255,255,0.85); padding: 10px 12px; border-radius: 8px; border: 1px solid #bfdbfe;">
+          <div id="payDestInstructions" class="pay-dest-instructions" style="display: none;">
           </div>
 
           <div class="bank-holder" id="payDestHolder">a.n. <strong>Robi Suryanto</strong></div>
         </div>
 
         <!-- Fitur Khusus Pembayaran Tunai (Cash): Input Tanggal Bayar -->
-        <div class="form-group" id="cashDateGroup" style="display: none; background: #fefce8; border: 1.5px solid #fef08a; padding: 14px; border-radius: 14px; margin-bottom: 16px;">
+        <div class="form-group cash-date-box" id="cashDateGroup" style="display: none; padding: 14px; border-radius: 14px; margin-bottom: 16px;">
           <label for="payCashDate" class="form-label">
-            <span style="color: #854d0e; font-weight: 800;">📅 Tanggal Bayar Tunai (Cash) *</span>
+            <span style="font-weight: 800;">📅 Tanggal Bayar Tunai (Cash) *</span>
             <span class="form-label-hint">Tentukan tanggal Anda menyerahkan uang tunai</span>
           </label>
           <input type="date" id="payCashDate" name="cash_date" class="form-control" value="{{ now()->format('Y-m-d') }}">
-          <div style="font-size: 0.76rem; color: #a16207; margin-top: 6px; line-height: 1.4;">
+          <div class="cash-date-note" style="font-size: 0.76rem; margin-top: 6px; line-height: 1.4;">
             💡 <em>Catatan:</em> Silakan serahkan uang tunai sewa kamar langsung kepada Mas Robi di lantai 1 pada tanggal yang Anda tentukan di atas. Kuitansi resmi fisik dan digital akan langsung diserahkan.
           </div>
         </div>
@@ -726,14 +724,14 @@
             <span id="proofLabelTitle">Foto Bukti / Nota Pembayaran *</span>
             <span class="form-label-hint" id="proofLabelHint">Wajib Struk ATM / Screenshot m-Banking</span>
           </label>
-          <div style="display: flex; gap: 12px; align-items: center; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 12px;">
-            <div id="proofPreviewBox" style="width: 58px; height: 58px; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+          <div class="tp-proof-upload-container">
+            <div id="proofPreviewBox" class="tp-proof-preview-box">
               <span id="proofPreviewPlaceholder" style="font-size: 26px;">🧾</span>
               <img id="proofPreviewImg" src="" alt="Bukti Transfer" style="display: none; width: 100%; height: 100%; object-fit: cover;">
             </div>
             <div style="flex-grow: 1;">
               <input type="file" id="payProofFile" name="proof_file" class="form-control" accept="image/*" onchange="handleProofImageSelected(event)" style="font-size: 0.8rem; padding: 6px;">
-              <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Mendukung format JPG, PNG, atau WEBP (Maksimal 5MB)</span>
+              <span class="tp-proof-hint" style="font-size: 0.72rem; margin-top: 4px; display: block;">Mendukung format JPG, PNG, atau WEBP (Maksimal 5MB)</span>
             </div>
           </div>
 
@@ -929,50 +927,50 @@
         </svg>
       </button>
     </div>
-    <div class="modal-body" style="background: #f8fafc; padding: 18px;">
-      <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 20px; box-shadow: 0 4px 18px rgba(0,0,0,0.05);">
-        <div style="text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 14px; margin-bottom: 14px;">
-          <h4 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h4>
-          <p style="font-size: 0.75rem; color: #64748b; margin: 4px 0 0 0;">Kuitansi Resmi Pembayaran Sewa Kost</p>
-          <div style="margin-top: 8px; display: inline-block; background: #eff6ff; color: #2563eb; font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 999px;" id="dtlRecCode">TRX-000</div>
+    <div class="modal-body receipt-detail-body" style="padding: 18px;">
+      <div class="receipt-paper-card" style="border-radius: 16px; padding: 20px;">
+        <div style="text-align: center; border-bottom: 2px dashed rgba(148, 163, 184, 0.4); padding-bottom: 14px; margin-bottom: 14px;">
+          <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0;" class="receipt-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h4>
+          <p style="font-size: 0.75rem; margin: 4px 0 0 0;" class="receipt-sub">Kuitansi Resmi Pembayaran Sewa Kost</p>
+          <div style="margin-top: 8px; display: inline-block; font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 999px;" class="receipt-code-pill" id="dtlRecCode">TRX-000</div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.84rem;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: #64748b;">Waktu Pengiriman:</span>
-            <span style="font-weight: 800; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 6px;" id="dtlRecTime">29 Okt 2026, 12:45:10 WIB</span>
+            <span class="receipt-label">Waktu Pengiriman:</span>
+            <span style="font-weight: 800; padding: 2px 8px; border-radius: 6px;" class="receipt-time-pill" id="dtlRecTime">29 Okt 2026, 12:45:10 WIB</span>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b;">Nama Penghuni:</span>
-            <span style="font-weight: 700; color: #0f172a;" id="dtlRecTenant">{{ $user->name }}</span>
+            <span class="receipt-label">Nama Penghuni:</span>
+            <span style="font-weight: 700;" class="receipt-val" id="dtlRecTenant">{{ $user->name }}</span>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b;">Unit Kamar:</span>
-            <span style="font-weight: 700; color: #0f172a;" id="dtlRecRoom">Kamar #{{ $room->number ?? '102' }}</span>
+            <span class="receipt-label">Unit Kamar:</span>
+            <span style="font-weight: 700;" class="receipt-val" id="dtlRecRoom">Kamar #{{ $room->number ?? '102' }}</span>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b;">Metode Bayar:</span>
-            <span style="font-weight: 700; color: #0f172a;" id="dtlRecMethod">Transfer Bank</span>
+            <span class="receipt-label">Metode Bayar:</span>
+            <span style="font-weight: 700;" class="receipt-val" id="dtlRecMethod">Transfer Bank</span>
           </div>
           <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b;">Keterangan:</span>
-            <span style="color: #334155; max-width: 240px; text-align: right;" id="dtlRecDesc">-</span>
+            <span class="receipt-label">Keterangan:</span>
+            <span style="max-width: 240px; text-align: right;" class="receipt-desc-val" id="dtlRecDesc">-</span>
           </div>
-          <div style="border-top: 1.5px dashed #cbd5e1; margin-top: 6px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 800; color: #0f172a; font-size: 0.92rem;">TOTAL DITERIMA:</span>
-            <span style="font-size: 1.15rem; font-weight: 800; color: #059669;" id="dtlRecAmount">Rp 1.500.000</span>
+          <div style="border-top: 1.5px dashed rgba(148, 163, 184, 0.4); margin-top: 6px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 0.92rem;" class="receipt-total-lbl">TOTAL DITERIMA:</span>
+            <span style="font-size: 1.15rem; font-weight: 800;" class="receipt-total-amount" id="dtlRecAmount">Rp 1.500.000</span>
           </div>
         </div>
 
         <!-- Lampiran Foto Bukti -->
-        <div id="dtlRecProofBox" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid #e2e8f0; text-align: center;">
-          <div style="font-size: 0.72rem; font-weight: 800; color: #64748b; margin-bottom: 6px;">LAMPIRAN FOTO BUKTI / NOTA TRANSAKSI:</div>
-          <img id="dtlRecProofImg" src="" alt="Bukti Transfer" style="max-height: 180px; max-width: 100%; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain;">
+        <div id="dtlRecProofBox" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(148, 163, 184, 0.3); text-align: center;">
+          <div style="font-size: 0.72rem; font-weight: 800; margin-bottom: 6px;" class="receipt-label">LAMPIRAN FOTO BUKTI / NOTA TRANSAKSI:</div>
+          <img id="dtlRecProofImg" src="" alt="Bukti Transfer" style="max-height: 180px; max-width: 100%; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.4); object-fit: contain;">
         </div>
 
-        <div style="margin-top: 16px; text-align: center; border-top: 2px dashed #cbd5e1; padding-top: 10px;">
+        <div style="margin-top: 16px; text-align: center; border-top: 2px dashed rgba(148, 163, 184, 0.4); padding-top: 10px;">
           <span class="tp-pill paid" style="font-size: 0.78rem; padding: 4px 14px;">● STATUS: LUNAS & SAH</span>
-          <p style="font-size: 0.68rem; color: #94a3b8; margin: 8px 0 0 0;">Diterbitkan otomatis secara digital oleh Sistem {{ $setting->kos_name ?? 'Kos Mas Robi' }}</p>
+          <p style="font-size: 0.68rem; margin: 8px 0 0 0;" class="receipt-sub">Diterbitkan otomatis secara digital oleh Sistem {{ $setting->kos_name ?? 'Kos Mas Robi' }}</p>
         </div>
       </div>
     </div>
@@ -1010,8 +1008,8 @@
       </button>
     </div>
     <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-      <div style="display: flex; align-items: center; justify-content: space-between; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 12px; padding: 10px 14px;">
-        <span style="font-size: 0.82rem; font-weight: 700; color: #059669;">● Status Jaringan: Aktif & Stabil</span>
+      <div class="tp-wifi-status-card">
+        <span class="tp-wifi-status-text">● Status Jaringan: Aktif & Stabil</span>
         <span class="tp-badge green" style="font-weight: 800;">100 Mbps Dedicated</span>
       </div>
 

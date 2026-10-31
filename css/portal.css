@@ -1401,6 +1401,23 @@ img { max-width: 100%; display: block; }
   transform: translateY(-1px);
 }
 
+/* Status Jaringan WiFi Banner */
+.tp-wifi-status-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: all 0.2s;
+}
+.tp-wifi-status-text {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #059669;
+}
+
 /* WiFi Box */
 .tp-wifi-box {
   display: flex;
@@ -1695,6 +1712,60 @@ img { max-width: 100%; display: block; }
 textarea.form-control {
   resize: vertical;
   min-height: 90px;
+}
+
+/* Proof Upload Container & Elements */
+.tp-proof-upload-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #f8fafc;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.2s;
+}
+
+.tp-proof-preview-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tp-proof-hint {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.pay-dest-instructions {
+  font-size: 0.82rem;
+  color: #1e3a8a;
+  line-height: 1.5;
+  margin: 8px 0;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #bfdbfe;
+}
+
+.cash-date-box {
+  background: #fefce8;
+  border: 1.5px solid #fef08a;
+}
+
+.cash-date-box span {
+  color: #854d0e;
+}
+
+.cash-date-note {
+  color: #a16207;
 }
 
 /* Modal Action Buttons */
