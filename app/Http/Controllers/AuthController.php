@@ -133,31 +133,186 @@ class AuthController extends Controller
     }
 
     /**
-     * Send new password directly to user's registered Gmail.
+     * Send new password directly to user's registered Gmail (Legacy compatibility).
      */
     public function sendResetLink(Request $request)
+    {
+        return $this->sendForgotOtp($request);
+    }
+
+    /**
+     * Send 6-digit OTP to user's registered Gmail for Forgot Password.
+     */
+    public function sendForgotOtp(Request $request)
     {
         $request->validate(['email' => 'required|email']);
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
-            return back()->withErrors(['email' => 'Alamat email tidak ditemukan dalam sistem kami.'])->onlyInput('email');
+            return response()->json([
+                'success' => false,
+                'message' => 'Alamat Gmail tidak terdaftar dalam sistem kami.',
+            ], 404);
         }
 
-        $newPassword = 'Kmr' . rand(1000, 9999) . '@' . Str::random(2);
-        $user->password = Hash::make($newPassword);
+        // Jeda waktu pengiriman ulang OTP: minimal 60 detik
+        if ($user->password_otp_sent_at) {
+            $secondsSinceLast = abs(now()->diffInSeconds($user->password_otp_sent_at));
+            if ($secondsSinceLast < 60) {
+                $cooldown = (int) max(1, 60 - $secondsSinceLast);
+                return response()->json([
+                    'success' => false,
+                    'message' => "Mohon tunggu {$cooldown} detik sebelum meminta pengiriman ulang OTP.",
+                    'cooldown' => $cooldown,
+                ], 429);
+            }
+        }
+
+        // Generate 6 digit OTP acak
+        $otpCode = sprintf('%06d', random_int(100000, 999999));
+
+        // Simpan OTP ke database: berlaku 5 menit, reset percobaan ke 0
+        $user->password_otp = $otpCode;
+        $user->password_otp_expires_at = now()->addMinutes(5);
+        $user->password_otp_attempts = 0;
+        $user->password_otp_sent_at = now();
+        $user->password_otp_verified_at = null;
         $user->save();
 
+        // Kirim email OTP ke Gmail terdaftar
         try {
-            Mail::to($user->email)->send(new \App\Mail\NewPasswordMail($user, $newPassword, 'lupa_password'));
+            Mail::to($user->email)->send(new \App\Mail\OtpPasswordMail($user, $otpCode));
         } catch (\Exception $e) {
-            Log::warning('Send new password to email failed: ' . $e->getMessage());
+            Log::warning('Send OTP for forgot password failed: ' . $e->getMessage());
         }
 
-        return back()->with([
-            'status' => 'Password baru telah berhasil dibuat untuk akun Anda (' . $user->email . ').',
-            'new_password' => $newPassword,
+        Log::info("Kode OTP Lupa Password untuk {$user->email}: {$otpCode}");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP 6 digit telah dikirim ke Gmail Anda (' . $user->email . '). Silakan cek kotak masuk atau spam.',
             'email' => $user->email,
+            'cooldown' => 60,
+            'otp_debug' => config('mail.default') === 'log' ? $otpCode : null,
+        ]);
+    }
+
+    /**
+     * Verify 6-digit OTP for Forgot Password.
+     */
+    public function verifyForgotOtp(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'otp'   => 'required|string|size:6',
+        ], [
+            'otp.required' => 'Kode OTP wajib diisi.',
+            'otp.size' => 'Kode OTP harus berupa 6 digit angka.',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Alamat email tidak ditemukan.'], 404);
+        }
+
+        if (empty($user->password_otp)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum ada permintaan OTP aktif. Silakan minta kode OTP terlebih dahulu.',
+            ], 400);
+        }
+
+        // Cek kedaluwarsa (berlaku 5 menit)
+        if (!$user->password_otp_expires_at || now()->isAfter($user->password_otp_expires_at)) {
+            $user->password_otp = null;
+            $user->save();
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP telah kedaluwarsa (melebihi 5 menit). Silakan minta kode OTP baru.',
+            ], 422);
+        }
+
+        // Cek maksimal 5 percobaan
+        if ($user->password_otp_attempts >= 5) {
+            $user->password_otp = null;
+            $user->save();
+            return response()->json([
+                'success' => false,
+                'message' => 'Batas percobaan OTP telah terlampaui (maksimal 5 kali salah). Silakan minta kode OTP baru.',
+            ], 422);
+        }
+
+        // Tambah counter percobaan
+        $user->password_otp_attempts += 1;
+        $user->save();
+
+        // Validasi kecocokan kode OTP
+        if (trim($request->otp) !== trim($user->password_otp)) {
+            $remaining = max(0, 5 - $user->password_otp_attempts);
+            if ($remaining === 0) {
+                $user->password_otp = null;
+                $user->save();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode OTP salah. Batas maksimal 5 percobaan telah habis. Silakan minta OTP baru.',
+                    'remaining' => 0,
+                ], 422);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => "Kode OTP salah. Sisa kesempatan: {$remaining} kali percobaan.",
+                'remaining' => $remaining,
+            ], 422);
+        }
+
+        // OTP valid: hanguskan OTP (hanya 1 kali pakai) dan tandai terverifikasi
+        $user->password_otp = null;
+        $user->password_otp_verified_at = now();
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP berhasil diverifikasi! Silakan buat password baru Anda.',
+        ]);
+    }
+
+    /**
+     * Set new password after OTP verification for Forgot Password.
+     */
+    public function resetPasswordWithOtp(Request $request)
+    {
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok. Pastikan kedua kolom sama.',
+        ]);
+
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Alamat email tidak ditemukan.'], 404);
+        }
+
+        // Ketentuan keamanan: OTP wajib diverifikasi sebelum formulir password baru dapat diakses / disimpan
+        if (!$user->password_otp_verified_at || now()->diffInMinutes($user->password_otp_verified_at) > 15) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesi verifikasi OTP telah kedaluwarsa atau belum diverifikasi. Silakan ulangi proses lupa password.',
+            ], 403);
+        }
+
+        // Simpan password baru dengan hashing
+        $user->password = Hash::make($request->password);
+        $user->password_otp_verified_at = null; // reset sesi verifikasi
+        $user->save();
+
+        Log::info("Password akun {$user->email} berhasil diubah melalui OTP Lupa Password.");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password Berhasil Diubah! Silakan login sekarang dengan password baru Anda.',
         ]);
     }
 

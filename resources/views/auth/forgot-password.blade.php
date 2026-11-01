@@ -55,20 +55,13 @@
   .auth-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(14,116,130,0.45); }
   .auth-btn-primary::after { content: ''; position: absolute; top: 0; left: -100%; width: 60%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transform: skewX(-20deg); animation: btnShimmer 5s infinite; }
   @keyframes btnShimmer { 0%,75% { left: -100%; } 100% { left: 160%; } }
-  .auth-alert-success { background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; padding: 14px 16px; border-radius: 14px; font-size: 0.85rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; }
-  .auth-alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 14px; border-radius: 14px; font-size: 0.82rem; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+  .auth-alert-error { background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626; padding: 12px 14px; border-radius: 14px; font-size: 0.82rem; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+  .auth-alert-success { background: #f0fdfa; border: 1.5px solid #99f6e4; color: #0f766e; padding: 12px 14px; border-radius: 14px; font-size: 0.82rem; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
 
   @media (max-width: 480px) {
-    .auth-viewport {
-      padding: 16px 12px;
-    }
-    .auth-card {
-      padding: 26px 18px;
-      border-radius: 24px;
-    }
-    .auth-input-control {
-      font-size: 16px;
-    }
+    .auth-viewport { padding: 16px 12px; }
+    .auth-card { padding: 26px 18px; border-radius: 24px; }
+    .auth-input-control { font-size: 16px; }
   }
 </style>
 
@@ -77,66 +70,132 @@
   <div class="auth-ambient-orb orb-teal-2"></div>
 
   <div class="auth-card">
-    <div style="text-align: center; margin-bottom: 26px;">
-      <a href="{{ route('home') }}" class="auth-logo-badge">
+    <div style="text-align: center; margin-bottom: 24px;">
+      <a href="{{ route('home') }}" class="auth-logo-badge" title="Kembali ke Beranda">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg>
       </a>
       <h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px; letter-spacing: -0.02em;">Lupa Password?</h2>
-      <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.5;">Masukkan email terdaftar Anda. Sistem akan membuat dan mengirimkan password baru langsung ke Gmail Anda.</p>
+      <p style="font-size: 0.85rem; color: #64748b; margin: 0; line-height: 1.5;" id="fpCardSubtitle">
+        Reset password Anda melalui kode verifikasi OTP 6 digit yang dikirim ke Gmail terdaftar.
+      </p>
     </div>
 
-    @if (session('status'))
-      <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border: 1.5px solid #99f6e4; border-radius: 20px; padding: 20px 18px; margin-bottom: 22px; text-align: center; box-shadow: 0 8px 24px -6px rgba(14, 116, 130, 0.12);">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #0e7482; color: #fff; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(14, 116, 130, 0.3);">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <h4 style="margin: 0 0 4px; color: #0a5661; font-size: 1.05rem; font-weight: 800;">Password Baru Berhasil Dibuat!</h4>
-        <p style="margin: 0 0 14px; font-size: 0.8rem; color: #64748b; line-height: 1.5;">
-          {{ session('status') }}
-        </p>
+    {{-- Pesan Notifikasi Error / Sukses Dinamis --}}
+    <div id="fpAlertError" class="auth-alert-error" style="display: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span id="fpAlertErrorText"></span>
+    </div>
 
-        @if (session('new_password'))
-          {{-- Kotak Password Baru dengan Tombol Salin --}}
-          <div style="background: #ffffff; border: 2px dashed #0e7482; border-radius: 16px; padding: 14px 18px; margin: 12px 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-            <div style="text-align: left;">
-              <span style="display: block; font-size: 0.70rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Password Baru Anda:</span>
-              <code id="displayNewPwd" style="font-size: 1.3rem; font-weight: 800; color: #0a5661; letter-spacing: 1px; font-family: monospace;">{{ session('new_password') }}</code>
-            </div>
-            <button type="button" onclick="copyPassword('{{ session('new_password') }}', this)" style="background: #0a5661; color: #ffffff; border: none; padding: 9px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; flex-shrink: 0;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <span>Salin</span>
-            </button>
-          </div>
+    <div id="fpAlertSuccess" class="auth-alert-success" style="display: none;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="fpAlertSuccessText"></span>
+    </div>
 
-          <a href="{{ route('login') }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: linear-gradient(135deg, #0a5661, #0e7482); color: #ffffff; border-radius: 14px; font-weight: 700; font-size: 0.92rem; text-decoration: none; box-sizing: border-box; box-shadow: 0 6px 18px rgba(14, 116, 130, 0.3); transition: transform 0.2s;">
-            <span>Masuk Sekarang dengan Password Baru &rarr;</span>
-          </a>
-        @endif
-      </div>
-    @endif
-
-    @if ($errors->any())
-      <div class="auth-alert-error">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>{{ $errors->first() }}</span>
-      </div>
-    @endif
-
-    <form action="{{ route('password.email') }}" method="POST">
-      @csrf
+    {{-- =====================================================================
+         LANGKAH 1: MASUKKAN EMAIL TERDAFTAR
+         ===================================================================== --}}
+    <div id="fpStepEmail">
       <div style="margin-bottom: 20px;">
-        <label for="fpEmail" class="auth-field-label">Alamat Email Terdaftar</label>
+        <label for="fpEmail" class="auth-field-label">Alamat Gmail Terdaftar</label>
         <div class="auth-input-wrapper">
           <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          <input type="email" id="fpEmail" name="email" class="auth-input-control" placeholder="email@gmail.com" value="{{ old('email') }}" required autofocus>
+          <input type="email" id="fpEmail" name="email" class="auth-input-control" placeholder="nama@gmail.com" required autofocus>
         </div>
       </div>
 
-      <button type="submit" class="auth-btn-primary">
+      <button type="button" id="btnSendOtp" class="auth-btn-primary">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        <span>Kirim Password Baru ke Gmail</span>
+        <span>Kirim Kode OTP ke Gmail</span>
       </button>
-    </form>
+    </div>
+
+    {{-- =====================================================================
+         LANGKAH 2: MASUKKAN & VERIFIKASI KODE OTP
+         ===================================================================== --}}
+    <div id="fpStepOtp" style="display: none;">
+      <div style="background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; text-align: center;">
+        <span style="font-size: 0.74rem; font-weight: 800; color: #0a5661; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 4px;">Kode OTP Terkirim!</span>
+        <p style="margin: 0; font-size: 0.8rem; color: #0e7482; line-height: 1.45;">
+          Kode OTP 6 digit telah dikirim ke <strong id="fpDisplayEmail">-</strong>. Berlaku selama <strong>5 menit</strong>.
+        </p>
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <label for="fpOtpCode" class="auth-field-label" style="text-align: center; display: block;">
+          Masukkan 6 Digit Kode OTP:
+        </label>
+        <input type="text" id="fpOtpCode" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="auth-input-control" placeholder="000000"
+               style="font-family: monospace; font-size: 1.6rem; font-weight: 900; letter-spacing: 8px; text-align: center; height: 52px; padding: 0 10px; background: #ffffff; border: 2px solid #0e7482;" autocomplete="one-time-code">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.74rem; color: #64748b;">
+          <span>Sisa kesempatan: <strong id="fpRemainingAttempts" style="color: #0a5661;">5</strong> kali</span>
+          <span id="fpTimerBadge" style="font-weight: 700; color: #0e7482;">⏱️ Kirim Ulang: <span id="fpTimerSeconds">60</span>s</span>
+        </div>
+      </div>
+
+      <button type="button" id="btnVerifyOtp" class="auth-btn-primary" style="margin-bottom: 10px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Verifikasi Kode OTP</span>
+      </button>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+        <button type="button" id="btnChangeEmail" style="background: none; border: none; color: #64748b; font-size: 0.78rem; font-weight: 700; cursor: pointer; padding: 0;">
+          &larr; Ganti Email
+        </button>
+        <button type="button" id="btnResendOtp" disabled style="background: none; border: none; color: #94a3b8; font-size: 0.78rem; font-weight: 700; cursor: not-allowed; padding: 0;">
+          Kirim Ulang OTP
+        </button>
+      </div>
+    </div>
+
+    {{-- =====================================================================
+         LANGKAH 3: FORMULIR PASSWORD BARU (DIVERIFIKASI SENDIRI OLEH PENGGUNA)
+         ===================================================================== --}}
+    <div id="fpStepNewPassword" style="display: none;">
+      <div style="background: #f0fdfa; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 12px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #10b981; color: #fff; font-size: 0.75rem;">✓</span>
+        <span style="font-size: 0.78rem; font-weight: 800; color: #065f46;">OTP Berhasil Diverifikasi! Silakan buat password baru:</span>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <label for="fpNewPassword" class="auth-field-label">Password Baru (Minimal 8 Karakter)</label>
+        <div class="auth-input-wrapper">
+          <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="fpNewPassword" class="auth-input-control" placeholder="Minimal 8 karakter" minlength="8" required>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label for="fpNewPasswordConfirm" class="auth-field-label">Konfirmasi Password Baru</label>
+        <div class="auth-input-wrapper">
+          <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="fpNewPasswordConfirm" class="auth-input-control" placeholder="Ulangi password baru" minlength="8" required>
+        </div>
+      </div>
+
+      <button type="button" id="btnSubmitNewPassword" class="auth-btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Simpan & Reset Password</span>
+      </button>
+    </div>
+
+    {{-- =====================================================================
+         LANGKAH 4: STATUS BERHASIL
+         ===================================================================== --}}
+    <div id="fpStepSuccess" style="display: none; text-align: center;">
+      <div style="width: 58px; height: 58px; border-radius: 50%; background: #0e7482; color: #ffffff; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(14, 116, 130, 0.35);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: #0a5661; margin: 0 0 8px;">Password Berhasil Diubah!</h3>
+      <p style="font-size: 0.86rem; color: #64748b; line-height: 1.5; margin: 0 0 24px;">
+        Kata sandi baru akun Anda telah berhasil diperbarui dan disimpan dengan enkripsi aman. Silakan masuk menggunakan kata sandi baru Anda.
+      </p>
+
+      <a href="{{ route('login') }}" class="auth-btn-primary" style="text-decoration: none;">
+        <span>Masuk ke Akun Sekarang &rarr;</span>
+      </a>
+    </div>
 
     <div style="text-align: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid #f1f5f9;">
       <a href="{{ route('login') }}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.84rem; color: #0e7482; font-weight: 700; text-decoration: none;">
@@ -148,28 +207,242 @@
 </div>
 
 <script>
-  function copyPassword(text, btn) {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(afterCopy);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      afterCopy();
-    }
-    function afterCopy() {
-      const orig = btn.innerHTML;
-      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Tersalin!</span>';
-      btn.style.background = '#059669';
-      setTimeout(() => {
-        btn.innerHTML = orig;
-        btn.style.background = '#0a5661';
-      }, 2500);
+  let currentTargetEmail = '';
+  let otpTimerInterval = null;
+  let otpCooldown = 0;
+
+  function showError(msg) {
+    const errBox = document.getElementById('fpAlertError');
+    const errText = document.getElementById('fpAlertErrorText');
+    if (errBox && errText) {
+      errText.textContent = msg;
+      errBox.style.display = 'flex';
     }
   }
+
+  function clearAlerts() {
+    const errBox = document.getElementById('fpAlertError');
+    const succBox = document.getElementById('fpAlertSuccess');
+    if (errBox) errBox.style.display = 'none';
+    if (succBox) succBox.style.display = 'none';
+  }
+
+  function showSuccess(msg) {
+    const succBox = document.getElementById('fpAlertSuccess');
+    const succText = document.getElementById('fpAlertSuccessText');
+    if (succBox && succText) {
+      succText.textContent = msg;
+      succBox.style.display = 'flex';
+    }
+  }
+
+  function startCooldown(sec) {
+    otpCooldown = sec || 60;
+    const badge = document.getElementById('fpTimerBadge');
+    const secEl = document.getElementById('fpTimerSeconds');
+    const resendBtn = document.getElementById('btnResendOtp');
+
+    if (badge) badge.style.display = 'inline';
+    if (resendBtn) {
+      resendBtn.disabled = true;
+      resendBtn.style.color = '#94a3b8';
+      resendBtn.style.cursor = 'not-allowed';
+    }
+
+    clearInterval(otpTimerInterval);
+    otpTimerInterval = setInterval(() => {
+      otpCooldown--;
+      if (secEl) secEl.textContent = otpCooldown;
+      if (otpCooldown <= 0) {
+        clearInterval(otpTimerInterval);
+        if (badge) badge.style.display = 'none';
+        if (resendBtn) {
+          resendBtn.disabled = false;
+          resendBtn.style.color = '#0e7482';
+          resendBtn.style.cursor = 'pointer';
+        }
+      }
+    }, 1000);
+  }
+
+  // 1. KIRIM OTP
+  function triggerSendOtp() {
+    clearAlerts();
+    const email = document.getElementById('fpEmail')?.value.trim();
+    if (!email) {
+      showError('Harap masukkan alamat Gmail Anda.');
+      document.getElementById('fpEmail')?.focus();
+      return;
+    }
+
+    currentTargetEmail = email;
+    const btn = document.getElementById('btnSendOtp');
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>Mengirim Kode OTP...</span>';
+
+    fetch('{{ route("password.send_otp") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ email: email })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showSuccess(data.message);
+        document.getElementById('fpDisplayEmail').textContent = email;
+        document.getElementById('fpStepEmail').style.display = 'none';
+        document.getElementById('fpStepOtp').style.display = 'block';
+        document.getElementById('fpCardSubtitle').textContent = 'Masukkan kode OTP 6 digit yang dikirim ke Gmail Anda.';
+        document.getElementById('fpOtpCode').value = '';
+        document.getElementById('fpOtpCode').focus();
+        document.getElementById('fpRemainingAttempts').textContent = '5';
+        startCooldown(data.cooldown || 60);
+      } else {
+        showError(data.message || 'Gagal mengirim kode OTP.');
+        if (data.cooldown) startCooldown(data.cooldown);
+      }
+    })
+    .catch(() => {
+      showError('Terjadi kesalahan jaringan, silakan coba lagi.');
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    });
+  }
+
+  document.getElementById('btnSendOtp')?.addEventListener('click', triggerSendOtp);
+  document.getElementById('btnResendOtp')?.addEventListener('click', () => {
+    if (otpCooldown <= 0) triggerSendOtp();
+  });
+
+  // Ganti Email
+  document.getElementById('btnChangeEmail')?.addEventListener('click', () => {
+    clearAlerts();
+    clearInterval(otpTimerInterval);
+    document.getElementById('fpStepOtp').style.display = 'none';
+    document.getElementById('fpStepEmail').style.display = 'block';
+    document.getElementById('fpCardSubtitle').textContent = 'Reset password Anda melalui kode verifikasi OTP 6 digit yang dikirim ke Gmail terdaftar.';
+    document.getElementById('fpEmail')?.focus();
+  });
+
+  // 2. VERIFIKASI OTP
+  document.getElementById('btnVerifyOtp')?.addEventListener('click', () => {
+    clearAlerts();
+    const otp = document.getElementById('fpOtpCode')?.value.trim();
+    if (!otp || otp.length !== 6) {
+      showError('Harap masukkan 6 digit angka kode OTP yang diterima.');
+      document.getElementById('fpOtpCode')?.focus();
+      return;
+    }
+
+    const btn = document.getElementById('btnVerifyOtp');
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>Memverifikasi...</span>';
+
+    fetch('{{ route("password.verify_otp") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: currentTargetEmail,
+        otp: otp
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showSuccess(data.message);
+        clearInterval(otpTimerInterval);
+        document.getElementById('fpStepOtp').style.display = 'none';
+        document.getElementById('fpStepNewPassword').style.display = 'block';
+        document.getElementById('fpCardSubtitle').textContent = 'Tentukan kata sandi baru yang kuat untuk akun Anda.';
+        document.getElementById('fpNewPassword').value = '';
+        document.getElementById('fpNewPasswordConfirm').value = '';
+        document.getElementById('fpNewPassword').focus();
+      } else {
+        showError(data.message || 'Kode OTP tidak valid.');
+        if (typeof data.remaining !== 'undefined') {
+          document.getElementById('fpRemainingAttempts').textContent = data.remaining;
+        }
+        document.getElementById('fpOtpCode')?.focus();
+      }
+    })
+    .catch(() => {
+      showError('Terjadi kesalahan jaringan saat memvalidasi OTP.');
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    });
+  });
+
+  // 3. SIMPAN PASSWORD BARU
+  document.getElementById('btnSubmitNewPassword')?.addEventListener('click', () => {
+    clearAlerts();
+    const p1 = document.getElementById('fpNewPassword')?.value || '';
+    const p2 = document.getElementById('fpNewPasswordConfirm')?.value || '';
+
+    if (p1.length < 8) {
+      showError('Password baru minimal harus 8 karakter.');
+      document.getElementById('fpNewPassword')?.focus();
+      return;
+    }
+
+    if (p1 !== p2) {
+      showError('Konfirmasi password tidak cocok. Pastikan kedua kolom sama.');
+      document.getElementById('fpNewPasswordConfirm')?.focus();
+      return;
+    }
+
+    const btn = document.getElementById('btnSubmitNewPassword');
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>Menyimpan Password...</span>';
+
+    fetch('{{ route("password.update_otp") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: currentTargetEmail,
+        password: p1,
+        password_confirmation: p2
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        clearAlerts();
+        document.getElementById('fpStepNewPassword').style.display = 'none';
+        document.getElementById('fpStepSuccess').style.display = 'block';
+        document.getElementById('fpCardSubtitle').style.display = 'none';
+      } else {
+        showError(data.message || 'Gagal mereset password.');
+      }
+    })
+    .catch(() => {
+      showError('Terjadi kesalahan jaringan saat menyimpan password.');
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    });
+  });
 </script>
 @endsection
-

@@ -55,3 +55,4 @@ class OtpPasswordMail extends Mailable
         return [];
     }
 }
+

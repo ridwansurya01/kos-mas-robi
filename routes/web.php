@@ -26,6 +26,9 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 // ─── Forgot / Reset Password ───
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::post('/forgot-password/send-otp', [AuthController::class, 'sendForgotOtp'])->name('password.send_otp');
+Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyForgotOtp'])->name('password.verify_otp');
+Route::post('/forgot-password/update', [AuthController::class, 'resetPasswordWithOtp'])->name('password.update_otp');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 
