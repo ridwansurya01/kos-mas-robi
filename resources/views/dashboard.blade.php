@@ -124,32 +124,7 @@
           <kbd class="search-kbd">Ctrl K</kbd>
         </div>
 
-        <!-- Theme Switcher Button (Sliding Pill Switch di Header Pojok Kanan) -->
-        <button type="button" class="kmr-theme-switch" id="btnToggleTheme" aria-label="Ganti Tema Terang / Gelap" title="Ganti Mode Gelap / Terang">
-          <span class="kmr-switch-bg"></span>
-          <span class="kmr-switch-label day-lbl">DAY MODE</span>
-          <span class="kmr-switch-label night-lbl">NIGHT MODE</span>
-          <span class="kmr-switch-knob">
-            <span class="kmr-knob-sun">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5">
-                <circle cx="12" cy="12" r="5" fill="#f59e0b"/>
-                <line x1="12" y1="2" x2="12" y2="4"/>
-                <line x1="12" y1="20" x2="12" y2="22"/>
-                <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
-                <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
-                <line x1="2" y1="12" x2="4" y2="12"/>
-                <line x1="20" y1="12" x2="22" y2="12"/>
-                <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
-                <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
-              </svg>
-            </span>
-            <span class="kmr-knob-moon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#93c5fd" stroke="#60a5fa" stroke-width="1.5">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </span>
-          </span>
-        </button>
+
 
         <!-- Logout Button (Memicu Pop-up Konfirmasi Modern) -->
         <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline; margin:0;">

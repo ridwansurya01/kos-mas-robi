@@ -227,34 +227,6 @@
         </div>
       </div>
 
-      {{-- Tombol Mode Gelap & Terang (Gambar 1 di Bagian Kotak Profil Kanan Pinggir Gambar 2) --}}
-      <div class="tp-welcome-right" style="display: flex; align-items: center; justify-content: flex-end;">
-        <button type="button" class="kmr-theme-switch" id="portalThemeToggleBtn" aria-label="Ganti Tema Terang / Gelap" title="Ganti Mode Gelap / Terang">
-          <span class="kmr-switch-bg"></span>
-          <span class="kmr-switch-label day-lbl">DAY MODE</span>
-          <span class="kmr-switch-label night-lbl">NIGHT MODE</span>
-          <span class="kmr-switch-knob">
-            <span class="kmr-knob-sun">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24" stroke="#f59e0b" stroke-width="1.5">
-                <circle cx="12" cy="12" r="5" fill="#f59e0b"/>
-                <line x1="12" y1="2" x2="12" y2="4"/>
-                <line x1="12" y1="20" x2="12" y2="22"/>
-                <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"/>
-                <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"/>
-                <line x1="2" y1="12" x2="4" y2="12"/>
-                <line x1="20" y1="12" x2="22" y2="12"/>
-                <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"/>
-                <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"/>
-              </svg>
-            </span>
-            <span class="kmr-knob-moon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="#93c5fd" stroke="#60a5fa" stroke-width="1.5">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-              </svg>
-            </span>
-          </span>
-        </button>
-      </div>
     </div>
 
     {{-- ----------------------------------------------------- SHOWCASE SECTION (Desktop: Kiri Foto, Kanan Detail | Mobile: Atas Foto, Bawah Detail) ----------------------------------------------------- --}}
@@ -1461,26 +1433,6 @@ document.addEventListener('click', function(e) {
   });
   modalLogout?.addEventListener('click', function(e) {
     if (e.target === modalLogout) modalLogout.classList.remove('open');
-  });
-
-  // ─── Mode Gelap & Terang (Day / Night Switcher Sesuai Gambar 1) ───
-  var THEME_STORAGE_KEY = 'KOS_MAS_ROBI_THEME';
-  var themeBtn = document.getElementById('portalThemeToggleBtn');
-
-  function applyPortalTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
-    localStorage.setItem('kosTheme', theme);
-  }
-
-  // Init theme saat pertama kali dimuat
-  var savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || localStorage.getItem('kosTheme') || 'light';
-  applyPortalTheme(savedTheme);
-
-  themeBtn?.addEventListener('click', function() {
-    var current = document.documentElement.getAttribute('data-theme') || 'light';
-    var next = current === 'dark' ? 'light' : 'dark';
-    applyPortalTheme(next);
   });
 
   document.getElementById('btnOpenProfileBanner')?.addEventListener('click', function() {

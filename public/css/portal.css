@@ -12,7 +12,7 @@
 }
 
 :root {
-  --tp-bg-primary: #f8fafc;
+  --tp-bg-primary: #f4fbfb;
   --tp-bg-card: #ffffff;
   --tp-bg-surface: #f1f5f9;
   --tp-bg-surface-hover: #e2e8f0;
@@ -26,15 +26,15 @@
   --tp-text-muted: #94a3b8;
   
   /* Brand Blue Accents & Ornaments */
-  --tp-blue-primary: #2563eb;
-  --tp-blue-hover: #1d4ed8;
-  --tp-blue-light: #3b82f6;
-  --tp-blue-soft: #eff6ff;
-  --tp-blue-border: #bfdbfe;
+  --tp-blue-primary: #0a5661;\n  --tp-teal-primary: #0a5661;\n  --tp-teal-medium: #0e7482;
+  --tp-blue-hover: #063d45;\n  --tp-coral-primary: #f43f5e;\n  --tp-coral-dark: #e11d48;
+  --tp-blue-light: #0e7482;\n  --tp-coral-soft: #fff1f2;
+  --tp-blue-soft: #f0fdfa;
+  --tp-blue-border: #ccfbf1;
   
   /* Midnight Navy Accents */
-  --tp-navy-dark: #0f172a;
-  --tp-navy-surface: #1e293b;
+  --tp-navy-dark: #032328;
+  --tp-navy-surface: #063d45;
   
   /* Status Colors */
   --tp-green-bg: #ecfdf5;
@@ -69,7 +69,7 @@ body {
   font-family: 'Outfit', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--tp-bg-primary);
   background-image: 
-    radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 10% 10%, rgba(14, 116, 130, 0.06) 0%, transparent 40%),
     radial-gradient(circle at 90% 90%, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
   color: var(--tp-text-primary);
   min-height: 100vh;
@@ -120,13 +120,13 @@ img { max-width: 100%; display: block; }
 .tp-brand-icon, .tp-brand-icon-box {
   width: 42px;
   height: 42px;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.3);
   color: #ffffff;
 }
 
@@ -382,7 +382,7 @@ img { max-width: 100%; display: block; }
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--tp-blue-primary);
-  box-shadow: 0 0 0 4px var(--tp-blue-soft), 0 8px 20px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 4px var(--tp-blue-soft), 0 8px 20px rgba(14, 116, 130, 0.18);
 }
 
 .tp-welcome-edit-badge {
@@ -606,7 +606,7 @@ img { max-width: 100%; display: block; }
   background: var(--tp-blue-primary);
   border-color: #60a5fa;
   transform: scale(1.1);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.45);
 }
 
 .tp-gallery-dots {
@@ -706,7 +706,7 @@ img { max-width: 100%; display: block; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%);
+  background: linear-gradient(135deg, #f0fdfa 0%, #f8fafc 100%);
   border: 1px solid var(--tp-blue-border);
   border-radius: var(--tp-radius-md);
   padding: 14px 18px;
@@ -828,14 +828,14 @@ img { max-width: 100%; display: block; }
   border: none;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.35);
   white-space: nowrap;
 }
 
 .tp-btn-primary-action:hover {
   background: var(--tp-blue-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 6px 18px rgba(14, 116, 130, 0.45);
 }
 
 .tp-btn-secondary-action {
@@ -965,7 +965,7 @@ img { max-width: 100%; display: block; }
 .tp-metric-box:hover {
   transform: translateY(-2px);
   border-color: var(--tp-blue-border);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+  box-shadow: 0 4px 12px rgba(14, 116, 130, 0.1);
 }
 
 .tp-metric-emoji {
@@ -1118,7 +1118,7 @@ img { max-width: 100%; display: block; }
   transform: scale(1.08);
 }
 
-.tp-quick-ico.blue { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; }
+.tp-quick-ico.blue { background: #f0fdfa; color: #0a5661; border-color: #ccfbf1; }
 .tp-quick-ico.purple { background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe; }
 .tp-quick-ico.amber { background: #fffbeb; color: #d97706; border-color: #fde68a; }
 .tp-quick-ico.green { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
@@ -1393,7 +1393,7 @@ img { max-width: 100%; display: block; }
   border-radius: var(--tp-radius-full);
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(14, 116, 130, 0.25);
 }
 
 .tp-btn-empty-pay:hover {
@@ -1706,7 +1706,7 @@ img { max-width: 100%; display: block; }
 .form-control:focus {
   background: #ffffff;
   border-color: var(--tp-blue-primary);
-  box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 0 0 3.5px rgba(14, 116, 130, 0.18);
 }
 
 textarea.form-control {
@@ -1752,7 +1752,7 @@ textarea.form-control {
   background: rgba(255, 255, 255, 0.85);
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #bfdbfe;
+  border: 1px solid #ccfbf1;
 }
 
 .cash-date-box {
@@ -1779,7 +1779,7 @@ textarea.form-control {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.35);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1789,7 +1789,7 @@ textarea.form-control {
 .btn-primary:hover {
   background: var(--tp-blue-hover);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 6px 18px rgba(14, 116, 130, 0.45);
 }
 
 .btn-secondary {
@@ -1811,8 +1811,8 @@ textarea.form-control {
 
 /* Bank Account Information Box */
 .bank-info-box {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1.5px solid #bfdbfe;
+  background: linear-gradient(135deg, #f0fdfa 0%, #dbeafe 100%);
+  border: 1.5px solid #ccfbf1;
   border-radius: 16px;
   padding: 18px 20px;
   display: flex;
@@ -1830,7 +1830,7 @@ textarea.form-control {
 .bank-badge {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #1e40af;
+  color: #063d45;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -1857,15 +1857,15 @@ textarea.form-control {
 .bank-number {
   font-size: 1.45rem;
   font-weight: 900;
-  color: #1e40af;
+  color: #063d45;
   letter-spacing: 0.04em;
   font-family: monospace;
 }
 
 .btn-copy-acc {
   background: #ffffff;
-  border: 1px solid #bfdbfe;
-  color: #2563eb;
+  border: 1px solid #ccfbf1;
+  color: #0a5661;
   padding: 6px 12px;
   border-radius: var(--tp-radius-full);
   font-size: 0.74rem;
@@ -1875,13 +1875,13 @@ textarea.form-control {
 }
 
 .btn-copy-acc:hover {
-  background: #2563eb;
+  background: #0a5661;
   color: #ffffff;
 }
 
 .bank-holder {
   font-size: 0.8rem;
-  color: #3b82f6;
+  color: #0e7482;
 }
 
 /* Modal Receipts Cards */
@@ -1898,8 +1898,8 @@ textarea.form-control {
 
 .tp-receipt-item:hover {
   background: #ffffff;
-  border-color: #93c5fd;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+  border-color: #99f6e4;
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.1);
 }
 
 .tp-receipt-left {
@@ -2080,7 +2080,7 @@ textarea.form-control {
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid var(--tp-blue-primary);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.25);
 }
 
 .tp-avatar-upload-badge {
@@ -2531,7 +2531,7 @@ textarea.form-control {
   }
   .tp-nav-item.active, .tp-nav-item:hover {
     color: #ffffff;
-    background: rgba(37, 99, 235, 0.35);
+    background: rgba(14, 116, 130, 0.35);
   }
   .tp-nav-item.active svg { color: #38bdf8; }
 }
@@ -2730,10 +2730,10 @@ textarea.form-control {
 }
 
 .tp-tab-btn.active {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%);
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(14, 116, 130, 0.35);
 }
 
 .tp-tab-count {
@@ -2827,7 +2827,7 @@ textarea.form-control {
 }
 
 .tp-catalog-open-room-btn {
-  background: #2563eb;
+  background: #0a5661;
   color: #ffffff;
   border: none;
   padding: 10px 18px;
@@ -2838,14 +2838,14 @@ textarea.form-control {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 18px rgba(14, 116, 130, 0.35);
   transition: all 0.2s;
 }
 
 .tp-catalog-open-room-btn:hover {
-  background: #1d4ed8;
+  background: #063d45;
   transform: translateY(-1px);
-  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 8px 22px rgba(14, 116, 130, 0.45);
 }
 
 .tp-catalog-header::after {
@@ -2856,7 +2856,7 @@ textarea.form-control {
   width: 320px;
   height: 320px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(14, 116, 130, 0.25) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -2968,10 +2968,10 @@ textarea.form-control {
 }
 
 .tp-filter-btn.active {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #0a5661;
+  border-color: #0a5661;
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 4px 12px rgba(14, 116, 130, 0.25);
 }
 
 /* Room Cards Grid */
@@ -2997,7 +2997,7 @@ textarea.form-control {
 
 .tp-room-card:hover {
   transform: translateY(-6px);
-  border-color: #93c5fd;
+  border-color: #99f6e4;
   box-shadow: 0 16px 36px rgba(37, 99, 235, 0.14);
 }
 
@@ -3055,9 +3055,9 @@ textarea.form-control {
 }
 
 .tp-room-card-status-badge.my-room {
-  background: #2563eb;
+  background: #0a5661;
   color: #ffffff;
-  border: 1px solid #93c5fd;
+  border: 1px solid #99f6e4;
 }
 
 .tp-room-card-interior-tag {
@@ -3107,7 +3107,7 @@ textarea.form-control {
 
 .tp-room-card-type {
   font-size: 0.84rem;
-  color: #2563eb;
+  color: #0a5661;
   font-weight: 700;
   margin-bottom: 12px;
 }
@@ -3163,9 +3163,9 @@ textarea.form-control {
 }
 
 .tp-room-card-action-btn {
-  background: #eff6ff;
-  color: #2563eb;
-  border: 1px solid #bfdbfe;
+  background: #f0fdfa;
+  color: #0a5661;
+  border: 1px solid #ccfbf1;
   padding: 8px 14px;
   border-radius: 12px;
   font-family: inherit;
@@ -3179,9 +3179,9 @@ textarea.form-control {
 }
 
 .tp-room-card-action-btn:hover {
-  background: #2563eb;
+  background: #0a5661;
   color: #ffffff;
-  border-color: #2563eb;
+  border-color: #0a5661;
 }
 
 .tp-room-card-action-btn.is-my-room {
@@ -3263,9 +3263,9 @@ textarea.form-control {
 }
 
 .tp-tz-label input[type="radio"]:checked + .tp-tz-pill-btn {
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border-color: #2563eb;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+  background: linear-gradient(135deg, #f0fdfa 0%, #dbeafe 100%);
+  border-color: #0a5661;
+  box-shadow: 0 4px 12px rgba(14, 116, 130, 0.18);
 }
 
 .tp-tz-main {
@@ -3275,7 +3275,7 @@ textarea.form-control {
 }
 
 .tp-tz-label input[type="radio"]:checked + .tp-tz-pill-btn .tp-tz-main {
-  color: #1d4ed8;
+  color: #063d45;
 }
 
 .tp-tz-desc {
@@ -3285,7 +3285,7 @@ textarea.form-control {
 }
 
 .tp-tz-label input[type="radio"]:checked + .tp-tz-pill-btn .tp-tz-desc {
-  color: #2563eb;
+  color: #0a5661;
 }
 
 /* ─── Tombol Buka Kuitansi Kecil di Tabel & List ─── */
@@ -3305,8 +3305,12 @@ textarea.form-control {
 }
 
 .tp-btn-receipt-small:hover {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: #0a5661;
+  border-color: #0a5661;
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 2px 8px rgba(14, 116, 130, 0.25);
 }
+
+
+/* Ensure Day/Night theme switch is hidden */
+.kmr-theme-switch { display: none !important; }

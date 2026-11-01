@@ -143,28 +143,13 @@
     }, 3200);
   };
 
-  // --- THEME CONTROLLER ---
+  // --- THEME CONTROLLER (PERMANENT SINGLE LUXURY TEAL THEME MATCHING LANDING PAGE) ---
   function initTheme() {
-    const root = document.documentElement;
-    const btn = document.getElementById('btnToggleTheme');
-    const icon = document.getElementById('themeIconText');
-    const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
-
-    function applyTheme(theme) {
-      root.setAttribute('data-theme', theme);
-      localStorage.setItem(THEME_KEY, theme);
-      localStorage.setItem('kosTheme', theme);
-      if (icon) {
-        icon.textContent = theme === 'dark' ? '🌙' : '☀️';
-      }
-    }
-
-    applyTheme(savedTheme);
-
-    btn?.addEventListener('click', () => {
-      const current = root.getAttribute('data-theme');
-      applyTheme(current === 'dark' ? 'light' : 'dark');
-    });
+    document.documentElement.removeAttribute('data-theme');
+    try {
+      localStorage.removeItem(THEME_KEY);
+      localStorage.removeItem('kosTheme');
+    } catch(e) {}
   }
 
   // --- NAVIGATION CONTROLLER ---

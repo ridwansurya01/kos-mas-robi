@@ -3,13 +3,13 @@
 @section('title', 'Login Akun - Kos Mas Robi')
 
 @section('content')
-<div style="min-height: 100vh; min-height: 100dvh; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.08) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.08) 0%, transparent 45%), #f8fafc;">
-  <div style="width: 100%; max-width: 450px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 28px; padding: 36px 32px; box-shadow: 0 16px 40px -8px rgba(15, 23, 42, 0.08);">
+<div style="min-height: 100vh; min-height: 100dvh; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at 15% 15%, rgba(14, 116, 130, 0.10) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(244, 63, 94, 0.06) 0%, transparent 45%), #f8fafc;">
+  <div style="width: 100%; max-width: 450px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 28px; padding: 36px 32px; box-shadow: 0 16px 40px -8px rgba(3, 35, 40, 0.10);">
 
     <!-- Header Logo & Title -->
     <div style="text-align: center; margin-bottom: 24px;">
       <a href="{{ route('home') }}" style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; text-decoration: none;">
-        <div style="width: 54px; height: 54px; border-radius: 18px; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);">
+        <div style="width: 54px; height: 54px; border-radius: 18px; background: linear-gradient(135deg, #0a5661, #0e7482); display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 8px 20px rgba(14, 116, 130, 0.35);">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
             <path d="M9 21V12h6v9"/>
@@ -21,18 +21,18 @@
     </div>
 
     <!-- Quick Credentials Helper Box -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 18px; padding: 14px 16px; margin-bottom: 20px;">
-      <div style="font-size: 0.75rem; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
+    <div style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 18px; padding: 14px 16px; margin-bottom: 20px;">
+      <div style="font-size: 0.75rem; font-weight: 700; color: #0e7482; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
         <span>⚡ Akun Percobaan (1-Klik Isi Form):</span>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-        <button type="button" onclick="fillCreds('admin@gmail.com', '123')" style="background: #0f172a; color: #ffffff; border: none; padding: 8px 10px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-align: left; transition: opacity 0.2s;">
-          <div style="color: #93c5fd;">🔑 Admin</div>
+        <button type="button" onclick="fillCreds('admin@gmail.com', '123')" style="background: #063d45; color: #ffffff; border: none; padding: 8px 10px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-align: left; transition: opacity 0.2s;">
+          <div style="color: #99f6e4;">🔑 Admin</div>
           <div style="font-size: 0.7rem; opacity: 0.85;">admin@gmail.com (123)</div>
         </button>
-        <button type="button" onclick="fillCreds('dimas@gmail.com', 'password123')" style="background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; padding: 8px 10px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-align: left; transition: opacity 0.2s;">
-          <div style="color: #2563eb;">📱 Pelanggan</div>
-          <div style="font-size: 0.7rem; color: #475569;">dimas@gmail.com</div>
+        <button type="button" onclick="fillCreds('dimas@gmail.com', 'password123')" style="background: #ffffff; color: #0e7482; border: 1px solid #ccfbf1; padding: 8px 10px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; cursor: pointer; text-align: left; transition: opacity 0.2s;">
+          <div style="color: #0a5661;">📱 Pelanggan</div>
+          <div style="font-size: 0.7rem; color: #64748b;">dimas@gmail.com</div>
         </button>
       </div>
     </div>
@@ -78,18 +78,18 @@
 
       <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; margin: 2px 0;">
         <label style="display: flex; align-items: center; gap: 7px; cursor: pointer; color: #475569;">
-          <input type="checkbox" name="remember" style="accent-color: #2563eb;"> Ingat saya di perangkat ini
+          <input type="checkbox" name="remember" style="accent-color: #0e7482;"> Ingat saya di perangkat ini
         </label>
       </div>
 
-      <button type="submit" style="padding: 13px; font-size: 0.95rem; font-weight: 700; background: #2563eb; color: #ffffff; border: none; border-radius: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35); margin-top: 4px;">
+      <button type="submit" style="padding: 13px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); color: #ffffff; border: none; border-radius: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(14, 116, 130, 0.35); margin-top: 4px;">
         Masuk Sekarang →
       </button>
     </form>
 
     <div style="text-align: center; margin-top: 20px; font-size: 0.83rem; color: #64748b;">
       Kembali ke halaman utama? 
-      <a href="{{ route('home') }}" style="color: #2563eb; font-weight: 700; text-decoration: none;">Landing Page</a>
+      <a href="{{ route('home') }}" style="color: #0e7482; font-weight: 700; text-decoration: none;">Landing Page</a>
     </div>
 
   </div>

@@ -143,28 +143,13 @@
     }, 3200);
   };
 
-  // --- THEME CONTROLLER ---
+  // --- THEME CONTROLLER (PERMANENT SINGLE LUXURY TEAL THEME MATCHING LANDING PAGE) ---
   function initTheme() {
-    const root = document.documentElement;
-    const btn = document.getElementById('btnToggleTheme');
-    const icon = document.getElementById('themeIconText');
-    const savedTheme = localStorage.getItem(THEME_KEY) || 'light';
-
-    function applyTheme(theme) {
-      root.setAttribute('data-theme', theme);
-      localStorage.setItem(THEME_KEY, theme);
-      localStorage.setItem('kosTheme', theme);
-      if (icon) {
-        icon.textContent = theme === 'dark' ? '🌙' : '☀️';
-      }
-    }
-
-    applyTheme(savedTheme);
-
-    btn?.addEventListener('click', () => {
-      const current = root.getAttribute('data-theme');
-      applyTheme(current === 'dark' ? 'light' : 'dark');
-    });
+    document.documentElement.removeAttribute('data-theme');
+    try {
+      localStorage.removeItem(THEME_KEY);
+      localStorage.removeItem('kosTheme');
+    } catch(e) {}
   }
 
   // --- NAVIGATION CONTROLLER ---
@@ -1494,12 +1479,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       btn.addEventListener('click', () => {
         subTabBtns.forEach(b => {
           b.classList.remove('active');
-          b.style.background = 'var(--bg-surface)';
-          b.style.color = 'var(--text-primary)';
+          b.style.background = '';
+          b.style.color = '';
         });
         btn.classList.add('active');
-        btn.style.background = 'var(--primary)';
-        btn.style.color = '#ffffff';
+        btn.style.background = '';
+        btn.style.color = '';
 
         const target = btn.getAttribute('data-subtab');
         subTabPanes.forEach(pane => {

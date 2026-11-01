@@ -3,11 +3,11 @@
 @section('title', 'Daftar Akun Anak Kos - Kos Mas Robi')
 
 @section('content')
-<div style="min-height: 100vh; min-height: 100dvh; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at 15% 15%, rgba(37, 99, 235, 0.08) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.08) 0%, transparent 45%), #f8fafc;">
-  <div style="width: 100%; max-width: 480px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 28px; padding: 36px 30px; box-shadow: 0 16px 40px -8px rgba(15, 23, 42, 0.08);">
+<div style="min-height: 100vh; min-height: 100dvh; width: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; background: radial-gradient(circle at 15% 15%, rgba(14, 116, 130, 0.10) 0%, transparent 45%), radial-gradient(circle at 85% 85%, rgba(244, 63, 94, 0.06) 0%, transparent 45%), #f8fafc;">
+  <div style="width: 100%; max-width: 480px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 28px; padding: 36px 30px; box-shadow: 0 16px 40px -8px rgba(3, 35, 40, 0.10);">
 
     <div style="text-align: center; margin-bottom: 26px;">
-      <div style="margin: 0 auto 14px; width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, #2563eb, #1d4ed8); display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);">
+      <div style="margin: 0 auto 14px; width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, #0a5661, #0e7482); display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 8px 20px rgba(14, 116, 130, 0.35);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
           <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
         </svg>
@@ -61,14 +61,14 @@
         </div>
       </div>
 
-      <button type="submit" style="padding: 13px; font-size: 0.95rem; font-weight: 700; background: #2563eb; color: #ffffff; border: none; border-radius: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); margin-top: 6px;">
+      <button type="submit" style="padding: 13px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); color: #ffffff; border: none; border-radius: 14px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(14, 116, 130, 0.35); margin-top: 6px;">
         Buat Akun Sekarang
       </button>
     </form>
 
     <div style="text-align: center; margin-top: 22px; font-size: 0.83rem; color: #64748b;">
       Sudah punya akun? 
-      <a href="{{ route('login') }}" style="color: #2563eb; font-weight: 700;">Masuk di sini</a>
+      <a href="{{ route('login') }}" style="color: #0e7482; font-weight: 700;">Masuk di sini</a>
     </div>
 
   </div>
