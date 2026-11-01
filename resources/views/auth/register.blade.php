@@ -313,6 +313,31 @@
   {{-- Main Glass Card --}}
   <div class="auth-card">
 
+    {{-- Banner: Already Logged In --}}
+    @auth
+    <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border: 1.5px solid #99f6e4; border-radius: 18px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661; margin-bottom: 3px;">
+          ✅ Anda sudah masuk sebagai: <strong>{{ Auth::user()->name }}</strong>
+          ({{ Auth::user()->isOwner() ? 'Admin' : 'Pelanggan' }})
+        </div>
+        <div style="font-size: 0.74rem; color: #0e7482;">Untuk daftar akun baru, logout terlebih dahulu atau isi form di bawah dengan data akun baru.</div>
+      </div>
+      <div style="display: flex; gap: 8px; flex-shrink: 0;">
+        <a href="{{ Auth::user()->isOwner() ? route('admin.dashboard') : route('tenant.portal') }}"
+           style="padding: 7px 14px; background: #0a5661; color: #fff; border-radius: 10px; font-size: 0.78rem; font-weight: 700; text-decoration: none; white-space: nowrap;">
+          Ke Dashboard →
+        </a>
+        <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
+          @csrf
+          <button type="submit" style="padding: 7px 14px; background: transparent; border: 1.5px solid #0e7482; color: #0e7482; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
+            Logout
+          </button>
+        </form>
+      </div>
+    </div>
+    @endauth
+
     {{-- Brand Logo & Header --}}
     <div style="text-align: center; margin-bottom: 22px;">
       <a href="{{ route('home') }}" class="auth-logo-badge" title="Ke Beranda Kos Mas Robi">

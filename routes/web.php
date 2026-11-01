@@ -12,14 +12,12 @@ use App\Http\Controllers\EmailReminderController;
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
 // =========================================================================
-// AUTHENTICATION ROUTES (guests only)
+// AUTHENTICATION ROUTES (accessible by all, controller handles auth state)
 // =========================================================================
-Route::middleware('guest')->group(function () {
-    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
-});
+Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
 // Quick demo switcher (dev-only convenience, requires existing auth)
 Route::get('/quick-login/{role?}', [AuthController::class, 'quickLogin'])->name('quick-login');

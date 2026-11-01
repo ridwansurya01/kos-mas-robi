@@ -12,15 +12,11 @@ class AuthController extends Controller
 {
     /**
      * Show Login Page.
+     * Accessible by all — controller shows the form even if already logged in.
      */
     public function showLogin()
     {
-        if (Auth::check()) {
-            return Auth::user()->isOwner() ? redirect()->route('admin.dashboard') : redirect()->route('tenant.portal');
-        }
-
         $tenants = User::where('role', 'tenant')->with('room')->get();
-
         return view('auth.login', compact('tenants'));
     }
 
@@ -78,14 +74,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Show Tenant Register Page.
+     * Show Register Page.
+     * Accessible by all — controller shows the form even if already logged in.
      */
     public function showRegister()
     {
-        if (Auth::check()) {
-            return Auth::user()->isOwner() ? redirect()->route('admin.dashboard') : redirect()->route('tenant.portal');
-        }
-
         $availableRooms = Room::where('status', 'available')->get();
         return view('auth.register', compact('availableRooms'));
     }
