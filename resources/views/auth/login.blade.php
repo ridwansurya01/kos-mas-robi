@@ -383,44 +383,6 @@
       <h2 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0 0 6px; letter-spacing: -0.02em;">Masuk ke Akun</h2>
       <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Sistem Manajemen Hunian Kos Mas Robi</p>
       
-      <div id="roleIndicator" class="auth-role-indicator">
-        <span>✨ Masuk otomatis sesuai peran Anda (Admin / Pelanggan)</span>
-      </div>
-    </div>
-
-    {{-- Role Switcher Tab (Quick Selector) --}}
-    <div class="auth-role-tabs">
-      <button type="button" class="auth-role-tab-btn active" id="tabPelanggan" onclick="switchLoginRole('tenant')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Pelanggan (Anak Kos)</span>
-      </button>
-      <button type="button" class="auth-role-tab-btn" id="tabAdmin" onclick="switchLoginRole('admin')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Admin (Pengelola)</span>
-      </button>
-    </div>
-
-    {{-- Quick Demo Credentials Box --}}
-    <div class="auth-demo-box">
-      <div style="font-size: 0.74rem; font-weight: 700; color: #0a5661; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: space-between;">
-        <span>⚡ 1-Klik Isi Akun Percobaan:</span>
-        <span style="font-size: 0.68rem; color: #0e7482; font-weight: 600;">Otomatis redirect sesuai role</span>
-      </div>
-      <div class="auth-demo-grid">
-        <button type="button" class="auth-demo-pill admin-pill" onclick="fillCreds('admin@gmail.com', 'password123', 'admin')">
-          <div style="display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.78rem;">
-            <span>🔑</span> <span>Akun Admin</span>
-          </div>
-          <div style="font-size: 0.7rem; color: #99f6e4; margin-top: 2px;">admin@gmail.com</div>
-        </button>
-
-        <button type="button" class="auth-demo-pill tenant-pill" onclick="fillCreds('dimas@gmail.com', 'password123', 'tenant')">
-          <div style="display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.78rem;">
-            <span>📱</span> <span>Akun Pelanggan</span>
-          </div>
-          <div style="font-size: 0.7rem; color: #64748b; margin-top: 2px;">dimas@gmail.com</div>
-        </button>
-      </div>
     </div>
 
     {{-- Validation Error Alerts --}}
@@ -465,7 +427,6 @@
       <div class="auth-field-group">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
           <label for="loginPassword" class="auth-field-label" style="margin-bottom: 0;">Kata Sandi</label>
-          <span id="rolePasswordHint" style="font-size: 0.74rem; color: #64748b;">(default: password123)</span>
         </div>
         <div class="auth-input-wrapper">
           <svg class="auth-input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -546,61 +507,6 @@
       iconEye.style.display = 'block';
       iconEyeOff.style.display = 'none';
     }
-  }
-
-  // Switch role tabs
-  function switchLoginRole(role) {
-    const tabPelanggan = document.getElementById('tabPelanggan');
-    const tabAdmin = document.getElementById('tabAdmin');
-    const roleIndicator = document.getElementById('roleIndicator');
-    const emailInput = document.getElementById('loginEmail');
-    const btnSubmitText = document.getElementById('btnSubmitText');
-
-    if (role === 'admin') {
-      tabAdmin.classList.add('active');
-      tabPelanggan.classList.remove('active');
-      roleIndicator.innerHTML = '⚙️ Mode Login: <strong>Admin / Pengelola Kos</strong> (masuk ke Dashboard Admin)';
-      roleIndicator.style.background = 'rgba(10, 86, 97, 0.12)';
-      roleIndicator.style.color = '#0a5661';
-      btnSubmitText.textContent = 'Masuk Dashboard Admin';
-      if (!emailInput.value || emailInput.value === 'dimas@gmail.com') {
-        emailInput.value = 'admin@gmail.com';
-        document.getElementById('loginPassword').value = 'password123';
-      }
-    } else {
-      tabPelanggan.classList.add('active');
-      tabAdmin.classList.remove('active');
-      roleIndicator.innerHTML = '📱 Mode Login: <strong>Pelanggan / Anak Kos</strong> (masuk ke Portal Penghuni)';
-      roleIndicator.style.background = 'rgba(14, 116, 130, 0.1)';
-      roleIndicator.style.color = '#0e7482';
-      btnSubmitText.textContent = 'Masuk Portal Pelanggan';
-      if (!emailInput.value || emailInput.value === 'admin@gmail.com') {
-        emailInput.value = 'dimas@gmail.com';
-        document.getElementById('loginPassword').value = 'password123';
-      }
-    }
-  }
-
-  // 1-Click quick credentials filler
-  function fillCreds(email, password, role) {
-    const emailInput = document.getElementById('loginEmail');
-    const pwdInput = document.getElementById('loginPassword');
-    
-    emailInput.value = email;
-    pwdInput.value = password;
-    
-    if (role) {
-      switchLoginRole(role);
-    }
-    
-    // Smooth pulse animation feedback
-    const card = document.querySelector('.auth-card');
-    card.style.transform = 'scale(1.01)';
-    setTimeout(() => {
-      card.style.transform = 'none';
-    }, 200);
-
-    pwdInput.focus();
   }
 </script>
 @endsection

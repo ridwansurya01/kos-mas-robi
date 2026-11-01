@@ -349,23 +349,7 @@
         </svg>
       </a>
       <h2 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0 0 6px; letter-spacing: -0.02em;">Daftar Akun Baru</h2>
-      <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Pilih peran pendaftaran Anda di Kos Mas Robi</p>
-
-      <div id="registerRoleIndicator" class="auth-role-indicator">
-        <span>✨ Pendaftaran Akun Pelanggan (Anak Kos) &rarr; Masuk ke Portal Pelanggan</span>
-      </div>
-    </div>
-
-    {{-- Role Switcher Tab --}}
-    <div class="auth-role-tabs">
-      <button type="button" class="auth-role-tab-btn active" id="tabRegPelanggan" onclick="switchRegisterRole('tenant')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span>Pelanggan (Anak Kos)</span>
-      </button>
-      <button type="button" class="auth-role-tab-btn" id="tabRegAdmin" onclick="switchRegisterRole('owner')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        <span>Admin (Pengelola)</span>
-      </button>
+      <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Isi data di bawah untuk membuat akun pelanggan Kos Mas Robi</p>
     </div>
 
     {{-- Validation Error Alerts --}}
@@ -380,8 +364,8 @@
     <form action="{{ route('register.post') }}" method="POST" id="formRegister">
       @csrf
 
-      {{-- Hidden Role Input (tenant / owner) --}}
-      <input type="hidden" name="role" id="regRole" value="{{ old('role', 'tenant') }}">
+      {{-- Role always tenant for public registration --}}
+      <input type="hidden" name="role" id="regRole" value="tenant">
 
       {{-- Nama Lengkap --}}
       <div class="auth-field-group">
@@ -485,7 +469,7 @@
 
       {{-- Submit Button --}}
       <button type="submit" class="auth-btn-primary" id="btnSubmitReg">
-        <span id="btnSubmitRegText">Daftar & Masuk ke Portal Pelanggan</span>
+        <span>Daftar Akun Sekarang</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <line x1="5" y1="12" x2="19" y2="12"></line>
           <polyline points="12 5 19 12 12 19"></polyline>
@@ -513,35 +497,6 @@
 </div>
 
 <script>
-  function switchRegisterRole(role) {
-    const tabPelanggan = document.getElementById('tabRegPelanggan');
-    const tabAdmin = document.getElementById('tabRegAdmin');
-    const roleInput = document.getElementById('regRole');
-    const indicator = document.getElementById('registerRoleIndicator');
-    const roomGroup = document.getElementById('regRoomGroup');
-    const btnSubmitRegText = document.getElementById('btnSubmitRegText');
-
-    roleInput.value = role;
-
-    if (role === 'owner') {
-      tabAdmin.classList.add('active');
-      tabPelanggan.classList.remove('active');
-      indicator.innerHTML = '⚙️ Pendaftaran <strong>Admin / Pengelola Kos</strong> &rarr; Langsung masuk ke <strong>Dashboard Admin</strong>';
-      indicator.style.background = 'rgba(10, 86, 97, 0.12)';
-      indicator.style.color = '#0a5661';
-      roomGroup.style.display = 'none';
-      btnSubmitRegText.textContent = 'Daftar & Masuk ke Dashboard Admin';
-    } else {
-      tabPelanggan.classList.add('active');
-      tabAdmin.classList.remove('active');
-      indicator.innerHTML = '📱 Pendaftaran <strong>Pelanggan (Anak Kos)</strong> &rarr; Langsung masuk ke <strong>Portal Pelanggan</strong>';
-      indicator.style.background = 'rgba(14, 116, 130, 0.1)';
-      indicator.style.color = '#0e7482';
-      roomGroup.style.display = 'block';
-      btnSubmitRegText.textContent = 'Daftar & Masuk ke Portal Pelanggan';
-    }
-  }
-
   function toggleRegPassword(inputId, btn) {
     const input = document.getElementById(inputId);
     if (input.type === 'password') {
@@ -552,13 +507,5 @@
       btn.style.color = '#94a3b8';
     }
   }
-
-  // Set initial state from old input if validation failed
-  document.addEventListener('DOMContentLoaded', () => {
-    const initialRole = document.getElementById('regRole').value;
-    if (initialRole === 'owner') {
-      switchRegisterRole('owner');
-    }
-  });
 </script>
 @endsection
