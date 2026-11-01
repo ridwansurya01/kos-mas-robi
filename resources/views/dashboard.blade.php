@@ -872,88 +872,237 @@
         </div>
       </div>
       <div class="tab-pane" id="tab-settings">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Profil & Pengaturan Kos Mas Robi</h2>
+        <div class="section-header" style="flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 12px;">
+            <div class="section-title">
+              <h2>Pusat Pengaturan & Kelola Landing Page</h2>
+            </div>
+            <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
+              <span>🌐 Lihat Website Landing Page ↗</span>
+            </a>
+          </div>
+
+          <!-- Sub-Tab Navigation Pills -->
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="settingsSubTabNav">
+            <button type="button" class="btn-settings-subtab active" data-subtab="subtab-landing" style="padding: 10px 20px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border-color); background: var(--primary); color: #ffffff; display: flex; align-items: center; gap: 8px;">
+              <span>🎨 Tampilan & Foto Landing Page</span>
+            </button>
+            <button type="button" class="btn-settings-subtab" data-subtab="subtab-location" style="padding: 10px 20px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+              <span>📍 Titik Lokasi Google Maps & 4 POI</span>
+            </button>
+            <button type="button" class="btn-settings-subtab" data-subtab="subtab-profile" style="padding: 10px 20px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+              <span>⚙️ Profil Properti & Rekening</span>
+            </button>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
-          <!-- Profile Card -->
-          <div class="table-card-container" style="padding: 24px;">
-            <h3 style="margin-bottom: 16px;">Informasi Properti Kos</h3>
-            <form id="settingsProfileForm" style="display: flex; flex-direction: column; gap: 14px;">
-              <div class="form-group">
-                <label for="setKosName">Nama Kos</label>
-                <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}">
-              </div>
-              <div class="form-group">
-                <label for="setOwnerName">Nama Pemilik / Pengelola</label>
-                <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}">
-              </div>
-              <div class="form-group">
-                <label for="setOwnerPhone">No. WhatsApp Pengelola (Format 62...)</label>
-                <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}">
-              </div>
-              <div class="form-group">
-                <label for="setKosAddress">Alamat Lengkap</label>
-                <textarea id="setKosAddress" class="form-control" rows="2">{{ $setting->kos_address }}</textarea>
+        @php
+          $lc = $setting->landing_content ?? [];
+          $bGallery = $lc['bento_gallery'] ?? [
+              'assets/images/hero_scandinavian_room.jpg',
+              'assets/images/rooms/room_2.jpg',
+              'assets/images/rooms/room_3.jpg',
+              'assets/images/kos_exterior.jpg'
+          ];
+        @endphp
+
+        <!-- =========================================================================
+             SUBTAB 1: KELOLA TAMPILAN & FOTO LANDING PAGE
+             ========================================================================= -->
+        <div class="settings-subtab-pane active" id="subtab-landing">
+          <form id="landingPageEditorForm" style="display: flex; flex-direction: column; gap: 24px;" enctype="multipart/form-data">
+
+            <!-- 1. HERO SECTION EDITOR -->
+            <div class="table-card-container" style="padding: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <span>✨ 1. Hero Banner Utama (Bagian Paling Atas)</span>
+                </h3>
+                <span style="font-size: 0.76rem; background: var(--bg-surface); padding: 4px 10px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700;">Headline & Foto Utama</span>
               </div>
 
-              <!-- Integrasi Google Maps Properti -->
-              <div class="form-group" style="background: var(--bg-surface); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color);">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                  <div class="form-group">
+                    <label for="lp_hero_title">Judul Utama Hero (Gunakan Enter untuk Baris Baru)</label>
+                    <textarea id="lp_hero_title" name="hero_title" class="form-control" rows="2" placeholder="Contoh: Find Your&#10;Dream Home">{{ $lc['hero_title'] ?? "Find Your\nDream Home" }}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="lp_hero_desc">Deskripsi Singkat Hero</label>
+                    <textarea id="lp_hero_desc" name="hero_desc" class="form-control" rows="3" placeholder="Deskripsi hunian kost eksklusif...">{{ $lc['hero_desc'] ?? 'Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis di Sleman, DI Yogyakarta.' }}</textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="lp_hero_btn_text">Teks Tombol Aksi (CTA)</label>
+                    <input type="text" id="lp_hero_btn_text" name="hero_btn_text" class="form-control" value="{{ $lc['hero_btn_text'] ?? 'Jelajahi Kamar' }}">
+                  </div>
+                </div>
+
+                <!-- Foto Utama Hero / Eksterior -->
+                <div style="display: flex; flex-direction: column; gap: 10px; background: var(--bg-surface); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
+                  <label style="font-weight: 700; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
+                    <span>📸 Foto Utama Hero (Gedung / Eksterior Kos)</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary);">Mendukung PNG, JPG, WEBP</span>
+                  </label>
+                  <div style="width: 100%; height: 180px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid var(--border-color); background: #04272c;">
+                    <img id="previewHeroImage" src="{{ asset($lc['hero_image'] ?? 'assets/images/kos_exterior.jpg') }}" alt="Preview Foto Hero" style="width: 100%; height: 100%; object-fit: cover;">
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
+                    <input type="file" id="lp_hero_image_file" name="hero_image_file" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 6px;">
+                  </div>
+                  <div style="font-size: 0.74rem; color: var(--text-secondary);">
+                    💡 <em>Tips:</em> Foto gedung malam/dusk dengan pencahayaan hangat akan otomatis menyatu halus dengan background teal di Landing Page.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. BENTO & FASILITAS SECTION EDITOR -->
+            <div class="table-card-container" style="padding: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <span>🍱 2. Bagian Bento Keunggulan & Galeri Foto Kost</span>
+                </h3>
+                <span style="font-size: 0.76rem; background: var(--bg-surface); padding: 4px 10px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700;">Teks & 4 Foto Galeri</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                <div class="form-group">
+                  <label for="lp_bento_tag">Judul Tagline (Warna Coral / Merah)</label>
+                  <input type="text" id="lp_bento_tag" name="bento_tag" class="form-control" value="{{ $lc['bento_tag'] ?? 'Kenyamanan Maksimal' }}">
+                </div>
+                <div class="form-group">
+                  <label for="lp_bento_title">Judul Utama (Warna Gelap)</label>
+                  <input type="text" id="lp_bento_title" name="bento_title" class="form-control" value="{{ $lc['bento_title'] ?? 'Untuk Istirahat & Produktivitas' }}">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 24px;">
+                <label for="lp_bento_desc">Deskripsi Bagian Keunggulan</label>
+                <textarea id="lp_bento_desc" name="bento_desc" class="form-control" rows="2">{{ $lc['bento_desc'] ?? 'Setiap jengkal hunian kami rancang dengan seksama untuk memastikan penghuni mendapatkan istirahat berkualitas dan fokus maksimal dalam menuntut ilmu maupun berkarier.' }}</textarea>
+              </div>
+
+              <!-- 4 FOTO GALERI BENTO -->
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>🖼️ 4 Foto Galeri Bento Kost (Bisa Diganti & Diunggah Kapan Saja)</span>
+              </h4>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+                @for($g = 0; $g < 4; $g++)
+                  @php
+                    $curGalImg = $bGallery[$g] ?? 'assets/images/rooms/room_1.jpg';
+                    $galLabels = ['Foto Galeri 1 (Interior Scandinavian)', 'Foto Galeri 2 (Kamar Tidur)', 'Foto Galeri 3 (Fasilitas Kamar/KM)', 'Foto Galeri 4 (Gedung Luar)'];
+                  @endphp
+                  <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+                    <label style="font-size: 0.74rem; font-weight: 800; color: var(--text-primary);">{{ $galLabels[$g] }}</label>
+                    <div style="width: 100%; height: 130px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); background: #000;">
+                      <img id="previewBentoGallery_{{ $g }}" src="{{ asset($curGalImg) }}" alt="Preview Galeri {{ $g + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <input type="file" id="lp_gallery_file_{{ $g }}" name="gallery_file_{{ $g }}" accept="image/*" class="form-control gal-file-input" data-preview-target="previewBentoGallery_{{ $g }}" style="font-size: 0.76rem; padding: 4px;">
+                  </div>
+                @endfor
+              </div>
+            </div>
+
+            <!-- 3. KUTIPAN PENGELOLA & FOOTER EDITOR -->
+            <div class="table-card-container" style="padding: 24px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
+                  <span>💬 3. Kutipan Komitmen Pengelola & Footer</span>
+                </h3>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 18px;">
+                <div class="form-group">
+                  <label for="lp_founder_name">Nama Pengelola / Owner</label>
+                  <input type="text" id="lp_founder_name" name="founder_name" class="form-control" value="{{ $lc['founder_name'] ?? ($setting->owner_name ?? 'Mas Robi') }}">
+                </div>
+                <div class="form-group">
+                  <label for="lp_founder_role">Jabatan / Peran</label>
+                  <input type="text" id="lp_founder_role" name="founder_role" class="form-control" value="{{ $lc['founder_role'] ?? 'Owner & Pengelola Properti' }}">
+                </div>
+                <div class="form-group">
+                  <label for="lp_founder_avatar">Inisial Avatar Bulat</label>
+                  <input type="text" id="lp_founder_avatar" name="founder_avatar" class="form-control" value="{{ $lc['founder_avatar'] ?? 'MR' }}" maxlength="4">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="lp_founder_quote">Teks Kutipan / Pernyataan Komitmen Pengelola</label>
+                <textarea id="lp_founder_quote" name="founder_quote" class="form-control" rows="3">{{ $lc['founder_quote'] ?? 'Kenyamanan, kebersihan, dan keamanan penghuni adalah komitmen utama kami. Kami memastikan setiap anak kos merasakan suasana tinggal yang hangat layaknya di rumah sendiri, dengan fasilitas modern tanpa repot dan dukungan pengelola yang selalu siap membantu kapan pun dibutuhkan.' }}</textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="lp_footer_desc">Deskripsi Singkat Footer</label>
+                <textarea id="lp_footer_desc" name="footer_desc" class="form-control" rows="2">{{ $lc['footer_desc'] ?? 'Hunian kost eksklusif dengan fasilitas lengkap, kamar ber-AC, kamar mandi dalam, WiFi fiber cepat 100 Mbps, dan keamanan 24 jam di kawasan strategis.' }}</textarea>
+              </div>
+            </div>
+
+            <!-- Tombol Simpan Landing Page -->
+            <div style="display: flex; gap: 14px; align-items: center; padding: 10px 0;">
+              <button type="submit" id="btnSaveLandingPage" class="btn-primary" style="padding: 12px 28px; font-size: 0.95rem; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+                <span>💾 Simpan Seluruh Tampilan Landing Page</span>
+              </button>
+              <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="padding: 12px 20px; font-weight: 700;">
+                <span>Lihat Hasil Langsung ↗</span>
+              </a>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- =========================================================================
+             SUBTAB 2: TITIK LOKASI GOOGLE MAPS & 4 POI
+             ========================================================================= -->
+        <div class="settings-subtab-pane" id="subtab-location" style="display: none;">
+          <div class="table-card-container" style="padding: 24px;">
+            <h3 style="margin-bottom: 16px;">Pengaturan Peta Google Maps & 4 Poin Akses Lokasi</h3>
+            <form id="settingsProfileForm" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="form-group">
+                <label for="setKosAddress">Alamat Lengkap Properti Kos</label>
+                <textarea id="setKosAddress" class="form-control" rows="2" placeholder="Contoh: Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta">{{ $setting->kos_address }}</textarea>
+              </div>
+
+              <!-- Integrasi Google Maps Properti (Anti-Gagal) -->
+              <div class="form-group" style="background: var(--bg-surface); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                   <label for="setGmapsUrl" style="font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
-                    <span>📍 Link URL Google Maps</span>
+                    <span>📍 Link Buka Google Maps (Tombol "Buka di Google Maps")</span>
                   </label>
-                  <a href="{{ $setting->gmaps_url ?: 'https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi Sleman Yogyakarta') }}" id="btnTestGmapsUrl" target="_blank" rel="noopener noreferrer" style="font-size: 0.78rem; color: #2563eb; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 4px;">
+                  <a href="{{ $setting->gmaps_url ?: ('https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi')) }}" id="btnTestGmapsUrl" target="_blank" rel="noopener noreferrer" style="font-size: 0.78rem; color: #2563eb; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 4px;">
                     <span>Uji Buka Peta ↗</span>
                   </a>
                 </div>
                 <input type="text" id="setGmapsUrl" class="form-control" placeholder="https://maps.app.goo.gl/... atau https://maps.google.com/?q=..." value="{{ $setting->gmaps_url }}">
-                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 5px;">
-                  Link ini digunakan untuk tombol <strong>"Buka di Google Maps"</strong> pada Landing Page.
-                </div>
               </div>
 
-              <div class="form-group" style="background: var(--bg-surface); padding: 16px; border-radius: 14px; border: 1px solid var(--border-color);">
+              <div class="form-group" style="background: var(--bg-surface); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
                 <label for="setGmapsEmbed" style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
-                  🗺️ Sematkan Peta Interaktif (Embed HTML / Iframe)
+                  🗺️ Sematkan Peta Interaktif (Bisa Masukkan Kode Iframe, Link Maps, Koordinat, atau Alamat)
                 </label>
-                <textarea id="setGmapsEmbed" class="form-control" rows="3" placeholder="Tempel kode <iframe>...</iframe> dari Google Maps atau masukkan URL embed maps https://maps.google.com/maps?q=...">{{ $setting->gmaps_embed }}</textarea>
-                <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 5px; line-height: 1.4;">
-                  💡 <em>Cara ambil kode:</em> Buka Google Maps di browser > Cari lokasi Kos Mas Robi > Klik <strong>Bagikan (Share)</strong> > Pilih tab <strong>Sematkan peta (Embed a map)</strong> > Klik <strong>Salin HTML</strong> lalu tempel di sini.
+                <textarea id="setGmapsEmbed" class="form-control" rows="3" placeholder="Tempel kode <iframe>...</iframe>, link https://maps.app.goo.gl/..., atau koordinat -8.1639, 113.7311">{{ $setting->gmaps_embed }}</textarea>
+                <div style="font-size: 0.76rem; color: #10b981; margin-top: 6px; font-weight: 700;">
+                  ✅ <em>Anti-Gagal:</em> Apapun yang Anda masukkan (link bagikan, kode iframe, koordinat, atau alamat) akan otomatis dikonversi sistem agar tampil sempurna tanpa ikon tanda larang (forbidden).
                 </div>
               </div>
 
               <!-- Live Preview Peta di Admin -->
               <div class="form-group">
-                <label style="font-weight: 700; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <label style="font-weight: 700; color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
                   <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
-                  Pratinjau Peta Google Maps (Live Preview):
+                  Pratinjau Langsung Peta Google Maps (Live Preview):
                 </label>
-                <div id="gmapsLivePreviewWrap" style="width: 100%; height: 220px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); position: relative;">
-                  @php
-                    $adminEmbedSrc = $setting->gmaps_embed;
-                    if (str_contains($adminEmbedSrc ?? '', '<iframe')) {
-                        preg_match('/src="([^"]+)"/', $adminEmbedSrc, $adminMatches);
-                        $adminEmbedSrc = $adminMatches[1] ?? '';
-                    }
-                    if (empty($adminEmbedSrc)) {
-                        $adminEmbedSrc = 'https://maps.google.com/maps?q=' . urlencode($setting->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta') . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-                    }
-                  @endphp
-                  <iframe id="gmapsPreviewIframe" src="{{ $adminEmbedSrc }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pratinjau Lokasi Kos Mas Robi"></iframe>
+                <div id="gmapsLivePreviewWrap" style="width: 100%; height: 260px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); position: relative;">
+                  <iframe id="gmapsPreviewIframe" src="{{ $setting->final_embed_url }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pratinjau Lokasi Kos Mas Robi"></iframe>
                 </div>
               </div>
 
-              <!-- Poin Akses & Keunggulan Lokasi (Sesuai Gambar 1 Landing Page) -->
+              <!-- Poin Akses & Keunggulan Lokasi -->
               <div style="border-top: 1px solid var(--border-color); padding-top: 18px; margin-top: 10px;">
                 <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
                   <span>📌 4 Poin Akses & Keunggulan Lokasi (Landing Page)</span>
                 </h4>
                 <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 14px;">
-                  Edit teks 4 kartu keunggulan lokasi yang tampil di samping peta pada Landing Page (ikon, judul, dan deskripsi):
+                  Edit teks 4 kartu keunggulan lokasi yang tampil di samping peta pada Landing Page:
                 </p>
 
                 @php
@@ -989,39 +1138,67 @@
                 </div>
               </div>
 
-              <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px;">Simpan Perubahan Profil & Lokasi</button>
+              <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px; padding: 10px 24px; font-weight: 800;">Simpan Perubahan Lokasi & Peta</button>
             </form>
           </div>
+        </div>
 
-          <!-- Payment Account Card -->
-          <div class="table-card-container" style="padding: 24px;">
-            <h3 style="margin-bottom: 16px;">Rekening Pembayaran & Cadangan Data</h3>
-            <form id="settingsBankForm" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
-              <div class="form-group">
-                <label for="setBankName">Nama Bank / QRIS</label>
-                <input type="text" id="setBankName" class="form-control" value="{{ $setting->bank_name }}">
-              </div>
-              <div class="form-group">
-                <label for="setBankAccount">Nomor Rekening</label>
-                <input type="text" id="setBankAccount" class="form-control" value="{{ $setting->bank_account }}">
-              </div>
-              <div class="form-group">
-                <label for="setBankHolder">Atas Nama</label>
-                <input type="text" id="setBankHolder" class="form-control" value="{{ $setting->bank_holder }}">
-              </div>
-              <button type="submit" class="btn-primary" style="align-self: flex-start;">Simpan Rekening</button>
-            </form>
+        <!-- =========================================================================
+             SUBTAB 3: PROFIL KOS & REKENING PEMBAYARAN
+             ========================================================================= -->
+        <div class="settings-subtab-pane" id="subtab-profile" style="display: none;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+            <!-- Profile Card -->
+            <div class="table-card-container" style="padding: 24px;">
+              <h3 style="margin-bottom: 16px;">Informasi Properti & Pengelola</h3>
+              <form id="settingsGeneralProfileForm" style="display: flex; flex-direction: column; gap: 14px;">
+                <div class="form-group">
+                  <label for="setKosName">Nama Kos</label>
+                  <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}">
+                </div>
+                <div class="form-group">
+                  <label for="setOwnerName">Nama Pemilik / Pengelola</label>
+                  <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}">
+                </div>
+                <div class="form-group">
+                  <label for="setOwnerPhone">No. WhatsApp Pengelola (Format 62...)</label>
+                  <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}">
+                </div>
+                <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px;">Simpan Informasi Umum</button>
+              </form>
+            </div>
 
-            <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+            <!-- Payment Account Card -->
+            <div class="table-card-container" style="padding: 24px;">
+              <h3 style="margin-bottom: 16px;">Rekening Pembayaran & Cadangan Data</h3>
+              <form id="settingsBankForm" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+                <div class="form-group">
+                  <label for="setBankName">Nama Bank / QRIS</label>
+                  <input type="text" id="setBankName" class="form-control" value="{{ $setting->bank_name }}">
+                </div>
+                <div class="form-group">
+                  <label for="setBankAccount">Nomor Rekening</label>
+                  <input type="text" id="setBankAccount" class="form-control" value="{{ $setting->bank_account }}">
+                </div>
+                <div class="form-group">
+                  <label for="setBankHolder">Atas Nama</label>
+                  <input type="text" id="setBankHolder" class="form-control" value="{{ $setting->bank_holder }}">
+                </div>
+                <button type="submit" class="btn-primary" style="align-self: flex-start;">Simpan Rekening</button>
+              </form>
 
-            <h4 style="margin-bottom: 10px;">Manajemen Data Sistem</h4>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Data tersimpan aman di database SQLite Laravel. Anda dapat mengunduh cadangan JSON kapan saja.</p>
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <button type="button" class="btn-secondary" id="btnExportData">📥 Unduh Cadangan JSON</button>
-              <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171;">🔄 Reset Data Sampel</button>
+              <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+              <h4 style="margin-bottom: 10px;">Manajemen Data Sistem</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Data tersimpan aman di database SQLite Laravel. Anda dapat mengunduh cadangan JSON kapan saja.</p>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn-secondary" id="btnExportData">📥 Unduh Cadangan JSON</button>
+                <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171;">🔄 Reset Data Sampel</button>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
 
     </div><!-- /content-body -->

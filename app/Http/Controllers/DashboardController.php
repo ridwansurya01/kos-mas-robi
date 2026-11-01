@@ -404,6 +404,61 @@ class DashboardController extends Controller
     }
 
     /**
+     * Resolves user input into a guaranteed working embed URL for Google Maps.
+     */
+    private function resolveGmapsEmbed(?string $raw, ?string $address): string
+    {
+        $raw = trim($raw ?? '');
+        if (empty($raw)) {
+            return 'https://maps.google.com/maps?q=' . urlencode($address ?: 'Kos Mas Robi') . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        }
+
+        // If iframe code, extract src
+        if (str_contains($raw, '<iframe')) {
+            if (preg_match('/src=["\']([^"\']+)["\']/', $raw, $m)) {
+                $raw = trim($m[1]);
+            }
+        }
+
+        // Already valid embed URL
+        if (str_contains($raw, 'google.com/maps/embed') || (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
+            return $raw;
+        }
+
+        // Check if GPS coordinates present like @-8.1639986,113.7311205
+        if (preg_match('/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $raw, $coords)) {
+            return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        }
+
+        // If shortlink maps.app.goo.gl or goo.gl/maps, try resolving via cURL
+        if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
+            try {
+                $ch = curl_init($raw);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_NOBODY, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                curl_exec($ch);
+                $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+                curl_close($ch);
+
+                if ($finalUrl && preg_match('/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $finalUrl, $coords)) {
+                    return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                }
+                if ($finalUrl && preg_match('/place\/([^\/@]+)/', $finalUrl, $pm)) {
+                    $place = str_replace('+', ' ', urldecode($pm[1]));
+                    return 'https://maps.google.com/maps?q=' . urlencode($place) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                }
+            } catch (\Throwable $e) {
+                // Ignore network error and fallback gracefully
+            }
+        }
+
+        // Fallback to query embed using address or raw
+        return 'https://maps.google.com/maps?q=' . urlencode($address ?: $raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+    }
+
+    /**
      * Save Kos Settings.
      */
     public function saveSettings(Request $request): JsonResponse
@@ -416,6 +471,7 @@ class DashboardController extends Controller
             'gmaps_url' => 'nullable|string',
             'gmaps_embed' => 'nullable|string',
             'location_highlights' => 'nullable',
+            'landing_content' => 'nullable',
             'bank_name' => 'nullable|string',
             'bank_account' => 'nullable|string',
             'bank_holder' => 'nullable|string',
@@ -429,11 +485,103 @@ class DashboardController extends Controller
             $validated['location_highlights'] = $lh;
         }
 
+        if ($request->has('landing_content')) {
+            $lc = $request->input('landing_content');
+            if (is_string($lc)) {
+                $lc = json_decode($lc, true);
+            }
+            $validated['landing_content'] = $lc;
+        }
+
+        // Normalize gmaps_embed so it NEVER shows a forbidden / broken icon
+        if (!empty($validated['gmaps_embed'])) {
+            $validated['gmaps_embed'] = $this->resolveGmapsEmbed($validated['gmaps_embed'], $validated['kos_address'] ?? null);
+        }
+
+        if (empty($validated['gmaps_url']) && !empty($validated['kos_address'])) {
+            $validated['gmaps_url'] = 'https://maps.google.com/?q=' . urlencode($validated['kos_address']);
+        }
+
         $setting = Setting::first() ?? new Setting();
         $setting->fill($validated);
         $setting->save();
 
         return response()->json(['success' => true, 'setting' => $setting]);
+    }
+
+    /**
+     * Dedicated API to update all Landing Page content & uploaded photos.
+     */
+    public function saveLandingPage(Request $request): JsonResponse
+    {
+        $setting = Setting::first() ?? new Setting();
+        $landing = $setting->landing_content ?? [];
+
+        // Text fields
+        $fields = [
+            'hero_title', 'hero_desc', 'hero_btn_text', 'hero_btn_link',
+            'bento_tag', 'bento_title', 'bento_desc',
+            'bento_card_tag', 'bento_card_title', 'bento_card_desc', 'bento_card_btn',
+            'founder_name', 'founder_role', 'founder_avatar', 'founder_quote',
+            'footer_desc'
+        ];
+
+        foreach ($fields as $field) {
+            if ($request->has($field)) {
+                $landing[$field] = $request->input($field);
+            }
+        }
+
+        // Bento features array
+        if ($request->has('bento_features')) {
+            $bf = $request->input('bento_features');
+            if (is_string($bf)) {
+                $bf = json_decode($bf, true);
+            }
+            if (is_array($bf)) {
+                $landing['bento_features'] = $bf;
+            }
+        }
+
+        // Handle Hero Image File Upload
+        if ($request->hasFile('hero_image_file')) {
+            $file = $request->file('hero_image_file');
+            $filename = 'hero_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/images/landing'), $filename);
+            $landing['hero_image'] = 'assets/images/landing/' . $filename;
+        } elseif ($request->filled('hero_image_url')) {
+            $landing['hero_image'] = $request->input('hero_image_url');
+        }
+
+        // Handle Bento Gallery Photos (up to 4 photos)
+        if (!isset($landing['bento_gallery']) || !is_array($landing['bento_gallery'])) {
+            $landing['bento_gallery'] = [
+                'assets/images/hero_scandinavian_room.jpg',
+                'assets/images/rooms/room_2.jpg',
+                'assets/images/rooms/room_3.jpg',
+                'assets/images/kos_exterior.jpg'
+            ];
+        }
+
+        for ($i = 0; $i < 4; $i++) {
+            if ($request->hasFile("gallery_file_{$i}")) {
+                $file = $request->file("gallery_file_{$i}");
+                $filename = "gallery_{$i}_" . time() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('assets/images/landing'), $filename);
+                $landing['bento_gallery'][$i] = 'assets/images/landing/' . $filename;
+            } elseif ($request->filled("gallery_url_{$i}")) {
+                $landing['bento_gallery'][$i] = $request->input("gallery_url_{$i}");
+            }
+        }
+
+        $setting->landing_content = $landing;
+        $setting->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Tampilan Landing Page berhasil diperbarui!',
+            'landing_content' => $landing
+        ]);
     }
 
     /**

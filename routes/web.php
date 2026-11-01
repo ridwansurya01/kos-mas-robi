@@ -95,6 +95,11 @@ Route::middleware(['auth'])->group(function () {
             return app(DashboardController::class)->saveSettings($req);
         })->name('api.settings.save');
 
+        Route::post('/settings/landing', function (\Illuminate\Http\Request $req) {
+            if (!Auth::user()->isOwner()) abort(403);
+            return app(DashboardController::class)->saveLandingPage($req);
+        })->name('api.settings.landing');
+
         Route::get('/export', function (\Illuminate\Http\Request $req) {
             if (!Auth::user()->isOwner()) abort(403);
             return app(DashboardController::class)->exportData($req);

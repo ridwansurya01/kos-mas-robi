@@ -1481,9 +1481,91 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   // --- SETTINGS, BACKUP & RESTORE ---
   function initSettings() {
     const profileForm = document.getElementById('settingsProfileForm');
+    const generalProfileForm = document.getElementById('settingsGeneralProfileForm');
+    const landingForm = document.getElementById('landingPageEditorForm');
     const bankForm = document.getElementById('settingsBankForm');
     const btnExport = document.getElementById('btnExportData');
     const btnReset = document.getElementById('btnResetData');
+
+    // Sub-tab navigation in Settings
+    const subTabBtns = document.querySelectorAll('#settingsSubTabNav .btn-settings-subtab');
+    const subTabPanes = document.querySelectorAll('.settings-subtab-pane');
+    subTabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        subTabBtns.forEach(b => {
+          b.classList.remove('active');
+          b.style.background = 'var(--bg-surface)';
+          b.style.color = 'var(--text-primary)';
+        });
+        btn.classList.add('active');
+        btn.style.background = 'var(--primary)';
+        btn.style.color = '#ffffff';
+
+        const target = btn.getAttribute('data-subtab');
+        subTabPanes.forEach(pane => {
+          if (pane.id === target) {
+            pane.style.display = 'block';
+          } else {
+            pane.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Hero image file preview
+    const heroFileInput = document.getElementById('lp_hero_image_file');
+    const heroPreview = document.getElementById('previewHeroImage');
+    heroFileInput?.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file && heroPreview) {
+        const reader = new FileReader();
+        reader.onload = (re) => { heroPreview.src = re.target.result; };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Bento Gallery file previews (4 photos)
+    const galInputs = document.querySelectorAll('.gal-file-input');
+    galInputs.forEach(input => {
+      input.addEventListener('change', (e) => {
+        const targetId = input.getAttribute('data-preview-target');
+        const imgEl = document.getElementById(targetId);
+        const file = e.target.files[0];
+        if (file && imgEl) {
+          const reader = new FileReader();
+          reader.onload = (re) => { imgEl.src = re.target.result; };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+
+    // Save Landing Page Form
+    landingForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSaveLandingPage');
+      if (btn) btn.disabled = true;
+
+      const formData = new FormData(landingForm);
+      try {
+        const res = await fetch('/api/settings/landing', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': getCsrfToken()
+          },
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Seluruh tampilan & foto Landing Page berhasil disimpan!', 'success');
+        } else {
+          showToast(data.message || 'Gagal menyimpan tampilan', 'warning');
+        }
+      } catch (err) {
+        showToast('Gagal terhubung ke server', 'warning');
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    });
 
     // Live update Google Maps preview & test button
     const setGmapsUrlInput = document.getElementById('setGmapsUrl');
@@ -1495,14 +1577,20 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     function updateGmapsPreview() {
       if (!gmapsPreviewIframe) return;
       let embedVal = setGmapsEmbedInput?.value.trim() || '';
+
       if (embedVal.includes('<iframe')) {
-        const match = embedVal.match(/src="([^"]+)"/);
+        const match = embedVal.match(/src=["']([^"']+)["']/);
         if (match && match[1]) embedVal = match[1];
       }
-      if (!embedVal && setKosAddressInput) {
-        const addr = setKosAddressInput.value.trim() || 'Kos Mas Robi Sleman Yogyakarta';
+
+      const coordMatch = embedVal.match(/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+      if (coordMatch) {
+        embedVal = 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+      } else if (!embedVal.includes('google.com/maps/embed') && !embedVal.includes('output=embed')) {
+        const addr = setKosAddressInput?.value.trim() || 'Kos Mas Robi';
         embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
       }
+
       if (embedVal) {
         gmapsPreviewIframe.src = embedVal;
       }
@@ -1524,14 +1612,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const kosName = document.getElementById('setKosName').value.trim();
-      const ownerName = document.getElementById('setOwnerName').value.trim();
-      const ownerPhone = document.getElementById('setOwnerPhone').value.trim();
       const kosAddress = document.getElementById('setKosAddress').value.trim();
       const gmapsUrl = setGmapsUrlInput ? setGmapsUrlInput.value.trim() : '';
       const gmapsEmbed = setGmapsEmbedInput ? setGmapsEmbedInput.value.trim() : '';
 
-      // Collect 4 location highlights (from Gambar 1)
+      // Collect 4 location highlights
       const highlightItems = [];
       const editContainers = document.querySelectorAll('#locationHighlightsEditorList .highlight-edit-item');
       editContainers.forEach(item => {
@@ -1540,6 +1625,36 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         const desc = item.querySelector('.hl-desc')?.value.trim() || '';
         highlightItems.push({ icon, title, desc });
       });
+
+      try {
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': getCsrfToken()
+          },
+          body: JSON.stringify({
+            kos_address: kosAddress,
+            gmaps_url: gmapsUrl,
+            gmaps_embed: gmapsEmbed,
+            location_highlights: highlightItems
+          })
+        });
+        const data = await res.json();
+        showToast('Titik lokasi Google Maps & 4 poin akses berhasil disimpan!', 'success');
+        if (data.setting && data.setting.final_embed_url && gmapsPreviewIframe) {
+          gmapsPreviewIframe.src = data.setting.final_embed_url;
+        }
+      } catch (err) {
+        showToast('Gagal menyimpan lokasi ke server', 'warning');
+      }
+    });
+
+    generalProfileForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const kosName = document.getElementById('setKosName').value.trim();
+      const ownerName = document.getElementById('setOwnerName').value.trim();
+      const ownerPhone = document.getElementById('setOwnerPhone').value.trim();
 
       try {
         await fetch('/api/settings', {
@@ -1551,19 +1666,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           body: JSON.stringify({
             kos_name: kosName,
             owner_name: ownerName,
-            owner_phone: ownerPhone,
-            kos_address: kosAddress,
-            gmaps_url: gmapsUrl,
-            gmaps_embed: gmapsEmbed,
-            location_highlights: highlightItems
+            owner_phone: ownerPhone
           })
         });
-        showToast('Profil kos, peta, dan 4 poin keunggulan lokasi berhasil disimpan!', 'success');
+        showToast('Informasi profil kos & pengelola berhasil disimpan!', 'success');
         if (document.getElementById('bannerPropertyName')) document.getElementById('bannerPropertyName').textContent = kosName;
-        if (document.getElementById('bannerPropertyAddress')) document.getElementById('bannerPropertyAddress').textContent = '📍 ' + kosAddress;
         if (document.getElementById('profileOwnerName')) document.getElementById('profileOwnerName').textContent = ownerName;
       } catch (err) {
-        showToast('Gagal menyimpan profil ke server', 'warning');
+        showToast('Gagal menyimpan profil', 'warning');
       }
     });
 

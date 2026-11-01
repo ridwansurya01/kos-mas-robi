@@ -199,13 +199,13 @@ body {
 }
 
 /* ==========================================================================
-   2. HERO SECTION — FULL TEAL BG + PHOTO FADING IN FROM RIGHT
-   Exactly like transport-logistic reference: one unified dark gradient
-   background, photo positioned on right fading seamlessly into the gradient.
+   2. HERO SECTION — FULL TEAL BG + SEAMLESS BLURRED PHOTO MASK
+   Uses CSS mask-image so the photo pixels smoothly dissolve to 0% opacity.
+   Guarantees 100% zero-line, seamless transition between left color and photo.
    ========================================================================== */
 .lr-hero-section {
   position: relative;
-  background: linear-gradient(135deg, #0b2e33 0%, #0d3d44 30%, #115a64 60%, #1a7080 100%);
+  background: linear-gradient(135deg, #04272c 0%, #063d45 35%, #0a5661 70%, #0d6572 100%);
   color: #ffffff;
   padding: 0;
   overflow: hidden;
@@ -213,55 +213,42 @@ body {
   min-height: 540px;
 }
 
-/* The photo image — positioned absolutely on the right half */
+/* The photo image — masked with ultra-soft alpha gradient */
 .lr-hero-photo-bg {
   position: absolute;
   top: 0;
   right: 0;
-  width: 55%;
+  width: 72%;
   height: 100%;
   z-index: 1;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.02) 8%, rgba(0,0,0,0.15) 25%, rgba(0,0,0,0.5) 48%, rgba(0,0,0,0.85) 75%, black 95%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0,0,0,0.02) 8%, rgba(0,0,0,0.15) 25%, rgba(0,0,0,0.5) 48%, rgba(0,0,0,0.85) 75%, black 95%);
 }
 
 .lr-hero-photo-bg img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
   display: block;
 }
 
-/* Gradient overlay ON TOP of the photo — fades photo into teal on its left edge */
-.lr-hero-photo-fade {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    #0b2e33 0%,
-    rgba(11, 46, 51, 0.95) 15%,
-    rgba(13, 61, 68, 0.75) 35%,
-    rgba(17, 90, 100, 0.35) 55%,
-    rgba(26, 112, 128, 0.1) 75%,
-    transparent 100%
-  );
-  z-index: 2;
-  pointer-events: none;
-}
-
-/* Subtle dark tint at the very bottom for depth */
+/* Ambient shadow at bottom of photo to merge with floating search card */
 .lr-hero-photo-bg::after {
   content: '';
   position: absolute;
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 40%;
-  background: linear-gradient(180deg, transparent 0%, rgba(11, 46, 51, 0.4) 100%);
-  z-index: 1;
+  height: 35%;
+  background: linear-gradient(180deg, transparent 0%, rgba(4, 39, 44, 0.45) 100%);
+  z-index: 2;
   pointer-events: none;
+}
+
+.lr-hero-photo-fade {
+  display: none;
 }
 
 .lr-hero-grid {

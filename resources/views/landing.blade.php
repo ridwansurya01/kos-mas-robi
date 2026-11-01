@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
   <meta name="description" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
   <meta name="theme-color" content="#0a5661">
-  <title>{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern Sleman</title>
+  <title>{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230a5661'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/></svg>">
@@ -20,15 +20,38 @@
 </head>
 <body>
 
+  @php
+    $landing = $setting->landing_content ?? [];
+    $heroImg = $landing['hero_image'] ?? 'assets/images/kos_exterior.jpg';
+    $bentoGallery = $landing['bento_gallery'] ?? [
+        'assets/images/hero_scandinavian_room.jpg',
+        'assets/images/rooms/room_2.jpg',
+        'assets/images/rooms/room_3.jpg',
+        'assets/images/kos_exterior.jpg'
+    ];
+    $bentoFeatures = $landing['bento_features'] ?? [
+        [
+            'icon' => '🚀',
+            'title' => 'Internet Fiber 100 Mbps Tanpa Batas',
+            'desc' => 'Koneksi lancar untuk skripsi, kuliah online, zoom meeting, dan hiburan streaming.'
+        ],
+        [
+            'icon' => '🔐',
+            'title' => 'Smart Access Mandiri & CCTV 24 Jam',
+            'desc' => 'Bebas jam malam dengan kunci mandiri dan pengawasan kamera CCTV di seluruh lorong.'
+        ]
+    ];
+  @endphp
+
   {{-- =========================================================================
-       1. TOP NAVBAR (MATCHING REFERENCE DESIGN)
+       1. TOP NAVBAR (PUTIH PREMIUM MODERN)
        ========================================================================= --}}
   <nav class="lr-navbar">
     <div class="lr-container lr-nav-inner">
       <a href="{{ route('home') }}" class="lr-brand">
         <div class="lr-brand-badge-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
             <path d="M9 21V12h6v9"/>
           </svg>
         </div>
@@ -61,33 +84,30 @@
   </nav>
 
   {{-- =========================================================================
-       2. HERO SECTION — FULL TEAL BG, PHOTO FADING IN FROM RIGHT
-       (Persis referensi transport-logistic: foto menyatu dengan gradient)
+       2. HERO SECTION — SEAMLESS FADED PHOTO MASK (ZERO-LINE TRANSITION)
        ========================================================================= --}}
   <header class="lr-hero-section" id="beranda">
 
-    {{-- Photo positioned on the right, behind content --}}
+    {{-- Photo positioned on the right, alpha masked smoothly into background --}}
     <div class="lr-hero-photo-bg">
-      <img src="{{ asset('assets/images/kos_exterior.jpg') }}"
+      <img src="{{ asset($heroImg) }}"
            alt="Bangunan {{ $setting->kos_name ?? 'Kos Mas Robi' }}"
-           onerror="this.src='{{ asset('assets/images/hero_scandinavian_room.jpg') }}'">
-      {{-- Gradient overlay that fades photo into teal on its left edge --}}
-      <div class="lr-hero-photo-fade"></div>
+           onerror="this.src='{{ asset('assets/images/kos_exterior.jpg') }}'">
     </div>
 
     <div class="lr-container lr-hero-grid">
       <div class="lr-hero-left">
         <h1 class="lr-hero-title">
-          Find Your<br>Dream Home
+          {!! nl2br(e($landing['hero_title'] ?? "Find Your\nDream Home")) !!}
         </h1>
 
         <p class="lr-hero-desc">
-          Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis di Sleman, DI Yogyakarta.
+          {{ $landing['hero_desc'] ?? 'Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis.' }}
         </p>
 
         <div class="lr-hero-cta-group">
-          <a href="#kamar" class="lr-btn-coral">
-            <span>Jelajahi Kamar</span>
+          <a href="{{ $landing['hero_btn_link'] ?? '#kamar' }}" class="lr-btn-coral">
+            <span>{{ $landing['hero_btn_text'] ?? 'Jelajahi Kamar' }}</span>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
           <a href="#lokasi" class="lr-btn-link-white">
@@ -115,7 +135,7 @@
             </div>
 
             <div class="lr-search-input-pill">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="18" x2="9" y2="18.01"/><line x1="15" y1="18" x2="15" y2="18.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="9" y1="22" x2="9" y2="22.01"/><line x1="15" y1="22" x2="15" y2="22.01"/><line x1="9" y1="14" x2="9" y2="14.01"/><line x1="15" y1="14" x2="15" y2="14.01"/><line x1="9" y1="10" x2="9" y2="10.01"/><line x1="15" y1="10" x2="15" y2="10.01"/><line x1="9" y1="6" x2="9" y2="6.01"/><line x1="15" y1="6" x2="15" y2="6.01"/></svg>
               <select name="floor" aria-label="Pilih Lantai">
                 <option value="all" {{ request('floor') == 'all' ? 'selected' : '' }}>🏢 Semua Lantai</option>
                 <option value="1" {{ request('floor') == '1' ? 'selected' : '' }}>Lantai 1</option>
@@ -260,7 +280,7 @@
   </section>
 
   {{-- =========================================================================
-       5. BENTO ABOUT & FASILITAS COLLAGE (PERSIS BAGIAN BAWAH PADA TEMPLATE)
+       5. BENTO ABOUT & FASILITAS COLLAGE (EDITABLE DARI ADMIN)
        ========================================================================= --}}
   <section class="lr-bento-section" id="fasilitas">
     <div class="lr-container">
@@ -269,52 +289,46 @@
       <div class="lr-bento-header-grid">
         <div>
           <h2 class="lr-two-tone-title">
-            <span class="highlight-coral">Kenyamanan Maksimal</span><br>
-            <span class="dark-teal">Untuk Istirahat & Produktivitas</span>
+            <span class="highlight-coral">{{ $landing['bento_tag'] ?? 'Kenyamanan Maksimal' }}</span><br>
+            <span class="dark-teal">{{ $landing['bento_title'] ?? 'Untuk Istirahat & Produktivitas' }}</span>
           </h2>
           <p class="lr-bento-header-desc">
-            Setiap jengkal hunian kami rancang dengan seksama untuk memastikan penghuni mendapatkan istirahat berkualitas dan fokus maksimal dalam menuntut ilmu maupun berkarier.
+            {{ $landing['bento_desc'] ?? 'Setiap jengkal hunian kami rancang dengan seksama untuk memastikan penghuni mendapatkan istirahat berkualitas dan fokus maksimal dalam menuntut ilmu maupun berkarier.' }}
           </p>
         </div>
 
         <div class="lr-feature-pill-stack">
-          <div class="lr-feat-pill-item">
-            <div class="lr-feat-circle-icon coral">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          @foreach($bentoFeatures as $idx => $bf)
+            <div class="lr-feat-pill-item">
+              <div class="lr-feat-circle-icon {{ $idx % 2 == 0 ? 'coral' : 'teal' }}">
+                <span>{{ $bf['icon'] ?? ($idx % 2 == 0 ? '🚀' : '🔐') }}</span>
+              </div>
+              <div class="lr-feat-pill-text">
+                <strong>{{ $bf['title'] ?? '' }}</strong>
+                <span>{{ $bf['desc'] ?? '' }}</span>
+              </div>
             </div>
-            <div class="lr-feat-pill-text">
-              <strong>Internet Fiber 100 Mbps Tanpa Batas</strong>
-              <span>Koneksi lancar untuk skripsi, kuliah online, zoom meeting, dan hiburan streaming.</span>
-            </div>
-          </div>
-
-          <div class="lr-feat-pill-item">
-            <div class="lr-feat-circle-icon teal">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </div>
-            <div class="lr-feat-pill-text">
-              <strong>Smart Access Mandiri & CCTV 24 Jam</strong>
-              <span>Bebas jam malam dengan kunci mandiri dan pengawasan kamera CCTV di seluruh lorong.</span>
-            </div>
-          </div>
+          @endforeach
         </div>
       </div>
 
-      {{-- Bento Photo Collage Grid (Persis Layout Kotak-Kotak Bawah Template) --}}
+      {{-- Bento Photo Collage Grid (4 Foto Terkelola Admin) --}}
       <div class="lr-gallery-grid">
 
         {{-- Card 1: Fast Racket / Highlight Feature Card --}}
         <div class="lr-gallery-hero-card">
           <div>
-            <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--coral-light); font-weight: 800; display: block; margin-bottom: 8px;">Fasilitas Unggulan</span>
-            <h3>Living & Study In Harmony</h3>
+            <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--coral-light); font-weight: 800; display: block; margin-bottom: 8px;">
+              {{ $landing['bento_card_tag'] ?? 'Fasilitas Unggulan' }}
+            </span>
+            <h3>{{ $landing['bento_card_title'] ?? 'Living & Study In Harmony' }}</h3>
             <p>
-              Tersedia dapur bersama komplit dengan kompor dan kulkas, area parkir motor dan mobil luas berpagar aman, serta pembersihan area publik rutin setiap hari.
+              {{ $landing['bento_card_desc'] ?? 'Tersedia dapur bersama komplit dengan kompor dan kulkas, area parkir motor dan mobil luas berpagar aman, serta pembersihan area publik rutin setiap hari.' }}
             </p>
           </div>
           <div style="margin-top: 30px;">
             <a href="#kamar" class="lr-btn-coral" style="padding: 0 22px; height: 42px; font-size: 0.85rem;">
-              <span>Lihat Unit Kamar</span>
+              <span>{{ $landing['bento_card_btn'] ?? 'Lihat Unit Kamar' }}</span>
             </a>
           </div>
         </div>
@@ -322,13 +336,13 @@
         {{-- Card 2: 2 Stacked Photo Cards --}}
         <div class="lr-gallery-column">
           <div class="lr-gallery-photo-card">
-            <img src="{{ asset('assets/images/hero_scandinavian_room.jpg') }}"
-                 alt="Interior Kamar Scandinavian"
+            <img src="{{ asset($bentoGallery[0] ?? 'assets/images/hero_scandinavian_room.jpg') }}"
+                 alt="Foto Galeri 1"
                  onerror="this.src='{{ asset('assets/images/rooms/room_1.jpg') }}'">
           </div>
           <div class="lr-gallery-photo-card">
-            <img src="{{ asset('assets/images/rooms/room_2.jpg') }}"
-                 alt="Kamar Kost Nyaman"
+            <img src="{{ asset($bentoGallery[1] ?? 'assets/images/rooms/room_2.jpg') }}"
+                 alt="Foto Galeri 2"
                  onerror="this.src='{{ asset('assets/images/room_sample.jpg') }}'">
           </div>
         </div>
@@ -336,13 +350,13 @@
         {{-- Card 3: 2 Stacked Photo Cards --}}
         <div class="lr-gallery-column">
           <div class="lr-gallery-photo-card">
-            <img src="{{ asset('assets/images/rooms/room_3.jpg') }}"
-                 alt="Fasilitas Kamar Mandi & Kasur"
+            <img src="{{ asset($bentoGallery[2] ?? 'assets/images/rooms/room_3.jpg') }}"
+                 alt="Foto Galeri 3"
                  onerror="this.src='{{ asset('assets/images/rooms/room_1.jpg') }}'">
           </div>
           <div class="lr-gallery-photo-card">
-            <img src="{{ asset('assets/images/kos_exterior.jpg') }}"
-                 alt="Tampak Luar Kos Mas Robi Malam Hari"
+            <img src="{{ asset($bentoGallery[3] ?? 'assets/images/kos_exterior.jpg') }}"
+                 alt="Foto Galeri 4"
                  onerror="this.src='{{ asset('assets/images/hero_scandinavian_room.jpg') }}'">
           </div>
         </div>
@@ -353,18 +367,20 @@
   </section>
 
   {{-- =========================================================================
-       6. GOOGLE MAPS & STRATEGIC LOCATION HIGHLIGHTS (DENGAN TEMA TEAL & CORAL)
+       6. GOOGLE MAPS & STRATEGIC LOCATION HIGHLIGHTS (100% WORKING & EDITABLE)
        ========================================================================= --}}
   <section class="lr-location-section" id="lokasi">
     <div class="lr-container">
 
       <div style="margin-bottom: 40px;">
-        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal-primary); background: #ffffff; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-teal-soft); display: inline-block; margin-bottom: 12px;">📍 Peta & Akses Strategis</span>
+        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal-primary); background: #ffffff; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-teal-soft); display: inline-block; margin-bottom: 12px;">
+          {{ $landing['location_tag'] ?? '📍 PETA & AKSES STRATEGIS' }}
+        </span>
         <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 900; color: var(--text-dark); letter-spacing: -0.02em;">
-          Lokasi Sangat Strategis di Sleman
+          {{ $landing['location_title'] ?? 'Lokasi Sangat Strategis' }}
         </h2>
         <p style="font-size: 0.95rem; color: var(--text-muted); max-width: 640px; margin-top: 6px;">
-          Terletak di kawasan Pandega Marta - Kaliurang KM 5 Sleman. Tenang untuk belajar, aman 24 jam, dan sangat dekat dengan kampus utama dan fasilitas umum.
+          {{ $landing['location_desc'] ?? 'Akses cepat dan tenang untuk belajar, aman 24 jam, serta dekat dengan berbagai kampus utama dan fasilitas publik.' }}
         </p>
       </div>
 
@@ -399,7 +415,7 @@
 
           <div class="lr-loc-actions">
             @php
-              $mapsUrl = $setting->gmaps_url ?: 'https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi Sleman Yogyakarta');
+              $mapsUrl = $setting->gmaps_url ?: ('https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi'));
             @endphp
             <a href="{{ $mapsUrl }}" target="_blank" rel="noopener noreferrer" class="lr-btn-gmaps">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -412,7 +428,7 @@
           </div>
         </div>
 
-        {{-- Right: Interactive Google Maps Iframe Frame --}}
+        {{-- Right: Interactive Google Maps Iframe Frame (Anti-Gagal) --}}
         <div class="lr-map-card-right">
           <div class="lr-map-chrome-bar">
             <div class="lr-map-dots">
@@ -426,17 +442,7 @@
             </div>
           </div>
           <div class="lr-map-frame">
-            @php
-              $finalEmbed = $setting->gmaps_embed;
-              if (str_contains($finalEmbed ?? '', '<iframe')) {
-                  preg_match('/src="([^"]+)"/', $finalEmbed, $m);
-                  $finalEmbed = $m[1] ?? '';
-              }
-              if (empty($finalEmbed)) {
-                  $finalEmbed = 'https://maps.google.com/maps?q=' . urlencode($setting->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta') . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-              }
-            @endphp
-            <iframe src="{{ $finalEmbed }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Maps Lokasi Kos Mas Robi"></iframe>
+            <iframe src="{{ $setting->final_embed_url }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Maps Lokasi {{ $setting->kos_name ?? 'Kos Mas Robi' }}"></iframe>
           </div>
         </div>
 
@@ -446,20 +452,20 @@
   </section>
 
   {{-- =========================================================================
-       7. FOUNDER QUOTE & COMMITMENT
+       7. FOUNDER QUOTE & COMMITMENT (EDITABLE DARI ADMIN)
        ========================================================================= --}}
   <section class="lr-quote-section" id="tentang">
     <div class="lr-container">
       <div class="lr-quote-box">
         <div>
-          <div class="lr-quote-avatar">MR</div>
-          <div class="lr-quote-name">{{ $setting->owner_name ?? 'Mas Robi' }}</div>
-          <div class="lr-quote-role">Owner & Pengelola Properti</div>
+          <div class="lr-quote-avatar">{{ $landing['founder_avatar'] ?? 'MR' }}</div>
+          <div class="lr-quote-name">{{ $landing['founder_name'] ?? ($setting->owner_name ?? 'Mas Robi') }}</div>
+          <div class="lr-quote-role">{{ $landing['founder_role'] ?? 'Owner & Pengelola Properti' }}</div>
         </div>
 
         <div class="lr-quote-content">
           <p>
-            “Kenyamanan, kebersihan, dan keamanan penghuni adalah komitmen utama kami. Kami memastikan setiap anak kos merasakan suasana tinggal yang hangat layaknya di rumah sendiri, dengan fasilitas modern tanpa repot dan dukungan pengelola yang selalu siap membantu kapan pun dibutuhkan.”
+            “{{ $landing['founder_quote'] ?? 'Kenyamanan, kebersihan, dan keamanan penghuni adalah komitmen utama kami. Kami memastikan setiap anak kos merasakan suasana tinggal yang hangat layaknya di rumah sendiri, dengan fasilitas modern tanpa repot dan dukungan pengelola yang selalu siap membantu kapan pun dibutuhkan.' }}”
           </p>
         </div>
       </div>
@@ -475,7 +481,7 @@
         <div class="lr-footer-brand">
           <h4>{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h4>
           <p style="font-size: 0.88rem; line-height: 1.65; max-width: 440px; color: #94a3b8; margin-bottom: 18px;">
-            Hunian kost eksklusif dengan fasilitas lengkap, kamar ber-AC, kamar mandi dalam, WiFi fiber cepat 100 Mbps, dan keamanan 24 jam di Sleman, DI Yogyakarta.
+            {{ $landing['footer_desc'] ?? 'Hunian kost eksklusif dengan fasilitas lengkap, kamar ber-AC, kamar mandi dalam, WiFi fiber cepat 100 Mbps, dan keamanan 24 jam di kawasan strategis.' }}
           </p>
           <div style="font-size: 0.84rem; color: #cbd5e1;">
             📍 {{ $setting->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta' }}
