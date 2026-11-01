@@ -19,6 +19,16 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
+// ─── Google OAuth ───
+Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+// ─── Forgot / Reset Password ───
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 // Quick demo switcher (dev-only convenience, requires existing auth)
 Route::get('/quick-login/{role?}', [AuthController::class, 'quickLogin'])->name('quick-login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -133,6 +143,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/portal/payment', [TenantPortalController::class, 'submitPayment'])->name('tenant.payment.submit');
     Route::post('/portal/complaint', [TenantPortalController::class, 'submitComplaint'])->name('tenant.complaint.submit');
     Route::post('/portal/profile', [TenantPortalController::class, 'updateProfile'])->name('tenant.profile.update');
+    Route::post('/portal/profile/send-new-password', [TenantPortalController::class, 'sendNewPasswordToGmail'])->name('tenant.profile.send_new_password');
     Route::post('/portal/room/{id}/custom-interior', [TenantPortalController::class, 'requestCustomInterior'])->name('tenant.room.custom_interior');
     Route::post('/portal/room-transfer', [TenantPortalController::class, 'submitRoomTransfer'])->name('tenant.room.transfer');
 });

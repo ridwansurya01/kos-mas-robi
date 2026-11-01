@@ -11,6 +11,9 @@ use App\Models\MaintenanceTicket;
 use App\Models\Setting;
 use App\Models\RoomTransfer;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class TenantPortalController extends Controller
@@ -375,5 +378,36 @@ class TenantPortalController extends Controller
         ]);
 
         return back()->with('success', 'Pengajuan pindah kamar berhasil dikirim! Pengelola akan segera meninjau permohonan Anda.');
+    }
+
+    /**
+     * Generate and send new password to tenant's registered Gmail.
+     */
+    public function sendNewPasswordToGmail(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Sesi Anda telah berakhir. Silakan login kembali.'], 401);
+        }
+
+        if (empty($user->email)) {
+            return response()->json(['success' => false, 'message' => 'Akun Anda belum memiliki alamat email yang terdaftar.'], 422);
+        }
+
+        $newPassword = 'Kmr' . rand(1000, 9999) . '@' . Str::random(2);
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        try {
+            Mail::to($user->email)->send(new \App\Mail\NewPasswordMail($user, $newPassword, 'profile'));
+        } catch (\Exception $e) {
+            Log::warning('Send new password to tenant email failed: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password baru berhasil dibuat dan dikirim ke Gmail (' . $user->email . ')! Silakan cek inbox/spam.',
+            'new_password_preview' => $newPassword,
+        ]);
     }
 }

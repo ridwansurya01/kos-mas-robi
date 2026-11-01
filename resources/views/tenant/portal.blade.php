@@ -1289,6 +1289,41 @@
             </div>
           </div>
 
+          {{-- Keamanan & Password --}}
+          <div class="tp-grid-col-2" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <strong style="color: #0f172a; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
+                  <span>🔒 Keamanan & Password</span>
+                </strong>
+                <p style="margin: 3px 0 0; font-size: 0.78rem; color: #64748b;">
+                  Ubah kata sandi secara manual atau minta sistem mengirim password baru langsung ke Gmail Anda.
+                </p>
+              </div>
+
+              {{-- Tombol Kirim Password Baru ke Gmail --}}
+              <button type="button" id="btnSendPasswordToEmail" class="btn-sm" style="background: #f0fdfa; border: 1.5px solid #0e7482; color: #0a5661; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <span>Kirim Password Baru ke Gmail</span>
+              </button>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="profilePassword" class="form-label" style="font-size: 0.78rem;">
+                  <span>Password Baru (Opsional)</span>
+                </label>
+                <input type="password" id="profilePassword" name="password" class="form-control" placeholder="Min. 6 karakter">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="profilePasswordConf" class="form-label" style="font-size: 0.78rem;">
+                  <span>Ulangi Password Baru</span>
+                </label>
+                <input type="password" id="profilePasswordConf" name="password_confirmation" class="form-control" placeholder="Ketik ulang password">
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -1589,6 +1624,40 @@ document.addEventListener('click', function(e) {
     })
     .catch(function() { showPortalToast('Terjadi kesalahan jaringan, coba lagi.', 'error'); })
     .finally(function() { btn.disabled = false; btn.textContent = orig; });
+  });
+
+  // ─── AJAX: Kirim Password Baru ke Gmail ─────────────────────────────
+  document.getElementById('btnSendPasswordToEmail')?.addEventListener('click', function() {
+    var btn = this;
+    if (!confirm('Apakah Anda yakin ingin membuat password baru dan mengirimkannya ke Gmail terdaftar Anda?')) return;
+    
+    var origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="tp-spinner"></span> Mengirim...';
+    
+    fetch('{{ route("tenant.profile.send_new_password") }}', {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') || {}).content || '',
+        'Accept': 'application/json'
+      }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        showPortalToast(data.message, 'success');
+      } else {
+        showPortalToast(data.message || 'Gagal mengirim password baru.', 'error');
+      }
+    })
+    .catch(function() {
+      showPortalToast('Terjadi kesalahan jaringan.', 'error');
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+    });
   });
 
   // ─── AJAX: Custom Interior & Booking Form ──────────────────────

@@ -1426,9 +1426,23 @@ ul, ol {
     gap: 12px;
   }
 
-  /* Automatically convert wide tables to responsive touch cards */
+  /* Automatically convert wide tables to responsive touch cards or scrollable */
   .custom-table {
     display: none;
+  }
+
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .table-responsive .custom-table,
+  .custom-table.force-table {
+    display: table !important;
+    min-width: 600px;
   }
 
   .mobile-card-list {

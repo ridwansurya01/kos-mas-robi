@@ -778,7 +778,8 @@
             </div>
           </div>
 
-          <table class="custom-table" id="transfersTable">
+          <div class="table-responsive">
+            <table class="custom-table" id="transfersTable">
             <thead>
               <tr>
                 <th>Tgl Pengajuan</th>
@@ -852,6 +853,7 @@
               @endforelse
             </tbody>
           </table>
+          </div>
         </div>
       </div>
       <div class="tab-pane" id="tab-settings">
