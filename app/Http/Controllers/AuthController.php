@@ -41,10 +41,10 @@ class AuthController extends Controller
             $request->session()->forget('url.intended');
 
             if (Auth::user()->isOwner()) {
-                return redirect()->route('admin.dashboard');
+                return redirect()->route('admin.dashboard')->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '! Masuk sebagai Admin.');
             }
 
-            return redirect()->route('tenant.portal');
+            return redirect()->route('tenant.portal')->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '! Masuk sebagai Pelanggan.');
         }
 
         return back()->withErrors([
@@ -82,6 +82,10 @@ class AuthController extends Controller
      */
     public function showRegister()
     {
+        if (Auth::check()) {
+            return Auth::user()->isOwner() ? redirect()->route('admin.dashboard') : redirect()->route('tenant.portal');
+        }
+
         $availableRooms = Room::where('status', 'available')->get();
         return view('auth.register', compact('availableRooms'));
     }
@@ -94,31 +98,44 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
             'phone' => 'required|string',
+            'role' => 'nullable|string|in:tenant,owner',
             'room_id' => 'nullable|exists:rooms,id',
         ]);
+
+        $role = $request->input('role', 'tenant');
+        if (!in_array($role, ['tenant', 'owner'])) {
+            $role = 'tenant';
+        }
 
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'tenant',
+            'role' => $role,
             'phone' => $validated['phone'],
-            'room_id' => $validated['room_id'] ?? null,
-            'avatar' => 'assets/images/tenant_avatar.jpg',
+            'room_id' => ($role === 'tenant') ? ($validated['room_id'] ?? null) : null,
+            'avatar' => $role === 'owner' ? 'assets/images/owner_avatar.jpg' : 'assets/images/tenant_avatar.jpg',
         ]);
 
-        // Send Welcome email to customer's Gmail
-        try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeTenantMail($user));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Welcome email failed: ' . $e->getMessage());
+        // Send Welcome email to tenant if registered as tenant
+        if ($role === 'tenant') {
+            try {
+                \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeTenantMail($user));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::warning('Welcome email failed: ' . $e->getMessage());
+            }
         }
 
         Auth::login($user);
+        $request->session()->regenerate();
 
-        return redirect()->route('tenant.portal')->with('success', 'Akun berhasil dibuat! Selamat datang di Kos Mas Robi.');
+        if ($user->isOwner()) {
+            return redirect()->route('admin.dashboard')->with('success', 'Akun Admin berhasil dibuat! Selamat datang di Dashboard Kos Mas Robi.');
+        }
+
+        return redirect()->route('tenant.portal')->with('success', 'Akun Pelanggan berhasil dibuat! Selamat datang di Kos Mas Robi.');
     }
 
     /**
