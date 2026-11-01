@@ -69,15 +69,15 @@
       <div class="lr-nav-actions">
         @auth
           @if(Auth::user()->isOwner())
-            <a href="{{ route('admin.dashboard') }}" class="lr-btn-ghost-white">⚙️ Panel Admin</a>
+            <a href="{{ route('admin.dashboard') }}" class="lr-btn-ghost-white">Login</a>
           @else
-            <a href="{{ route('tenant.portal') }}" class="lr-btn-ghost-white">🚪 Portal Penghuni</a>
+            <a href="{{ route('tenant.portal') }}" class="lr-btn-ghost-white">Login</a>
           @endif
         @else
-          <a href="{{ route('login') }}" class="lr-btn-ghost-white">Masuk Akun</a>
+          <a href="{{ route('login') }}" class="lr-btn-ghost-white">Login</a>
         @endauth
-        <a href="#kamar" class="lr-btn-pill-teal">
-          <span>+ Pesan Kamar</span>
+        <a href="{{ route('register') }}" class="lr-btn-pill-teal">
+          <span>Register</span>
         </a>
       </div>
     </div>
