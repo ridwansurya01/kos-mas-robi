@@ -71,7 +71,7 @@
 
       <form action="{{ route('logout') }}" method="POST" id="formLogoutTenant" style="display:inline;">
         @csrf
-        <button type="button" class="tp-btn-logout" id="btnTriggerLogoutTenant">Keluar</button>
+        <button type="submit" class="tp-btn-logout">Keluar</button>
       </form>
     </div>
   </nav>
@@ -1187,28 +1187,6 @@
   </div>
 </div>
 
-{{-- Modal 4D: Pop-up Konfirmasi Logout Modern (Sesuai Permintaan Revisi) --}}
-<div class="kmr-logout-overlay" id="modalLogoutConfirm">
-  <div class="kmr-logout-card">
-    <div class="kmr-logout-icon-wrap">
-      <div class="kmr-logout-pulse-ring"></div>
-      <div class="kmr-logout-icon-circle">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-      </div>
-    </div>
-    <h3 class="kmr-logout-title">Yakin Ingin Keluar?</h3>
-    <p class="kmr-logout-subtitle">Sesi Anda di portal <strong>{{ $setting->kos_name ?? 'Kos Mas Robi' }}</strong> akan diakhiri. Anda perlu login kembali untuk mengakses kamar Anda.</p>
-    <div class="kmr-logout-actions">
-      <button type="button" class="kmr-logout-btn-cancel" id="btnCancelLogoutModal">Batal</button>
-      <button type="button" class="kmr-logout-btn-confirm" id="btnConfirmLogoutModal">Ya, Keluar</button>
-    </div>
-  </div>
-</div>
-
 {{-- Modal 5: Profil Pelanggan (Fitur Lengkap Sesuai Permintaan User) --}}
 <div class="modal-overlay" id="modalProfile">
   <div class="modal-box wide">
@@ -1416,23 +1394,6 @@ document.addEventListener('click', function(e) {
     document.getElementById(id)?.addEventListener('click', function() {
       document.getElementById(modalId)?.classList.add('open');
     });
-  });
-
-  // ─── Konfirmasi Logout Modern (Pop-up "Yakin Ingin Keluar?") ───
-  var modalLogout = document.getElementById('modalLogoutConfirm');
-  var formLogout = document.getElementById('formLogoutTenant');
-  document.getElementById('btnTriggerLogoutTenant')?.addEventListener('click', function(e) {
-    e.preventDefault();
-    modalLogout?.classList.add('open');
-  });
-  document.getElementById('btnCancelLogoutModal')?.addEventListener('click', function() {
-    modalLogout?.classList.remove('open');
-  });
-  document.getElementById('btnConfirmLogoutModal')?.addEventListener('click', function() {
-    formLogout?.submit();
-  });
-  modalLogout?.addEventListener('click', function(e) {
-    if (e.target === modalLogout) modalLogout.classList.remove('open');
   });
 
   document.getElementById('btnOpenProfileBanner')?.addEventListener('click', function() {
