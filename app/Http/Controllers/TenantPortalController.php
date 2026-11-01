@@ -269,10 +269,14 @@ class TenantPortalController extends Controller
         }
 
         if ($request->filled('password')) {
-            $request->validate([
-                'password' => 'string|min:8|confirmed',
-            ]);
-            $user->password = Hash::make($request->password);
+            // Penggantian password wajib melalui alur verifikasi OTP
+            if ($user->password_otp_verified_at && now()->diffInMinutes($user->password_otp_verified_at) <= 15) {
+                $request->validate([
+                    'password' => 'string|min:8|confirmed',
+                ]);
+                $user->password = Hash::make($request->password);
+                $user->password_otp_verified_at = null;
+            }
         }
 
         $user->name = $validated['name'];
@@ -381,9 +385,9 @@ class TenantPortalController extends Controller
     }
 
     /**
-     * Generate and send new password to tenant's registered Gmail.
+     * Kirim kode OTP 6 digit ke Gmail terdaftar pelanggan untuk Ganti Password.
      */
-    public function sendNewPasswordToGmail(Request $request)
+    public function sendPasswordOtp(Request $request)
     {
         $user = Auth::user();
         if (!$user) {
@@ -391,23 +395,174 @@ class TenantPortalController extends Controller
         }
 
         if (empty($user->email)) {
-            return response()->json(['success' => false, 'message' => 'Akun Anda belum memiliki alamat email yang terdaftar.'], 422);
+            return response()->json(['success' => false, 'message' => 'Akun Anda belum memiliki alamat Gmail terdaftar.'], 422);
         }
 
-        $newPassword = 'Kmr' . rand(1000, 9999) . '@' . Str::random(2);
-        $user->password = Hash::make($newPassword);
+        // Jeda waktu pengiriman ulang OTP: minimal 60 detik
+        if ($user->password_otp_sent_at) {
+            $secondsSinceLast = abs(now()->diffInSeconds($user->password_otp_sent_at));
+            if ($secondsSinceLast < 60) {
+                $cooldown = (int) max(1, 60 - $secondsSinceLast);
+                return response()->json([
+                    'success' => false,
+                    'message' => "Mohon tunggu {$cooldown} detik sebelum meminta pengiriman ulang OTP.",
+                    'cooldown' => $cooldown,
+                ], 429);
+            }
+        }
+
+        // Generate 6 digit OTP acak
+        $otpCode = sprintf('%06d', random_int(100000, 999999));
+
+        // Simpan OTP ke database: berlaku 5 menit, reset percobaan ke 0
+        $user->password_otp = $otpCode;
+        $user->password_otp_expires_at = now()->addMinutes(5);
+        $user->password_otp_attempts = 0;
+        $user->password_otp_sent_at = now();
+        $user->password_otp_verified_at = null;
         $user->save();
 
+        // Kirim email OTP ke Gmail terdaftar
         try {
-            Mail::to($user->email)->send(new \App\Mail\NewPasswordMail($user, $newPassword, 'profile'));
+            Mail::to($user->email)->send(new \App\Mail\OtpPasswordMail($user, $otpCode));
         } catch (\Exception $e) {
-            Log::warning('Send new password to tenant email failed: ' . $e->getMessage());
+            Log::warning('Send OTP to tenant email failed: ' . $e->getMessage());
         }
+
+        Log::info("Kode OTP Ganti Password untuk {$user->email}: {$otpCode}");
 
         return response()->json([
             'success' => true,
-            'message' => 'Password baru berhasil dibuat dan dikirim ke Gmail (' . $user->email . ')! Silakan cek inbox/spam.',
-            'new_password_preview' => $newPassword,
+            'message' => 'Kode OTP 6 digit telah dikirim ke Gmail Anda (' . $user->email . '). Silakan cek kotak masuk atau spam.',
+            'email' => $user->email,
+            'cooldown' => 60,
+            'otp_debug' => config('mail.default') === 'log' ? $otpCode : null,
         ]);
+    }
+
+    /**
+     * Verifikasi kode OTP 6 digit yang dimasukkan pelanggan.
+     */
+    public function verifyPasswordOtp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Sesi Anda telah berakhir. Silakan login kembali.'], 401);
+        }
+
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ], [
+            'otp.required' => 'Kode OTP wajib diisi.',
+            'otp.size' => 'Kode OTP harus berupa 6 digit angka.',
+        ]);
+
+        if (empty($user->password_otp)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Belum ada permintaan OTP aktif. Silakan klik Ganti Password untuk menerima OTP baru.',
+            ], 400);
+        }
+
+        // Cek kedaluwarsa (berlaku 5 menit)
+        if (!$user->password_otp_expires_at || now()->isAfter($user->password_otp_expires_at)) {
+            $user->password_otp = null;
+            $user->save();
+            return response()->json([
+                'success' => false,
+                'message' => 'Kode OTP telah kedaluwarsa (melebihi 5 menit). Silakan minta kode OTP baru.',
+            ], 422);
+        }
+
+        // Cek maksimal 5 percobaan
+        if ($user->password_otp_attempts >= 5) {
+            $user->password_otp = null;
+            $user->save();
+            return response()->json([
+                'success' => false,
+                'message' => 'Batas percobaan OTP telah terlampaui (maksimal 5 kali salah). Silakan minta kode OTP baru.',
+            ], 422);
+        }
+
+        // Tambah counter percobaan
+        $user->password_otp_attempts += 1;
+        $user->save();
+
+        // Validasi kecocokan kode OTP
+        if (trim($request->otp) !== trim($user->password_otp)) {
+            $remaining = max(0, 5 - $user->password_otp_attempts);
+            if ($remaining === 0) {
+                $user->password_otp = null;
+                $user->save();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode OTP salah. Batas maksimal 5 percobaan telah habis. Silakan minta OTP baru.',
+                    'remaining' => 0,
+                ], 422);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => "Kode OTP salah. Sisa kesempatan: {$remaining} kali percobaan.",
+                'remaining' => $remaining,
+            ], 422);
+        }
+
+        // OTP valid: hanguskan OTP (hanya dapat digunakan 1 kali) dan tandai terverifikasi
+        $user->password_otp = null;
+        $user->password_otp_verified_at = now();
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kode OTP berhasil diverifikasi! Silakan buat password baru Anda pada formulir di bawah ini.',
+        ]);
+    }
+
+    /**
+     * Simpan password baru setelah OTP terverifikasi.
+     */
+    public function updatePasswordWithOtp(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Sesi Anda telah berakhir. Silakan login kembali.'], 401);
+        }
+
+        // Ketentuan keamanan: OTP wajib diverifikasi sebelum formulir password baru dapat diakses / disimpan
+        if (!$user->password_otp_verified_at || now()->diffInMinutes($user->password_otp_verified_at) > 15) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Sesi verifikasi OTP telah kedaluwarsa atau belum diverifikasi. Silakan ulangi proses ganti password.',
+            ], 403);
+        }
+
+        // Password minimal 8 karakter dan harus dikonfirmasi
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ], [
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password minimal harus 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok. Pastikan kedua kolom sama.',
+        ]);
+
+        // Simpan password baru dengan hashing
+        $user->password = Hash::make($request->password);
+        $user->password_otp_verified_at = null; // reset sesi verifikasi
+        $user->save();
+
+        Log::info("Password akun pelanggan {$user->email} berhasil diubah melalui verifikasi OTP.");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password Berhasil Diubah! Silakan gunakan password baru ini saat login berikutnya.',
+        ]);
+    }
+
+    /**
+     * Generate and send new password to tenant's registered Gmail (Legacy compatibility).
+     */
+    public function sendNewPasswordToGmail(Request $request)
+    {
+        return $this->sendPasswordOtp($request);
     }
 }

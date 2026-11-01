@@ -143,6 +143,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/portal/payment', [TenantPortalController::class, 'submitPayment'])->name('tenant.payment.submit');
     Route::post('/portal/complaint', [TenantPortalController::class, 'submitComplaint'])->name('tenant.complaint.submit');
     Route::post('/portal/profile', [TenantPortalController::class, 'updateProfile'])->name('tenant.profile.update');
+    Route::post('/portal/profile/send-otp', [TenantPortalController::class, 'sendPasswordOtp'])->name('tenant.profile.send_otp');
+    Route::post('/portal/profile/verify-otp', [TenantPortalController::class, 'verifyPasswordOtp'])->name('tenant.profile.verify_otp');
+    Route::post('/portal/profile/update-password', [TenantPortalController::class, 'updatePasswordWithOtp'])->name('tenant.profile.update_password');
     Route::post('/portal/profile/send-new-password', [TenantPortalController::class, 'sendNewPasswordToGmail'])->name('tenant.profile.send_new_password');
     Route::post('/portal/room/{id}/custom-interior', [TenantPortalController::class, 'requestCustomInterior'])->name('tenant.room.custom_interior');
     Route::post('/portal/room-transfer', [TenantPortalController::class, 'submitRoomTransfer'])->name('tenant.room.transfer');

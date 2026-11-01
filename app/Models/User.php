@@ -29,6 +29,11 @@ class User extends Authenticatable
         'avatar',
         'birth_date',
         'origin_address',
+        'password_otp',
+        'password_otp_expires_at',
+        'password_otp_attempts',
+        'password_otp_sent_at',
+        'password_otp_verified_at',
     ];
 
     /**
@@ -50,6 +55,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'password_otp_expires_at' => 'datetime',
+            'password_otp_sent_at' => 'datetime',
+            'password_otp_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

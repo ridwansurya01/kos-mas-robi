@@ -1297,41 +1297,110 @@
                   <span>🔒 Keamanan & Password</span>
                 </strong>
                 <p style="margin: 3px 0 0; font-size: 0.78rem; color: #64748b;">
-                  Ubah kata sandi secara manual atau minta sistem mengirim password baru langsung ke Gmail Anda.
+                  Ganti kata sandi akun Anda secara aman dengan verifikasi kode OTP 6 digit ke Gmail.
                 </p>
               </div>
 
-              {{-- Tombol Kirim Password Baru ke Gmail --}}
+              {{-- Tombol Ganti Password (Pertahankan tombol yang sudah ada pada posisinya) --}}
               <button type="button" id="btnSendPasswordToEmail" class="btn-sm" style="background: #f0fdfa; border: 1.5px solid #0e7482; color: #0a5661; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                <span>Kirim Password Baru ke Gmail</span>
+                <span id="btnSendPasswordText">Ganti Password</span>
               </button>
             </div>
 
-            {{-- Kotak Hasil Password Baru (muncul setelah klik tombol) --}}
-            <div id="profileNewPasswordResult" style="display: none; background: #ffffff; border: 2px dashed #0e7482; border-radius: 14px; padding: 12px 16px; margin-bottom: 14px; align-items: center; justify-content: space-between; gap: 10px;">
-              <div>
-                <span style="display: block; font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Password Baru Berhasil Dibuat:</span>
-                <code id="profileNewPasswordCode" style="font-size: 1.2rem; font-weight: 800; color: #0a5661; letter-spacing: 1px; font-family: monospace;">-</code>
-              </div>
-              <button type="button" id="btnCopyProfileNewPwd" style="background: #0a5661; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                Salin
-              </button>
+            {{-- Info Awal sebelum klik Ganti Password --}}
+            <div id="pwdInitialNotice" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 1.05rem;">🛡️</span>
+              <span>Klik tombol <strong>Ganti Password</strong> di atas untuk menerima kode OTP 6 digit di Gmail terdaftar ({{ $user->email }}).</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-              <div class="form-group" style="margin-bottom: 0;">
-                <label for="profilePassword" class="form-label" style="font-size: 0.78rem;">
-                  <span>Password Baru (Opsional)</span>
-                </label>
-                <input type="password" id="profilePassword" name="password" class="form-control" placeholder="Min. 6 karakter">
+            {{-- Container Interaktif Alur Ganti Password (OTP -> Form Password -> Selesai) --}}
+            <div id="otpPasswordWorkflow" style="display: none; flex-direction: column; gap: 12px; margin-top: 10px;">
+
+              {{-- TAHAP 1: INPUT & VERIFIKASI OTP --}}
+              <div id="otpStepVerification" style="background: #ffffff; border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(14, 116, 130, 0.06);">
+                <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                  <div>
+                    <span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(14, 116, 130, 0.1); color: #0a5661; font-size: 0.72rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">Langkah 1 dari 2: Verifikasi OTP</span>
+                    <p style="margin: 6px 0 0; font-size: 0.8rem; color: #334155; line-height: 1.45;">
+                      Kode OTP 6 digit telah dikirim ke Gmail <strong>{{ $user->email }}</strong>. Berlaku <strong>5 menit</strong>.
+                    </p>
+                  </div>
+                  <div id="otpTimerBadge" style="font-size: 0.74rem; font-weight: 700; color: #0e7482; background: #f0fdfa; border: 1px solid #99f6e4; padding: 4px 10px; border-radius: 20px;">
+                    ⏱️ Jeda Kirim Ulang: <span id="otpTimerSeconds">60</span>s
+                  </div>
+                </div>
+
+                {{-- Input OTP 6 Digit --}}
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                  <div style="position: relative; flex: 1 1 160px; max-width: 220px;">
+                    <input type="text" id="inputOtpCode" maxlength="6" inputmode="numeric" pattern="[0-9]*" class="form-control" placeholder="000000"
+                           style="font-family: monospace; font-size: 1.35rem; font-weight: 800; letter-spacing: 6px; text-align: center; height: 44px; padding: 0 10px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 12px;" autocomplete="one-time-code">
+                  </div>
+                  <button type="button" id="btnVerifyOtp" style="height: 44px; background: linear-gradient(135deg, #0a5661, #0e7482); color: #ffffff; border: none; padding: 0 18px; border-radius: 12px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(14, 116, 130, 0.25); transition: all 0.2s;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Verifikasi OTP</span>
+                  </button>
+                  <button type="button" id="btnResendOtp" disabled style="height: 44px; background: #f1f5f9; color: #94a3b8; border: 1px solid #cbd5e1; padding: 0 14px; border-radius: 12px; font-size: 0.78rem; font-weight: 700; cursor: not-allowed; transition: all 0.2s;">
+                    Kirim Ulang OTP
+                  </button>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px; flex-wrap: wrap; gap: 6px;">
+                  <span style="font-size: 0.73rem; color: #64748b;">
+                    Kesempatan verifikasi: <strong id="otpRemainingAttempts" style="color: #0a5661;">5</strong> kali tersisa.
+                  </span>
+                </div>
+
+                <div id="otpErrorAlert" style="display: none; margin-top: 10px; background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626; padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;"></div>
               </div>
-              <div class="form-group" style="margin-bottom: 0;">
-                <label for="profilePasswordConf" class="form-label" style="font-size: 0.78rem;">
-                  <span>Ulangi Password Baru</span>
-                </label>
-                <input type="password" id="profilePasswordConf" name="password_confirmation" class="form-control" placeholder="Ketik ulang password">
+
+              {{-- TAHAP 2: FORMULIR PASSWORD BARU (Hanya tampil setelah OTP valid) --}}
+              <div id="otpStepNewPassword" style="display: none; background: #ffffff; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #10b981; color: #fff; font-size: 0.75rem;">✓</span>
+                  <span style="font-size: 0.76rem; font-weight: 800; color: #065f46; text-transform: uppercase;">OTP Terverifikasi — Langkah 2: Tentukan Password Baru</span>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="inputNewPassword" class="form-label" style="font-size: 0.78rem; font-weight: 700;">
+                      <span>Password Baru (Min. 8 Karakter) *</span>
+                    </label>
+                    <input type="password" id="inputNewPassword" class="form-control" placeholder="Minimal 8 karakter" minlength="8" required style="font-size: 16px;">
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="inputNewPasswordConfirm" class="form-label" style="font-size: 0.78rem; font-weight: 700;">
+                      <span>Ulangi Password Baru *</span>
+                    </label>
+                    <input type="password" id="inputNewPasswordConfirm" class="form-control" placeholder="Ketik ulang password" minlength="8" required style="font-size: 16px;">
+                  </div>
+                </div>
+
+                <div id="newPwdErrorAlert" style="display: none; margin-top: 10px; background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626; padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;"></div>
+
+                <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 8px;">
+                  <button type="button" id="btnCancelOtpFlow" class="btn-sm" style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 9px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer;">
+                    Batal
+                  </button>
+                  <button type="button" id="btnSubmitNewPassword" style="background: linear-gradient(135deg, #0a5661, #0e7482); color: #ffffff; border: none; padding: 9px 18px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(14, 116, 130, 0.25); transition: all 0.2s;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span>Simpan Password Baru</span>
+                  </button>
+                </div>
               </div>
+
+              {{-- TAHAP 3: NOTIFIKASI BERHASIL --}}
+              <div id="otpStepSuccess" style="display: none; background: #f0fdfa; border: 2px solid #99f6e4; border-radius: 14px; padding: 18px; text-align: center;">
+                <div style="display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; background: #0e7482; color: #ffffff; margin-bottom: 8px; box-shadow: 0 4px 12px rgba(14, 116, 130, 0.25);">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <h4 style="margin: 0 0 4px; font-size: 1.05rem; font-weight: 800; color: #0a5661;">Password Berhasil Diubah!</h4>
+                <p style="margin: 0; font-size: 0.8rem; color: #64748b; line-height: 1.45;">
+                  Kata sandi akun Anda telah berhasil diperbarui menggunakan enkripsi hashing. Silakan gunakan password baru ini saat masuk ke portal berikutnya.
+                </p>
+              </div>
+
             </div>
           </div>
 
@@ -1637,16 +1706,59 @@ document.addEventListener('click', function(e) {
     .finally(function() { btn.disabled = false; btn.textContent = orig; });
   });
 
-  // ─── AJAX: Kirim Password Baru ke Gmail ─────────────────────────────
-  document.getElementById('btnSendPasswordToEmail')?.addEventListener('click', function() {
-    var btn = this;
-    if (!confirm('Apakah Anda yakin ingin membuat password baru dan mengirimkannya ke Gmail terdaftar Anda?')) return;
-    
+  // ─── ALUR GANTI PASSWORD VIA VERIFIKASI OTP GMAIL ───────────────────
+  var otpTimerInterval = null;
+  var otpCooldownSeconds = 0;
+
+  function startOtpCooldown(seconds) {
+    otpCooldownSeconds = seconds || 60;
+    var timerBadge = document.getElementById('otpTimerBadge');
+    var timerSec = document.getElementById('otpTimerSeconds');
+    var resendBtn = document.getElementById('btnResendOtp');
+    var btnSend = document.getElementById('btnSendPasswordToEmail');
+    var btnSendText = document.getElementById('btnSendPasswordText');
+
+    if (timerBadge) timerBadge.style.display = 'inline-block';
+    if (resendBtn) {
+      resendBtn.disabled = true;
+      resendBtn.style.background = '#f1f5f9';
+      resendBtn.style.color = '#94a3b8';
+      resendBtn.style.cursor = 'not-allowed';
+    }
+
+    clearInterval(otpTimerInterval);
+    otpTimerInterval = setInterval(function() {
+      otpCooldownSeconds--;
+      if (timerSec) timerSec.textContent = otpCooldownSeconds;
+      if (btnSendText) btnSendText.textContent = 'Kirim Ulang (' + otpCooldownSeconds + 's)';
+
+      if (otpCooldownSeconds <= 0) {
+        clearInterval(otpTimerInterval);
+        if (timerBadge) timerBadge.style.display = 'none';
+        if (btnSend) btnSend.disabled = false;
+        if (btnSendText) btnSendText.textContent = 'Kirim Ulang OTP';
+        if (resendBtn) {
+          resendBtn.disabled = false;
+          resendBtn.style.background = '#0a5661';
+          resendBtn.style.color = '#ffffff';
+          resendBtn.style.cursor = 'pointer';
+        }
+      }
+    }, 1000);
+  }
+
+  function sendOtpRequest() {
+    var btn = document.getElementById('btnSendPasswordToEmail');
+    var resendBtn = document.getElementById('btnResendOtp');
+    var errAlert = document.getElementById('otpErrorAlert');
+    if (errAlert) errAlert.style.display = 'none';
+
     var origHtml = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="tp-spinner"></span> Mengirim...';
-    
-    fetch('{{ route("tenant.profile.send_new_password") }}', {
+    btn.innerHTML = '<span class="tp-spinner"></span> Mengirim OTP...';
+    if (resendBtn) resendBtn.disabled = true;
+
+    fetch('{{ route("tenant.profile.send_otp") }}', {
       method: 'POST',
       headers: {
         'X-Requested-With': 'XMLHttpRequest',
@@ -1658,51 +1770,220 @@ document.addEventListener('click', function(e) {
     .then(function(data) {
       if (data.success) {
         showPortalToast(data.message, 'success');
-        if (data.new_password_preview) {
-          var resBox = document.getElementById('profileNewPasswordResult');
-          var codeEl = document.getElementById('profileNewPasswordCode');
-          if (resBox && codeEl) {
-            codeEl.textContent = data.new_password_preview;
-            resBox.style.display = 'flex';
-          }
-          var pwdInp = document.getElementById('profilePassword');
-          var pwdConfInp = document.getElementById('profilePasswordConf');
-          if (pwdInp) pwdInp.value = data.new_password_preview;
-          if (pwdConfInp) pwdConfInp.value = data.new_password_preview;
+
+        // Buka workflow dan sembunyikan info awal
+        var notice = document.getElementById('pwdInitialNotice');
+        var workflow = document.getElementById('otpPasswordWorkflow');
+        var stepVerify = document.getElementById('otpStepVerification');
+        var stepNewPwd = document.getElementById('otpStepNewPassword');
+        var stepSucc = document.getElementById('otpStepSuccess');
+
+        if (notice) notice.style.display = 'none';
+        if (workflow) workflow.style.display = 'flex';
+        if (stepVerify) stepVerify.style.display = 'block';
+        if (stepNewPwd) stepNewPwd.style.display = 'none';
+        if (stepSucc) stepSucc.style.display = 'none';
+
+        var inputOtp = document.getElementById('inputOtpCode');
+        if (inputOtp) {
+          inputOtp.value = '';
+          inputOtp.focus();
         }
+
+        var remEl = document.getElementById('otpRemainingAttempts');
+        if (remEl) remEl.textContent = '5';
+
+        startOtpCooldown(data.cooldown || 60);
       } else {
-        showPortalToast(data.message || 'Gagal mengirim password baru.', 'error');
+        showPortalToast(data.message || 'Gagal mengirim kode OTP.', 'error');
+        if (data.cooldown) {
+          startOtpCooldown(data.cooldown);
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
       }
     })
     .catch(function() {
       showPortalToast('Terjadi kesalahan jaringan.', 'error');
-    })
-    .finally(function() {
       btn.disabled = false;
       btn.innerHTML = origHtml;
     });
+  }
+
+  // Klik tombol Ganti Password (sudah tersedia pada halaman profil)
+  document.getElementById('btnSendPasswordToEmail')?.addEventListener('click', function() {
+    if (otpCooldownSeconds > 0) {
+      showPortalToast('Mohon tunggu ' + otpCooldownSeconds + ' detik sebelum meminta pengiriman ulang OTP.', 'warning');
+      return;
+    }
+    sendOtpRequest();
   });
 
-  document.getElementById('btnCopyProfileNewPwd')?.addEventListener('click', function() {
-    var code = document.getElementById('profileNewPasswordCode')?.textContent || '';
-    if (!code || code === '-') return;
-    var btn = this;
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(code);
-    } else {
-      var ta = document.createElement('textarea');
-      ta.value = code;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
+  // Klik tombol Kirim Ulang OTP
+  document.getElementById('btnResendOtp')?.addEventListener('click', function() {
+    if (this.disabled) return;
+    sendOtpRequest();
+  });
+
+  // Verifikasi Kode OTP
+  document.getElementById('btnVerifyOtp')?.addEventListener('click', function() {
+    var otpInput = document.getElementById('inputOtpCode');
+    var otpVal = (otpInput?.value || '').trim();
+    var errAlert = document.getElementById('otpErrorAlert');
+    if (errAlert) errAlert.style.display = 'none';
+
+    if (!otpVal || otpVal.length !== 6) {
+      if (errAlert) {
+        errAlert.textContent = 'Harap masukkan 6 digit kode OTP yang diterima melalui Gmail.';
+        errAlert.style.display = 'block';
+      }
+      otpInput?.focus();
+      return;
     }
-    btn.textContent = '✓ Tersalin!';
-    btn.style.background = '#059669';
-    setTimeout(function() {
-      btn.textContent = 'Salin';
-      btn.style.background = '#0a5661';
-    }, 2000);
+
+    var btn = this;
+    var orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="tp-spinner"></span> Memvalidasi...';
+
+    fetch('{{ route("tenant.profile.verify_otp") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') || {}).content || '',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ otp: otpVal })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        showPortalToast(data.message, 'success');
+
+        // Beralih ke Tahap 2: Form Password Baru
+        var stepVerify = document.getElementById('otpStepVerification');
+        var stepNewPwd = document.getElementById('otpStepNewPassword');
+        if (stepVerify) stepVerify.style.display = 'none';
+        if (stepNewPwd) stepNewPwd.style.display = 'block';
+
+        var newPwdInput = document.getElementById('inputNewPassword');
+        if (newPwdInput) {
+          newPwdInput.value = '';
+          newPwdInput.focus();
+        }
+        var newPwdConf = document.getElementById('inputNewPasswordConfirm');
+        if (newPwdConf) newPwdConf.value = '';
+      } else {
+        if (errAlert) {
+          errAlert.textContent = data.message || 'Kode OTP tidak valid.';
+          errAlert.style.display = 'block';
+        }
+        if (typeof data.remaining !== 'undefined') {
+          var remEl = document.getElementById('otpRemainingAttempts');
+          if (remEl) remEl.textContent = data.remaining;
+        }
+        otpInput?.focus();
+      }
+    })
+    .catch(function() {
+      if (errAlert) {
+        errAlert.textContent = 'Terjadi kesalahan jaringan. Coba lagi.';
+        errAlert.style.display = 'block';
+      }
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    });
+  });
+
+  // Simpan Password Baru (Tahap 2)
+  document.getElementById('btnSubmitNewPassword')?.addEventListener('click', function() {
+    var p1 = document.getElementById('inputNewPassword')?.value || '';
+    var p2 = document.getElementById('inputNewPasswordConfirm')?.value || '';
+    var errAlert = document.getElementById('newPwdErrorAlert');
+    if (errAlert) errAlert.style.display = 'none';
+
+    if (p1.length < 8) {
+      if (errAlert) {
+        errAlert.textContent = 'Password baru minimal harus 8 karakter.';
+        errAlert.style.display = 'block';
+      }
+      document.getElementById('inputNewPassword')?.focus();
+      return;
+    }
+
+    if (p1 !== p2) {
+      if (errAlert) {
+        errAlert.textContent = 'Konfirmasi password baru tidak cocok. Pastikan kedua kolom sama.';
+        errAlert.style.display = 'block';
+      }
+      document.getElementById('inputNewPasswordConfirm')?.focus();
+      return;
+    }
+
+    var btn = this;
+    var orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="tp-spinner"></span> Menyimpan...';
+
+    fetch('{{ route("tenant.profile.update_password") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') || {}).content || '',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        password: p1,
+        password_confirmation: p2
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        showPortalToast(data.message, 'success');
+
+        // Beralih ke Tahap 3: Notifikasi Berhasil
+        var stepNewPwd = document.getElementById('otpStepNewPassword');
+        var stepSucc = document.getElementById('otpStepSuccess');
+        if (stepNewPwd) stepNewPwd.style.display = 'none';
+        if (stepSucc) stepSucc.style.display = 'block';
+
+        // Reset teks tombol utama
+        var btnSendText = document.getElementById('btnSendPasswordText');
+        if (btnSendText) btnSendText.textContent = 'Ganti Password';
+        var btnSend = document.getElementById('btnSendPasswordToEmail');
+        if (btnSend) btnSend.disabled = false;
+        clearInterval(otpTimerInterval);
+      } else {
+        if (errAlert) {
+          errAlert.textContent = data.message || 'Gagal menyimpan password baru.';
+          errAlert.style.display = 'block';
+        }
+      }
+    })
+    .catch(function() {
+      if (errAlert) {
+        errAlert.textContent = 'Terjadi kesalahan jaringan saat menyimpan password.';
+        errAlert.style.display = 'block';
+      }
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.innerHTML = orig;
+    });
+  });
+
+  // Tombol Batal saat di formulir password baru
+  document.getElementById('btnCancelOtpFlow')?.addEventListener('click', function() {
+    var workflow = document.getElementById('otpPasswordWorkflow');
+    var notice = document.getElementById('pwdInitialNotice');
+    if (workflow) workflow.style.display = 'none';
+    if (notice) notice.style.display = 'flex';
   });
 
   // ─── AJAX: Custom Interior & Booking Form ──────────────────────
