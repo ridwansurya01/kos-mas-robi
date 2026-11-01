@@ -4566,3 +4566,226 @@ body:has(.tp-page) {
   cursor: pointer;
   padding: 4px 20px 4px 4px;
 }
+
+/* ==========================================================================
+   ADVANCED MOBILE RESPONSIVENESS OVERRIDES (ADMIN DASHBOARD)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Header Compact & Overflow-Free */
+  .app-header.modern-header {
+    min-height: 58px;
+    padding: 8px 14px;
+    gap: 8px;
+  }
+  .modern-title-box {
+    max-width: calc(100% - 100px);
+  }
+  .modern-title-box .header-breadcrumb {
+    display: none !important;
+  }
+  .modern-title-box .header-sub-title {
+    display: none !important;
+  }
+  .modern-title-box .header-main-title {
+    font-size: 1.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .modern-header-right {
+    gap: 6px;
+  }
+  .header-search.modern-search-box {
+    display: none !important;
+  }
+  .header-action-btn.modern-logout-btn {
+    width: 36px;
+    height: 36px;
+  }
+  .btn-primary-action.modern-quick-add-btn {
+    height: 36px;
+    padding: 0 10px;
+    font-size: 0.78rem;
+    gap: 4px;
+  }
+
+  /* Stat KPI Grid */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px 14px 0 !important;
+  }
+  .stat-card {
+    padding: 12px 14px !important;
+    border-radius: 16px !important;
+  }
+  .stat-card-value {
+    font-size: 1.15rem !important;
+    word-break: break-word;
+  }
+  .stat-card-title {
+    font-size: 0.74rem !important;
+  }
+
+  /* Filter Pills Horizontal Smooth Swipe */
+  .filter-pills {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-bottom: 6px !important;
+    gap: 6px !important;
+  }
+  .filter-pills::-webkit-scrollbar {
+    display: none !important;
+  }
+  .filter-pill {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Settings Segmented Sub-tab Nav */
+  .settings-segmented-nav {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    border-radius: 16px !important;
+    scrollbar-width: none !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    box-sizing: border-box !important;
+  }
+  .settings-segmented-nav::-webkit-scrollbar {
+    display: none !important;
+  }
+  .settings-nav-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 8px 14px !important;
+    font-size: 0.8rem !important;
+  }
+  .settings-card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .settings-modern-card {
+    padding: 16px 14px !important;
+    border-radius: 18px !important;
+  }
+
+  /* Financial Controls & Curve */
+  .financial-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+  .financial-curve-card {
+    padding: 16px 12px !important;
+    border-radius: 18px !important;
+  }
+  .finance-year-picker-wrap {
+    width: 100% !important;
+    justify-content: space-between !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Table Horizontal Scrolling */
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin-bottom: 14px !important;
+    border-radius: 12px !important;
+    display: block !important;
+  }
+  .table-responsive .custom-table,
+  .table-responsive table {
+    display: table !important;
+    min-width: 650px !important;
+  }
+
+  /* Section Header on Mobile */
+  .section-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .section-header > div:last-child {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  /* Modal Bottom Sheet */
+  .modal-backdrop {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+  .modal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 88vh !important;
+    border-radius: 24px 24px 0 0 !important;
+    margin: auto 0 0 0 !important;
+  }
+  .modal-body {
+    padding: 16px !important;
+    max-height: calc(88vh - 130px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .modal-footer {
+    padding: 12px 16px 20px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .modal-footer .btn-secondary,
+  .modal-footer .btn-primary-action {
+    flex: 1 1 0 !important;
+  }
+
+  /* Prevent iOS Safari auto-zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-primary-action.modern-quick-add-btn span {
+    display: none !important;
+  }
+  .btn-primary-action.modern-quick-add-btn {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+  }
+  .financial-kpi-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .stat-card-value {
+    font-size: 1.05rem !important;
+  }
+  .property-banner {
+    margin: 10px 12px 0 !important;
+    border-radius: 18px !important;
+  }
+  .content-body {
+    padding: 12px !important;
+  }
+}

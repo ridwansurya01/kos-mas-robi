@@ -57,6 +57,19 @@
   @keyframes btnShimmer { 0%,75% { left: -100%; } 100% { left: 160%; } }
   .auth-alert-success { background: #f0fdfa; border: 1px solid #99f6e4; color: #0f766e; padding: 14px 16px; border-radius: 14px; font-size: 0.85rem; font-weight: 600; margin-bottom: 20px; display: flex; align-items: flex-start; gap: 10px; }
   .auth-alert-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 14px; border-radius: 14px; font-size: 0.82rem; font-weight: 600; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+
+  @media (max-width: 480px) {
+    .auth-viewport {
+      padding: 16px 12px;
+    }
+    .auth-card {
+      padding: 26px 18px;
+      border-radius: 24px;
+    }
+    .auth-input-control {
+      font-size: 16px;
+    }
+  }
 </style>
 
 <div class="auth-viewport">

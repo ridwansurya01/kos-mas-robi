@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <meta name="description" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
   <meta name="theme-color" content="#0a5661">
   <title>{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern</title>
@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Luxury Real Estate Stylesheet -->
-  <link rel="stylesheet" href="{{ asset('css/landing.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ file_exists(public_path('css/landing.css')) ? filemtime(public_path('css/landing.css')) : time() }}">
 </head>
 <body>
 

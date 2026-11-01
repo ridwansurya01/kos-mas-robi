@@ -3314,3 +3314,207 @@ textarea.form-control {
 
 /* Ensure Day/Night theme switch is hidden */
 .kmr-theme-switch { display: none !important; }
+
+/* ==========================================================================
+   ADVANCED MOBILE RESPONSIVENESS OVERRIDES (TENANT PORTAL)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* Navbar */
+  .tp-navbar {
+    height: auto !important;
+    min-height: 56px !important;
+    padding: 8px 12px !important;
+    flex-wrap: wrap !important;
+    row-gap: 8px !important;
+  }
+  .tp-navbar-brand {
+    gap: 8px !important;
+  }
+  .tp-brand-icon-box {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+  }
+  .tp-brand-icon-box svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .tp-brand-name {
+    font-size: 0.92rem !important;
+    font-weight: 800 !important;
+    max-width: 130px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .tp-brand-sub {
+    display: none !important;
+  }
+  .tp-navbar-actions {
+    gap: 4px !important;
+  }
+  .tp-icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+    padding: 0 !important;
+  }
+  .tp-icon-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .tp-btn-logout {
+    padding: 5px 9px !important;
+    font-size: 0.74rem !important;
+    border-radius: 8px !important;
+  }
+  .tp-btn-profile-img {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .tp-navbar-nav-tabs {
+    order: 3 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    padding: 4px !important;
+    background: #f1f5f9 !important;
+    border-radius: 9999px !important;
+    box-shadow: none !important;
+  }
+  .tp-tab-btn {
+    flex: 1 1 0 !important;
+    justify-content: center !important;
+    padding: 7px 10px !important;
+    font-size: 0.78rem !important;
+  }
+  .tp-tab-btn .tp-tab-count,
+  .tp-tab-btn .tp-tab-room-pill {
+    font-size: 0.68rem !important;
+    padding: 2px 6px !important;
+  }
+
+  /* Catalog Header */
+  .tp-catalog-header {
+    margin-bottom: 16px !important;
+    border-radius: 18px !important;
+  }
+  .tp-catalog-header-content {
+    padding: 18px 14px !important;
+  }
+  .tp-catalog-title {
+    font-size: 1.25rem !important;
+  }
+  .tp-catalog-desc {
+    font-size: 0.8rem !important;
+    line-height: 1.45 !important;
+  }
+
+  /* Filter Pills Touch Swipeable */
+  .tp-catalog-filters-bar {
+    margin-bottom: 16px !important;
+    width: 100% !important;
+  }
+  .tp-filter-pills {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    width: 100% !important;
+    padding-bottom: 6px !important;
+    gap: 6px !important;
+    scrollbar-width: none !important;
+  }
+  .tp-filter-pills::-webkit-scrollbar {
+    display: none !important;
+  }
+  .tp-filter-btn {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 6px 12px !important;
+    font-size: 0.78rem !important;
+  }
+
+  /* Catalog Room Grid */
+  .tp-catalog-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    margin-bottom: 28px !important;
+  }
+  .tp-catalog-stats-row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .tp-catalog-stat-card {
+    padding: 10px 12px !important;
+  }
+  .tp-catalog-stat-info .stat-num {
+    font-size: 1.15rem !important;
+  }
+
+  /* Modals on Mobile */
+  .modal-overlay {
+    padding: 10px 6px !important;
+    align-items: flex-end !important;
+  }
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 88vh !important;
+    border-radius: 24px 24px 0 0 !important;
+    margin: 0 !important;
+  }
+  .modal-hdr {
+    padding: 16px 16px 12px !important;
+  }
+  .modal-body {
+    padding: 14px 16px !important;
+    max-height: calc(88vh - 120px) !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .modal-ftr {
+    padding: 12px 16px 18px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .modal-ftr .btn,
+  .modal-ftr button {
+    flex: 1 1 0 !important;
+  }
+
+  /* iOS Auto-zoom Prevention */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Main Container Padding Bottom for Bottom Nav */
+  .tp-main {
+    padding: 12px 12px 96px !important;
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tp-brand-name {
+    max-width: 105px !important;
+    font-size: 0.88rem !important;
+  }
+  .tp-catalog-stats-row {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .tp-details-actions {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .tp-btn-primary-action, .tp-btn-secondary-action {
+    width: 100% !important;
+  }
+}

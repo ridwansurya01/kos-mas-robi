@@ -417,6 +417,7 @@
             </div>
           </div>
 
+          <div class="table-responsive">
           <table class="custom-table" id="billingMasterTable">
             <thead>
               <tr>
@@ -514,6 +515,7 @@
               @endforelse
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 

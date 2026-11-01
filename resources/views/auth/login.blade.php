@@ -365,6 +365,19 @@
     from { opacity: 0; transform: translateY(-4px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  @media (max-width: 480px) {
+    .auth-viewport {
+      padding: 16px 12px;
+    }
+    .auth-card {
+      padding: 26px 18px;
+      border-radius: 24px;
+    }
+    .auth-input-control {
+      font-size: 16px;
+    }
+  }
 </style>
 
 <div class="auth-viewport">
