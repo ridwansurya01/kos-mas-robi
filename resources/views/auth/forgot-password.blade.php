@@ -73,9 +73,32 @@
     </div>
 
     @if (session('status'))
-      <div class="auth-alert-success">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
-        <span>{{ session('status') }}</span>
+      <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border: 1.5px solid #99f6e4; border-radius: 20px; padding: 20px 18px; margin-bottom: 22px; text-align: center; box-shadow: 0 8px 24px -6px rgba(14, 116, 130, 0.12);">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: #0e7482; color: #fff; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(14, 116, 130, 0.3);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h4 style="margin: 0 0 4px; color: #0a5661; font-size: 1.05rem; font-weight: 800;">Password Baru Berhasil Dibuat!</h4>
+        <p style="margin: 0 0 14px; font-size: 0.8rem; color: #64748b; line-height: 1.5;">
+          {{ session('status') }}
+        </p>
+
+        @if (session('new_password'))
+          {{-- Kotak Password Baru dengan Tombol Salin --}}
+          <div style="background: #ffffff; border: 2px dashed #0e7482; border-radius: 16px; padding: 14px 18px; margin: 12px 0 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+            <div style="text-align: left;">
+              <span style="display: block; font-size: 0.70rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;">Password Baru Anda:</span>
+              <code id="displayNewPwd" style="font-size: 1.3rem; font-weight: 800; color: #0a5661; letter-spacing: 1px; font-family: monospace;">{{ session('new_password') }}</code>
+            </div>
+            <button type="button" onclick="copyPassword('{{ session('new_password') }}', this)" style="background: #0a5661; color: #ffffff; border: none; padding: 9px 16px; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; flex-shrink: 0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <span>Salin</span>
+            </button>
+          </div>
+
+          <a href="{{ route('login') }}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: linear-gradient(135deg, #0a5661, #0e7482); color: #ffffff; border-radius: 14px; font-weight: 700; font-size: 0.92rem; text-decoration: none; box-sizing: border-box; box-shadow: 0 6px 18px rgba(14, 116, 130, 0.3); transition: transform 0.2s;">
+            <span>Masuk Sekarang dengan Password Baru &rarr;</span>
+          </a>
+        @endif
       </div>
     @endif
 
@@ -110,5 +133,30 @@
     </div>
   </div>
 </div>
+
+<script>
+  function copyPassword(text, btn) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(afterCopy);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      afterCopy();
+    }
+    function afterCopy() {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> <span>Tersalin!</span>';
+      btn.style.background = '#059669';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '#0a5661';
+      }, 2500);
+    }
+  }
+</script>
 @endsection
 

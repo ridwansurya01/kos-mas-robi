@@ -57,3 +57,4 @@ class NewPasswordMail extends Mailable
         return [];
     }
 }
+

@@ -1308,6 +1308,17 @@
               </button>
             </div>
 
+            {{-- Kotak Hasil Password Baru (muncul setelah klik tombol) --}}
+            <div id="profileNewPasswordResult" style="display: none; background: #ffffff; border: 2px dashed #0e7482; border-radius: 14px; padding: 12px 16px; margin-bottom: 14px; align-items: center; justify-content: space-between; gap: 10px;">
+              <div>
+                <span style="display: block; font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Password Baru Berhasil Dibuat:</span>
+                <code id="profileNewPasswordCode" style="font-size: 1.2rem; font-weight: 800; color: #0a5661; letter-spacing: 1px; font-family: monospace;">-</code>
+              </div>
+              <button type="button" id="btnCopyProfileNewPwd" style="background: #0a5661; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                Salin
+              </button>
+            </div>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="profilePassword" class="form-label" style="font-size: 0.78rem;">
@@ -1647,6 +1658,18 @@ document.addEventListener('click', function(e) {
     .then(function(data) {
       if (data.success) {
         showPortalToast(data.message, 'success');
+        if (data.new_password_preview) {
+          var resBox = document.getElementById('profileNewPasswordResult');
+          var codeEl = document.getElementById('profileNewPasswordCode');
+          if (resBox && codeEl) {
+            codeEl.textContent = data.new_password_preview;
+            resBox.style.display = 'flex';
+          }
+          var pwdInp = document.getElementById('profilePassword');
+          var pwdConfInp = document.getElementById('profilePasswordConf');
+          if (pwdInp) pwdInp.value = data.new_password_preview;
+          if (pwdConfInp) pwdConfInp.value = data.new_password_preview;
+        }
       } else {
         showPortalToast(data.message || 'Gagal mengirim password baru.', 'error');
       }
@@ -1658,6 +1681,28 @@ document.addEventListener('click', function(e) {
       btn.disabled = false;
       btn.innerHTML = origHtml;
     });
+  });
+
+  document.getElementById('btnCopyProfileNewPwd')?.addEventListener('click', function() {
+    var code = document.getElementById('profileNewPasswordCode')?.textContent || '';
+    if (!code || code === '-') return;
+    var btn = this;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(code);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = code;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    btn.textContent = '✓ Tersalin!';
+    btn.style.background = '#059669';
+    setTimeout(function() {
+      btn.textContent = 'Salin';
+      btn.style.background = '#0a5661';
+    }, 2000);
   });
 
   // ─── AJAX: Custom Interior & Booking Form ──────────────────────

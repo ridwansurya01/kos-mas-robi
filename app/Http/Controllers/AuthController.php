@@ -154,7 +154,11 @@ class AuthController extends Controller
             Log::warning('Send new password to email failed: ' . $e->getMessage());
         }
 
-        return back()->with('status', 'Password baru telah berhasil dibuat dan dikirim ke alamat Gmail Anda (' . $user->email . '). Silakan cek kotak masuk/spam Anda.');
+        return back()->with([
+            'status' => 'Password baru telah berhasil dibuat untuk akun Anda (' . $user->email . ').',
+            'new_password' => $newPassword,
+            'email' => $user->email,
+        ]);
     }
 
     /**
