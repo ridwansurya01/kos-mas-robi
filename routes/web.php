@@ -80,6 +80,11 @@ Route::middleware(['auth'])->group(function () {
             return app(DashboardController::class)->saveFinance($req);
         })->name('api.finances.save');
 
+        Route::get('/finances/stats', function (\Illuminate\Http\Request $req) {
+            if (!Auth::user()->isOwner()) abort(403);
+            return app(DashboardController::class)->getFinanceStats($req);
+        })->name('api.finances.stats');
+
         Route::post('/maintenance', function (\Illuminate\Http\Request $req) {
             if (!Auth::user()->isOwner()) abort(403);
             return app(DashboardController::class)->saveMaintenance($req);

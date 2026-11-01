@@ -1494,12 +1494,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       btn.addEventListener('click', () => {
         subTabBtns.forEach(b => {
           b.classList.remove('active');
-          b.style.background = 'var(--bg-surface)';
-          b.style.color = 'var(--text-primary)';
+          b.style.background = '';
+          b.style.color = '';
         });
         btn.classList.add('active');
-        btn.style.background = 'var(--primary)';
-        btn.style.color = '#ffffff';
+        btn.style.background = '';
+        btn.style.color = '';
 
         const target = btn.getAttribute('data-subtab');
         subTabPanes.forEach(pane => {

@@ -551,7 +551,15 @@
             <h2>Laporan Keuangan & Analisis Arus Kas</h2>
             <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Analisis kurva pendapatan bulanan s/d 1 tahun penuh, rasio pengeluaran operasional, dan buku kas transaksi resmi.</p>
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="finance-year-picker-wrap">
+              <span class="fyp-label">📅 Periode Tahun:</span>
+              <select id="selectFinanceYear" class="fyp-select" onchange="changeFinanceYear(this.value)">
+                @foreach(($availableYears ?? [2027, 2026, 2025, 2024]) as $yr)
+                  <option value="{{ $yr }}" {{ ($selectedYear ?? 2026) == $yr ? 'selected' : '' }}>Tahun {{ $yr }}</option>
+                @endforeach
+              </select>
+            </div>
             <button type="button" class="btn-secondary" onclick="exportFinancesCSV()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Export Buku Kas</span>
@@ -563,58 +571,58 @@
           </div>
         </div>
 
-        <!-- 4 KPI Cards Keuangan Kompleks -->
+        <!-- 4 KPI Cards Keuangan Kompleks (Dinamis Berdasarkan Filter Tahun) -->
         <div class="stats-grid financial-kpi-grid" style="padding: 0; margin-bottom: 24px;">
           <div class="stat-card">
             <div class="stat-card-header">
-              <span class="stat-card-title">Total Pemasukan Sewa</span>
+              <span class="stat-card-title">Total Pemasukan (<span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span>)</span>
               <div class="stat-icon emerald">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" style="color:#10b981;">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiIncomeVal" style="color:#10b981;">Rp {{ number_format($yearlyIncome ?? ($monthlyIncome * 12), 0, ',', '.') }}</div>
             <div class="stat-card-meta">
               <span class="stat-trend-up">▲ 100% Terverifikasi</span>
-              <span>Arus kas masuk</span>
+              <span>Arus kas masuk setahun</span>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-card-header">
-              <span class="stat-card-title">Biaya Operasional (Opex)</span>
+              <span class="stat-card-title">Biaya Operasional (<span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span>)</span>
               <div class="stat-icon amber">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" style="color:#f87171;">Rp {{ number_format($totalExpense ?: 3500000, 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiExpenseVal" style="color:#f87171;">Rp {{ number_format($yearlyExpense ?? (($totalExpense ?: 3500000) * 12), 0, ',', '.') }}</div>
             <div class="stat-card-meta">
-              <span>Listrik, WiFi, Servis AC</span>
+              <span>Listrik, WiFi, Servis AC, Opex</span>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-card-header">
-              <span class="stat-card-title">Laba Bersih (Net Cashflow)</span>
+              <span class="stat-card-title">Laba Bersih (<span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span>)</span>
               <div class="stat-icon blue">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" style="color:#3b82f6;">Rp {{ number_format($netCashflow ?: 14700000, 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiNetVal" style="color:#3b82f6;">Rp {{ number_format($yearlyNet ?? (($netCashflow ?: 14700000) * 12), 0, ',', '.') }}</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-up">Margin Bersih ~81%</span>
+              <span class="stat-trend-up">Margin Bersih Sehat</span>
             </div>
           </div>
 
           <div class="stat-card">
             <div class="stat-card-header">
-              <span class="stat-card-title">Proyeksi Tahunan (1 Tahun)</span>
+              <span class="stat-card-title">Rata-rata Bersih / Bulan</span>
               <div class="stat-icon teal">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
             </div>
-            <div class="stat-card-value">Rp {{ number_format(($monthlyIncome ?: 18200000) * 12, 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiAvgVal">Rp {{ number_format(($yearlyNet ?? 176400000) / 12, 0, ',', '.') }}</div>
             <div class="stat-card-meta">
-              <span class="stat-badge-info">Proyeksi Penuh</span>
+              <span class="stat-badge-info">Tahun <span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span></span>
               <span>16 Unit Kamar</span>
             </div>
           </div>
@@ -628,7 +636,7 @@
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="font-size: 1.15rem;">📈</span>
-                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Kurva Pertumbuhan Pendapatan (Tren 1 Bulan - 1 Tahun)</h3>
+                <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Kurva Pertumbuhan Pendapatan <span id="curveYearLabel">(Tahun {{ $selectedYear ?? 2026 }})</span></h3>
               </div>
               <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 0;">Grafik kurva dinamis pendapatan sewa dan arus kas riil Kos Mas Robi</p>
             </div>
@@ -872,26 +880,32 @@
         </div>
       </div>
       <div class="tab-pane" id="tab-settings">
-        <div class="section-header" style="flex-direction: column; align-items: flex-start; gap: 14px; margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 12px;">
-            <div class="section-title">
-              <h2>Pusat Pengaturan & Kelola Landing Page</h2>
-            </div>
-            <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
-              <span>🌐 Lihat Website Landing Page ↗</span>
-            </a>
+        <!-- Modern Header -->
+        <div class="settings-modern-header">
+          <div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0;">Pusat Pengaturan & Kelola Properti</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px; margin-bottom: 0;">Kelola konten Landing Page, foto galeri, titik peta Google Maps, dan profil rekening pembayaran.</p>
           </div>
+          <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; padding: 10px 18px; border-radius: 9999px;">
+            <span style="font-size: 1rem;">🌐</span>
+            <span>Buka Website Landing Page ↗</span>
+          </a>
+        </div>
 
-          <!-- Sub-Tab Navigation Pills -->
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="settingsSubTabNav">
-            <button type="button" class="btn-settings-subtab active" data-subtab="subtab-landing" style="padding: 10px 20px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border-color); background: var(--primary); color: #ffffff; display: flex; align-items: center; gap: 8px;">
-              <span>🎨 Tampilan & Foto Landing Page</span>
+        <!-- Segmented Sub-Tab Navigation -->
+        <div style="margin-bottom: 26px;">
+          <div class="settings-segmented-nav" id="settingsSubTabNav">
+            <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing">
+              <span>🎨</span>
+              <span>Tampilan & Foto Landing Page</span>
             </button>
-            <button type="button" class="btn-settings-subtab" data-subtab="subtab-location" style="padding: 10px 20px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-              <span>📍 Titik Lokasi Google Maps & 4 POI</span>
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location">
+              <span>📍</span>
+              <span>Titik Lokasi Google Maps & POI</span>
             </button>
-            <button type="button" class="btn-settings-subtab" data-subtab="subtab-profile" style="padding: 10px 20px; border-radius: 9999px; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-              <span>⚙️ Profil Properti & Rekening</span>
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile">
+              <span>⚙️</span>
+              <span>Profil Properti & Rekening</span>
             </button>
           </div>
         </div>
@@ -912,137 +926,154 @@
         <div class="settings-subtab-pane active" id="subtab-landing">
           <form id="landingPageEditorForm" style="display: flex; flex-direction: column; gap: 24px;" enctype="multipart/form-data">
 
-            <!-- 1. HERO SECTION EDITOR -->
-            <div class="table-card-container" style="padding: 24px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
-                  <span>✨ 1. Hero Banner Utama (Bagian Paling Atas)</span>
-                </h3>
-                <span style="font-size: 0.76rem; background: var(--bg-surface); padding: 4px 10px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700;">Headline & Foto Utama</span>
+            <!-- 1. HERO SECTION CARD -->
+            <div class="settings-modern-card">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge coral">✨</div>
+                  <div>
+                    <h3 class="settings-card-title">1. Hero Banner Utama (Bagian Teratas)</h3>
+                    <div class="settings-card-subtitle">Atur judul headline, deskripsi pengantar, tombol CTA, dan foto utama gedung kos</div>
+                  </div>
+                </div>
+                <span style="font-size: 0.76rem; background: var(--bg-card); padding: 5px 12px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700; border: 1px solid var(--border-color);">Tampilan Pertama Pengunjung</span>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
                   <div class="form-group">
-                    <label for="lp_hero_title">Judul Utama Hero (Gunakan Enter untuk Baris Baru)</label>
-                    <textarea id="lp_hero_title" name="hero_title" class="form-control" rows="2" placeholder="Contoh: Find Your&#10;Dream Home">{{ $lc['hero_title'] ?? "Find Your\nDream Home" }}</textarea>
+                    <label for="lp_hero_title" style="font-weight: 700;">Judul Utama Hero (Gunakan Enter untuk Baris Baru)</label>
+                    <textarea id="lp_hero_title" name="hero_title" class="form-control" rows="2" placeholder="Contoh: Find Your&#10;Dream Home" style="font-size: 1rem; font-weight: 700;">{{ $lc['hero_title'] ?? "Find Your\nDream Home" }}</textarea>
                   </div>
                   <div class="form-group">
-                    <label for="lp_hero_desc">Deskripsi Singkat Hero</label>
+                    <label for="lp_hero_desc" style="font-weight: 700;">Deskripsi Singkat Hero</label>
                     <textarea id="lp_hero_desc" name="hero_desc" class="form-control" rows="3" placeholder="Deskripsi hunian kost eksklusif...">{{ $lc['hero_desc'] ?? 'Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis di Sleman, DI Yogyakarta.' }}</textarea>
                   </div>
                   <div class="form-group">
-                    <label for="lp_hero_btn_text">Teks Tombol Aksi (CTA)</label>
+                    <label for="lp_hero_btn_text" style="font-weight: 700;">Teks Tombol Aksi (CTA)</label>
                     <input type="text" id="lp_hero_btn_text" name="hero_btn_text" class="form-control" value="{{ $lc['hero_btn_text'] ?? 'Jelajahi Kamar' }}">
                   </div>
                 </div>
 
                 <!-- Foto Utama Hero / Eksterior -->
-                <div style="display: flex; flex-direction: column; gap: 10px; background: var(--bg-surface); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
-                  <label style="font-weight: 700; color: var(--text-primary); display: flex; align-items: center; justify-content: space-between;">
-                    <span>📸 Foto Utama Hero (Gedung / Eksterior Kos)</span>
-                    <span style="font-size: 0.72rem; color: var(--text-secondary);">Mendukung PNG, JPG, WEBP</span>
-                  </label>
-                  <div style="width: 100%; height: 180px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid var(--border-color); background: #04272c;">
-                    <img id="previewHeroImage" src="{{ asset($lc['hero_image'] ?? 'assets/images/kos_exterior.jpg') }}" alt="Preview Foto Hero" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="settings-upload-drop">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-primary);">📸 Foto Utama Gedung / Eksterior</span>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary);">Format: JPG, PNG, WEBP</span>
                   </div>
-                  <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
-                    <input type="file" id="lp_hero_image_file" name="hero_image_file" accept="image/*" class="form-control" style="font-size: 0.8rem; padding: 6px;">
+                  <div class="settings-preview-img-wrap">
+                    <img id="previewHeroImage" src="{{ asset($lc['hero_image'] ?? 'assets/images/kos_exterior.jpg') }}" alt="Preview Foto Hero">
                   </div>
-                  <div style="font-size: 0.74rem; color: var(--text-secondary);">
-                    💡 <em>Tips:</em> Foto gedung malam/dusk dengan pencahayaan hangat akan otomatis menyatu halus dengan background teal di Landing Page.
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <input type="file" id="lp_hero_image_file" name="hero_image_file" accept="image/*" class="form-control" style="font-size: 0.82rem; padding: 8px;">
+                    <div style="font-size: 0.76rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
+                      💡 <em>Tips:</em> Bagian tengah foto akan otomatis disatukan secara mulus dengan gradasi warna latar belakang Landing Page.
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- 2. BENTO & FASILITAS SECTION EDITOR -->
-            <div class="table-card-container" style="padding: 24px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
-                  <span>🍱 2. Bagian Bento Keunggulan & Galeri Foto Kost</span>
-                </h3>
-                <span style="font-size: 0.76rem; background: var(--bg-surface); padding: 4px 10px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700;">Teks & 4 Foto Galeri</span>
+            <!-- 2. BENTO & FASILITAS SECTION CARD -->
+            <div class="settings-modern-card">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge teal">🍱</div>
+                  <div>
+                    <h3 class="settings-card-title">2. Bento Keunggulan & 4 Galeri Foto Kost</h3>
+                    <div class="settings-card-subtitle">Pengaturan teks keunggulan kos serta 4 slot foto galeri yang dapat diganti kapan saja</div>
+                  </div>
+                </div>
+                <span style="font-size: 0.76rem; background: var(--bg-card); padding: 5px 12px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700; border: 1px solid var(--border-color);">4 Slot Galeri Real-time</span>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
                 <div class="form-group">
-                  <label for="lp_bento_tag">Judul Tagline (Warna Coral / Merah)</label>
+                  <label for="lp_bento_tag" style="font-weight: 700;">Judul Tagline (Warna Coral / Merah)</label>
                   <input type="text" id="lp_bento_tag" name="bento_tag" class="form-control" value="{{ $lc['bento_tag'] ?? 'Kenyamanan Maksimal' }}">
                 </div>
                 <div class="form-group">
-                  <label for="lp_bento_title">Judul Utama (Warna Gelap)</label>
+                  <label for="lp_bento_title" style="font-weight: 700;">Judul Utama Keunggulan</label>
                   <input type="text" id="lp_bento_title" name="bento_title" class="form-control" value="{{ $lc['bento_title'] ?? 'Untuk Istirahat & Produktivitas' }}">
                 </div>
               </div>
 
               <div class="form-group" style="margin-bottom: 24px;">
-                <label for="lp_bento_desc">Deskripsi Bagian Keunggulan</label>
+                <label for="lp_bento_desc" style="font-weight: 700;">Deskripsi Paragraf Keunggulan</label>
                 <textarea id="lp_bento_desc" name="bento_desc" class="form-control" rows="2">{{ $lc['bento_desc'] ?? 'Setiap jengkal hunian kami rancang dengan seksama untuk memastikan penghuni mendapatkan istirahat berkualitas dan fokus maksimal dalam menuntut ilmu maupun berkarier.' }}</textarea>
               </div>
 
-              <!-- 4 FOTO GALERI BENTO -->
-              <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                <span>🖼️ 4 Foto Galeri Bento Kost (Bisa Diganti & Diunggah Kapan Saja)</span>
-              </h4>
+              <!-- 4 FOTO GALERI BENTO GRID -->
+              <div style="margin-top: 10px;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+                  <span>🖼️ 4 Foto Galeri Kamar & Fasilitas Kost</span>
+                </h4>
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
-                @for($g = 0; $g < 4; $g++)
-                  @php
-                    $curGalImg = $bGallery[$g] ?? 'assets/images/rooms/room_1.jpg';
-                    $galLabels = ['Foto Galeri 1 (Interior Scandinavian)', 'Foto Galeri 2 (Kamar Tidur)', 'Foto Galeri 3 (Fasilitas Kamar/KM)', 'Foto Galeri 4 (Gedung Luar)'];
-                  @endphp
-                  <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                    <label style="font-size: 0.74rem; font-weight: 800; color: var(--text-primary);">{{ $galLabels[$g] }}</label>
-                    <div style="width: 100%; height: 130px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); background: #000;">
-                      <img id="previewBentoGallery_{{ $g }}" src="{{ asset($curGalImg) }}" alt="Preview Galeri {{ $g + 1 }}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div class="settings-gallery-grid">
+                  @for($g = 0; $g < 4; $g++)
+                    @php
+                      $curGalImg = $bGallery[$g] ?? 'assets/images/rooms/room_1.jpg';
+                      $galLabels = ['Galeri 1 (Interior)', 'Galeri 2 (Kamar Tidur)', 'Galeri 3 (Fasilitas/KM)', 'Galeri 4 (Area Gedung)'];
+                    @endphp
+                    <div class="gallery-photo-card">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.78rem; font-weight: 800; color: var(--text-primary);">{{ $galLabels[$g] }}</span>
+                        <span style="font-size: 0.7rem; color: var(--primary); font-weight: 700;">Foto #{{ $g + 1 }}</span>
+                      </div>
+                      <div class="settings-preview-img-wrap" style="height: 140px; margin-bottom: 8px;">
+                        <img id="previewBentoGallery_{{ $g }}" src="{{ asset($curGalImg) }}" alt="Preview Galeri {{ $g + 1 }}">
+                      </div>
+                      <input type="file" id="lp_gallery_file_{{ $g }}" name="gallery_file_{{ $g }}" accept="image/*" class="form-control gal-file-input" data-preview-target="previewBentoGallery_{{ $g }}" style="font-size: 0.76rem; padding: 6px;">
                     </div>
-                    <input type="file" id="lp_gallery_file_{{ $g }}" name="gallery_file_{{ $g }}" accept="image/*" class="form-control gal-file-input" data-preview-target="previewBentoGallery_{{ $g }}" style="font-size: 0.76rem; padding: 4px;">
-                  </div>
-                @endfor
+                  @endfor
+                </div>
               </div>
             </div>
 
-            <!-- 3. KUTIPAN PENGELOLA & FOOTER EDITOR -->
-            <div class="table-card-container" style="padding: 24px;">
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
-                <h3 style="display: flex; align-items: center; gap: 8px; margin: 0;">
-                  <span>💬 3. Kutipan Komitmen Pengelola & Footer</span>
-                </h3>
+            <!-- 3. KUTIPAN PENGELOLA & FOOTER CARD -->
+            <div class="settings-modern-card">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge">💬</div>
+                  <div>
+                    <h3 class="settings-card-title">3. Kutipan Komitmen Pengelola & Footer</h3>
+                    <div class="settings-card-subtitle">Profil pemilik properti serta teks komitmen layanan yang dibaca calon penghuni</div>
+                  </div>
+                </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 18px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 18px;">
                 <div class="form-group">
-                  <label for="lp_founder_name">Nama Pengelola / Owner</label>
+                  <label for="lp_founder_name" style="font-weight: 700;">Nama Pengelola / Owner</label>
                   <input type="text" id="lp_founder_name" name="founder_name" class="form-control" value="{{ $lc['founder_name'] ?? ($setting->owner_name ?? 'Mas Robi') }}">
                 </div>
                 <div class="form-group">
-                  <label for="lp_founder_role">Jabatan / Peran</label>
+                  <label for="lp_founder_role" style="font-weight: 700;">Jabatan / Peran</label>
                   <input type="text" id="lp_founder_role" name="founder_role" class="form-control" value="{{ $lc['founder_role'] ?? 'Owner & Pengelola Properti' }}">
                 </div>
                 <div class="form-group">
-                  <label for="lp_founder_avatar">Inisial Avatar Bulat</label>
+                  <label for="lp_founder_avatar" style="font-weight: 700;">Inisial Avatar Bulat</label>
                   <input type="text" id="lp_founder_avatar" name="founder_avatar" class="form-control" value="{{ $lc['founder_avatar'] ?? 'MR' }}" maxlength="4">
                 </div>
               </div>
 
               <div class="form-group" style="margin-bottom: 18px;">
-                <label for="lp_founder_quote">Teks Kutipan / Pernyataan Komitmen Pengelola</label>
+                <label for="lp_founder_quote" style="font-weight: 700;">Pernyataan Komitmen Pengelola</label>
                 <textarea id="lp_founder_quote" name="founder_quote" class="form-control" rows="3">{{ $lc['founder_quote'] ?? 'Kenyamanan, kebersihan, dan keamanan penghuni adalah komitmen utama kami. Kami memastikan setiap anak kos merasakan suasana tinggal yang hangat layaknya di rumah sendiri, dengan fasilitas modern tanpa repot dan dukungan pengelola yang selalu siap membantu kapan pun dibutuhkan.' }}</textarea>
               </div>
 
               <div class="form-group">
-                <label for="lp_footer_desc">Deskripsi Singkat Footer</label>
+                <label for="lp_footer_desc" style="font-weight: 700;">Deskripsi Singkat Footer</label>
                 <textarea id="lp_footer_desc" name="footer_desc" class="form-control" rows="2">{{ $lc['footer_desc'] ?? 'Hunian kost eksklusif dengan fasilitas lengkap, kamar ber-AC, kamar mandi dalam, WiFi fiber cepat 100 Mbps, dan keamanan 24 jam di kawasan strategis.' }}</textarea>
               </div>
             </div>
 
-            <!-- Tombol Simpan Landing Page -->
-            <div style="display: flex; gap: 14px; align-items: center; padding: 10px 0;">
-              <button type="submit" id="btnSaveLandingPage" class="btn-primary" style="padding: 12px 28px; font-size: 0.95rem; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+            <!-- Tombol Simpan Landing Page Action Bar -->
+            <div style="display: flex; gap: 14px; align-items: center; padding: 12px 0; flex-wrap: wrap;">
+              <button type="submit" id="btnSaveLandingPage" class="btn-primary" style="padding: 13px 32px; font-size: 0.95rem; font-weight: 800; display: inline-flex; align-items: center; gap: 10px; border-radius: 14px; box-shadow: 0 4px 16px rgba(37,99,235,0.3);">
                 <span>💾 Simpan Seluruh Tampilan Landing Page</span>
               </button>
-              <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="padding: 12px 20px; font-weight: 700;">
+              <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="padding: 13px 22px; font-weight: 700; border-radius: 14px;">
                 <span>Lihat Hasil Langsung ↗</span>
               </a>
             </div>
@@ -1054,148 +1085,179 @@
              SUBTAB 2: TITIK LOKASI GOOGLE MAPS & 4 POI
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-location" style="display: none;">
-          <div class="table-card-container" style="padding: 24px;">
-            <h3 style="margin-bottom: 16px;">Pengaturan Peta Google Maps & 4 Poin Akses Lokasi</h3>
-            <form id="settingsProfileForm" style="display: flex; flex-direction: column; gap: 16px;">
-              <div class="form-group">
-                <label for="setKosAddress">Alamat Lengkap Properti Kos</label>
+          <form id="settingsProfileForm" style="display: flex; flex-direction: column; gap: 24px;">
+
+            <!-- MAPS CARD -->
+            <div class="settings-modern-card">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge coral">📍</div>
+                  <div>
+                    <h3 class="settings-card-title">Titik Lokasi Google Maps & Embed Interaktif</h3>
+                    <div class="settings-card-subtitle">Pengaturan alamat dan peta interaktif yang dapat diakses langsung oleh calon penghuni</div>
+                  </div>
+                </div>
+                <a href="{{ $setting->gmaps_url ?: ('https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi')) }}" id="btnTestGmapsUrl" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 0.78rem; font-weight: 800; padding: 6px 14px; border-radius: 9999px;">
+                  <span>Uji Buka Peta ↗</span>
+                </a>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="setKosAddress" style="font-weight: 700;">Alamat Lengkap Properti Kos</label>
                 <textarea id="setKosAddress" class="form-control" rows="2" placeholder="Contoh: Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta">{{ $setting->kos_address }}</textarea>
               </div>
 
-              <!-- Integrasi Google Maps Properti (Anti-Gagal) -->
-              <div class="form-group" style="background: var(--bg-surface); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                  <label for="setGmapsUrl" style="font-weight: 700; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 6px;">
-                    <span>📍 Link Buka Google Maps (Tombol "Buka di Google Maps")</span>
-                  </label>
-                  <a href="{{ $setting->gmaps_url ?: ('https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi')) }}" id="btnTestGmapsUrl" target="_blank" rel="noopener noreferrer" style="font-size: 0.78rem; color: #2563eb; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 4px;">
-                    <span>Uji Buka Peta ↗</span>
-                  </a>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <div class="form-group">
+                  <label for="setGmapsUrl" style="font-weight: 700;">Link Buka Google Maps (Tombol Navigasi)</label>
+                  <input type="text" id="setGmapsUrl" class="form-control" placeholder="https://maps.app.goo.gl/... atau https://maps.google.com/?q=..." value="{{ $setting->gmaps_url }}">
+                  <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">Link ini dibuka saat calon penghuni klik tombol "Buka di Google Maps".</div>
                 </div>
-                <input type="text" id="setGmapsUrl" class="form-control" placeholder="https://maps.app.goo.gl/... atau https://maps.google.com/?q=..." value="{{ $setting->gmaps_url }}">
-              </div>
 
-              <div class="form-group" style="background: var(--bg-surface); padding: 18px; border-radius: 14px; border: 1px solid var(--border-color);">
-                <label for="setGmapsEmbed" style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
-                  🗺️ Sematkan Peta Interaktif (Bisa Masukkan Kode Iframe, Link Maps, Koordinat, atau Alamat)
-                </label>
-                <textarea id="setGmapsEmbed" class="form-control" rows="3" placeholder="Tempel kode <iframe>...</iframe>, link https://maps.app.goo.gl/..., atau koordinat -8.1639, 113.7311">{{ $setting->gmaps_embed }}</textarea>
-                <div style="font-size: 0.76rem; color: #10b981; margin-top: 6px; font-weight: 700;">
-                  ✅ <em>Anti-Gagal:</em> Apapun yang Anda masukkan (link bagikan, kode iframe, koordinat, atau alamat) akan otomatis dikonversi sistem agar tampil sempurna tanpa ikon tanda larang (forbidden).
+                <div class="form-group">
+                  <label for="setGmapsEmbed" style="font-weight: 700;">Sematkan Peta (Iframe, Link Maps, atau Koordinat)</label>
+                  <input type="text" id="setGmapsEmbed" class="form-control" placeholder="Contoh: https://maps.app.goo.gl/... atau kode <iframe>..." value="{{ $setting->gmaps_embed }}">
+                  <div style="font-size: 0.74rem; color: #10b981; margin-top: 4px; font-weight: 700;">
+                    ✅ <em>Anti-Gagal:</em> Otomatis dikonversi aman tanpa pesan tanda larang / forbidden.
+                  </div>
                 </div>
               </div>
 
               <!-- Live Preview Peta di Admin -->
               <div class="form-group">
-                <label style="font-weight: 700; color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                  <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>
+                <label style="font-weight: 800; color: var(--text-primary); font-size: 0.85rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                  <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span>
                   Pratinjau Langsung Peta Google Maps (Live Preview):
                 </label>
-                <div id="gmapsLivePreviewWrap" style="width: 100%; height: 260px; border-radius: 14px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); position: relative;">
+                <div id="gmapsLivePreviewWrap" style="width: 100%; height: 280px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
                   <iframe id="gmapsPreviewIframe" src="{{ $setting->final_embed_url }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pratinjau Lokasi Kos Mas Robi"></iframe>
                 </div>
               </div>
+            </div>
 
-              <!-- Poin Akses & Keunggulan Lokasi -->
-              <div style="border-top: 1px solid var(--border-color); padding-top: 18px; margin-top: 10px;">
-                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
-                  <span>📌 4 Poin Akses & Keunggulan Lokasi (Landing Page)</span>
-                </h4>
-                <p style="font-size: 0.76rem; color: var(--text-secondary); margin-bottom: 14px;">
-                  Edit teks 4 kartu keunggulan lokasi yang tampil di samping peta pada Landing Page:
-                </p>
-
-                @php
-                  $highlights = $setting->location_highlights ?? [];
-                @endphp
-
-                <div style="display: flex; flex-direction: column; gap: 12px;" id="locationHighlightsEditorList">
-                  @for($i = 0; $i < 4; $i++)
-                    @php
-                      $hl = $highlights[$i] ?? [
-                        'icon' => ['🎓', '☕', '🏥', '🛡️'][$i] ?? '📍',
-                        'title' => '',
-                        'desc' => ''
-                      ];
-                    @endphp
-                    <div class="highlight-edit-item" style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-                      <div style="display: flex; gap: 10px; align-items: center;">
-                        <div style="width: 58px; flex-shrink: 0;">
-                          <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Ikon</label>
-                          <input type="text" class="form-control hl-icon" value="{{ $hl['icon'] ?? '📍' }}" style="text-align: center; font-size: 1.15rem; padding: 4px;" maxlength="4" placeholder="🎓">
-                        </div>
-                        <div style="flex: 1;">
-                          <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Judul Poin Keunggulan #{{ $i + 1 }}</label>
-                          <input type="text" class="form-control hl-title" value="{{ $hl['title'] ?? '' }}" placeholder="Contoh: 3 – 5 Menit ke Kawasan Kampus">
-                        </div>
-                      </div>
-                      <div>
-                        <label style="font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Deskripsi Singkat</label>
-                        <textarea class="form-control hl-desc" rows="2" placeholder="Contoh: Akses sangat dekat ke UGM, UNY, UII, dan berbagai fakultas utama.">{{ $hl['desc'] ?? '' }}</textarea>
-                      </div>
-                    </div>
-                  @endfor
+            <!-- 4 POI CARD -->
+            <div class="settings-modern-card">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge">📌</div>
+                  <div>
+                    <h3 class="settings-card-title">4 Poin Akses & Keunggulan Lokasi</h3>
+                    <div class="settings-card-subtitle">4 kartu akses strategis yang tampil mendampingi peta pada Landing Page</div>
+                  </div>
                 </div>
               </div>
 
-              <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px; padding: 10px 24px; font-weight: 800;">Simpan Perubahan Lokasi & Peta</button>
-            </form>
-          </div>
+              @php
+                $highlights = $setting->location_highlights ?? [];
+              @endphp
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;" id="locationHighlightsEditorList">
+                @for($i = 0; $i < 4; $i++)
+                  @php
+                    $hl = $highlights[$i] ?? [
+                      'icon' => ['🎓', '☕', '🏥', '🛡️'][$i] ?? '📍',
+                      'title' => '',
+                      'desc' => ''
+                    ];
+                  @endphp
+                  <div class="highlight-edit-item" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                      <div style="width: 58px; flex-shrink: 0;">
+                        <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Ikon</label>
+                        <input type="text" class="form-control hl-icon" value="{{ $hl['icon'] ?? '📍' }}" style="text-align: center; font-size: 1.15rem; padding: 4px;" maxlength="4" placeholder="🎓">
+                      </div>
+                      <div style="flex: 1;">
+                        <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Judul Poin Keunggulan #{{ $i + 1 }}</label>
+                        <input type="text" class="form-control hl-title" value="{{ $hl['title'] ?? '' }}" placeholder="Contoh: 3 – 5 Menit ke Kawasan Kampus">
+                      </div>
+                    </div>
+                    <div>
+                      <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Deskripsi Singkat</label>
+                      <textarea class="form-control hl-desc" rows="2" placeholder="Contoh: Akses sangat dekat ke kampus dan pusat kuliner.">{{ $hl['desc'] ?? '' }}</textarea>
+                    </div>
+                  </div>
+                @endfor
+              </div>
+
+              <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 18px; padding: 11px 26px; font-weight: 800; border-radius: 12px;">Simpan Perubahan Lokasi & Peta</button>
+            </div>
+
+          </form>
         </div>
 
         <!-- =========================================================================
              SUBTAB 3: PROFIL KOS & REKENING PEMBAYARAN
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-profile" style="display: none;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+
             <!-- Profile Card -->
-            <div class="table-card-container" style="padding: 24px;">
-              <h3 style="margin-bottom: 16px;">Informasi Properti & Pengelola</h3>
-              <form id="settingsGeneralProfileForm" style="display: flex; flex-direction: column; gap: 14px;">
+            <div class="settings-modern-card" style="margin-bottom: 0;">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge">⚙️</div>
+                  <div>
+                    <h3 class="settings-card-title">Informasi Properti & Pengelola</h3>
+                    <div class="settings-card-subtitle">Nama kos, nama pengelola, dan kontak WhatsApp resmi</div>
+                  </div>
+                </div>
+              </div>
+              <form id="settingsGeneralProfileForm" style="display: flex; flex-direction: column; gap: 16px;">
                 <div class="form-group">
-                  <label for="setKosName">Nama Kos</label>
+                  <label for="setKosName" style="font-weight: 700;">Nama Resmi Properti Kos</label>
                   <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}">
                 </div>
                 <div class="form-group">
-                  <label for="setOwnerName">Nama Pemilik / Pengelola</label>
+                  <label for="setOwnerName" style="font-weight: 700;">Nama Pemilik / Pengelola Utama</label>
                   <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}">
                 </div>
                 <div class="form-group">
-                  <label for="setOwnerPhone">No. WhatsApp Pengelola (Format 62...)</label>
+                  <label for="setOwnerPhone" style="font-weight: 700;">No. WhatsApp Pengelola (Format 62...)</label>
                   <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}">
                 </div>
-                <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 10px;">Simpan Informasi Umum</button>
+                <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 6px; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Profil Kos</button>
               </form>
             </div>
 
             <!-- Payment Account Card -->
-            <div class="table-card-container" style="padding: 24px;">
-              <h3 style="margin-bottom: 16px;">Rekening Pembayaran & Cadangan Data</h3>
-              <form id="settingsBankForm" style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+            <div class="settings-modern-card" style="margin-bottom: 0;">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge teal">💳</div>
+                  <div>
+                    <h3 class="settings-card-title">Rekening Pembayaran & Cadangan Data</h3>
+                    <div class="settings-card-subtitle">Tujuan transfer sewa resmi serta utilitas backup JSON</div>
+                  </div>
+                </div>
+              </div>
+              <form id="settingsBankForm" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
                 <div class="form-group">
-                  <label for="setBankName">Nama Bank / QRIS</label>
+                  <label for="setBankName" style="font-weight: 700;">Nama Bank / QRIS</label>
                   <input type="text" id="setBankName" class="form-control" value="{{ $setting->bank_name }}">
                 </div>
                 <div class="form-group">
-                  <label for="setBankAccount">Nomor Rekening</label>
+                  <label for="setBankAccount" style="font-weight: 700;">Nomor Rekening</label>
                   <input type="text" id="setBankAccount" class="form-control" value="{{ $setting->bank_account }}">
                 </div>
                 <div class="form-group">
-                  <label for="setBankHolder">Atas Nama</label>
+                  <label for="setBankHolder" style="font-weight: 700;">Atas Nama Pemilik Rekening</label>
                   <input type="text" id="setBankHolder" class="form-control" value="{{ $setting->bank_holder }}">
                 </div>
-                <button type="submit" class="btn-primary" style="align-self: flex-start;">Simpan Rekening</button>
+                <button type="submit" class="btn-primary" style="align-self: flex-start; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Rekening</button>
               </form>
 
               <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
 
-              <h4 style="margin-bottom: 10px;">Manajemen Data Sistem</h4>
-              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Data tersimpan aman di database SQLite Laravel. Anda dapat mengunduh cadangan JSON kapan saja.</p>
-              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button type="button" class="btn-secondary" id="btnExportData">📥 Unduh Cadangan JSON</button>
-                <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171;">🔄 Reset Data Sampel</button>
+              <div>
+                <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data & Cadangan</h4>
+                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database SQLite Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">📥 Unduh Cadangan JSON</button>
+                  <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">🔄 Reset Data Sampel</button>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
 
@@ -1735,11 +1797,49 @@
     // KURVA PERTUMBUHAN PENDAPATAN & ARUS KAS (CANVAS SPLINE CURVE INTERACTIVE)
     // =========================================================================
     var chartMonths = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-    var chartIncomeFull = [15650000,16300000,16950000,17600000,18250000,18900000,19550000,20200000,20850000,21500000,19500000,19500000];
-    var chartExpenseFull = [3350000,3500000,3650000,3800000,3950000,4100000,4250000,4400000,4550000,4700000,3800000,3800000];
-    var chartNetFull = [12300000,12800000,13300000,13800000,14300000,14800000,15300000,15800000,16300000,16800000,15700000,15700000];
+    var chartIncomeFull = {!! json_encode($chartIncome ?? [15650000,16300000,16950000,17600000,18250000,18900000,19550000,20200000,20850000,21500000,19500000,19500000]) !!};
+    var chartExpenseFull = {!! json_encode($chartExpense ?? [3350000,3500000,3650000,3800000,3950000,4100000,4250000,4400000,4550000,4700000,3800000,3800000]) !!};
+    var chartNetFull = {!! json_encode($chartNet ?? [12300000,12800000,13300000,13800000,14300000,14800000,15300000,15800000,16300000,16800000,15700000,15700000]) !!};
 
     var currentCurvePeriod = "1y";
+
+    async function changeFinanceYear(year) {
+      try {
+        var res = await fetch('/finances/stats?year=' + encodeURIComponent(year));
+        var data = await res.json();
+        if (data.success) {
+          if (document.getElementById('finKpiIncomeVal')) {
+            document.getElementById('finKpiIncomeVal').textContent = 'Rp ' + Number(data.income).toLocaleString('id-ID');
+          }
+          if (document.getElementById('finKpiExpenseVal')) {
+            document.getElementById('finKpiExpenseVal').textContent = 'Rp ' + Number(data.expense).toLocaleString('id-ID');
+          }
+          if (document.getElementById('finKpiNetVal')) {
+            document.getElementById('finKpiNetVal').textContent = 'Rp ' + Number(data.net).toLocaleString('id-ID');
+          }
+          if (document.getElementById('finKpiAvgVal')) {
+            document.getElementById('finKpiAvgVal').textContent = 'Rp ' + Number(data.avgMonthly).toLocaleString('id-ID');
+          }
+
+          document.querySelectorAll('.fin-selected-year-badge').forEach(function(el) {
+            el.textContent = year;
+          });
+          var curveYearEl = document.getElementById('curveYearLabel');
+          if (curveYearEl) curveYearEl.textContent = '(Tahun ' + year + ')';
+
+          chartIncomeFull = data.chartIncome;
+          chartExpenseFull = data.chartExpense;
+          chartNetFull = data.chartNet;
+          drawRevenueCurve();
+
+          if (typeof showToast === 'function') {
+            showToast('Laporan keuangan tahun ' + year + ' berhasil dimuat!', 'info');
+          }
+        }
+      } catch (err) {
+        console.error('Error changing finance year:', err);
+      }
+    }
 
     function drawRevenueCurve() {
       var canvas = document.getElementById("revenueCurveCanvas");
