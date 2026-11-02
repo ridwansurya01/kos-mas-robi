@@ -372,14 +372,7 @@
         @endphp
 
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (DATA PENGHUNI) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.2rem;">👥</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Penghuni Kos</div>
-              <div style="font-size: 0.75rem; color: var(--text-secondary);">Pilih cabang kos untuk memisahkan daftar penghuni Kos 1 dan Kos 2</div>
-            </div>
-          </div>
+        <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="tenantLocationFilters">
             <button type="button" class="filter-pill active" data-tloc="all">🏢 Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
             <button type="button" class="filter-pill" data-tloc="Lokasi 1">🌿 Kos 1 - Kampus Utama ({{ $b1TenantsCount }})</button>
@@ -452,14 +445,7 @@
         @endphp
 
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (TAGIHAN SEWA) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.2rem;">💳</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Tagihan & Invoice Sewa</div>
-              <div style="font-size: 0.75rem; color: var(--text-secondary);">Tampilkan daftar tagihan berdasarkan cabang kos untuk verifikasi pembayaran manual</div>
-            </div>
-          </div>
+        <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="billingLocationFilters">
             <button type="button" class="filter-pill active" onclick="filterBillingLocation('all', this)">🏢 Semua Cabang ({{ $totalRooms }} Unit)</button>
             <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 1', this)">🌿 Kos 1 - Kampus Utama ({{ $b1RoomsList->count() }} Unit)</button>
@@ -683,14 +669,7 @@
         </div>
 
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (LAPORAN KEUANGAN) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.2rem;">📊</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Buku Kas & Laporan Cabang Kos</div>
-              <div style="font-size: 0.75rem; color: var(--text-secondary);">Pilih cabang untuk memfilter KPI, kurva pendapatan, dan riwayat transaksi Buku Kas</div>
-            </div>
-          </div>
+        <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="financeLocationFilters">
             <button type="button" class="filter-pill active" data-floc="all">🏢 Gabungan 2 Kos</button>
             <button type="button" class="filter-pill" data-floc="Lokasi 1">🌿 Buku Kas Kos 1 (Kampus)</button>
@@ -867,14 +846,7 @@
         </div>
 
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (KELUHAN & SERVIS) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.2rem;">🔧</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Keluhan & Servis</div>
-              <div style="font-size: 0.75rem; color: var(--text-secondary);">Pilih cabang kos untuk memisahkan antrean perbaikan teknisi Kos 1 dan Kos 2</div>
-            </div>
-          </div>
+        <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="maintenanceLocationFilters">
             <button type="button" class="filter-pill active" data-mloc="all">🏢 Semua Cabang</button>
             <button type="button" class="filter-pill" data-mloc="Lokasi 1">🌿 Servis Kos 1 (Kampus)</button>
@@ -925,14 +897,7 @@
            ===================================================================== -->
       <div class="tab-pane" id="tab-transfers">
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (PINDAH KAMAR) -->
-        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 1.2rem;">🔀</span>
-            <div>
-              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Pindah Kamar</div>
-              <div style="font-size: 0.75rem; color: var(--text-secondary);">Saring permohonan pindah kamar berdasarkan cabang asal/tujuan atau mutasi lintas cabang</div>
-            </div>
-          </div>
+        <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="transferLocationFilters">
             <button type="button" class="filter-pill active" onclick="filterTransferLocation('all', this)">🏢 Semua Mutasi</button>
             <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 1', this)">🌿 Internal Kos 1 (Kampus)</button>
@@ -1555,7 +1520,6 @@
                   <div class="settings-card-subtitle">Atur SSID, password, lokasi modem router, dan pembagian jaringan antara Kos 1 (Kampus Utama) & Kos 2 (Ringroad Exclusive).</div>
                 </div>
               </div>
-              <span style="font-size: 0.76rem; background: #e0f2fe; color: #0284c7; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1.5px solid #bae6fd;">Dual-Branch Multi-WiFi</span>
             </div>
 
             @php
@@ -1565,20 +1529,12 @@
             @endphp
 
             <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (JARINGAN WIFI) -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-              <div style="font-size: 0.82rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                <span>📡</span>
-                <span>Filter Jaringan WiFi per Cabang Kos:</span>
-              </div>
+            <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div class="filter-pills" id="wifiLocationFilters">
                 <button type="button" class="filter-pill active" onclick="filterWifiByLocation('all', this)">🏢 Semua Cabang ({{ count($allWifis) }})</button>
                 <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 1', this)">🌿 WiFi Kos 1 - Kampus ({{ $wfLoc1Count }})</button>
                 <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 2', this)">⚡ WiFi Kos 2 - Ringroad ({{ $wfLoc2Count }})</button>
               </div>
-            </div>
-
-            <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.82rem; color: #166534; line-height: 1.5;">
-              <strong>💡 Sinkronisasi Otomatis ke Portal Pelanggan:</strong> Jaringan WiFi yang berlabel <strong>Kos 1 (Lokasi 1)</strong> akan otomatis tampil di portal penghuni Kamar #101–#108, sedangkan jaringan berlabel <strong>Kos 2 (Lokasi 2)</strong> tampil di portal penghuni Kamar #201–#208 saat toggle <strong>"● Ditayangkan"</strong> aktif.
             </div>
 
             {{-- Daftar Jaringan WiFi Dinamis --}}
