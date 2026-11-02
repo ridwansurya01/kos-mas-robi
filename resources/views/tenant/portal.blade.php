@@ -2172,46 +2172,49 @@ function openRoomCustomModal(room) {
       'instruction' => $m['instructions'] ?? '',
     ];
   }
+  if (empty($pmMapped)) {
+    $pmMapped = [
+      'Transfer Mandiri' => [
+        'badge' => 'Rekening Resmi Bank Mandiri',
+        'bank' => 'Bank Mandiri',
+        'number' => '1370019283100',
+        'holder' => 'Robi Suryanto',
+        'isCash' => false,
+        'isQris' => false,
+        'instruction' => ''
+      ],
+      'Transfer BCA' => [
+        'badge' => 'Rekening Resmi Bank BCA',
+        'bank' => 'Bank Central Asia (BCA)',
+        'number' => '8830192831',
+        'holder' => 'Robi Suryanto',
+        'isCash' => false,
+        'isQris' => false,
+        'instruction' => ''
+      ],
+      'Transfer QRIS' => [
+        'badge' => 'QRIS Instant All Payment',
+        'bank' => 'QRIS Resmi Kos Mas Robi',
+        'number' => 'NMID: ID102026192831',
+        'holder' => 'Kos Mas Robi / Robi Suryanto',
+        'isCash' => false,
+        'isQris' => true,
+        'instruction' => '⚡ <strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia atau gunakan NMID di atas.'
+      ],
+      'Tunai (Cash)' => [
+        'badge' => 'Pembayaran Tunai (Cash)',
+        'bank' => 'Tunai Langsung ke Mas Robi',
+        'number' => 'Bayar Cash / Uang Tunai',
+        'holder' => 'Mas Robi (Kamar Pengelola Lt. 1)',
+        'isCash' => true,
+        'isQris' => false,
+        'instruction' => '💵 <strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.'
+      ]
+    ];
+  }
 @endphp
 
-var paymentMethodsData = @json(!empty($pmMapped) ? $pmMapped : [
-  'Transfer Mandiri' => [
-    'badge' => 'Rekening Resmi Bank Mandiri',
-    'bank' => 'Bank Mandiri',
-    'number' => '1370019283100',
-    'holder' => 'Robi Suryanto',
-    'isCash' => false,
-    'isQris' => false,
-    'instruction' => ''
-  ],
-  'Transfer BCA' => [
-    'badge' => 'Rekening Resmi Bank BCA',
-    'bank' => 'Bank Central Asia (BCA)',
-    'number' => '8830192831',
-    'holder' => 'Robi Suryanto',
-    'isCash' => false,
-    'isQris' => false,
-    'instruction' => ''
-  ],
-  'Transfer QRIS' => [
-    'badge' => 'QRIS Instant All Payment',
-    'bank' => 'QRIS Resmi Kos Mas Robi',
-    'number' => 'NMID: ID102026192831',
-    'holder' => 'Kos Mas Robi / Robi Suryanto',
-    'isCash' => false,
-    'isQris' => true,
-    'instruction' => '⚡ <strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia atau gunakan NMID di atas.'
-  ],
-  'Tunai (Cash)' => [
-    'badge' => 'Pembayaran Tunai (Cash)',
-    'bank' => 'Tunai Langsung ke Mas Robi',
-    'number' => 'Bayar Cash / Uang Tunai',
-    'holder' => 'Mas Robi (Kamar Pengelola Lt. 1)',
-    'isCash' => true,
-    'isQris' => false,
-    'instruction' => '💵 <strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.'
-  ]
-]);
+var paymentMethodsData = @json($pmMapped);
 
 function handlePaymentMethodChange(selectedMethod) {
   var data = paymentMethodsData[selectedMethod] || Object.values(paymentMethodsData)[0] || {
