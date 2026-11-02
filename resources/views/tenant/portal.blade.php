@@ -4,6 +4,15 @@
 
 @section('content')
 
+  @php
+    $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
+    $userInitial = strtoupper(substr($user->name ?? 'P', 0, 1));
+    $isB2 = ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2';
+    $branchName = $isB2 ? 'Kos Mas Robi 2 — Ringroad Exclusive' : 'Kos Mas Robi 1 — Kampus Utama';
+    $branchAddr = $isB2 ? 'Jl. Kaliurang KM 12, Sardonoharjo, Sleman' : 'Jl. Pandega Marta, Pogung, Sinduadi (3 Mnt UGM)';
+    $branchMaps = $isB2 ? 'https://maps.google.com/?q=Kos+Mas+Robi+Ringroad' : 'https://maps.google.com/?q=Kos+Mas+Robi+Kampus';
+  @endphp
+
   {{-- ======================================================= NAVBAR ======================================================= --}}
   <nav class="tp-navbar">
     <div class="tp-navbar-brand">
