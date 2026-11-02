@@ -292,10 +292,7 @@
            PANE 2: TAB DAFTAR KAMAR
            ===================================================================== -->
       <div class="tab-pane" id="tab-rooms">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Kelola Master Kamar</h2>
-          </div>
+        <div class="section-header" style="justify-content: flex-end;">
           <button type="button" class="btn-primary-action" id="btnAddNewRoom">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Tambah Kamar Baru</span>
@@ -360,11 +357,7 @@
            PANE 3: TAB DATA PENGHUNI (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-tenants">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Data & Kontak Penghuni Kos (2 Cabang)</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Kelola profil penghuni, kartu akses cabang, kontak darurat, dan masa sewa di Kos 1 (Kampus) & Kos 2 (Ringroad).</p>
-          </div>
+        <div class="section-header" style="justify-content: flex-end;">
           <button type="button" class="btn-primary-action" id="btnAddNewTenant">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Daftarkan Anak Kos</span>
@@ -488,11 +481,7 @@
            PANE 3B: TAB TAGIHAN & INVOICE SEWA (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-bills">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Manajemen Tagihan & Invoice Sewa (2 Cabang)</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Pantau jatuh tempo sewa per lokasi kos, rincian tarif & layanan cabang, kirim WA penagihan, dan konfirmasi pelunasan manual oleh Admin.</p>
-          </div>
+        <div class="section-header" style="justify-content: flex-end;">
           <div style="display: flex; gap: 10px;">
             <button type="button" class="btn-primary-action" onclick="exportBillingReport()">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -760,11 +749,7 @@
            PANE 4: TAB LAPORAN KEUANGAN & KURVA ARUS KAS (DENGAN PERBEDAAN 2 KOS)
            ===================================================================== -->
       <div class="tab-pane" id="tab-finances">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Laporan Keuangan & Analisis Arus Kas (2 Cabang)</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Analisis komparasi pendapatan & beban operasional Kos 1 (Kampus Utama) vs Kos 2 (Ringroad Exclusive) beserta buku kas resmi.</p>
-          </div>
+        <div class="section-header" style="justify-content: flex-end;">
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             @php
               $currYear = (int)($selectedYear ?? 2026);
@@ -1033,11 +1018,7 @@
            PANE 5: TAB KELUHAN & PERAWATAN (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-maintenance">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Laporan Keluhan & Servis Fasilitas (2 Cabang)</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Penanganan tiket komplain & perawatan rutin dengan tim teknisi terpisah untuk Kos 1 (Kampus) & Kos 2 (Ringroad Exclusive).</p>
-          </div>
+        <div class="section-header" style="justify-content: flex-end;">
           <button type="button" class="btn-primary-action" id="btnNewRepairTicket">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             <span>Buat Tiket Komplain</span>
@@ -1147,13 +1128,6 @@
            PANE 5B: TAB PERSETUJUAN PINDAH KAMAR (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-transfers">
-        <div class="section-header">
-          <div class="section-title">
-            <h2>Pengajuan Pindah Kamar & Mutasi Antar Cabang (2 Kos)</h2>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Kelola perpindahan kamar internal di dalam cabang yang sama maupun mutasi lintas cabang (Upgrade Kos 1 ➔ Kos 2).</p>
-          </div>
-        </div>
-
         <!-- PERBEDAAN 2 KOS: ATURAN MUTASI INTERNAL VS LINTAS CABANG -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 18px;">
           <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 16px; padding: 16px;">
