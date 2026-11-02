@@ -162,52 +162,52 @@
   }
 
   // --- NAVIGATION CONTROLLER ---
-  function initNavigation() {
+  const navTitles = {
+    'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
+    'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
+    'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
+    'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
+    'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
+    'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
+    'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
+    'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
+  };
+
+  function switchTab(tabId) {
+    const panes = document.querySelectorAll('.tab-pane');
     const sidebarItems = document.querySelectorAll('.app-sidebar .nav-item');
     const bottomNavItems = document.querySelectorAll('.mobile-bottom-nav .bottom-nav-item');
-    const panes = document.querySelectorAll('.tab-pane');
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
     const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
 
-    const titles = {
-      'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
-      'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
-      'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
-      'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
-      'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
-      'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
-      'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
-      'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
-    };
+    panes.forEach(pane => {
+      pane.classList.toggle('active', pane.id === tabId);
+    });
 
-    function switchTab(tabId) {
-      panes.forEach(pane => {
-        pane.classList.toggle('active', pane.id === tabId);
-      });
+    sidebarItems.forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
+    });
 
-      sidebarItems.forEach(item => {
-        item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
-      });
+    bottomNavItems.forEach(item => {
+      item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
+    });
 
-      bottomNavItems.forEach(item => {
-        item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
-      });
-
-      if (titles[tabId]) {
-        if (pageTitle) pageTitle.textContent = titles[tabId].title;
-        if (pageSubtitle) pageSubtitle.textContent = titles[tabId].sub;
-        if (breadcrumbCurrent) breadcrumbCurrent.textContent = titles[tabId].title;
-      }
-
-      if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
-        setTimeout(window.drawRevenueCurve, 80);
-      }
-
-      document.getElementById('appSidebar')?.classList.remove('open');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (navTitles[tabId]) {
+      if (pageTitle) pageTitle.textContent = navTitles[tabId].title;
+      if (pageSubtitle) pageSubtitle.textContent = navTitles[tabId].sub;
+      if (breadcrumbCurrent) breadcrumbCurrent.textContent = navTitles[tabId].title;
     }
 
+    if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
+      setTimeout(window.drawRevenueCurve, 80);
+    }
+
+    document.getElementById('appSidebar')?.classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function initNavigation() {
     window.switchTab = switchTab;
 
     document.addEventListener('click', (e) => {
@@ -2111,7 +2111,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   }
 
   // --- INITIALIZE APPLICATION ---
+  let isInitialized = false;
   async function init() {
+    if (isInitialized) return;
+    isInitialized = true;
     const safeRun = (fnName, fn) => {
       try {
         fn();
@@ -2172,10 +2175,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   window.showReceiptModal = showReceiptModal;
   window.updateRepairStatus = updateRepairStatus;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
+  if (document.getElementById('appSidebar') || document.readyState !== 'loading') {
     init();
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
   }
 
 })();

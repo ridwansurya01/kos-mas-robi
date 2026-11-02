@@ -11,6 +11,62 @@
       finances: @json($allFinances ?? []),
       maintenance: @json($allMaintenance ?? [])
     };
+
+    window.switchTab = function(tabId) {
+      var navTitles = {
+        'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
+        'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
+        'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
+        'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
+        'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
+        'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
+        'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
+        'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
+      };
+      document.querySelectorAll('.tab-pane').forEach(function(pane) {
+        pane.classList.toggle('active', pane.id === tabId);
+      });
+      document.querySelectorAll('.app-sidebar .nav-item').forEach(function(item) {
+        item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
+      });
+      document.querySelectorAll('.mobile-bottom-nav .bottom-nav-item').forEach(function(item) {
+        item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
+      });
+      if (navTitles[tabId]) {
+        var pageTitle = document.getElementById('pageTitle');
+        var pageSubtitle = document.getElementById('pageSubtitle');
+        var breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
+        if (pageTitle) pageTitle.textContent = navTitles[tabId].title;
+        if (pageSubtitle) pageSubtitle.textContent = navTitles[tabId].sub;
+        if (breadcrumbCurrent) breadcrumbCurrent.textContent = navTitles[tabId].title;
+      }
+      if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
+        setTimeout(window.drawRevenueCurve, 80);
+      }
+      var sb = document.getElementById('appSidebar');
+      if (sb) sb.classList.remove('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.openModal = function(modalId) {
+      var modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.add('open');
+        modal.style.display = 'flex';
+        modal.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'hidden';
+      }
+    };
+
+    window.closeModal = function(modalId) {
+      var modal = document.getElementById(modalId);
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
+        document.body.style.overflow = '';
+      }
+    };
   </script>
 
   <!-- =========================================================================
@@ -37,38 +93,38 @@
     <nav class="sidebar-nav" aria-label="Main Navigation">
       <div class="nav-section-title">Ringkasan</div>
 
-      <div class="nav-item active" data-tab="tab-dashboard" role="button" tabindex="0">
+      <div class="nav-item active" data-tab="tab-dashboard" onclick="window.switchTab('tab-dashboard')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
         <span>Dashboard</span>
       </div>
 
       <div class="nav-section-title" style="margin-top: 14px;">Kamar & Pelanggan</div>
 
-      <div class="nav-item" data-tab="tab-rooms" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-rooms" onclick="window.switchTab('tab-rooms')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
         <span>Daftar Kamar</span>
         <span class="nav-badge-count" id="badgeRoomCount">{{ $totalRooms }}</span>
       </div>
 
-      <div class="nav-item" data-tab="tab-tenants" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-tenants" onclick="window.switchTab('tab-tenants')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>Data Penghuni</span>
         <span class="nav-badge-count" id="badgeTenantCount">{{ $occupiedRooms }}</span>
       </div>
 
-      <div class="nav-item" data-tab="tab-bills" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-bills" onclick="window.switchTab('tab-bills')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
         <span>Tagihan Sewa</span>
         <span class="nav-badge-count" id="badgeDueBills" style="{{ $dueRooms > 0 ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; font-weight:800;' : 'display:none;' }}">{{ $dueRooms }}</span>
       </div>
 
-      <div class="nav-item" data-tab="tab-transfers" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-transfers" onclick="window.switchTab('tab-transfers')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
         <span>Pindah Kamar</span>
         <span class="nav-badge-count" id="badgePendingTransfers" style="{{ ($pendingTransfersCount ?? 0) > 0 ? 'background: #f0fdfa; color: #0a5661; border: 1px solid #99f6e4;' : 'display:none;' }}">{{ $pendingTransfersCount ?? 0 }}</span>
       </div>
 
-      <div class="nav-item" data-tab="tab-maintenance" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-maintenance" onclick="window.switchTab('tab-maintenance')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         <span>Keluhan & Servis</span>
         <span class="nav-badge-count" id="badgePendingRepairs">{{ $activeTickets }}</span>
@@ -76,12 +132,12 @@
 
       <div class="nav-section-title" style="margin-top: 14px;">Manajemen Admin</div>
 
-      <div class="nav-item" data-tab="tab-finances" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
         <span>Laporan Keuangan</span>
       </div>
 
-      <div class="nav-item" data-tab="tab-settings" role="button" tabindex="0">
+      <div class="nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>Pengaturan Kos</span>
       </div>
@@ -1617,23 +1673,23 @@
        MOBILE BOTTOM NAVIGATION (Automatic Smartphone View)
        ========================================================================= -->
   <nav class="mobile-bottom-nav" aria-label="Navigasi Bawah Mobile">
-    <div class="bottom-nav-item active" data-tab="tab-dashboard">
+    <div class="bottom-nav-item active" data-tab="tab-dashboard" onclick="window.switchTab('tab-dashboard')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
       <span>Dashboard</span>
     </div>
-    <div class="bottom-nav-item" data-tab="tab-rooms">
+    <div class="bottom-nav-item" data-tab="tab-rooms" onclick="window.switchTab('tab-rooms')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
       <span>Kamar</span>
     </div>
-    <div class="bottom-nav-item" data-tab="tab-tenants">
+    <div class="bottom-nav-item" data-tab="tab-tenants" onclick="window.switchTab('tab-tenants')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       <span>Penghuni</span>
     </div>
-    <div class="bottom-nav-item" data-tab="tab-finances">
+    <div class="bottom-nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
       <span>Keuangan</span>
     </div>
-    <div class="bottom-nav-item" data-tab="tab-settings">
+    <div class="bottom-nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Pengaturan</span>
     </div>
