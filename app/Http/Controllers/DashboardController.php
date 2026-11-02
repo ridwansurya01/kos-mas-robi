@@ -46,13 +46,13 @@ class DashboardController extends Controller
         $netCashflow = $monthlyIncome - $totalExpense;
         $dueAmount = $rooms->where('status', 'due')->sum('price');
 
-        // Analisis Keuangan Kompleks Berdasarkan Tahun Pilihan Admin
-        $availableYears = [2027, 2026, 2025, 2024];
+        // Analisis Keuangan Berdasarkan Tahun (Mulai 2026 s/d Tak Terhingga)
         $selectedYear = (int)$request->input('year', 2026);
-        if (!in_array($selectedYear, $availableYears)) {
-            $availableYears[] = $selectedYear;
-            rsort($availableYears);
+        if ($selectedYear < 2026) {
+            $selectedYear = 2026;
         }
+        $maxYear = max(2045, $selectedYear + 5);
+        $availableYears = range(2026, $maxYear);
 
         $allYearFinances = Finance::whereYear('date', $selectedYear)->get();
         $hasDbRecords = $allYearFinances->count() > 0;
@@ -61,13 +61,7 @@ class DashboardController extends Controller
         $yearlyExpense = $allYearFinances->where('type', 'expense')->sum('amount');
 
         if (!$hasDbRecords) {
-            if ($selectedYear === 2025) {
-                $yearlyIncome = 196400000;
-                $yearlyExpense = 41200000;
-            } elseif ($selectedYear === 2024) {
-                $yearlyIncome = 162000000;
-                $yearlyExpense = 34500000;
-            } elseif ($selectedYear === 2027) {
+            if ($selectedYear === 2027) {
                 $yearlyIncome = 238000000;
                 $yearlyExpense = 46000000;
             } else {
@@ -248,11 +242,11 @@ class DashboardController extends Controller
             'custom_interior_admin_notes' => 'nullable|string',
         ]);
 
-        // Support array of 3 slide images
+        // Support array of up to 4 slide images
         if ($request->has('images') && is_array($request->input('images'))) {
             $imgs = array_values(array_filter($request->input('images')));
             if (!empty($imgs)) {
-                $validated['images'] = $imgs;
+                $validated['images'] = array_slice($imgs, 0, 4); // max 4
                 $validated['image'] = $imgs[0];
             }
         } elseif ($request->filled('image')) {
@@ -817,6 +811,9 @@ class DashboardController extends Controller
     public function getFinanceStats(Request $request): JsonResponse
     {
         $year = (int)$request->input('year', 2026);
+        if ($year < 2026) {
+            $year = 2026;
+        }
         $finances = Finance::whereYear('date', $year)->orderBy('date', 'desc')->get();
         $hasDb = $finances->count() > 0;
 
@@ -824,15 +821,12 @@ class DashboardController extends Controller
         $expense = $finances->where('type', 'expense')->sum('amount');
 
         if (!$hasDb) {
-            if ($year === 2025) {
-                $income = 196400000;
-                $expense = 41200000;
-            } elseif ($year === 2024) {
-                $income = 162000000;
-                $expense = 34500000;
-            } elseif ($year === 2027) {
+            if ($year === 2027) {
                 $income = 238000000;
                 $expense = 46000000;
+            } else {
+                $income = 0;
+                $expense = 0;
             }
         }
         $net = $income - $expense;

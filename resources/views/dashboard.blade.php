@@ -56,7 +56,7 @@
       <div class="nav-item" data-tab="tab-transfers" role="button" tabindex="0">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
         <span>Pindah Kamar</span>
-        <span class="nav-badge-count" id="badgePendingTransfers" style="{{ ($pendingTransfersCount ?? 0) > 0 ? 'background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;' : 'display:none;' }}">{{ $pendingTransfersCount ?? 0 }}</span>
+        <span class="nav-badge-count" id="badgePendingTransfers" style="{{ ($pendingTransfersCount ?? 0) > 0 ? 'background: #f0fdfa; color: #0a5661; border: 1px solid #99f6e4;' : 'display:none;' }}">{{ $pendingTransfersCount ?? 0 }}</span>
       </div>
 
       <div class="nav-item" data-tab="tab-maintenance" role="button" tabindex="0">
@@ -137,7 +137,7 @@
         <!-- Quick Add Button -->
         <button type="button" class="btn-primary-action modern-quick-add-btn" id="btnQuickAdd">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>+ Penghuni Baru</span>
+          <span>Penghuni Baru</span>
         </button>
       </div>
     </header>
@@ -249,7 +249,7 @@
           </div>
           <button type="button" class="btn-primary-action" id="btnAddNewRoom">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>+ Tambah Kamar Baru</span>
+            <span>Tambah Kamar Baru</span>
           </button>
         </div>
 
@@ -301,7 +301,7 @@
           </div>
           <button type="button" class="btn-primary-action" id="btnAddNewTenant">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>+ Daftarkan Anak Kos</span>
+            <span>Daftarkan Anak Kos</span>
           </button>
         </div>
 
@@ -449,12 +449,12 @@
                 <td>
                   @if($t)
                     <div style="font-weight: 700; color: var(--text-primary);">{{ $t->name }}</div>
-                    <div style="font-size: 0.76rem; color: #2563eb;">{{ $t->phone }}</div>
+                    <div style="font-size: 0.76rem; color: #0a5661;">{{ $t->phone }}</div>
                   @else
                     <span style="color: var(--text-muted); font-style: italic;">(Unit Kosong / Siap Huni)</span>
                   @endif
                 </td>
-                <td style="font-weight: 800; color: #2563eb;">
+                <td style="font-weight: 800; color: #0a5661;">
                   Rp {{ number_format($r->price, 0, ',', '.') }}
                 </td>
                 <td>
@@ -529,13 +529,25 @@
             <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Analisis kurva pendapatan bulanan s/d 1 tahun penuh, rasio pengeluaran operasional, dan buku kas transaksi resmi.</p>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <div class="finance-year-picker-wrap">
-              <span class="fyp-label">📅 Periode Tahun:</span>
-              <select id="selectFinanceYear" class="fyp-select" onchange="changeFinanceYear(this.value)">
-                @foreach(($availableYears ?? [2027, 2026, 2025, 2024]) as $yr)
-                  <option value="{{ $yr }}" {{ ($selectedYear ?? 2026) == $yr ? 'selected' : '' }}>Tahun {{ $yr }}</option>
+            @php
+              $currYear = (int)($selectedYear ?? 2026);
+              if ($currYear < 2026) $currYear = 2026;
+              $maxYearOpt = max(2050, $currYear + 5);
+              $yearsList = range(2026, $maxYearOpt);
+            @endphp
+            <div class="finance-year-picker-wrap" id="finYearPickerWrap" onwheel="handleYearWheelScroll(event)" title="Gulir roda mouse untuk ganti tahun">
+              <span class="fyp-label">📅 Periode:</span>
+              <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2026 ? 'disabled' : '' }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <select id="selectFinanceYear" class="fyp-select" onchange="changeFinanceYear(this.value); updateYearNavButtons();">
+                @foreach($yearsList as $yr)
+                  <option value="{{ $yr }}" {{ $currYear == $yr ? 'selected' : '' }}>Tahun {{ $yr }}</option>
                 @endforeach
               </select>
+              <button type="button" class="fyp-scroll-btn" id="btnNextYear" onclick="scrollFinanceYear(1)" title="Tahun Berikutnya (Tak Terhingga)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
             </div>
             <button type="button" class="btn-secondary" onclick="exportFinancesCSV()">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -543,7 +555,7 @@
             </button>
             <button type="button" class="btn-primary-action" id="btnRecordTransaction">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ Catat Transaksi Baru</span>
+              <span>Catat Transaksi Baru</span>
             </button>
           </div>
         </div>
@@ -584,7 +596,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" id="finKpiNetVal" style="color:#3b82f6;">Rp {{ number_format($yearlyNet ?? (($netCashflow ?: 14700000) * 12), 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiNetVal" style="color:#0d9488;">Rp {{ number_format($yearlyNet ?? (($netCashflow ?: 14700000) * 12), 0, ',', '.') }}</div>
             <div class="stat-card-meta">
               <span class="stat-trend-up">Margin Bersih Sehat</span>
             </div>
@@ -630,7 +642,7 @@
                   <span style="color: var(--text-secondary);">Pengeluaran</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
+                  <span style="width: 12px; height: 12px; border-radius: 50%; background: #0d9488; display: inline-block;"></span>
                   <span style="color: var(--text-secondary);">Laba Bersih</span>
                 </div>
               </div>
@@ -651,17 +663,17 @@
               <div id="ttPeriod" style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 2px;">Oktober 2026</div>
               <div id="ttIncome" style="color: #34d399;">Pemasukan: Rp 18.200.000</div>
               <div id="ttExpense" style="color: #f87171;">Pengeluaran: Rp 3.500.000</div>
-              <div id="ttNet" style="color: #60a5fa; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 4px; padding-top: 3px;">Net: Rp 14.700.000</div>
+              <div id="ttNet" style="color: #2dd4bf; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 4px; padding-top: 3px;">Net: Rp 14.700.000</div>
             </div>
           </div>
 
           <!-- Quick Insight Bar -->
-          <div style="margin-top: 16px; padding: 12px 18px; border-radius: 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="margin-top: 16px; padding: 12px 18px; border-radius: 14px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-primary);">
               <span>💡</span>
               <span><strong>Insight Keuangan:</strong> Rata-rata pemasukan per unit kamar mencapai <strong>Rp 1.512.000/bln</strong> dengan tingkat perputaran kas sehat.</span>
             </div>
-            <div style="font-size: 0.78rem; font-weight: 700; color: #2563eb;">
+            <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661;">
               Status Kas: Surplus Finansial ✓
             </div>
           </div>
@@ -714,7 +726,7 @@
           </div>
           <button type="button" class="btn-primary-action" id="btnNewRepairTicket">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>+ Buat Tiket Komplain</span>
+            <span>Buat Tiket Komplain</span>
           </button>
         </div>
 
@@ -816,7 +828,7 @@
                   <td style="max-width: 240px;">
                     <div style="font-size: 0.82rem; line-height: 1.4;">{{ $tr->reason }}</div>
                     @if($tr->preferred_date)
-                      <div style="font-size: 0.72rem; color: #2563eb; font-weight: 600; margin-top: 3px;">📅 Rencana: {{ \Carbon\Carbon::parse($tr->preferred_date)->format('d M Y') }}</div>
+                      <div style="font-size: 0.72rem; color: #0a5661; font-weight: 600; margin-top: 3px;">📅 Rencana: {{ \Carbon\Carbon::parse($tr->preferred_date)->format('d M Y') }}</div>
                     @endif
                     @if($tr->admin_note)
                       <div style="font-size: 0.72rem; color: #059669; font-weight: 600; margin-top: 3px;">💬 Catatan: {{ $tr->admin_note }}</div>
@@ -859,32 +871,63 @@
         </div>
       </div>
       <div class="tab-pane" id="tab-settings">
-        <!-- Modern Header -->
-        <div class="settings-modern-header">
-          <div>
-            <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary); margin: 0;">Pusat Pengaturan & Kelola Properti</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px; margin-bottom: 0;">Kelola konten Landing Page, foto galeri, titik peta Google Maps, dan profil rekening pembayaran.</p>
+        <!-- ====== SUPER PREMIUM SETTINGS HEADER ====== -->
+        <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 28px 32px; margin-bottom: 28px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35);">
+          <!-- Decorative blobs -->
+          <div style="position:absolute; top:-40px; right:-40px; width:200px; height:200px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none;"></div>
+          <div style="position:absolute; bottom:-60px; left:60px; width:150px; height:150px; background:rgba(20, 184, 166, 0.1); border-radius:50%; pointer-events:none;"></div>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px);">⚙️</div>
+              <div>
+                <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
+                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil & rekening pembayaran kost</p>
+              </div>
+            </div>
+            <a href="{{ route('home') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.84rem; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
+              <span>🌐</span> Lihat Landing Page ↗
+            </a>
           </div>
-          <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; padding: 10px 18px; border-radius: 9999px;">
-            <span style="font-size: 1rem;">🌐</span>
-            <span>Buka Website Landing Page ↗</span>
-          </a>
+          <!-- Stats bar -->
+          <div style="display: flex; gap: 20px; margin-top: 22px; flex-wrap: wrap; position: relative; z-index: 1;">
+            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.1rem;">🎨</span>
+              <div>
+                <div style="color: rgba(255,255,255,0.55); font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Tampilan</div>
+                <div style="color: #fff; font-size: 0.82rem; font-weight: 800;">Landing Page</div>
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.1rem;">📍</span>
+              <div>
+                <div style="color: rgba(255,255,255,0.55); font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Peta & Lokasi</div>
+                <div style="color: #fff; font-size: 0.82rem; font-weight: 800;">Google Maps</div>
+              </div>
+            </div>
+            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 1.1rem;">💳</span>
+              <div>
+                <div style="color: rgba(255,255,255,0.55); font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Pembayaran</div>
+                <div style="color: #fff; font-size: 0.82rem; font-weight: 800;">Rekening & Metode</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Segmented Sub-Tab Navigation -->
-        <div style="margin-bottom: 26px;">
-          <div class="settings-segmented-nav" id="settingsSubTabNav">
-            <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing">
-              <span>🎨</span>
-              <span>Tampilan & Foto Landing Page</span>
+        <!-- ====== PREMIUM SUB-TAB NAV ====== -->
+        <div style="margin-bottom: 26px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px;">
+          <div class="settings-segmented-nav" id="settingsSubTabNav" style="display: flex; gap: 4px; background: transparent; padding: 0; border-radius: 0;">
+            <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+              <span style="font-size: 1.1rem;">🎨</span>
+              <span>Tampilan & Foto</span>
             </button>
-            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location">
-              <span>📍</span>
-              <span>Titik Lokasi Google Maps & POI</span>
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+              <span style="font-size: 1.1rem;">📍</span>
+              <span>Titik Lokasi</span>
             </button>
-            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile">
-              <span>⚙️</span>
-              <span>Profil Properti & Rekening</span>
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+              <span style="font-size: 1.1rem;">⚙️</span>
+              <span>Profil & Rekening</span>
             </button>
           </div>
         </div>
@@ -1458,175 +1501,258 @@
   </div>
 
   <!-- =========================================================================
-       MODAL: FORM TAMBAH / EDIT KAMAR
+       MODAL: FORM TAMBAH / EDIT KAMAR — THEME TEAL & EMPTY BY DEFAULT
        ========================================================================= -->
   <div class="modal-backdrop" id="modalAddRoom">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h3 id="mRoomFormTitle">Tambah Master Kamar</h3>
-        <button type="button" class="modal-close-btn" data-close-modal="modalAddRoom">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <form id="formAddRoom">
-        <div class="modal-body">
-          <input type="hidden" id="roomEditId" value="">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="roomNumberInput">Nomor Kamar *</label>
-              <input type="text" id="roomNumberInput" class="form-control" placeholder="Contoh: 105 atau B02" required>
-            </div>
-            <div class="form-group">
-              <label for="roomFloorInput">Lantai *</label>
-              <select id="roomFloorInput" class="form-control" required>
-                <option value="1">Lantai 1</option>
-                <option value="2">Lantai 2</option>
-                <option value="3">Lantai 3</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="roomTypeInput">Tipe Kamar *</label>
-              <select id="roomTypeInput" class="form-control" required>
-                <option value="VIP AC (KM Dalam)">VIP AC (KM Dalam)</option>
-                <option value="Deluxe AC">Deluxe AC</option>
-                <option value="Standard Fan (KM Luar)">Standard Fan (KM Luar)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="roomPriceInput">Harga Sewa / Bulan (Rp) *</label>
-              <input type="number" id="roomPriceInput" class="form-control" placeholder="1500000" required>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="roomFacilitiesInput">Fasilitas Kamar (pisahkan dengan koma)</label>
-            <input type="text" id="roomFacilitiesInput" class="form-control" value="AC, Kasur Springbed, Lemari 2 Pintu, Meja Belajar, KM Dalam, Water Heater">
-          </div>
-          <div class="form-group">
-            <label for="roomStatusInput">Status Kamar</label>
-            <select id="roomStatusInput" class="form-control">
-              <option value="available">🔵 Kosong (Tersedia)</option>
-              <option value="occupied">🟢 Terisi</option>
-              <option value="repair">🔴 Dalam Perbaikan</option>
-            </select>
-          </div>
-
-          <!-- Section Custom Interior & Anggaran Khusus (Dikelola & Diubah Dinamis oleh Admin) -->
-          <div class="form-group" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-color); background: rgba(37,99,235,0.03); padding: 14px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.15);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label style="font-weight: 700; color: #1e40af; font-size: 0.9rem; display: flex; align-items: center; gap: 6px;">
-                <span>🎨</span>
-                <span>Custom Interior & Anggaran Pelanggan</span>
-              </label>
-              <span style="font-size: 0.72rem; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 999px; font-weight: 700;">Admin Control</span>
-            </div>
-            <p style="font-size: 0.76rem; color: var(--text-muted); margin-bottom: 12px;">
-              Kelola permintaan penataan interior dari pelanggan dan tentukan/perbarui nominal anggaran (budget) secara dinamis.
-            </p>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="roomCustomInteriorStatusInput">Status Custom Interior</label>
-                <select id="roomCustomInteriorStatusInput" class="form-control">
-                  <option value="none">⚪ Tidak Ada Permintaan</option>
-                  <option value="pending">⏳ Menunggu Review / Konfirmasi</option>
-                  <option value="approved">✅ Disetujui (Approved)</option>
-                  <option value="in_progress">🛠️ Sedang Dikerjakan (In Progress)</option>
-                  <option value="completed">🎉 Selesai Dikerjakan</option>
-                  <option value="rejected">❌ Ditolak / Tidak Memungkinkan</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="roomCustomInteriorBudgetInput">Anggaran Interior Disetujui (Rp) *</label>
-                <input type="number" id="roomCustomInteriorBudgetInput" class="form-control" placeholder="Contoh: 750000" min="0" step="10000" value="0">
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="roomCustomInteriorRequestInput">Permintaan Desain Pelanggan</label>
-              <textarea id="roomCustomInteriorRequestInput" class="form-control" rows="2" placeholder="Catatan permintaan dekorasi atau furnitur tambahan dari calon/penghuni kamar..."></textarea>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="roomCustomInteriorNotesInput">Catatan Mas Robi untuk Pelanggan</label>
-              <input type="text" id="roomCustomInteriorNotesInput" class="form-control" placeholder="Contoh: Ambalan kayu jati siap dipasang tgl 5 November. Budget disetujui Rp 500.000.">
-            </div>
-          </div>
-          <div class="form-group" style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border-color);">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
-              <label style="font-weight: 700; color: var(--text-primary); font-size: 0.88rem;">
-                📸 3 Foto Slide Kamar (Hanya Diinput & Diatur Oleh Admin)
-              </label>
-              <button type="button" class="btn-secondary" style="font-size: 0.72rem; padding: 2px 8px;" onclick="window.kosApp.fillDefaultRoomImages()">
-                ⚡ 3 Foto Standar
-              </button>
-            </div>
-            <p style="font-size: 0.74rem; color: var(--text-muted); margin-bottom: 10px;">
-              Ketiga foto ini akan menjadi latar belakang slide interaktif kamar di Portal Pelanggan dan Landing Page.
-            </p>
-
-            <!-- Foto 1 (Utama) -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">1. Foto Kamar Tidur Utama *</span>
-                <span id="roomImgUploadStatus1" style="font-size: 0.7rem; color: #10b981; font-weight: 700;"></span>
-              </div>
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <img id="roomImgPreview1" src="/assets/images/rooms/room_1.jpg" alt="Slide 1"
-                     style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.75rem; padding: 4px 6px;"
-                         onchange="uploadRoomSlideImage(this, 1)">
-                  <input type="text" id="roomImageInput1" class="form-control" value="assets/images/rooms/room_1.jpg"
-                         placeholder="Path foto atau hasil upload..." style="font-size: 0.75rem; padding: 4px 8px;"
-                         oninput="document.getElementById('roomImgPreview1').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
-                </div>
-              </div>
-            </div>
-
-            <!-- Foto 2 -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">2. Foto Meja Kerja / Area Belajar & AC</span>
-                <span id="roomImgUploadStatus2" style="font-size: 0.7rem; color: #10b981; font-weight: 700;"></span>
-              </div>
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <img id="roomImgPreview2" src="/assets/images/rooms/room_2.jpg" alt="Slide 2"
-                     style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.75rem; padding: 4px 6px;"
-                         onchange="uploadRoomSlideImage(this, 2)">
-                  <input type="text" id="roomImageInput2" class="form-control" value="assets/images/rooms/room_2.jpg"
-                         placeholder="Path foto atau hasil upload..." style="font-size: 0.75rem; padding: 4px 8px;"
-                         oninput="document.getElementById('roomImgPreview2').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
-                </div>
-              </div>
-            </div>
-
-            <!-- Foto 3 -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">3. Foto Kamar Mandi Dalam / Fasilitas Tambahan</span>
-                <span id="roomImgUploadStatus3" style="font-size: 0.7rem; color: #10b981; font-weight: 700;"></span>
-              </div>
-              <div style="display: flex; gap: 10px; align-items: center;">
-                <img id="roomImgPreview3" src="/assets/images/rooms/room_3.jpg" alt="Slide 3"
-                     style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
-                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.75rem; padding: 4px 6px;"
-                         onchange="uploadRoomSlideImage(this, 3)">
-                  <input type="text" id="roomImageInput3" class="form-control" value="assets/images/rooms/room_3.jpg"
-                         placeholder="Path foto atau hasil upload..." style="font-size: 0.75rem; padding: 4px 8px;"
-                         oninput="document.getElementById('roomImgPreview3').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
-                </div>
-              </div>
-            </div>
+    <div class="modal-dialog" style="max-width: 780px; width: 95vw;">
+      <!-- Premium Modal Header (Deep Teal Ocean) -->
+      <div class="modal-header" style="background: linear-gradient(135deg, #032328 0%, #063d45 40%, #0a5661 100%); border-radius: 20px 20px 0 0; padding: 20px 24px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🏠</div>
+          <div>
+            <h3 id="mRoomFormTitle" style="color: #fff; font-size: 1.1rem; font-weight: 800; margin: 0;">Tambah Master Kamar</h3>
+            <p style="color: rgba(255,255,255,0.7); font-size: 0.76rem; margin: 2px 0 0;">Isi data kamar & upload foto kamar asli</p>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn-secondary" data-close-modal="modalAddRoom">Batal</button>
-          <button type="submit" class="btn-primary">Simpan Kamar</button>
+        <button type="button" class="modal-close-btn" data-close-modal="modalAddRoom" style="background: rgba(255,255,255,0.15); border-radius: 10px; color: #fff;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="formAddRoom">
+        <div class="modal-body" style="padding: 24px; display: flex; flex-direction: column; gap: 20px; max-height: 75vh; overflow-y: auto;">
+          <input type="hidden" id="roomEditId" value="">
+
+          <!-- SECTION 1: INFO DASAR KAMAR -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1.5px solid #99f6e4; border-radius: 16px; padding: 18px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+              <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">📋</div>
+              <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Informasi Dasar Kamar</span>
+            </div>
+            <div class="form-row" style="gap: 14px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="roomNumberInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Nomor Kamar *</label>
+                <input type="text" id="roomNumberInput" class="form-control" placeholder="Contoh: 101 atau B02" required style="border-color: #99f6e4; border-radius: 10px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="roomFloorInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Lantai *</label>
+                <select id="roomFloorInput" class="form-control" required style="border-color: #99f6e4; border-radius: 10px;">
+                  <option value="1">Lantai 1</option>
+                  <option value="2">Lantai 2</option>
+                  <option value="3">Lantai 3</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="gap: 14px; margin-top: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="roomTypeInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Tipe Kamar *</label>
+                <select id="roomTypeInput" class="form-control" required style="border-color: #99f6e4; border-radius: 10px;">
+                  <option value="VIP AC (KM Dalam)">VIP AC (KM Dalam)</option>
+                  <option value="Deluxe AC">Deluxe AC</option>
+                  <option value="Standard Fan (KM Luar)">Standard Fan (KM Luar)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="roomPriceInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Harga Sewa / Bulan (Rp) *</label>
+                <input type="number" id="roomPriceInput" class="form-control" placeholder="1500000" required style="border-color: #99f6e4; border-radius: 10px;">
+              </div>
+            </div>
+            <div class="form-row" style="gap: 14px; margin-top: 12px;">
+              <div class="form-group" style="margin-bottom: 0; flex: 2;">
+                <label for="roomFacilitiesInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Fasilitas (pisahkan dengan koma)</label>
+                <input type="text" id="roomFacilitiesInput" class="form-control" value="AC, Kasur Springbed, Lemari 2 Pintu, Meja Belajar, KM Dalam, Water Heater" style="border-color: #99f6e4; border-radius: 10px;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0; flex: 1;">
+                <label for="roomStatusInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Status Kamar</label>
+                <select id="roomStatusInput" class="form-control" style="border-color: #99f6e4; border-radius: 10px;">
+                  <option value="available">🔵 Kosong</option>
+                  <option value="occupied">🟢 Terisi</option>
+                  <option value="repair">🔴 Perbaikan</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: UPLOAD 3–4 FOTO KAMAR (KOSONG AWAL, MUNCUL KETIKA DIUPLOAD) -->
+          <div style="background: #fff; border: 1.5px solid #ccfbf1; border-radius: 16px; padding: 18px; box-shadow: 0 2px 12px rgba(10,86,97,0.04);">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #0a5661, #0d9488); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">📸</div>
+                <div>
+                  <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Foto Kamar</span>
+                  <span style="font-size: 0.72rem; background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; margin-left: 8px;">Upload 3–4 Foto</span>
+                </div>
+              </div>
+              <span style="font-size: 0.72rem; color: #0d9488; font-weight: 700;">💡 Klik slot untuk memilih foto</span>
+            </div>
+            <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
+              Slot foto awal kosong. Silakan upload 3–4 foto terbaik kamar. Foto pertama otomatis menjadi <strong>foto utama (cover)</strong> kamar.
+            </p>
+
+            <!-- 4 Foto Grid Upload (Default Kosong) -->
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;" id="roomPhotosGrid">
+
+              <!-- Slot Foto 1 (Utama) -->
+              <div class="room-photo-slot" id="roomPhotoSlot1" data-slot="1" style="position: relative; overflow: hidden; cursor: pointer; min-height: 140px;"
+                   onclick="document.getElementById('roomPhotoFile1').click()"
+                   ondragover="event.preventDefault(); this.style.borderColor='#0d9488'; this.style.background='#ccfbf1';"
+                   ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
+                   ondrop="handleRoomPhotoDrop(event, 1)">
+                <!-- Empty Placeholder -->
+                <div id="roomPhotoPlaceholder1" class="room-photo-placeholder">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">📷</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 1: Utama (Cover) *</div>
+                  <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
+                  <div style="font-size: 0.62rem; color: #0d9488; margin-top: 4px; font-weight: 700;">Wajib Diisi</div>
+                </div>
+                <!-- Filled View -->
+                <div id="roomPhotoFilled1" class="room-photo-filled" style="display: none;">
+                  <img id="roomImgPreview1" src="" alt="Foto 1" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
+                  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
+                  <div style="position: absolute; top: 8px; left: 8px; background: #0a5661; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO UTAMA ⭐</div>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(1);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <div id="roomImgUploadStatus1" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">📷 Foto Kamar Tidur Utama</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
+                  </div>
+                </div>
+                <input type="file" id="roomPhotoFile1" accept="image/*" style="display: none;" onchange="uploadRoomSlideImage(this, 1)">
+                <input type="hidden" id="roomImageInput1" value="">
+              </div>
+
+              <!-- Slot Foto 2 -->
+              <div class="room-photo-slot" id="roomPhotoSlot2" data-slot="2" style="position: relative; overflow: hidden; cursor: pointer; min-height: 140px;"
+                   onclick="document.getElementById('roomPhotoFile2').click()"
+                   ondragover="event.preventDefault(); this.style.borderColor='#0d9488'; this.style.background='#ccfbf1';"
+                   ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
+                   ondrop="handleRoomPhotoDrop(event, 2)">
+                <div id="roomPhotoPlaceholder2" class="room-photo-placeholder">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">🖥️</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 2: Meja Kerja / AC</div>
+                  <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
+                </div>
+                <div id="roomPhotoFilled2" class="room-photo-filled" style="display: none;">
+                  <img id="roomImgPreview2" src="" alt="Foto 2" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
+                  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
+                  <div style="position: absolute; top: 8px; left: 8px; background: rgba(3,35,40,0.65); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO 2</div>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(2);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <div id="roomImgUploadStatus2" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">🖥️ Meja Kerja / AC</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
+                  </div>
+                </div>
+                <input type="file" id="roomPhotoFile2" accept="image/*" style="display: none;" onchange="uploadRoomSlideImage(this, 2)">
+                <input type="hidden" id="roomImageInput2" value="">
+              </div>
+
+              <!-- Slot Foto 3 -->
+              <div class="room-photo-slot" id="roomPhotoSlot3" data-slot="3" style="position: relative; overflow: hidden; cursor: pointer; min-height: 140px;"
+                   onclick="document.getElementById('roomPhotoFile3').click()"
+                   ondragover="event.preventDefault(); this.style.borderColor='#0d9488'; this.style.background='#ccfbf1';"
+                   ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
+                   ondrop="handleRoomPhotoDrop(event, 3)">
+                <div id="roomPhotoPlaceholder3" class="room-photo-placeholder">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">🚿</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 3: Kamar Mandi / Fasilitas</div>
+                  <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
+                </div>
+                <div id="roomPhotoFilled3" class="room-photo-filled" style="display: none;">
+                  <img id="roomImgPreview3" src="" alt="Foto 3" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
+                  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
+                  <div style="position: absolute; top: 8px; left: 8px; background: rgba(3,35,40,0.65); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO 3</div>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(3);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <div id="roomImgUploadStatus3" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">🚿 Kamar Mandi / Fasilitas</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
+                  </div>
+                </div>
+                <input type="file" id="roomPhotoFile3" accept="image/*" style="display: none;" onchange="uploadRoomSlideImage(this, 3)">
+                <input type="hidden" id="roomImageInput3" value="">
+              </div>
+
+              <!-- Slot Foto 4 (Opsional) -->
+              <div class="room-photo-slot" id="roomPhotoSlot4" data-slot="4" style="position: relative; overflow: hidden; cursor: pointer; min-height: 140px;"
+                   onclick="document.getElementById('roomPhotoFile4').click()"
+                   ondragover="event.preventDefault(); this.style.borderColor='#0d9488'; this.style.background='#ccfbf1';"
+                   ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
+                   ondrop="handleRoomPhotoDrop(event, 4)">
+                <div id="roomPhotoPlaceholder4" class="room-photo-placeholder">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">✨</div>
+                  <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 4: Tambahan (Opsional)</div>
+                  <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
+                </div>
+                <div id="roomPhotoFilled4" class="room-photo-filled" style="display: none;">
+                  <img id="roomImgPreview4" src="" alt="Foto 4" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
+                  <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
+                  <div style="position: absolute; top: 8px; left: 8px; background: rgba(3,35,40,0.65); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">OPSIONAL</div>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(4);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <div id="roomImgUploadStatus4" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
+                  <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">✨ Foto Tambahan</div>
+                    <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
+                  </div>
+                </div>
+                <input type="file" id="roomPhotoFile4" accept="image/*" style="display: none;" onchange="uploadRoomSlideImage(this, 4)">
+                <input type="hidden" id="roomImageInput4" value="">
+              </div>
+
+            </div>
+
+            <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px; text-align: center;">
+              💡 Format: JPG, PNG, WEBP • Maks 5MB per foto • Klik kotak foto untuk upload langsung
+            </p>
+          </div>
+
+          <!-- SECTION 3: CUSTOM INTERIOR -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 16px; padding: 18px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">🎨</div>
+                <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Custom Interior & Anggaran</span>
+              </div>
+              <span style="font-size: 0.68rem; background: #063d45; color: #fff; padding: 3px 9px; border-radius: 999px; font-weight: 700;">Admin Only</span>
+            </div>
+            <div class="form-row" style="gap: 14px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="roomCustomInteriorStatusInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Status Custom Interior</label>
+                <select id="roomCustomInteriorStatusInput" class="form-control" style="border-color: #99f6e4; border-radius: 10px;">
+                  <option value="none">⚪ Tidak Ada Permintaan</option>
+                  <option value="pending">⏳ Menunggu Review</option>
+                  <option value="approved">✅ Disetujui</option>
+                  <option value="in_progress">🛠️ Sedang Dikerjakan</option>
+                  <option value="completed">🎉 Selesai</option>
+                  <option value="rejected">❌ Ditolak</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="roomCustomInteriorBudgetInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Anggaran Disetujui (Rp)</label>
+                <input type="number" id="roomCustomInteriorBudgetInput" class="form-control" placeholder="0" min="0" step="10000" value="0" style="border-color: #99f6e4; border-radius: 10px;">
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 12px; margin-bottom: 10px;">
+              <label for="roomCustomInteriorRequestInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Permintaan Desain Pelanggan</label>
+              <textarea id="roomCustomInteriorRequestInput" class="form-control" rows="2" placeholder="Catatan permintaan dari pelanggan..." style="border-color: #99f6e4; border-radius: 10px;"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="roomCustomInteriorNotesInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Catatan Admin untuk Pelanggan</label>
+              <input type="text" id="roomCustomInteriorNotesInput" class="form-control" placeholder="Contoh: Ambalan kayu jati siap dipasang tgl 5 Nov." style="border-color: #99f6e4; border-radius: 10px;">
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Premium Footer -->
+        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 20px 20px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center;">
+          <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0;">* Bidang wajib diisi</p>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn-secondary" data-close-modal="modalAddRoom" style="border-radius: 10px; padding: 10px 20px;">Batal</button>
+            <button type="submit" class="btn-primary" style="border-radius: 10px; padding: 10px 24px; font-weight: 800; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); border: none; box-shadow: 0 4px 14px rgba(10,86,97,0.35);">
+              💾 Simpan Kamar
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -1713,7 +1839,7 @@
           </div>
           <div class="receipt-row">
             <span style="color: #64748b;">Tanggal & Waktu Bayar:</span>
-            <span id="recDate" style="font-weight: 700; color: #1e40af;">28 Oktober 2026, 12:00:00 WIB</span>
+            <span id="recDate" style="font-weight: 700; color: #0a5661;">28 Oktober 2026, 12:00:00 WIB</span>
           </div>
           <div class="receipt-row">
             <span style="color: #64748b;">Telah Terima Dari:</span>
@@ -1909,6 +2035,58 @@
 
     var currentCurvePeriod = "1y";
 
+    function handleYearWheelScroll(e) {
+      e.preventDefault();
+      var delta = e.deltaY > 0 ? 1 : -1;
+      scrollFinanceYear(delta);
+    }
+    window.handleYearWheelScroll = handleYearWheelScroll;
+
+    function scrollFinanceYear(delta) {
+      var select = document.getElementById('selectFinanceYear');
+      if (!select) return;
+      var currentYear = parseInt(select.value) || 2026;
+      var targetYear = currentYear + delta;
+      if (targetYear < 2026) {
+        targetYear = 2026;
+        if (typeof showToast === 'function') {
+          showToast('Batas awal tahun dimulai dari 2026', 'warning');
+        }
+        updateYearNavButtons();
+        return;
+      }
+
+      // Pastikan targetYear ada dalam opsi select; jika belum ada, tambahkan dinamis (Tak Terhingga)
+      var optionExists = false;
+      for (var i = 0; i < select.options.length; i++) {
+        if (parseInt(select.options[i].value) === targetYear) {
+          optionExists = true;
+          break;
+        }
+      }
+      if (!optionExists) {
+        var opt = document.createElement('option');
+        opt.value = targetYear;
+        opt.textContent = 'Tahun ' + targetYear;
+        select.appendChild(opt);
+      }
+
+      select.value = targetYear;
+      updateYearNavButtons();
+      changeFinanceYear(targetYear);
+    }
+    window.scrollFinanceYear = scrollFinanceYear;
+
+    function updateYearNavButtons() {
+      var select = document.getElementById('selectFinanceYear');
+      var btnPrev = document.getElementById('btnPrevYear');
+      if (select && btnPrev) {
+        var currentYear = parseInt(select.value) || 2026;
+        btnPrev.disabled = (currentYear <= 2026);
+      }
+    }
+    window.updateYearNavButtons = updateYearNavButtons;
+
     async function changeFinanceYear(year) {
       try {
         var res = await fetch('/finances/stats?year=' + encodeURIComponent(year));
@@ -2100,7 +2278,7 @@
 
       // Draw 3 Curves: Income (Green/Cyan Glow), Net (Blue), Expense (Red)
       drawSpline(points, "inc", "#10b981", "rgba(16, 185, 129, 0.25)", "rgba(16, 185, 129, 0.0)", true);
-      drawSpline(points, "net", "#3b82f6", "rgba(59, 130, 246, 0.15)", "rgba(59, 130, 246, 0.0)", false);
+      drawSpline(points, "net", "#0d9488", "rgba(13, 148, 136, 0.18)", "rgba(13, 148, 136, 0.0)", false);
       drawSpline(points, "exp", "#ef4444", "rgba(239, 68, 68, 0.15)", "rgba(239, 68, 68, 0.0)", false);
     }
 
@@ -2243,19 +2421,82 @@
     }
 
     // =========================================================================
-    // POINT 1: UPLOAD FOTO SLIDE KAMAR OLEH ADMIN (3 FOTO SLIDE)
+    // UPLOAD FOTO KAMAR OLEH ADMIN (4 FOTO — TEAL THEME & EMPTY BY DEFAULT)
     // =========================================================================
+    function setRoomPhotoSlot(slideIndex, url) {
+      var textInput = document.getElementById('roomImageInput' + slideIndex);
+      var previewImg = document.getElementById('roomImgPreview' + slideIndex);
+      var placeholder = document.getElementById('roomPhotoPlaceholder' + slideIndex);
+      var filled = document.getElementById('roomPhotoFilled' + slideIndex);
+      var slot = document.getElementById('roomPhotoSlot' + slideIndex);
+
+      if (textInput) textInput.value = url || '';
+
+      if (url && url.trim() !== '') {
+        var fullSrc = url.startsWith('http') || url.startsWith('/') || url.startsWith('data:') ? url : '/' + url;
+        if (previewImg) previewImg.src = fullSrc;
+        if (placeholder) placeholder.style.display = 'none';
+        if (filled) filled.style.display = 'block';
+        if (slot) {
+          slot.style.borderColor = '#0d9488';
+          slot.style.borderStyle = 'solid';
+          slot.style.background = '#f0fdfa';
+        }
+      } else {
+        if (previewImg) previewImg.src = '';
+        if (placeholder) placeholder.style.display = 'flex';
+        if (filled) filled.style.display = 'none';
+        if (slot) {
+          slot.style.borderColor = '#99f6e4';
+          slot.style.borderStyle = 'dashed';
+          slot.style.background = '#f0fdfa';
+        }
+      }
+    }
+    window.setRoomPhotoSlot = setRoomPhotoSlot;
+
+    function removeRoomPhoto(slideIndex) {
+      setRoomPhotoSlot(slideIndex, '');
+      var fileInput = document.getElementById('roomPhotoFile' + slideIndex);
+      if (fileInput) fileInput.value = '';
+      var statusEl = document.getElementById('roomImgUploadStatus' + slideIndex);
+      if (statusEl) statusEl.textContent = '';
+    }
+    window.removeRoomPhoto = removeRoomPhoto;
+
     function uploadRoomSlideImage(fileInput, slideIndex) {
       if (!fileInput.files || !fileInput.files[0]) return;
-      var file = fileInput.files[0];
+      _doRoomPhotoUpload(fileInput.files[0], slideIndex);
+    }
+
+    function handleRoomPhotoDrop(event, slideIndex) {
+      event.preventDefault();
+      var slot = event.currentTarget;
+      slot.style.borderColor = '#99f6e4';
+      slot.style.background = '#f0fdfa';
+      var file = event.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        _doRoomPhotoUpload(file, slideIndex);
+      }
+    }
+
+    function _doRoomPhotoUpload(file, slideIndex) {
       var statusEl = document.getElementById('roomImgUploadStatus' + slideIndex);
       var textInput = document.getElementById('roomImageInput' + slideIndex);
       var previewImg = document.getElementById('roomImgPreview' + slideIndex);
 
       if (statusEl) {
-        statusEl.textContent = '⏳ Mengunggah foto...';
-        statusEl.style.color = '#3b82f6';
+        statusEl.textContent = '⏳ Uploading...';
+        statusEl.style.color = '#fff';
+        statusEl.style.background = 'rgba(10,86,97,0.85)';
       }
+
+      // Local preview instantly
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        setRoomPhotoSlot(slideIndex, e.target.result);
+      };
+      reader.readAsDataURL(file);
 
       var formData = new FormData();
       formData.append('photo', file);
@@ -2272,12 +2513,14 @@
         return res.json();
       })
       .then(function(data) {
-        if (data.success && data.url) {
-          if (textInput) textInput.value = data.url;
-          if (previewImg) previewImg.src = data.url;
+        if (data.success) {
+          var url = data.full_url || data.url || data.path;
+          if (textInput) textInput.value = data.path || url;
+          if (previewImg) previewImg.src = url;
           if (statusEl) {
-            statusEl.textContent = '✓ Foto terunggah';
-            statusEl.style.color = '#10b981';
+            statusEl.textContent = '✓ Tersimpan';
+            statusEl.style.background = 'rgba(13,148,136,0.9)';
+            setTimeout(function() { statusEl.textContent = ''; }, 3000);
           }
         } else {
           throw new Error(data.message || 'Gagal');
@@ -2285,10 +2528,22 @@
       })
       .catch(function(err) {
         if (statusEl) {
-          statusEl.textContent = '✕ Gagal unggah';
-          statusEl.style.color = '#ef4444';
+          statusEl.textContent = '✕ Gagal';
+          statusEl.style.background = 'rgba(239,68,68,0.85)';
         }
-        alert('Gagal mengunggah foto slide ' + slideIndex + ': ' + (err.message || 'Error'));
+        console.error('Upload foto ' + slideIndex + ':', err.message);
+      });
+    }
+
+    function fillDefaultRoomImages4() {
+      var defaults = [
+        'assets/images/rooms/room_1.jpg',
+        'assets/images/rooms/room_2.jpg',
+        'assets/images/rooms/room_3.jpg',
+        ''
+      ];
+      defaults.forEach(function(path, i) {
+        setRoomPhotoSlot(i + 1, path);
       });
     }
 
@@ -2458,7 +2713,7 @@
 
       if (statusEl) {
         statusEl.textContent = '⏳ Menyimpan...';
-        statusEl.style.color = '#3b82f6';
+        statusEl.style.color = '#0d9488';
       }
 
       fetch('/api/settings', {

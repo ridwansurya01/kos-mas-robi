@@ -937,13 +937,17 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const defaultImgs = [
       'assets/images/rooms/room_1.jpg',
       'assets/images/rooms/room_2.jpg',
-      'assets/images/rooms/room_3.jpg'
+      'assets/images/rooms/room_3.jpg',
+      ''
     ];
-    for (let i = 1; i <= 3; i++) {
+    for (let i = 1; i <= 4; i++) {
       const input = document.getElementById(`roomImageInput${i}`);
       const preview = document.getElementById(`roomImgPreview${i}`);
       if (input) input.value = defaultImgs[i - 1];
-      if (preview) preview.src = '/' + defaultImgs[i - 1];
+      if (preview && defaultImgs[i - 1]) {
+        preview.src = '/' + defaultImgs[i - 1];
+        if (i === 4) preview.style.filter = 'brightness(0.4)';
+      }
     }
   }
 
@@ -971,19 +975,19 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     if (customReq) customReq.value = room.custom_interior_request || '';
     if (customNotes) customNotes.value = room.custom_interior_admin_notes || '';
 
-    // Populate 3 images
+    // Populate up to 4 images
     const imgs = (room.images && room.images.length > 0) ? room.images : (room.images_list || [
-      room.image || 'assets/images/rooms/room_1.jpg',
-      'assets/images/rooms/room_2.jpg',
-      'assets/images/rooms/room_3.jpg'
+      room.image || ''
     ]);
 
-    for (let i = 1; i <= 3; i++) {
-      const input = document.getElementById(`roomImageInput${i}`);
-      const preview = document.getElementById(`roomImgPreview${i}`);
-      const val = imgs[i - 1] || imgs[0] || 'assets/images/rooms/room_1.jpg';
-      if (input) input.value = val;
-      if (preview) preview.src = val.startsWith('http') || val.startsWith('/') ? val : '/' + val;
+    for (let i = 1; i <= 4; i++) {
+      const val = imgs[i - 1] || '';
+      if (typeof window.setRoomPhotoSlot === 'function') {
+        window.setRoomPhotoSlot(i, val);
+      } else {
+        const input = document.getElementById(`roomImageInput${i}`);
+        if (input) input.value = val;
+      }
     }
 
     openModal('modalAddRoom');
@@ -994,7 +998,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const btnNew = document.getElementById('btnAddNewRoom');
 
     btnNew?.addEventListener('click', () => {
-      document.getElementById('mRoomFormTitle').textContent = 'Tambah Master Kamar';
+      document.getElementById('mRoomFormTitle').textContent = 'Tambah Master Kamar Baru';
       document.getElementById('roomEditId').value = '';
       document.getElementById('roomNumberInput').value = '';
       document.getElementById('roomNumberInput').disabled = false;
@@ -1010,7 +1014,16 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       if (customBudget) customBudget.value = 0;
       if (customReq) customReq.value = '';
       if (customNotes) customNotes.value = '';
-      fillDefaultRoomImages();
+      
+      // Kosongkan seluruh slot foto sampai admin mengupload foto baru
+      for (let i = 1; i <= 4; i++) {
+        if (typeof window.setRoomPhotoSlot === 'function') {
+          window.setRoomPhotoSlot(i, '');
+        } else {
+          const input = document.getElementById(`roomImageInput${i}`);
+          if (input) input.value = '';
+        }
+      }
       openModal('modalAddRoom');
     });
 
@@ -1024,10 +1037,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const facilities = document.getElementById('roomFacilitiesInput').value.split(',').map(s => s.trim()).filter(Boolean);
       const status = document.getElementById('roomStatusInput').value;
       
-      const img1 = document.getElementById('roomImageInput1')?.value.trim() || 'assets/images/rooms/room_1.jpg';
-      const img2 = document.getElementById('roomImageInput2')?.value.trim() || 'assets/images/rooms/room_2.jpg';
-      const img3 = document.getElementById('roomImageInput3')?.value.trim() || 'assets/images/rooms/room_3.jpg';
-      const images = [img1, img2, img3];
+      const img1 = document.getElementById('roomImageInput1')?.value.trim() || '';
+      const img2 = document.getElementById('roomImageInput2')?.value.trim() || '';
+      const img3 = document.getElementById('roomImageInput3')?.value.trim() || '';
+      const img4 = document.getElementById('roomImageInput4')?.value.trim() || '';
+      const images = [img1, img2, img3, img4].filter(Boolean);
+      const mainImage = images[0] || (editId ? '' : 'assets/images/rooms/room_1.jpg');
 
       const custom_interior_status = document.getElementById('roomCustomInteriorStatusInput')?.value || 'none';
       const custom_interior_budget = Number(document.getElementById('roomCustomInteriorBudgetInput')?.value || 0);
@@ -1049,7 +1064,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             price,
             facilities,
             status,
-            image: img1,
+            image: mainImage || img1 || (images.length > 0 ? images[0] : null),
             images,
             custom_interior_status,
             custom_interior_budget,
