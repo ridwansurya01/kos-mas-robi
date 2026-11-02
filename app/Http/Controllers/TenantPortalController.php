@@ -82,6 +82,17 @@ class TenantPortalController extends Controller
         $availableRoomsCount = $allRooms->where('status', 'available')->count();
         $occupiedRoomsCount = $allRooms->whereIn('status', ['occupied', 'due'])->count();
 
+        // Branch 1 vs Branch 2 Stats (Kamar Tersedia vs Sudah Disewa)
+        $branch1Rooms = $allRooms->filter(fn($r) => ($r->location ?? 'Lokasi 1') !== 'Lokasi 2');
+        $b1Total = $branch1Rooms->count();
+        $b1Available = $branch1Rooms->where('status', 'available')->count();
+        $b1Occupied = $branch1Rooms->whereIn('status', ['occupied', 'due'])->count();
+
+        $branch2Rooms = $allRooms->filter(fn($r) => ($r->location ?? '') === 'Lokasi 2');
+        $b2Total = $branch2Rooms->count();
+        $b2Available = $branch2Rooms->where('status', 'available')->count();
+        $b2Occupied = $branch2Rooms->whereIn('status', ['occupied', 'due'])->count();
+
         // Determine tenant's branch (Cabang 1 vs Cabang 2)
         $tenantBranchKey = 'lokasi_1';
         if ($room && ($room->location === 'Lokasi 2')) {
@@ -104,6 +115,12 @@ class TenantPortalController extends Controller
             'totalRoomsCount',
             'availableRoomsCount',
             'occupiedRoomsCount',
+            'b1Total',
+            'b1Available',
+            'b1Occupied',
+            'b2Total',
+            'b2Available',
+            'b2Occupied',
             'setting',
             'dueDate',
             'recentPayments',

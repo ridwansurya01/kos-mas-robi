@@ -24,7 +24,6 @@
       <button type="button" class="tp-tab-btn active" id="tabBtnCatalog" onclick="switchPortalTab('catalog')">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
         <span>Dashboard Kos</span>
-        <span class="tp-tab-count">{{ $totalRoomsCount }} Kamar</span>
       </button>
       <button type="button" class="tp-tab-btn" id="tabBtnMyRoom" onclick="switchPortalTab('myroom')">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -36,6 +35,17 @@
     </div>
 
     <div class="tp-navbar-actions">
+      {{-- Indikator Cabang Tempat Tinggal Penghuni (Sesuai Desain Image 4 & 6) --}}
+      <div class="tp-nav-branch-pill {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'branch-2' : 'branch-1' }}">
+        @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
+          <span>⚡</span>
+          <span>Cabang 2 (Ringroad)</span>
+        @else
+          <span>🌿</span>
+          <span>Cabang 1 (Kampus)</span>
+        @endif
+      </div>
+
       {{-- Profil Pelanggan Button --}}
       @php
         $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
@@ -109,19 +119,115 @@
          ========================================================================= --}}
     <div id="sectionDashboardCatalog" class="tp-portal-tab-content active">
 
-      <!-- Catalog Header Banner (With Kos Building Background Image) -->
-      <div class="tp-catalog-header">
-        <img src="{{ asset('assets/images/kos_exterior.jpg') }}" alt="Eksterior Kos" class="tp-catalog-header-bg">
-        <div class="tp-catalog-header-content">
-          <div class="tp-catalog-header-top">
-            <div>
-              <div style="display:inline-flex; align-items:center; gap:6px; background:rgba(37,99,235,0.35); backdrop-filter:blur(8px); border:1px solid rgba(147,197,253,0.35); border-radius:999px; padding:4px 14px; font-size:0.75rem; font-weight:700; color:#bfdbfe; margin-bottom:10px;">
-                <span>✨ Kos Eksklusif & Nyaman</span>
+      @php
+        $landing = $setting->landing_content ?? [];
+        $heroImg = $landing['hero_image'] ?? 'assets/images/kos_exterior.jpg';
+        $heroTitle = $landing['hero_title'] ?? "Kos Impian\nOrang Jember";
+        $heroDesc = $landing['hero_desc'] ?? 'Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis.';
+        $heroBtnText = $landing['hero_btn_text'] ?? 'Jelajahi Kamar';
+      @endphp
+
+      <!-- =========================================================================
+           HERO SECTION: MATCHING LANDING PAGE DESIGN (IMAGE 5) & DYNAMICALLY
+           CONNECTED TO ADMIN LANDING PAGE SETTINGS
+           ========================================================================= -->
+      <div class="tp-hero-landing-banner">
+        {{-- Right Side Blended Photo with Gradient Mask --}}
+        <div class="tp-hero-landing-photo-wrap">
+          <img src="{{ asset($heroImg) }}"
+               alt="{{ $setting->kos_name ?? 'Kos Mas Robi' }}"
+               onerror="this.src='{{ asset('assets/images/kos_exterior.jpg') }}'"
+               class="tp-hero-landing-photo">
+        </div>
+
+        {{-- Left Content: Dynamic Typography from Admin Landing Page Settings --}}
+        <div class="tp-hero-landing-content">
+          <div class="tp-hero-landing-tag">
+            <span>✨</span>
+            <span>{{ $landing['bento_card_tag'] ?? 'Kos Eksklusif & Nyaman' }}</span>
+          </div>
+          <h1 class="tp-hero-landing-title">{!! nl2br(e($heroTitle)) !!}</h1>
+          <p class="tp-hero-landing-desc">{{ $heroDesc }}</p>
+
+          <div class="tp-hero-landing-actions">
+            <button type="button" class="tp-btn-coral" onclick="document.getElementById('catalogRoomGrid')?.scrollIntoView({ behavior: 'smooth' })">
+              <span>{{ $heroBtnText }}</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <a href="#sectionBranchSelector" class="tp-btn-ghost-white">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>Pilih Titik Lokasi</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================================
+           PEMILIHAN 2 TEMPAT KOS & INDIKATOR KAMAR TERSEDIA VS SUDAH DISEWA
+           ========================================================================= -->
+      <div class="tp-branch-select-section" id="sectionBranchSelector">
+        <div class="tp-branch-select-header">
+          <div>
+            <div class="tp-branch-subtitle-label">
+              <span>📍 PILIHAN 2 TITIK LOKASI CABANG</span>
+            </div>
+            <h3 class="tp-branch-title-text">Pilih Lokasi Cabang Kos</h3>
+          </div>
+          <div class="tp-branch-overall-pill">
+            <span>🏢 Total Keseluruhan: <strong>{{ $totalRoomsCount }} Kamar</strong></span>
+          </div>
+        </div>
+
+        <div class="tp-branch-cards-grid">
+          {{-- Cabang 1 Card --}}
+          <div class="tp-branch-card active" id="branchCard1" onclick="selectCatalogBranch('lokasi_1', this)">
+            <div class="tp-branch-card-header">
+              <div class="tp-branch-tag-pill b1">
+                <span>🌿</span>
+                <span>Cabang 1 (Kampus Utama)</span>
               </div>
-              <h2 class="tp-catalog-title">Dashboard {{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
-              <p class="tp-catalog-desc">
-                Pantau status ketersediaan setiap kamar secara transparan, lihat fasilitas lengkap, dan ajukan pemesanan atau <strong>Custom Interior</strong> sesuai kebutuhan dan budget Anda.
-              </p>
+              <span class="tp-branch-selected-badge">✓ Terpilih</span>
+            </div>
+            <h4 class="tp-branch-card-name">{{ $branches['lokasi_1']['name'] ?? 'Kos Mas Robi 1 - Kampus Utama' }}</h4>
+            <div class="tp-branch-card-addr">📍 {{ $branches['lokasi_1']['address'] ?? 'Jl. Pandega Marta, Caturtunggal (3 Mnt UGM)' }}</div>
+            <div class="tp-branch-stats-badges">
+              <span class="tp-branch-stat available">
+                <span class="tp-stat-dot green"></span>
+                <strong>{{ $b1Available }}</strong> Kamar Kosong
+              </span>
+              <span class="tp-branch-stat occupied">
+                <span class="tp-stat-dot slate"></span>
+                <strong>{{ $b1Occupied }}</strong> Sudah Disewa
+              </span>
+              <span class="tp-branch-stat total">
+                Total <strong>{{ $b1Total }}</strong> Unit
+              </span>
+            </div>
+          </div>
+
+          {{-- Cabang 2 Card --}}
+          <div class="tp-branch-card" id="branchCard2" onclick="selectCatalogBranch('lokasi_2', this)">
+            <div class="tp-branch-card-header">
+              <div class="tp-branch-tag-pill b2">
+                <span>⚡</span>
+                <span>Cabang 2 (Ringroad Exclusive)</span>
+              </div>
+              <span class="tp-branch-selected-badge">✓ Terpilih</span>
+            </div>
+            <h4 class="tp-branch-card-name">{{ $branches['lokasi_2']['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive' }}</h4>
+            <div class="tp-branch-card-addr">📍 {{ $branches['lokasi_2']['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo (Modern)' }}</div>
+            <div class="tp-branch-stats-badges">
+              <span class="tp-branch-stat available">
+                <span class="tp-stat-dot green"></span>
+                <strong>{{ $b2Available }}</strong> Kamar Kosong
+              </span>
+              <span class="tp-branch-stat occupied">
+                <span class="tp-stat-dot slate"></span>
+                <strong>{{ $b2Occupied }}</strong> Sudah Disewa
+              </span>
+              <span class="tp-branch-stat total">
+                Total <strong>{{ $b2Total }}</strong> Unit
+              </span>
             </div>
           </div>
         </div>
@@ -132,6 +238,12 @@
         <div class="tp-filter-pills" id="catalogFilterPills">
           <button type="button" class="tp-filter-btn active" data-filter="all" onclick="filterCatalogRooms('all', this)">
             Semua Kamar ({{ $totalRoomsCount }})
+          </button>
+          <button type="button" class="tp-filter-btn" data-filter="lokasi_1" onclick="filterCatalogRooms('lokasi_1', this)">
+            🌿 Cabang 1 ({{ $b1Total }})
+          </button>
+          <button type="button" class="tp-filter-btn" data-filter="lokasi_2" onclick="filterCatalogRooms('lokasi_2', this)">
+            ⚡ Cabang 2 ({{ $b2Total }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="available" onclick="filterCatalogRooms('available', this)">
             🟢 Tersedia / Kosong ({{ $availableRoomsCount }})
@@ -161,6 +273,7 @@
           <div class="tp-room-card room-item"
                data-status="{{ $r->status }}"
                data-floor="floor-{{ $r->floor }}"
+               data-location="{{ ($r->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'lokasi_2' : 'lokasi_1' }}"
                onclick="{{ $isMyRoom ? "switchPortalTab('myroom')" : "openRoomCustomModal(" . htmlspecialchars(json_encode($r), ENT_QUOTES, 'UTF-8') . ")" }}">
             
             <div class="tp-room-card-thumb-wrap">
@@ -365,21 +478,19 @@
           </div>
         </div>
 
-        {{-- Action Buttons --}}
+        {{-- Action Buttons (Pembayaran diinput manual oleh Admin, Pelanggan koordinasi via WhatsApp & Kuitansi) --}}
         <div class="tp-details-actions">
-          <button type="button" class="tp-btn-primary-action" id="btnPay">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-            </svg>
-            <span>Bayar Sekarang</span>
-          </button>
-          <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin,%20konfirmasi%20sewa%20Kamar%20%23{{ $room->number ?? '102' }}"
-             target="_blank" class="tp-btn-secondary-action tp-btn-wa-green">
+          <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20penghuni%20Kamar%20%23{{ $room->number ?? '102' }}%20ingin%20konfirmasi%20sewa"
+             target="_blank" class="tp-btn-primary-action tp-btn-wa-green" style="text-decoration: none;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
             </svg>
-            <span>WhatsApp Admin</span>
+            <span>Hubungi WhatsApp Admin</span>
           </a>
+          <button type="button" class="tp-btn-secondary-action" id="btnOpenReceipts">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Lihat Kuitansi Pembayaran</span>
+          </button>
         </div>
 
       </div>
@@ -465,19 +576,6 @@
       </div>
       <div class="tp-quick-grid">
 
-        <button type="button" class="tp-quick-tile" id="btnOpenPay">
-          <div class="tp-quick-ico blue">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>
-            </svg>
-          </div>
-          <div>
-            <div class="tp-quick-ttl">Bayar Sewa</div>
-            <div class="tp-quick-desc">Konfirmasi transfer pembayaran bulanan ke rekening pengelola</div>
-          </div>
-          <div class="tp-quick-footer"><span></span><span class="tp-quick-arrow">→</span></div>
-        </button>
-
         <button type="button" class="tp-quick-tile" id="btnOpenComplaint">
           <div class="tp-quick-ico purple">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -550,15 +648,34 @@
     
     <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
       
-      <!-- Photo Preview -->
-      <div style="position: relative; border-radius: 16px; overflow: hidden; height: 220px; background: #0f172a; border: 1px solid #e2e8f0;">
-        <img id="mCustomRoomImg" src="{{ asset('assets/images/rooms/room_1.jpg') }}" alt="Foto Kamar" style="width: 100%; height: 100%; object-fit: cover;">
-        <div style="position: absolute; bottom: 12px; left: 14px; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); color: #ffffff; padding: 4px 12px; border-radius: 999px; font-size: 0.78rem; font-weight: 700;">
-          <span id="mCustomRoomBadge">Kamar #101</span> • <span id="mCustomRoomFloor">Lantai 1</span>
+      <!-- Photo Preview Slider (Foto Bergerak Otomatis Seperti di Kamarku) -->
+      <div class="tp-modal-slider-wrap" id="modalRoomSliderWrap">
+        <div class="tp-modal-slider-track" id="modalRoomSliderTrack">
+          {{-- Slides injected dynamically --}}
         </div>
-        <div style="position: absolute; bottom: 12px; right: 14px;" id="mCustomRoomStatusTag">
-          <span class="tp-pill paid">🟢 Tersedia</span>
+
+        {{-- Top Slider Counter Badge --}}
+        <div class="tp-modal-slider-badge">
+          <span class="tp-pulse-dot"></span>
+          <span id="modalRoomSlideBadgeText">Foto 1/3: Kamar #101</span>
         </div>
+
+        {{-- Room Meta Tag Overlay --}}
+        <div class="tp-modal-slider-overlay-meta">
+          <div class="tp-modal-slider-room-badge">
+            <span id="mCustomRoomBadge">Kamar #101</span> • <span id="mCustomRoomFloor">Lantai 1</span>
+          </div>
+          <div id="mCustomRoomStatusTag">
+            <span class="tp-pill paid">🟢 Tersedia</span>
+          </div>
+        </div>
+
+        {{-- Nav Buttons --}}
+        <button type="button" class="tp-modal-slider-nav prev" id="btnModalSlidePrev" onclick="navigateModalRoomSlide(-1)" title="Foto Sebelumnya">&#8249;</button>
+        <button type="button" class="tp-modal-slider-nav next" id="btnModalSlideNext" onclick="navigateModalRoomSlide(1)" title="Foto Selanjutnya">&#8250;</button>
+
+        {{-- Dots Indicators --}}
+        <div class="tp-modal-slider-dots" id="modalRoomSliderDots"></div>
       </div>
 
       <!-- Quick Specs -->
@@ -644,123 +761,6 @@
       </form>
 
     </div>
-  </div>
-</div>
-
-{{-- Modal 1: Bayar Sewa --}}
-<div class="modal-overlay" id="modalPay">
-  <div class="modal-box">
-    <div class="modal-hdr">
-      <div>
-        <h3 class="modal-title">Konfirmasi Pembayaran Sewa</h3>
-        <p class="modal-subtitle">Kamar #{{ $room->number ?? '102' }} — {{ $user->name }}</p>
-      </div>
-      <button type="button" class="modal-close" data-close-modal="modalPay" aria-label="Tutup Modal">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <form action="{{ route('tenant.payment.submit') }}" method="POST" enctype="multipart/form-data" id="formPay" onsubmit="return validatePaymentSubmission(event)">
-      @csrf
-      <div class="modal-body">
-        
-        <!-- Pilihan Metode Pembayaran Otomatis -->
-        <div class="form-group" style="margin-bottom: 12px;">
-          <label for="payMethod" class="form-label">
-            <span>Metode Pembayaran *</span>
-            <span class="form-label-hint">Pilih rekening tujuan atau cara bayar</span>
-          </label>
-          <select id="payMethod" name="payment_method" class="form-control" required onchange="handlePaymentMethodChange(this.value)">
-            @php
-              $activeMethods = $setting->active_payment_methods ?? [];
-            @endphp
-            @forelse($activeMethods as $idx => $pm)
-              <option value="{{ $pm['name'] }}" {{ $idx === 0 ? 'selected' : '' }}>
-                {{ $pm['name'] }}
-              </option>
-            @empty
-              <option value="Transfer Mandiri">Transfer Bank Mandiri</option>
-              <option value="Transfer BCA">Transfer Bank BCA</option>
-              <option value="Transfer QRIS">Transfer QRIS (Instant All Payment / E-Wallet)</option>
-              <option value="Tunai (Cash)">Tunai (Cash ke Mas Robi)</option>
-            @endforelse
-          </select>
-        </div>
-
-        <!-- Box Tujuan Pembayaran Dinamis (Otomatis Berubah Sesuai Pilihan Bank / QRIS / Cash) -->
-        <div class="bank-info-box" id="payDestinationBox" style="margin-bottom: 16px;">
-          <div class="bank-info-hdr">
-            <span class="bank-badge" id="payDestBadge">Rekening Resmi Mandiri</span>
-            <span class="bank-online" id="payDestStatus">● Siap Terima</span>
-          </div>
-          <div class="bank-name" id="payDestBankName">Bank Mandiri</div>
-          
-          <!-- Nomor Rekening / Kode -->
-          <div class="bank-number-row" id="payDestNumberRow">
-            <div class="bank-number" id="bankNumberText">1370019283100</div>
-            <button type="button" class="btn-copy-acc" id="btnCopyAcc" onclick="copyText(document.getElementById('bankNumberText').textContent, this)">
-              Salin No. Rekening
-            </button>
-          </div>
-
-          <!-- Keterangan Khusus QRIS / Cash -->
-          <div id="payDestInstructions" class="pay-dest-instructions" style="display: none;">
-          </div>
-
-          <div class="bank-holder" id="payDestHolder">a.n. <strong>Robi Suryanto</strong></div>
-        </div>
-
-        <!-- Fitur Khusus Pembayaran Tunai (Cash): Input Tanggal Bayar -->
-        <div class="form-group cash-date-box" id="cashDateGroup" style="display: none; padding: 14px; border-radius: 14px; margin-bottom: 16px;">
-          <label for="payCashDate" class="form-label">
-            <span style="font-weight: 800;">📅 Tanggal Bayar Tunai (Cash) *</span>
-            <span class="form-label-hint">Tentukan tanggal Anda menyerahkan uang tunai</span>
-          </label>
-          <input type="date" id="payCashDate" name="cash_date" class="form-control" value="{{ now()->format('Y-m-d') }}">
-          <div class="cash-date-note" style="font-size: 0.76rem; margin-top: 6px; line-height: 1.4;">
-            💡 <em>Catatan:</em> Silakan serahkan uang tunai sewa kamar langsung kepada Mas Robi di lantai 1 pada tanggal yang Anda tentukan di atas. Kuitansi resmi fisik dan digital akan langsung diserahkan.
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="payAmount" class="form-label">Nominal Pembayaran (Rp) *</label>
-          <input type="number" id="payAmount" name="amount" class="form-control" value="{{ (int)($room->price ?? 1500000) }}" required>
-        </div>
-
-        <!-- Fitur Zona Waktu Daerah Pengiriman (WIB, WITA, WIT) - Berjalan Otomatis di Latar Belakang Tanpa Menampilkan UI -->
-        <input type="hidden" name="timezone" id="clientTimezoneInput" value="WIB">
-
-        <!-- Fitur Kolom Bukti Transfer Berupa Foto (Wajib Diisi Berupa Nota & Screening Aktif) -->
-        <div class="form-group" id="proofUploadGroup">
-          <label for="payProofFile" class="form-label">
-            <span id="proofLabelTitle">Foto Bukti / Nota Pembayaran *</span>
-            <span class="form-label-hint" id="proofLabelHint">Wajib Struk ATM / Screenshot m-Banking</span>
-          </label>
-          <div class="tp-proof-upload-container">
-            <div id="proofPreviewBox" class="tp-proof-preview-box">
-              <span id="proofPreviewPlaceholder" style="font-size: 26px;">🧾</span>
-              <img id="proofPreviewImg" src="" alt="Bukti Transfer" style="display: none; width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div style="flex-grow: 1;">
-              <input type="file" id="payProofFile" name="proof_file" class="form-control" accept="image/*" onchange="handleProofImageSelected(event)" style="font-size: 0.8rem; padding: 6px;">
-              <span class="tp-proof-hint" style="font-size: 0.72rem; margin-top: 4px; display: block;">Mendukung format JPG, PNG, atau WEBP (Maksimal 5MB)</span>
-            </div>
-          </div>
-
-          <!-- Status Box Screening Nota Otomatis -->
-          <div id="screeningResultBox" style="display: none; margin-top: 10px; padding: 10px 14px; border-radius: 10px; font-size: 0.82rem; line-height: 1.45;">
-          </div>
-        </div>
-
-      </div>
-      <div class="modal-ftr">
-        <button type="button" class="btn-secondary" data-close-modal="modalPay">Batal</button>
-        <button type="submit" class="btn-primary" id="btnSubmitPayment">
-          <span id="btnSubmitText">Kirim Konfirmasi Pembayaran</span>
-        </button>
-      </div>
-    </form>
   </div>
 </div>
 
@@ -918,9 +918,11 @@
     </div>
     <div class="modal-ftr">
       <button type="button" class="btn-secondary" data-close-modal="modalReceipts">Tutup</button>
-      <button type="button" class="btn-primary" onclick="document.getElementById('modalReceipts')?.classList.remove('open');document.getElementById('modalPay')?.classList.add('open');">
-        + Bayar Sewa Sekarang
-      </button>
+      <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20ingin%20konfirmasi%20pembayaran%20sewa%20kamar%20%23{{ $room->number ?? '102' }}"
+         target="_blank" class="btn-primary tp-btn-wa-green" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
+        <span>Konfirmasi via WhatsApp Admin</span>
+      </a>
     </div>
   </div>
 </div>
@@ -1499,9 +1501,9 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
       <span>Home</span>
     </a>
-    <button type="button" class="tp-nav-item" onclick="document.getElementById('modalPay')?.classList.add('open')">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <span>Bayar</span>
+    <button type="button" class="tp-nav-item" onclick="document.getElementById('modalReceipts')?.classList.add('open')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <span>Kuitansi</span>
     </button>
     <button type="button" class="tp-nav-item" onclick="document.getElementById('modalComplaint')?.classList.add('open')">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -2133,21 +2135,33 @@ function switchPortalTab(tabName) {
   }
 }
 
-// ─── Room Catalog Filtering ──────────────────────────────────────
+// ─── Room Catalog Filtering & 2-Branch Location Selector ─────────
 function filterCatalogRooms(filter, btn) {
   document.querySelectorAll('#catalogFilterPills .tp-filter-btn').forEach(function(b) {
     b.classList.remove('active');
   });
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  // Sync branch cards highlight if branch pill is selected
+  if (filter === 'lokasi_1' || filter === 'lokasi_2') {
+    document.querySelectorAll('.tp-branch-card').forEach(function(c) {
+      c.classList.toggle('active', c.getAttribute('data-branch') === filter);
+    });
+  }
 
   var cards = document.querySelectorAll('#catalogRoomGrid .tp-room-card');
   cards.forEach(function(card) {
     var status = card.dataset.status;
     var floor  = card.dataset.floor;
+    var loc    = card.dataset.location;
     var show   = false;
 
     if (filter === 'all') {
       show = true;
+    } else if (filter === 'lokasi_1') {
+      show = (loc === 'lokasi_1');
+    } else if (filter === 'lokasi_2') {
+      show = (loc === 'lokasi_2');
     } else if (filter === 'available') {
       show = (status === 'available');
     } else if (filter === 'occupied') {
@@ -2162,7 +2176,40 @@ function filterCatalogRooms(filter, btn) {
   });
 }
 
-// ─── Room Detail & Custom Interior Modal Opener ──────────────────
+function selectCatalogBranch(branchKey, el) {
+  document.querySelectorAll('.tp-branch-card').forEach(function(c) {
+    c.classList.remove('active');
+  });
+  if (el) el.classList.add('active');
+
+  // Sync filter pill
+  document.querySelectorAll('#catalogFilterPills .tp-filter-btn').forEach(function(b) {
+    if (b.dataset.filter === branchKey) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
+  });
+
+  var cards = document.querySelectorAll('#catalogRoomGrid .tp-room-card');
+  cards.forEach(function(card) {
+    var loc = card.dataset.location;
+    if (branchKey === 'all' || loc === branchKey) {
+      card.style.display = 'flex';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+
+  // Smooth scroll to rooms grid
+  document.getElementById('catalogRoomGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ─── Auto-Advancing Room Detail Photo Slider ─────────────────────
+var modalRoomSlideTimer = null;
+var modalRoomCurrentIndex = 0;
+var modalRoomImages = [];
+
 function openRoomCustomModal(room) {
   if (!room) return;
   document.getElementById('mCustomRoomTitle').textContent = 'Detail Kamar #' + room.number + ' (' + room.type + ')';
@@ -2172,12 +2219,64 @@ function openRoomCustomModal(room) {
   document.getElementById('mCustomRoomPrice').textContent = 'Rp ' + Number(room.price || 0).toLocaleString('id-ID') + ' / bln';
   document.getElementById('mCustomRoomType').textContent = room.type;
 
-  var imgList = room.images_list || [room.image || 'assets/images/rooms/room_1.jpg'];
-  var firstImg = imgList[0] || 'assets/images/rooms/room_1.jpg';
-  if (!firstImg.startsWith('http') && !firstImg.startsWith('/')) {
-    firstImg = '/' + firstImg;
+  // Prepare images list (minimum 3 photos for smooth auto-sliding transitions)
+  var list = [];
+  if (Array.isArray(room.images_list) && room.images_list.length > 0) {
+    list = room.images_list.slice();
+  } else if (room.image) {
+    list = [room.image];
   }
-  document.getElementById('mCustomRoomImg').src = firstImg;
+
+  var defaultImgs = [
+    '/assets/images/rooms/room_1.jpg',
+    '/assets/images/rooms/room_2.jpg',
+    '/assets/images/rooms/room_3.jpg',
+    '/assets/images/rooms/room_4.jpg',
+    '/assets/images/hero_scandinavian_room.jpg'
+  ];
+
+  if (list.length === 0) {
+    list = defaultImgs.slice(0, 3);
+  } else if (list.length === 1) {
+    var offset = (parseInt(room.number, 10) || 1);
+    list.push(defaultImgs[offset % defaultImgs.length]);
+    list.push(defaultImgs[(offset + 1) % defaultImgs.length]);
+  } else if (list.length === 2) {
+    list.push(defaultImgs[2]);
+  }
+
+  modalRoomImages = list.map(function(img) {
+    if (!img.startsWith('http') && !img.startsWith('/')) {
+      return '/' + img;
+    }
+    return img;
+  });
+
+  // Render slider slides & dots
+  var track = document.getElementById('modalRoomSliderTrack');
+  var dotsContainer = document.getElementById('modalRoomSliderDots');
+  if (track && dotsContainer) {
+    track.innerHTML = '';
+    dotsContainer.innerHTML = '';
+    modalRoomImages.forEach(function(src, idx) {
+      var slide = document.createElement('div');
+      slide.className = 'tp-modal-slide' + (idx === 0 ? ' active' : '');
+      slide.style.backgroundImage = "url('" + src + "')";
+      slide.setAttribute('data-index', idx);
+      track.appendChild(slide);
+
+      var dot = document.createElement('button');
+      dot.type = 'button';
+      dot.className = 'tp-modal-dot' + (idx === 0 ? ' active' : '');
+      dot.setAttribute('data-index', idx);
+      dot.onclick = function() { setModalRoomSlide(idx); };
+      dotsContainer.appendChild(dot);
+    });
+  }
+
+  modalRoomCurrentIndex = 0;
+  updateModalRoomSlideUI(room.number);
+  startModalRoomAutoSlide();
 
   var statusTag = document.getElementById('mCustomRoomStatusTag');
   if (statusTag) {
@@ -2223,7 +2322,9 @@ function openRoomCustomModal(room) {
 
   // Set form action
   var form = document.getElementById('formCustomInterior');
-  form.action = '/portal/room/' + room.id + '/custom-interior';
+  if (form) {
+    form.action = '/portal/room/' + room.id + '/custom-interior';
+  }
 
   // Pre-fill inputs
   var reqInput = document.getElementById('customInteriorReqInput');
@@ -2232,6 +2333,74 @@ function openRoomCustomModal(room) {
   if (budgetInput) budgetInput.value = room.custom_interior_budget || '';
 
   document.getElementById('modalRoomDetailCustom')?.classList.add('open');
+}
+
+function updateModalRoomSlideUI(roomNumber) {
+  var slides = document.querySelectorAll('#modalRoomSliderTrack .tp-modal-slide');
+  var dots = document.querySelectorAll('#modalRoomSliderDots .tp-modal-dot');
+  slides.forEach(function(slide, idx) {
+    if (idx === modalRoomCurrentIndex) {
+      slide.classList.add('active');
+    } else {
+      slide.classList.remove('active');
+    }
+  });
+  dots.forEach(function(dot, idx) {
+    if (idx === modalRoomCurrentIndex) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+  var badgeText = document.getElementById('modalRoomSlideBadgeText');
+  if (badgeText && modalRoomImages.length > 0) {
+    var rNum = roomNumber || (document.getElementById('mCustomRoomBadge')?.textContent || '').replace('Kamar #', '');
+    badgeText.textContent = 'Foto ' + (modalRoomCurrentIndex + 1) + '/' + modalRoomImages.length + ': Kamar #' + rNum;
+  }
+}
+
+function navigateModalRoomSlide(step) {
+  if (modalRoomImages.length === 0) return;
+  modalRoomCurrentIndex = (modalRoomCurrentIndex + step + modalRoomImages.length) % modalRoomImages.length;
+  updateModalRoomSlideUI();
+  restartModalRoomAutoSlide();
+}
+
+function setModalRoomSlide(index) {
+  if (index >= 0 && index < modalRoomImages.length) {
+    modalRoomCurrentIndex = index;
+    updateModalRoomSlideUI();
+    restartModalRoomAutoSlide();
+  }
+}
+
+function startModalRoomAutoSlide() {
+  stopModalRoomAutoSlide();
+  modalRoomSlideTimer = setInterval(function() {
+    var modal = document.getElementById('modalRoomDetailCustom');
+    if (modal && modal.classList.contains('open')) {
+      navigateModalRoomSlide(1);
+    } else {
+      stopModalRoomAutoSlide();
+    }
+  }, 2800); // Bergerak otomatis setiap 2.8 detik
+}
+
+function stopModalRoomAutoSlide() {
+  if (modalRoomSlideTimer) {
+    clearInterval(modalRoomSlideTimer);
+    modalRoomSlideTimer = null;
+  }
+}
+
+function restartModalRoomAutoSlide() {
+  stopModalRoomAutoSlide();
+  startModalRoomAutoSlide();
+}
+
+function closeRoomCustomModal() {
+  stopModalRoomAutoSlide();
+  document.getElementById('modalRoomDetailCustom')?.classList.remove('open');
 }
 
 // ─── Dynamic Payment Method Details (Dikelola Langsung Oleh Admin) ─
