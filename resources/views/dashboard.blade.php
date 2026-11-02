@@ -1512,16 +1512,6 @@
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-wifi" style="display: none;">
           <div class="settings-modern-card" style="max-width: 960px; margin: 0 auto;">
-            <div class="settings-card-header">
-              <div class="settings-card-title-group">
-                <div class="settings-card-icon-badge" style="background: rgba(14, 116, 130, 0.12); color: #0a5661;">📶</div>
-                <div>
-                  <h3 class="settings-card-title">Kelola Jaringan WiFi & Infrastruktur Modem (2 Cabang Kos)</h3>
-                  <div class="settings-card-subtitle">Atur SSID, password, lokasi modem router, dan pembagian jaringan antara Kos 1 (Kampus Utama) & Kos 2 (Ringroad Exclusive).</div>
-                </div>
-              </div>
-            </div>
-
             @php
               $allWifis = $setting->wifi_list ?? [];
               $wfLoc1Count = collect($allWifis)->filter(fn($w) => ($w['location'] ?? 'Lokasi 1') === 'Lokasi 1')->count();
