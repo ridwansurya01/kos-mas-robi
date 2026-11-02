@@ -14,13 +14,13 @@
 
     window.switchTab = function(tabId) {
       var navTitles = {
-        'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
-        'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
-        'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
-        'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
-        'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
-        'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
-        'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
+        'tab-dashboard': { title: 'Dashboard', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
+        'tab-rooms': { title: 'Daftar Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
+        'tab-tenants': { title: 'Data Penghuni', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
+        'tab-bills': { title: 'Tagihan Sewa', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
+        'tab-transfers': { title: 'Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
+        'tab-maintenance': { title: 'Keluhan & Servis', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
+        'tab-finances': { title: 'Laporan Keuangan', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
         'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
       };
       document.querySelectorAll('.tab-pane').forEach(function(pane) {
@@ -36,9 +36,11 @@
         var pageTitle = document.getElementById('pageTitle');
         var pageSubtitle = document.getElementById('pageSubtitle');
         var breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
+        var headerActiveTitle = document.getElementById('headerActiveTitle');
         if (pageTitle) pageTitle.textContent = navTitles[tabId].title;
         if (pageSubtitle) pageSubtitle.textContent = navTitles[tabId].sub;
         if (breadcrumbCurrent) breadcrumbCurrent.textContent = navTitles[tabId].title;
+        if (headerActiveTitle) headerActiveTitle.textContent = navTitles[tabId].title;
       }
       if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
         setTimeout(window.drawRevenueCurve, 80);
@@ -100,38 +102,38 @@
       <div class="nav-section-title">Ringkasan</div>
 
       <div class="nav-item active" data-tab="tab-dashboard" onclick="window.switchTab('tab-dashboard')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg></span>
         <span>Dashboard</span>
       </div>
 
-      <div class="nav-section-title" style="margin-top: 14px;">Kamar & Pelanggan</div>
+      <div class="nav-section-title" style="margin-top: 12px;">Kamar & Pelanggan</div>
 
       <div class="nav-item" data-tab="tab-rooms" onclick="window.switchTab('tab-rooms')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
         <span>Daftar Kamar</span>
         <span class="nav-badge-count" id="badgeRoomCount">{{ $totalRooms }}</span>
       </div>
 
       <div class="nav-item" data-tab="tab-tenants" onclick="window.switchTab('tab-tenants')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
         <span>Data Penghuni</span>
         <span class="nav-badge-count" id="badgeTenantCount">{{ $occupiedRooms }}</span>
       </div>
 
       <div class="nav-item" data-tab="tab-bills" onclick="window.switchTab('tab-bills')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
         <span>Tagihan Sewa</span>
-        <span class="nav-badge-count" id="badgeDueBills" style="{{ $dueRooms > 0 ? 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; font-weight:800;' : 'display:none;' }}">{{ $dueRooms }}</span>
+        <span class="nav-badge-count" id="badgeDueBills" style="{{ $dueRooms > 0 ? 'background: rgba(244, 63, 94, 0.22); color: #fda4af; border: 1px solid rgba(244, 63, 94, 0.4); font-weight:800;' : 'display:none;' }}">{{ $dueRooms }}</span>
       </div>
 
       <div class="nav-item" data-tab="tab-transfers" onclick="window.switchTab('tab-transfers')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg></span>
         <span>Pindah Kamar</span>
         <span class="nav-badge-count" id="badgePendingTransfers" style="{{ ($pendingTransfersCount ?? 0) > 0 ? 'background: #f0fdfa; color: #0a5661; border: 1px solid #99f6e4;' : 'display:none;' }}">{{ $pendingTransfersCount ?? 0 }}</span>
       </div>
 
       <div class="nav-item" data-tab="tab-maintenance" onclick="window.switchTab('tab-maintenance')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
         <span>Keluhan & Servis</span>
         <span class="nav-badge-count" id="badgePendingRepairs">{{ $activeTickets }}</span>
       </div>
@@ -139,17 +141,18 @@
       <div class="nav-section-title" style="margin-top: 14px;">Manajemen Admin</div>
 
       <div class="nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
         <span>Laporan Keuangan</span>
       </div>
 
       <div class="nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')" role="button" tabindex="0">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
         <span>Pengaturan Kos</span>
       </div>
     </nav>
 
     <div class="sidebar-footer">
+      <div class="sidebar-user-label">Akun Pengelola</div>
       <div class="host-profile modern-host-card">
         <div class="host-avatar-wrap">
           <div class="host-avatar">MR</div>
@@ -174,6 +177,7 @@
     <!-- HEADER TOP BAR -->
     <header class="app-header modern-header">
       <div class="header-left">
+        <h1 class="header-active-page-title" id="headerActiveTitle">Dashboard</h1>
         <div class="mobile-header-brand">
           <div class="brand-icon-box modern-brand-box">
             <div class="brand-icon-glow"></div>
@@ -193,11 +197,10 @@
       </div>
 
       <div class="header-right modern-header-right">
-        <!-- Hanya Fitur Keluar / Logout di Bagian Header Admin -->
         <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline; margin:0;">
           @csrf
-          <button type="button" class="header-action-btn modern-logout-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout" style="width: auto; height: 40px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.84rem; background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626;">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <button type="button" class="header-action-btn modern-logout-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
             <span>Keluar</span>
           </button>
         </form>
@@ -277,16 +280,16 @@
           </div>
           <div class="filter-pills" id="dashboardFilters">
             <button type="button" class="filter-pill active" data-filter="all">Semua Kamar</button>
-            <button type="button" class="filter-pill" data-filter="occupied">🟢 Terisi</button>
-            <button type="button" class="filter-pill" data-filter="available">🔵 Kosong</button>
-            <button type="button" class="filter-pill" data-filter="due">🟡 Jatuh Tempo</button>
-            <button type="button" class="filter-pill" data-filter="repair">🔴 Perbaikan</button>
+            <button type="button" class="filter-pill" data-filter="occupied">Terisi</button>
+            <button type="button" class="filter-pill" data-filter="available">Kosong</button>
+            <button type="button" class="filter-pill" data-filter="due">Jatuh Tempo</button>
+            <button type="button" class="filter-pill" data-filter="repair">Perbaikan</button>
           </div>
         </div>
 
         <!-- Floor 1 -->
         <div class="floor-section">
-          <div class="floor-badge">🏢 Lantai 1 (Lantai Bawah)</div>
+          <div class="floor-badge">Lantai 1 (Lantai Bawah)</div>
           <div class="rooms-grid" id="floor1Grid">
             <!-- Dynamically populated by JS & Laravel API -->
           </div>
@@ -294,7 +297,7 @@
 
         <!-- Floor 2 -->
         <div class="floor-section">
-          <div class="floor-badge">🏢 Lantai 2 (Lantai Atas)</div>
+          <div class="floor-badge">Lantai 2 (Lantai Atas)</div>
           <div class="rooms-grid" id="floor2Grid">
             <!-- Dynamically populated by JS & Laravel API -->
           </div>
@@ -329,13 +332,13 @@
             <!-- 2 TITIK LOKASI TABS FILTER -->
             <div class="location-switcher-bar" id="roomLocationFilters" style="display: flex; gap: 8px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 6px; border-radius: 14px;">
               <button type="button" class="loc-filter-btn active" data-location="all" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: none; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
-                <span>🏢</span> Semua Cabang ({{ $totalRooms }})
+                Semua Cabang ({{ $totalRooms }})
               </button>
               <button type="button" class="loc-filter-btn" data-location="Lokasi 1" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(10,86,97,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661;">
-                <span>📍</span> <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $roomsLoc1->count() }})
+                <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $roomsLoc1->count() }})
               </button>
               <button type="button" class="loc-filter-btn" data-location="Lokasi 2" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(13,148,136,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0d9488;">
-                <span>📍</span> <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $roomsLoc2->count() }})
+                <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $roomsLoc2->count() }})
               </button>
             </div>
           </div>
@@ -387,9 +390,9 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (DATA PENGHUNI) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="tenantLocationFilters">
-            <button type="button" class="filter-pill active" data-tloc="all">🏢 Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
-            <button type="button" class="filter-pill" data-tloc="Lokasi 1">🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1TenantsCount }})</button>
-            <button type="button" class="filter-pill" data-tloc="Lokasi 2">⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2TenantsCount }})</button>
+            <button type="button" class="filter-pill active" data-tloc="all">Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 1"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 2"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2TenantsCount }})</button>
           </div>
         </div>
 
@@ -460,9 +463,9 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (TAGIHAN SEWA) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="billingLocationFilters">
-            <button type="button" class="filter-pill active" onclick="filterBillingLocation('all', this)">🏢 Semua Cabang ({{ $totalRooms }} Unit)</button>
-            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 1', this)">🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1RoomsList->count() }} Unit)</button>
-            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 2', this)">⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2RoomsList->count() }} Unit)</button>
+            <button type="button" class="filter-pill active" onclick="filterBillingLocation('all', this)">Semua Cabang ({{ $totalRooms }} Unit)</button>
+            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 1', this)"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1RoomsList->count() }} Unit)</button>
+            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 2', this)"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2RoomsList->count() }} Unit)</button>
           </div>
         </div>
 
@@ -519,9 +522,9 @@
             </div>
             <div class="filter-pills" id="billingStatusFilter">
               <button type="button" class="filter-pill active" onclick="filterBillingStatus('all', this)">Semua Unit ({{ $totalRooms }})</button>
-              <button type="button" class="filter-pill" onclick="filterBillingStatus('due', this)" style="color:#d97706;">🟡 Jatuh Tempo ({{ $dueRooms }})</button>
-              <button type="button" class="filter-pill" onclick="filterBillingStatus('paid', this)" style="color:#059669;">🟢 Lunas ({{ $occupiedRooms - $dueRooms }})</button>
-              <button type="button" class="filter-pill" onclick="filterBillingStatus('available', this)">🔵 Kosong ({{ $availableRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('due', this)" style="color:#d97706;">Jatuh Tempo ({{ $dueRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('paid', this)" style="color:#059669;">Lunas ({{ $occupiedRooms - $dueRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('available', this)">Kosong ({{ $availableRooms }})</button>
             </div>
           </div>
 
@@ -560,12 +563,12 @@
                 <td>
                   @if($isLoc2)
                     <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">
-                      ⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
+                      <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
                     </span>
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 3px;">Incl. Co-Working & Cleaning 2x</div>
                   @else
                     <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">
-                      🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
+                      <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
                     </span>
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 3px;">Incl. Air PDAM & WiFi Kampus</div>
                   @endif
@@ -587,7 +590,7 @@
                       Tiap Tgl {{ $dueDay }}
                     </div>
                     <div style="font-size: 0.74rem; color: {{ $isDue ? '#ef4444' : 'var(--text-secondary)' }};">
-                      {{ $isDue ? '⚠️ Jatuh tempo bulan ini' : '✓ Pembayaran terjadwal' }}
+                      {{ $isDue ? 'Jatuh tempo bulan ini' : 'Pembayaran terjadwal' }}
                     </div>
                   @else
                     <span style="color: var(--text-muted);">-</span>
@@ -596,11 +599,11 @@
                 <td>
                   @if($isDue)
                     <span class="status-badge due" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
-                      ⚠️ Belum Lunas (Jatuh Tempo)
+                      Belum Lunas (Jatuh Tempo)
                     </span>
                   @elseif($isOccupied)
                     <span class="status-badge occupied" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
-                      ✓ Lunas Bulan Ini
+                      Lunas Bulan Ini
                     </span>
                   @else
                     <span class="status-badge available" style="padding: 4px 12px; border-radius: 999px;">
@@ -620,10 +623,10 @@
                         $waText = rawurlencode("Halo Kak {$t->name}, kami dari Pengelola {$branchLabel} ingin menginformasikan terkait tagihan sewa Kamar #{$r->number} sebesar Rp " . number_format($r->price, 0, ',', '.') . ". Silakan melakukan pembayaran ke Rekening BCA: 8830192831 (a.n. Robi Suryanto) atau Mandiri: 1370019283100. Terima kasih banyak Kak!");
                       @endphp
                       <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" target="_blank" class="btn-secondary" style="background:#059669;color:#ffffff;border:none;padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Kirim Pesan WhatsApp Penagihan">
-                        💬 WA Tagihan
+                        WA Tagihan
                       </a>
                       <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;" onclick="quickMarkPaid('{{ $r->number }}', '{{ $t->name }}', {{ (int)$r->price }})">
-                        ✓ Input Lunas Manual
+                        Input Lunas Manual
                       </button>
                     @else
                       <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;" onclick="document.getElementById('btnAddNewTenant')?.click()">
@@ -657,7 +660,7 @@
               $yearsList = range(2026, $maxYearOpt);
             @endphp
             <div class="finance-year-picker-wrap" id="finYearPickerWrap" onwheel="handleYearWheelScroll(event)" title="Gulir roda mouse untuk ganti tahun">
-              <span class="fyp-label">📅 Periode:</span>
+              <span class="fyp-label">Periode:</span>
               <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2026 ? 'disabled' : '' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
@@ -684,9 +687,9 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (LAPORAN KEUANGAN) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="financeLocationFilters">
-            <button type="button" class="filter-pill active" data-floc="all">🏢 Gabungan 2 Kos</button>
-            <button type="button" class="filter-pill" data-floc="Lokasi 1">🌿 Buku Kas <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
-            <button type="button" class="filter-pill" data-floc="Lokasi 2">⚡ Buku Kas <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
+            <button type="button" class="filter-pill active" data-floc="all">Gabungan 2 Kos</button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 1">Buku Kas <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 2">Buku Kas <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
           </div>
         </div>
 
@@ -754,7 +757,6 @@
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
             <div>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 1.15rem;">📈</span>
                 <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Kurva Pertumbuhan Pendapatan <span id="curveYearLabel">(Tahun {{ $selectedYear ?? 2026 }})</span></h3>
               </div>
               <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 0;">Grafik kurva dinamis pendapatan sewa dan arus kas riil Kos Mas Robi</p>
@@ -800,11 +802,10 @@
           <!-- Quick Insight Bar -->
           <div style="margin-top: 16px; padding: 12px 18px; border-radius: 14px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-primary);">
-              <span>💡</span>
               <span id="finInsightText"><strong>Insight Keuangan 2 Cabang:</strong> Kos 1 menyumbang stabilitas arus kas mahasiswa, sedangkan Kos 2 memberikan margin sewa eksklusif tertinggi.</span>
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661;">
-              Status Kas: Surplus Finansial ✓
+              Status Kas: Surplus Finansial 
             </div>
           </div>
         </div>
@@ -818,8 +819,8 @@
             </div>
             <div class="filter-pills" id="financeTypeFilter">
               <button type="button" class="filter-pill active" data-ftype="all">Semua Transaksi</button>
-              <button type="button" class="filter-pill" data-ftype="income">🟢 Pemasukan (Sewa)</button>
-              <button type="button" class="filter-pill" data-ftype="expense">🔴 Pengeluaran Kos</button>
+              <button type="button" class="filter-pill" data-ftype="income">Pemasukan (Sewa)</button>
+              <button type="button" class="filter-pill" data-ftype="expense">Pengeluaran Kos</button>
             </div>
           </div>
 
@@ -861,9 +862,9 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (KELUHAN & SERVIS) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="maintenanceLocationFilters">
-            <button type="button" class="filter-pill active" data-mloc="all">🏢 Semua Cabang</button>
-            <button type="button" class="filter-pill" data-mloc="Lokasi 1">🌿 Servis <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
-            <button type="button" class="filter-pill" data-mloc="Lokasi 2">⚡ Servis <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
+            <button type="button" class="filter-pill active" data-mloc="all">Semua Cabang</button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 1">Servis <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 2">Servis <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
           </div>
         </div>
 
@@ -912,10 +913,10 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (PINDAH KAMAR) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="transferLocationFilters">
-            <button type="button" class="filter-pill active" onclick="filterTransferLocation('all', this)">🏢 Semua Mutasi</button>
-            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 1', this)">🌿 Internal <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
-            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 2', this)">⚡ Internal <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
-            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lintas Cabang', this)">🔄 Lintas Cabang (<span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ⇄ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>)</button>
+            <button type="button" class="filter-pill active" onclick="filterTransferLocation('all', this)">Semua Mutasi</button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 1', this)">Internal <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 2', this)">Internal <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lintas Cabang', this)">Lintas Cabang (<span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ⇄ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>)</button>
           </div>
         </div>
 
@@ -940,7 +941,7 @@
                 <th>Tgl Pengajuan</th>
                 <th>Penghuni & Kontak</th>
                 <th>Jenis & Cabang Mutasi</th>
-                <th>Kamar Asal ➔ Tujuan</th>
+                <th>Kamar Asal → Tujuan</th>
                 <th>Alasan & Rencana</th>
                 <th>Status</th>
                 <th>Aksi Pengelola</th>
@@ -964,20 +965,20 @@
                   </td>
                   <td>
                     <div style="font-weight: 700; color: var(--brand-primary);">{{ $tr->user->name ?? $tr->tenant->name ?? 'Anak Kos' }}</div>
-                    <div style="font-size: 0.78rem; color: var(--text-muted);">📞 {{ $tr->user->phone ?? $tr->tenant->phone ?? '-' }}</div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">{{ $tr->user->phone ?? $tr->tenant->phone ?? '-' }}</div>
                   </td>
                   <td>
                     @if($isCrossBranch)
                       <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd;">
-                        🔄 Lintas Cabang (@if($fromLoc === 'Lokasi 1')<span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ➔ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>@else<span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ➔ <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>@endif)
+                        Lintas Cabang (@if($fromLoc === 'Lokasi 1')<span data-branch-name="lokasi_1">{{ $branch1Name }}</span> → <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>@else<span data-branch-name="lokasi_2">{{ $branch2Name }}</span> → <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>@endif)
                       </span>
                     @elseif($fromLoc === 'Lokasi 2')
                       <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">
-                        ⚡ Internal <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
+                        Internal <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
                       </span>
                     @else
                       <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">
-                        🌿 Internal <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
+                        Internal <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
                       </span>
                     @endif
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px;">
@@ -993,7 +994,7 @@
                   <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <span class="badge" style="background: var(--bg-surface); color: var(--text-primary); font-weight: 700; padding: 4px 8px; border-radius: 6px;">#{{ $fromNum }}</span>
-                      <span style="color: var(--brand-primary); font-weight: 800;">➔</span>
+                      <span style="color: var(--brand-primary); font-weight: 800;">→</span>
                       <span class="badge" style="background: var(--brand-soft-bg); color: var(--brand-primary); font-weight: 800; padding: 4px 8px; border-radius: 6px;">#{{ $toNum }}</span>
                     </div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">
@@ -1003,10 +1004,10 @@
                   <td style="max-width: 240px;">
                     <div style="font-size: 0.82rem; line-height: 1.4;">{{ $tr->reason }}</div>
                     @if($tr->preferred_date)
-                      <div style="font-size: 0.72rem; color: #0a5661; font-weight: 600; margin-top: 3px;">📅 Rencana: {{ \Carbon\Carbon::parse($tr->preferred_date)->format('d M Y') }}</div>
+                      <div style="font-size: 0.72rem; color: #0a5661; font-weight: 600; margin-top: 3px;">Rencana: {{ \Carbon\Carbon::parse($tr->preferred_date)->format('d M Y') }}</div>
                     @endif
                     @if($tr->admin_note)
-                      <div style="font-size: 0.72rem; color: #059669; font-weight: 600; margin-top: 3px;">💬 Catatan: {{ $tr->admin_note }}</div>
+                      <div style="font-size: 0.72rem; color: #059669; font-weight: 600; margin-top: 3px;">Catatan: {{ $tr->admin_note }}</div>
                     @endif
                   </td>
                   <td>
@@ -1022,10 +1023,10 @@
                     @if($tr->status === 'pending')
                       <div style="display: flex; gap: 6px;">
                         <button type="button" class="btn-sm" style="background: #10b981; color: #fff; border: none; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.76rem;" onclick="handleTransferAction({{ $tr->id }}, 'approved')">
-                          ✓ Izinkan
+                          Izinkan
                         </button>
                         <button type="button" class="btn-sm" style="background: #ef4444; color: #fff; border: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.76rem;" onclick="handleTransferAction({{ $tr->id }}, 'rejected')">
-                          ✕ Tolak
+                          Tolak
                         </button>
                       </div>
                     @else
@@ -1053,7 +1054,7 @@
           <div style="position:absolute; bottom:-60px; left:60px; width:150px; height:150px; background:rgba(20, 184, 166, 0.1); border-radius:50%; pointer-events:none;"></div>
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; position: relative; z-index: 1;">
             <div style="display: flex; align-items: center; gap: 16px;">
-              <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px);">⚙️</div>
+              <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
               <div>
                 <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
                 <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & jaringan WiFi kost</p>
@@ -1066,19 +1067,15 @@
         <div style="margin-bottom: 26px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px;">
           <div class="settings-segmented-nav" id="settingsSubTabNav" style="display: flex; gap: 4px; background: transparent; padding: 0; border-radius: 0;">
             <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span style="font-size: 1.1rem;">🎨</span>
               <span>Tampilan & Foto</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span style="font-size: 1.1rem;">📍</span>
               <span>Titik Lokasi</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span style="font-size: 1.1rem;">⚙️</span>
               <span>Profil Kos</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span style="font-size: 1.1rem;">📶</span>
               <span>Jaringan WiFi</span>
             </button>
           </div>
@@ -1104,7 +1101,7 @@
             <div class="settings-modern-card">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge coral">✨</div>
+                  <div class="settings-card-icon-badge coral"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">1. Hero Banner Utama (Bagian Teratas)</h3>
                     <div class="settings-card-subtitle">Atur judul headline, deskripsi pengantar, tombol CTA, dan foto utama gedung kos</div>
@@ -1132,7 +1129,7 @@
                 <!-- Foto Utama Hero / Eksterior -->
                 <div class="settings-upload-drop">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                    <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-primary);">📸 Foto Utama Gedung / Eksterior</span>
+                    <span style="font-weight: 800; font-size: 0.88rem; color: var(--text-primary);">Foto Utama Gedung / Eksterior</span>
                     <span style="font-size: 0.72rem; color: var(--text-secondary);">Format: JPG, PNG, WEBP</span>
                   </div>
                   <div class="settings-preview-img-wrap">
@@ -1141,7 +1138,7 @@
                   <div style="display: flex; flex-direction: column; gap: 8px;">
                     <input type="file" id="lp_hero_image_file" name="hero_image_file" accept="image/*" class="form-control" style="font-size: 0.82rem; padding: 8px;">
                     <div style="font-size: 0.76rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
-                      💡 <em>Tips:</em> Bagian tengah foto akan otomatis disatukan secara mulus dengan gradasi warna latar belakang Landing Page.
+                      <em>Tips:</em> Bagian tengah foto akan otomatis disatukan secara mulus dengan gradasi warna latar belakang Landing Page.
                     </div>
                   </div>
                 </div>
@@ -1152,7 +1149,7 @@
             <div class="settings-modern-card">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge teal">🍱</div>
+                  <div class="settings-card-icon-badge teal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">2. Bento Keunggulan & 4 Galeri Foto Kost</h3>
                     <div class="settings-card-subtitle">Pengaturan teks keunggulan kos serta 4 slot foto galeri yang dapat diganti kapan saja</div>
@@ -1180,7 +1177,7 @@
               <!-- 4 FOTO GALERI BENTO GRID -->
               <div style="margin-top: 10px;">
                 <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                  <span>🖼️ 4 Foto Galeri Kamar & Fasilitas Kost</span>
+                  <span>4 Foto Galeri Kamar & Fasilitas Kost</span>
                 </h4>
 
                 <div class="settings-gallery-grid">
@@ -1208,7 +1205,7 @@
             <div class="settings-modern-card">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge">💬</div>
+                  <div class="settings-card-icon-badge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">3. Kutipan Komitmen Pengelola & Footer</h3>
                     <div class="settings-card-subtitle">Profil pemilik properti serta teks komitmen layanan yang dibaca calon penghuni</div>
@@ -1245,7 +1242,7 @@
             <!-- Tombol Simpan Landing Page Action Bar -->
             <div style="display: flex; gap: 14px; align-items: center; padding: 12px 0; flex-wrap: wrap;">
               <button type="submit" id="btnSaveLandingPage" class="btn-primary" style="padding: 13px 32px; font-size: 0.95rem; font-weight: 800; display: inline-flex; align-items: center; gap: 10px; border-radius: 14px; box-shadow: 0 4px 16px rgba(37,99,235,0.3);">
-                <span>💾 Simpan Seluruh Tampilan Landing Page</span>
+                <span>Simpan Seluruh Tampilan Landing Page</span>
               </button>
               <a href="{{ route('home') }}" target="_blank" class="btn-secondary" style="padding: 13px 22px; font-weight: 700; border-radius: 14px;">
                 <span>Lihat Hasil Langsung ↗</span>
@@ -1270,7 +1267,7 @@
             <!-- CARD SELECTOR TITIK LOKASI (CABANG) -->
             <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 20px; padding: 22px 26px; box-shadow: 0 14px 30px -8px rgba(3, 35, 40, 0.35); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
               <div style="display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">🏢</div>
+                <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                 <div>
                   <h3 style="color: #fff; font-size: 1.15rem; font-weight: 800; margin: 0;">Sistem Manajemen 2 Titik Lokasi Kos</h3>
                   <p style="color: rgba(255,255,255,0.7); font-size: 0.78rem; margin: 3px 0 0;">Setiap lokasi memiliki fasilitas, tipe kamar, alamat & link Google Maps sendiri</p>
@@ -1278,10 +1275,10 @@
               </div>
               <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.18);">
                 <button type="button" class="branch-pill-tab active" id="btnTabBranch1" onclick="switchBranchSettings('lokasi_1')" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                  <span>📍</span> <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
+                  <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
                 </button>
                 <button type="button" class="branch-pill-tab" id="btnTabBranch2" onclick="switchBranchSettings('lokasi_2')" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: rgba(255,255,255,0.8);">
-                  <span>📍</span> <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
+                  <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
                 </button>
               </div>
             </div>
@@ -1291,7 +1288,7 @@
               <div class="settings-modern-card">
                 <div class="settings-card-header">
                   <div class="settings-card-title-group">
-                    <div class="settings-card-icon-badge" style="background: rgba(10,86,97,0.1); color: #0a5661;">📍</div>
+                    <div class="settings-card-icon-badge" style="background: rgba(10,86,97,0.1); color: #0a5661;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                     <div>
                       <h3 class="settings-card-title">Pengaturan <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></h3>
                       <div class="settings-card-subtitle">Alamat resmi, peta Google Maps, dan kontak WhatsApp untuk Cabang 1</div>
@@ -1317,7 +1314,7 @@
 
                 <div class="form-group" style="margin-top: 14px;">
                   <label style="font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between;">
-                    <span>🔗 Link Google Maps Cabang 1</span>
+                    <span>Link Google Maps Cabang 1</span>
                     <span style="font-size: 0.72rem; color: #047857; background: #dcfce7; padding: 2px 8px; border-radius: 6px; font-weight: 600;">Cukup Tempel Link Maps</span>
                   </label>
                   <input type="text" id="b1_gmaps_url" class="form-control" placeholder="https://maps.app.goo.gl/... atau link dari browser" value="{{ $b1['gmaps_url'] ?? ($setting->gmaps_url ?: $setting->gmaps_embed) }}" style="border-radius: 12px;">
@@ -1327,12 +1324,12 @@
                 <!-- Tipe Kamar & Fasilitas Cabang 1 -->
                 <div class="form-row" style="gap: 16px; margin-top: 16px;">
                   <div class="form-group" style="flex: 1;">
-                    <label style="font-weight: 700; font-size: 0.82rem; color: #0a5661;">🛏️ Daftar Tipe Kamar Cabang 1 (Pisahkan koma)</label>
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0a5661;">Daftar Tipe Kamar Cabang 1 (Pisahkan koma)</label>
                     <textarea id="b1_room_types" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b1['room_types'] ?? null) ? implode(', ', $b1['room_types']) : 'VIP AC (KM Dalam), Deluxe AC, Standard Fan (KM Luar)' }}</textarea>
                     <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Otomatis menjadi pilihan tipe saat menambah kamar di Cabang 1.</span>
                   </div>
                   <div class="form-group" style="flex: 1;">
-                    <label style="font-weight: 700; font-size: 0.82rem; color: #0a5661;">✨ Daftar Fasilitas Khas Cabang 1 (Pisahkan koma)</label>
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0a5661;">Daftar Fasilitas Khas Cabang 1 (Pisahkan koma)</label>
                     <textarea id="b1_facilities" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b1['facilities'] ?? null) ? implode(', ', $b1['facilities']) : 'AC Dingin & Hemat Listrik, Kamar Mandi Dalam & Water Heater, WiFi Fiber Ultra Cepat 100 Mbps, Dapur Bersama Komplit, Parkir Mobil & Motor Luas Beratap, Keamanan CCTV 24 Jam & One-Gate System, Rooftop Jemuran & Ruang Santai' }}</textarea>
                     <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Tampil di detail hunian & landing page untuk Cabang 1.</span>
                   </div>
@@ -1356,7 +1353,7 @@
               <div class="settings-modern-card">
                 <div class="settings-card-header">
                   <div class="settings-card-title-group">
-                    <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.1); color: #0d9488;">📍</div>
+                    <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.1); color: #0d9488;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                     <div>
                       <h3 class="settings-card-title">Pengaturan <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></h3>
                       <div class="settings-card-subtitle">Alamat resmi, peta Google Maps, dan kontak WhatsApp untuk Cabang 2</div>
@@ -1382,7 +1379,7 @@
 
                 <div class="form-group" style="margin-top: 14px;">
                   <label style="font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between;">
-                    <span>🔗 Link Google Maps Cabang 2</span>
+                    <span>Link Google Maps Cabang 2</span>
                     <span style="font-size: 0.72rem; color: #047857; background: #dcfce7; padding: 2px 8px; border-radius: 6px; font-weight: 600;">Cukup Tempel Link Maps</span>
                   </label>
                   <input type="text" id="b2_gmaps_url" class="form-control" placeholder="https://maps.app.goo.gl/... atau link dari browser" value="{{ $b2['gmaps_url'] ?? 'https://maps.google.com/?q=Jl.+Kaliurang+KM+12+Yogyakarta' }}" style="border-radius: 12px;">
@@ -1392,12 +1389,12 @@
                 <!-- Tipe Kamar & Fasilitas Cabang 2 -->
                 <div class="form-row" style="gap: 16px; margin-top: 16px;">
                   <div class="form-group" style="flex: 1;">
-                    <label style="font-weight: 700; font-size: 0.82rem; color: #0d9488;">🛏️ Daftar Tipe Kamar Cabang 2 (Pisahkan koma)</label>
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0d9488;">Daftar Tipe Kamar Cabang 2 (Pisahkan koma)</label>
                     <textarea id="b2_room_types" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b2['room_types'] ?? null) ? implode(', ', $b2['room_types']) : 'Executive Suite (Balkon), Superior AC Plus, Studio Mezzanine' }}</textarea>
                     <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Otomatis menjadi pilihan tipe saat menambah kamar di Cabang 2.</span>
                   </div>
                   <div class="form-group" style="flex: 1;">
-                    <label style="font-weight: 700; font-size: 0.82rem; color: #0d9488;">✨ Daftar Fasilitas Khas Cabang 2 (Pisahkan koma)</label>
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0d9488;">Daftar Fasilitas Khas Cabang 2 (Pisahkan koma)</label>
                     <textarea id="b2_facilities" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b2['facilities'] ?? null) ? implode(', ', $b2['facilities']) : 'Smart Digital Door Lock (Kartu & PIN), Balkon Pribadi dengan View Menarik, Smart Android TV & Meja Kerja Ergonomis, Co-Working Lounge & Area Diskusi, Mini Gym & Gazebo Santai Outdoor, Pantry Bersih & Dispenser Tiap Lantai, Free Pembersihan Kamar 1x per Minggu' }}</textarea>
                     <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Tampil di detail hunian & landing page untuk Cabang 2.</span>
                   </div>
@@ -1420,7 +1417,7 @@
             <div class="settings-modern-card">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge">📌</div>
+                  <div class="settings-card-icon-badge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">4 Poin Akses & Keunggulan Strategis</h3>
                     <div class="settings-card-subtitle">4 kartu akses strategis yang tampil mendampingi peta pada Landing Page</div>
@@ -1436,7 +1433,7 @@
                 @for($i = 0; $i < 4; $i++)
                   @php
                     $hl = $highlights[$i] ?? [
-                      'icon' => ['🎓', '☕', '🏥', '🛡️'][$i] ?? '📍',
+                      'icon' => ['', '', '', ''][$i] ?? '',
                       'title' => '',
                       'desc' => ''
                     ];
@@ -1445,7 +1442,7 @@
                     <div style="display: flex; gap: 10px; align-items: center;">
                       <div style="width: 58px; flex-shrink: 0;">
                         <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Ikon</label>
-                        <input type="text" class="form-control hl-icon" value="{{ $hl['icon'] ?? '📍' }}" style="text-align: center; font-size: 1.15rem; padding: 4px;" maxlength="4" placeholder="🎓">
+                        <input type="text" class="form-control hl-icon" value="{{ $hl['icon'] ?? '' }}" style="text-align: center; font-size: 1.15rem; padding: 4px;" maxlength="4" placeholder="">
                       </div>
                       <div style="flex: 1;">
                         <label style="font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 2px;">Judul Poin Keunggulan #{{ $i + 1 }}</label>
@@ -1462,7 +1459,7 @@
 
               <div style="display: flex; gap: 14px; align-items: center; margin-top: 20px;">
                 <button type="submit" class="btn-primary" style="padding: 12px 28px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
-                  <span>💾</span> Simpan Seluruh Pengaturan 2 Lokasi & Peta
+                  Simpan Seluruh Pengaturan 2 Lokasi & Peta
                 </button>
               </div>
             </div>
@@ -1480,7 +1477,7 @@
             <div class="settings-modern-card" style="margin-bottom: 0;">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge">⚙️</div>
+                  <div class="settings-card-icon-badge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">Informasi Properti & Pengelola</h3>
                     <div class="settings-card-subtitle">Nama kos, nama pengelola, dan kontak WhatsApp resmi</div>
@@ -1509,8 +1506,8 @@
                 <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data & Cadangan</h4>
                 <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                  <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">📥 Unduh Cadangan JSON</button>
-                  <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">🔄 Reset Data Sampel</button>
+                  <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">Unduh Cadangan JSON</button>
+                  <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">Reset Data Sampel</button>
                 </div>
               </div>
             </div>
@@ -1519,7 +1516,7 @@
             <div class="settings-modern-card" style="margin-bottom: 0;">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.12); color: #0d9488;">📜</div>
+                  <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.12); color: #0d9488;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">Tata Tertib & Peraturan Kos</h3>
                     <div class="settings-card-subtitle">Kelola poin peraturan kos yang otomatis tampil di Portal Pelanggan</div>
@@ -1543,18 +1540,18 @@
                     <div class="kos-rule-edit-item" style="display: flex; align-items: center; gap: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 12px;">
                       <span class="kos-rule-num" style="width: 26px; height: 26px; border-radius: 50%; background: #ccfbf1; color: #0a5661; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">{{ $rIdx + 1 }}</span>
                       <input type="text" class="form-control kos-rule-input" value="{{ $ruleText }}" placeholder="Tulis poin peraturan kos..." style="flex: 1; border-radius: 10px; font-size: 0.85rem;" required>
-                      <button type="button" class="btn-secondary" onclick="removeKosRuleRow(this)" style="padding: 6px 10px; border-radius: 8px; color: #ef4444; font-size: 0.78rem; flex-shrink: 0;" title="Hapus Poin">✕</button>
+                      <button type="button" class="btn-secondary" onclick="removeKosRuleRow(this)" style="padding: 6px 10px; border-radius: 8px; color: #ef4444; font-size: 0.78rem; flex-shrink: 0;" title="Hapus Poin"></button>
                     </div>
                   @endforeach
                 </div>
 
                 <button type="button" class="btn-secondary" onclick="addKosRuleRow()" style="width: 100%; border-style: dashed; padding: 10px; font-weight: 700; border-radius: 10px; font-size: 0.84rem;">
-                  ➕ Tambah Poin Peraturan Baru
+                  Tambah Poin Peraturan Baru
                 </button>
 
                 <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
                   <button type="submit" class="btn-primary" style="padding: 10px 22px; border-radius: 12px; font-weight: 800;">
-                    💾 Simpan Peraturan Kos
+                    Simpan Peraturan Kos
                   </button>
                   <span id="kosRulesSaveStatus" style="font-size: 0.8rem; font-weight: 700;"></span>
                 </div>
@@ -1578,9 +1575,9 @@
             <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (JARINGAN WIFI) -->
             <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div class="filter-pills" id="wifiLocationFilters">
-                <button type="button" class="filter-pill active" onclick="filterWifiByLocation('all', this)">🏢 Semua Cabang ({{ count($allWifis) }})</button>
-                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 1', this)">🌿 WiFi <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $wfLoc1Count }})</button>
-                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 2', this)">⚡ WiFi <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $wfLoc2Count }})</button>
+                <button type="button" class="filter-pill active" onclick="filterWifiByLocation('all', this)">Semua Cabang ({{ count($allWifis) }})</button>
+                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 1', this)">WiFi <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $wfLoc1Count }})</button>
+                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 2', this)">WiFi <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $wfLoc2Count }})</button>
               </div>
             </div>
 
@@ -1596,20 +1593,20 @@
                   <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                       <div style="width: 42px; height: 42px; border-radius: 12px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; border: 1px solid {{ $isWfLoc2 ? '#5eead4' : '#86efac' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
-                        📶
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
                       </div>
                       <div>
                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                           <span style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</span>
                           @if($isWfLoc2)
-                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
+                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
                           @else
-                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
+                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
                           @endif
-                          <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">🚀 {{ $wfSpeed }}</span>
+                          <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">{{ $wfSpeed }}</span>
                         </div>
                         <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-                          <span>📡 Modem:</span>
+                          <span>Modem:</span>
                           <span class="wf-modem-text" style="color: var(--text-secondary); font-weight: 500;">{{ $wf['modem'] ?? 'Modem Utama' }}</span>
                         </div>
                       </div>
@@ -1620,7 +1617,7 @@
                         <span class="wf-toggle-label">{{ !empty($wf['is_active']) ? '● Ditayangkan' : '○ Disembunyikan' }}</span>
                       </label>
                       <button type="button" class="btn-secondary" onclick="deleteWfItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus WiFi">
-                        ✕
+                        
                       </button>
                     </div>
                   </div>
@@ -1631,7 +1628,7 @@
                         <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
                         <code style="font-family: monospace; font-weight: 700; color: var(--text-primary); margin-left: 6px;" class="wf-pass-text">{{ $wf['password'] }}</code>
                       </div>
-                      <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong><span data-branch-name="{{ $isWfLoc2 ? 'lokasi_2' : 'lokasi_1' }}">{{ $isWfLoc2 ? $branch2Name : $branch1Name }}</span></strong></span>
+                      <span style="font-size: 0.7rem; color: var(--text-secondary);">Cabang: <strong><span data-branch-name="{{ $isWfLoc2 ? 'lokasi_2' : 'lokasi_1' }}">{{ $isWfLoc2 ? $branch2Name : $branch1Name }}</span></strong></span>
                     </div>
                   @endif
 
@@ -1643,19 +1640,19 @@
             {{-- Tombol & Box Tambah WiFi Baru --}}
             <div style="margin-bottom: 20px;">
               <button type="button" id="btnToggleAddWf" onclick="toggleAddWifiForm()" class="btn-secondary" style="width: 100%; border-style: dashed; padding: 12px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>➕ Tambah Jaringan WiFi & Modem Baru</span>
+                <span>Tambah Jaringan WiFi & Modem Baru</span>
               </button>
 
               <div id="addWifiFormBox" style="display: none; background: var(--bg-surface); border: 1.5px solid #0a5661; border-radius: 16px; padding: 18px; margin-top: 14px;">
                 <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
-                  <span>📶</span> Tambah Jaringan WiFi Baru untuk Cabang Kos
+                  Tambah Jaringan WiFi Baru untuk Cabang Kos
                 </h4>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
                   <div class="form-group">
                     <label style="font-size: 0.78rem; font-weight: 700;">Lokasi Cabang Kos *</label>
                     <select id="newWfLocation" class="form-control" style="font-weight: 700;">
-                      <option value="Lokasi 1" data-branch-option="lokasi_1">🌿 {{ $branch1Name }}</option>
-                      <option value="Lokasi 2" data-branch-option="lokasi_2">⚡ {{ $branch2Name }}</option>
+                      <option value="Lokasi 1" data-branch-option="lokasi_1">{{ $branch1Name }}</option>
+                      <option value="Lokasi 2" data-branch-option="lokasi_2">{{ $branch2Name }}</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -1692,7 +1689,7 @@
             {{-- Tombol Simpan Seluruh Perubahan WiFi --}}
             <div style="display: flex; align-items: center; gap: 14px; margin-top: 16px;">
               <button type="button" class="btn-primary" onclick="saveAllWifiNetworksToServer()" style="padding: 10px 24px; border-radius: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
-                <span>💾 Simpan Perubahan Jaringan WiFi</span>
+                <span>Simpan Perubahan Jaringan WiFi</span>
               </button>
               <span id="wfSaveStatus" style="font-size: 0.82rem; font-weight: 700;"></span>
             </div>
@@ -1750,10 +1747,10 @@
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🛏️</div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
             <h3 id="mRoomDetailTitle" style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Detail Kamar #101</h3>
-            <span id="mRoomDetailLocBadge" style="display: inline-block; font-size: 0.72rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px;">📍 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
+            <span id="mRoomDetailLocBadge" style="display: inline-block; font-size: 0.72rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px;"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
           </div>
         </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalRoomDetail">
@@ -1776,7 +1773,7 @@
     <div class="modal-dialog" style="max-width: 600px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👤</div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
             <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Daftarkan Penghuni Baru</h3>
             <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Registrasi data anak kos, tanggal masuk & penempatan kamar</p>
@@ -1845,7 +1842,7 @@
       <!-- Premium Modal Header (Deep Teal Ocean) -->
       <div class="modal-header" style="background: linear-gradient(135deg, #032328 0%, #063d45 40%, #0a5661 100%); border-radius: 20px 20px 0 0; padding: 20px 24px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">🏠</div>
+          <div style="width: 42px; height: 42px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
             <h3 id="mRoomFormTitle" style="color: #fff; font-size: 1.1rem; font-weight: 800; margin: 0;">Tambah Master Kamar</h3>
             <p style="color: rgba(255,255,255,0.7); font-size: 0.76rem; margin: 2px 0 0;">Isi data kamar & upload foto kamar asli</p>
@@ -1864,7 +1861,7 @@
           <div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1.5px solid #99f6e4; border-radius: 16px; padding: 18px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">📋</div>
+                <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                 <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Informasi Dasar Kamar</span>
               </div>
               <span style="font-size: 0.72rem; color: #0f766e; background: #ccfbf1; padding: 3px 8px; border-radius: 6px; font-weight: 700;">2 Titik Lokasi Tersedia</span>
@@ -1873,12 +1870,12 @@
             <!-- PILIHAN CABANG LOKASI KOS -->
             <div class="form-group" style="margin-bottom: 14px;">
               <label for="roomLocationInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e; display: flex; align-items: center; justify-content: space-between;">
-                <span>🏢 Titik Lokasi / Cabang Kos *</span>
+                <span>Titik Lokasi / Cabang Kos *</span>
                 <span style="font-weight: 500; font-size: 0.7rem; color: #0f766e;">Otomatis sinkron tipe & fasilitas</span>
               </label>
               <select id="roomLocationInput" class="form-control" required style="border-color: #99f6e4; border-radius: 10px; font-weight: 700; color: #0a5661; background: #ffffff;">
-                <option value="Lokasi 1" data-branch-option="lokasi_1">📍 {{ $branch1Name }}</option>
-                <option value="Lokasi 2" data-branch-option="lokasi_2">📍 {{ $branch2Name }}</option>
+                <option value="Lokasi 1" data-branch-option="lokasi_1">{{ $branch1Name }}</option>
+                <option value="Lokasi 2" data-branch-option="lokasi_2">{{ $branch2Name }}</option>
               </select>
             </div>
 
@@ -1918,9 +1915,9 @@
               <div class="form-group" style="margin-bottom: 0; flex: 1;">
                 <label for="roomStatusInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Status Kamar</label>
                 <select id="roomStatusInput" class="form-control" style="border-color: #99f6e4; border-radius: 10px;">
-                  <option value="available">🔵 Kosong</option>
-                  <option value="occupied">🟢 Terisi</option>
-                  <option value="repair">🔴 Perbaikan</option>
+                  <option value="available">Kosong</option>
+                  <option value="occupied">Terisi</option>
+                  <option value="repair">Perbaikan</option>
                 </select>
               </div>
             </div>
@@ -1930,13 +1927,13 @@
           <div style="background: #fff; border: 1.5px solid #ccfbf1; border-radius: 16px; padding: 18px; box-shadow: 0 2px 12px rgba(10,86,97,0.04);">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #0a5661, #0d9488); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">📸</div>
+                <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #0a5661, #0d9488); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                 <div>
                   <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Foto Kamar</span>
                   <span style="font-size: 0.72rem; background: #ccfbf1; color: #0f766e; padding: 2px 8px; border-radius: 999px; font-weight: 700; margin-left: 8px;">Upload 3–4 Foto</span>
                 </div>
               </div>
-              <span style="font-size: 0.72rem; color: #0d9488; font-weight: 700;">💡 Klik slot untuk memilih foto</span>
+              <span style="font-size: 0.72rem; color: #0d9488; font-weight: 700;">Klik slot untuk memilih foto</span>
             </div>
             <p style="font-size: 0.74rem; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5;">
               Slot foto awal kosong. Silakan upload 3–4 foto terbaik kamar. Foto pertama otomatis menjadi <strong>foto utama (cover)</strong> kamar.
@@ -1953,7 +1950,7 @@
                    ondrop="handleRoomPhotoDrop(event, 1)">
                 <!-- Empty Placeholder -->
                 <div id="roomPhotoPlaceholder1" class="room-photo-placeholder">
-                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">📷</div>
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                   <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 1: Utama (Cover) *</div>
                   <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
                   <div style="font-size: 0.62rem; color: #0d9488; margin-top: 4px; font-weight: 700;">Wajib Diisi</div>
@@ -1962,11 +1959,11 @@
                 <div id="roomPhotoFilled1" class="room-photo-filled" style="display: none;">
                   <img id="roomImgPreview1" src="" alt="Foto 1" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
                   <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
-                  <div style="position: absolute; top: 8px; left: 8px; background: #0a5661; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO UTAMA ⭐</div>
-                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(1);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <div style="position: absolute; top: 8px; left: 8px; background: #0a5661; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO UTAMA </div>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(1);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto"></button>
                   <div id="roomImgUploadStatus1" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
                   <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
-                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">📷 Foto Kamar Tidur Utama</div>
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">Foto Kamar Tidur Utama</div>
                     <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
                   </div>
                 </div>
@@ -1981,7 +1978,7 @@
                    ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
                    ondrop="handleRoomPhotoDrop(event, 2)">
                 <div id="roomPhotoPlaceholder2" class="room-photo-placeholder">
-                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">🖥️</div>
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                   <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 2: Meja Kerja / AC</div>
                   <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
                 </div>
@@ -1989,10 +1986,10 @@
                   <img id="roomImgPreview2" src="" alt="Foto 2" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
                   <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
                   <div style="position: absolute; top: 8px; left: 8px; background: rgba(3,35,40,0.65); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO 2</div>
-                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(2);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(2);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto"></button>
                   <div id="roomImgUploadStatus2" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
                   <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
-                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">🖥️ Meja Kerja / AC</div>
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">Meja Kerja / AC</div>
                     <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
                   </div>
                 </div>
@@ -2007,7 +2004,7 @@
                    ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
                    ondrop="handleRoomPhotoDrop(event, 3)">
                 <div id="roomPhotoPlaceholder3" class="room-photo-placeholder">
-                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">🚿</div>
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                   <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 3: Kamar Mandi / Fasilitas</div>
                   <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
                 </div>
@@ -2015,10 +2012,10 @@
                   <img id="roomImgPreview3" src="" alt="Foto 3" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
                   <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
                   <div style="position: absolute; top: 8px; left: 8px; background: rgba(3,35,40,0.65); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">FOTO 3</div>
-                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(3);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(3);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto"></button>
                   <div id="roomImgUploadStatus3" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
                   <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
-                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">🚿 Kamar Mandi / Fasilitas</div>
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">Kamar Mandi / Fasilitas</div>
                     <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
                   </div>
                 </div>
@@ -2033,7 +2030,7 @@
                    ondragleave="this.style.borderColor='#99f6e4'; this.style.background='#f0fdfa';"
                    ondrop="handleRoomPhotoDrop(event, 4)">
                 <div id="roomPhotoPlaceholder4" class="room-photo-placeholder">
-                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;">✨</div>
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                   <div style="font-size: 0.82rem; font-weight: 800; color: #0a5661;">Foto 4: Tambahan (Opsional)</div>
                   <div style="font-size: 0.68rem; color: #64748b; margin-top: 2px;">Klik / drag foto ke sini</div>
                 </div>
@@ -2041,10 +2038,10 @@
                   <img id="roomImgPreview4" src="" alt="Foto 4" style="width: 100%; height: 140px; object-fit: cover; display: block; border-radius: 12px;">
                   <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to top, rgba(3,35,40,0.65) 0%, transparent 55%); border-radius: 12px; pointer-events: none;"></div>
                   <div style="position: absolute; top: 8px; left: 8px; background: rgba(3,35,40,0.65); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; pointer-events: none;">OPSIONAL</div>
-                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(4);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto">✕</button>
+                  <button type="button" onclick="event.stopPropagation(); removeRoomPhoto(4);" style="position: absolute; top: 8px; right: 8px; background: rgba(239,68,68,0.9); color: #fff; border: none; border-radius: 6px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.72rem; font-weight: 800;" title="Hapus foto"></button>
                   <div id="roomImgUploadStatus4" style="position: absolute; top: 8px; right: 36px; font-size: 0.65rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0,0,0,0.5); color: #fff; pointer-events: none;"></div>
                   <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; pointer-events: none;">
-                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">✨ Foto Tambahan</div>
+                    <div style="color: #fff; font-size: 0.72rem; font-weight: 700;">Foto Tambahan</div>
                     <div style="color: rgba(255,255,255,0.8); font-size: 0.62rem;">Klik untuk ganti foto</div>
                   </div>
                 </div>
@@ -2055,7 +2052,7 @@
             </div>
 
             <p style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 10px; text-align: center;">
-              💡 Format: JPG, PNG, WEBP • Maks 5MB per foto • Klik kotak foto untuk upload langsung
+              Format: JPG, PNG, WEBP • Maks 5MB per foto • Klik kotak foto untuk upload langsung
             </p>
           </div>
 
@@ -2063,7 +2060,7 @@
           <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 16px; padding: 18px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">🎨</div>
+                <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                 <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Custom Interior & Anggaran</span>
               </div>
               <span style="font-size: 0.68rem; background: #063d45; color: #fff; padding: 3px 9px; border-radius: 999px; font-weight: 700;">Admin Only</span>
@@ -2072,12 +2069,12 @@
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="roomCustomInteriorStatusInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Status Custom Interior</label>
                 <select id="roomCustomInteriorStatusInput" class="form-control" style="border-color: #99f6e4; border-radius: 10px;">
-                  <option value="none">⚪ Tidak Ada Permintaan</option>
-                  <option value="pending">⏳ Menunggu Review</option>
-                  <option value="approved">✅ Disetujui</option>
-                  <option value="in_progress">🛠️ Sedang Dikerjakan</option>
-                  <option value="completed">🎉 Selesai</option>
-                  <option value="rejected">❌ Ditolak</option>
+                  <option value="none">Tidak Ada Permintaan</option>
+                  <option value="pending">Menunggu Review</option>
+                  <option value="approved">Disetujui</option>
+                  <option value="in_progress">Sedang Dikerjakan</option>
+                  <option value="completed">Selesai</option>
+                  <option value="rejected">Ditolak</option>
                 </select>
               </div>
               <div class="form-group" style="margin-bottom: 0;">
@@ -2103,7 +2100,7 @@
           <div style="display: flex; gap: 10px;">
             <button type="button" class="btn-secondary" data-close-modal="modalAddRoom" style="border-radius: 10px; padding: 10px 20px;">Batal</button>
             <button type="submit" class="btn-primary" style="border-radius: 10px; padding: 10px 24px; font-weight: 800; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); border: none; box-shadow: 0 4px 14px rgba(10,86,97,0.35);">
-              💾 Simpan Kamar
+              Simpan Kamar
             </button>
           </div>
         </div>
@@ -2118,7 +2115,7 @@
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">💳</div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
             <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Catat Pembayaran / Transaksi</h3>
             <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Pemasukan sewa kamar atau pengeluaran operasional kos</p>
@@ -2134,8 +2131,8 @@
             <div class="form-group" style="margin-bottom: 0;">
               <label for="transType" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Jenis Transaksi *</label>
               <select id="transType" class="form-control" required style="border-radius: 12px; font-weight: 700;">
-                <option value="income">🟢 Pemasukan (Sewa / Token / Laundry)</option>
-                <option value="expense">🔴 Pengeluaran (WiFi, Listrik, Kebersihan)</option>
+                <option value="income">Pemasukan (Sewa / Token / Laundry)</option>
+                <option value="expense">Pengeluaran (WiFi, Listrik, Kebersihan)</option>
               </select>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
@@ -2184,7 +2181,7 @@
     <div class="modal-dialog" style="max-width: 500px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🧾</div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
             <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Kuitansi Digital Resmi</h3>
             <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Bukti pembayaran sah tercatat di pembukuan kost</p>
@@ -2254,7 +2251,7 @@
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🛠️</div>
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
             <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Laporan Keluhan & Servis Fasilitas</h3>
             <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Catat kendala teknis atau perbaikan fasilitas kamar</p>
@@ -2276,9 +2273,9 @@
             <div class="form-group" style="margin-bottom: 0;">
               <label for="repairPriority" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tingkat Urgensi</label>
               <select id="repairPriority" class="form-control" style="border-radius: 12px; font-weight: 700;">
-                <option value="Normal">🟡 Normal</option>
-                <option value="Mendesak">🔴 Mendesak (Penting)</option>
-                <option value="Rendah">🟢 Rendah</option>
+                <option value="Normal">Normal</option>
+                <option value="Mendesak">Mendesak (Penting)</option>
+                <option value="Rendah">Rendah</option>
               </select>
             </div>
           </div>
@@ -2946,7 +2943,7 @@
       var previewImg = document.getElementById('roomImgPreview' + slideIndex);
 
       if (statusEl) {
-        statusEl.textContent = '⏳ Uploading...';
+        statusEl.textContent = 'Uploading...';
         statusEl.style.color = '#fff';
         statusEl.style.background = 'rgba(10,86,97,0.85)';
       }
@@ -2978,7 +2975,7 @@
           if (textInput) textInput.value = data.path || url;
           if (previewImg) previewImg.src = url;
           if (statusEl) {
-            statusEl.textContent = '✓ Tersimpan';
+            statusEl.textContent = 'Tersimpan';
             statusEl.style.background = 'rgba(13,148,136,0.9)';
             setTimeout(function() { statusEl.textContent = ''; }, 3000);
           }
@@ -2988,7 +2985,7 @@
       })
       .catch(function(err) {
         if (statusEl) {
-          statusEl.textContent = '✕ Gagal';
+          statusEl.textContent = 'Gagal';
           statusEl.style.background = 'rgba(239,68,68,0.85)';
         }
         console.error('Upload foto ' + slideIndex + ':', err.message);
@@ -3078,10 +3075,10 @@
         return;
       }
 
-      var icon = '🏦';
-      if (type === 'qris') icon = '📱';
-      else if (type === 'cash') icon = '💵';
-      else if (type === 'ewallet') icon = '💳';
+      var icon = '';
+      if (type === 'qris') icon = '';
+      else if (type === 'cash') icon = '';
+      else if (type === 'ewallet') icon = '';
 
       var newId = 'pm_' + Date.now();
       var card = document.createElement('div');
@@ -3115,7 +3112,7 @@
               <span class="pm-toggle-label">${isActive ? '● Ditayangkan' : '○ Disembunyikan'}</span>
             </label>
             <button type="button" class="btn-secondary" onclick="deletePmItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus Metode">
-              ✕
+              
             </button>
           </div>
         </div>
@@ -3129,7 +3126,7 @@
             <strong class="pm-holder-text" style="color: var(--text-primary);">${holder}</strong>
           </div>
         </div>
-        ${instructions ? `<div style="font-size: 0.74rem; color: var(--text-secondary); font-style: italic;" class="pm-inst-text">📝 ${instructions}</div>` : ''}
+        ${instructions ? `<div style="font-size: 0.74rem; color: var(--text-secondary); font-style: italic;" class="pm-inst-text">${instructions}</div>` : ''}
         <input type="hidden" class="pm-raw-data" value='${JSON.stringify(rawObj)}'>
       `;
 
@@ -3172,7 +3169,7 @@
       });
 
       if (statusEl) {
-        statusEl.textContent = '⏳ Menyimpan...';
+        statusEl.textContent = 'Menyimpan...';
         statusEl.style.color = '#0d9488';
       }
 
@@ -3189,14 +3186,14 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (statusEl) {
-          statusEl.textContent = '✓ Tersimpan di database!';
+          statusEl.textContent = 'Tersimpan di database!';
           statusEl.style.color = '#10b981';
           setTimeout(function() { statusEl.textContent = ''; }, 3000);
         }
       })
       .catch(function(err) {
         if (statusEl) {
-          statusEl.textContent = '✕ Gagal menyimpan';
+          statusEl.textContent = 'Gagal menyimpan';
           statusEl.style.color = '#ef4444';
         }
       });
@@ -3294,23 +3291,23 @@
       var branchKeyAttr = isWfLoc2 ? 'lokasi_2' : 'lokasi_1';
 
       var branchBadgeHtml = isWfLoc2
-        ? '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ <span data-branch-name="lokasi_2">' + branchDisplayName + '</span></span>'
-        : '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 <span data-branch-name="lokasi_1">' + branchDisplayName + '</span></span>';
+        ? '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;"><span data-branch-name="lokasi_2">' + branchDisplayName + '</span></span>'
+        : '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;"><span data-branch-name="lokasi_1">' + branchDisplayName + '</span></span>';
 
       card.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <div style="width: 42px; height: 42px; border-radius: 12px; background: ${isWfLoc2 ? '#ccfbf1' : '#dcfce7'}; border: 1px solid ${isWfLoc2 ? '#5eead4' : '#86efac'}; color: ${isWfLoc2 ? '#0a5661' : '#059669'}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
-              📶
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
             </div>
             <div>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">${name}</span>
                 ${branchBadgeHtml}
-                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">🚀 ${speed}</span>
+                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">${speed}</span>
               </div>
               <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
-                <span>📡 Modem:</span>
+                <span>Modem:</span>
                 <span class="wf-modem-text" style="color: var(--text-secondary); font-weight: 500;">${modem}</span>
               </div>
             </div>
@@ -3321,7 +3318,7 @@
               <span class="wf-toggle-label">${isActive ? '● Ditayangkan' : '○ Disembunyikan'}</span>
             </label>
             <button type="button" class="btn-secondary" onclick="deleteWfItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus WiFi">
-              ✕
+              
             </button>
           </div>
         </div>
@@ -3331,7 +3328,7 @@
               <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
               <code style="font-family: monospace; font-weight: 700; color: var(--text-primary); margin-left: 6px;" class="wf-pass-text">${password}</code>
             </div>
-            <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong><span data-branch-name="${branchKeyAttr}">${branchDisplayName}</span></strong></span>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);">Cabang: <strong><span data-branch-name="${branchKeyAttr}">${branchDisplayName}</span></strong></span>
           </div>
         ` : ''}
         <input type="hidden" class="wf-raw-data" value='${JSON.stringify(rawObj)}'>
@@ -3376,7 +3373,7 @@
       });
 
       if (statusEl) {
-        statusEl.textContent = '⏳ Menyimpan...';
+        statusEl.textContent = 'Menyimpan...';
         statusEl.style.color = '#0a5661';
       }
 
@@ -3393,14 +3390,14 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (statusEl) {
-          statusEl.textContent = '✓ Pengaturan WiFi berhasil disimpan!';
+          statusEl.textContent = 'Pengaturan WiFi berhasil disimpan!';
           statusEl.style.color = '#10b981';
           setTimeout(function() { statusEl.textContent = ''; }, 3000);
         }
       })
       .catch(function(err) {
         if (statusEl) {
-          statusEl.textContent = '✕ Gagal menyimpan WiFi';
+          statusEl.textContent = 'Gagal menyimpan WiFi';
           statusEl.style.color = '#ef4444';
         }
       });
@@ -3427,7 +3424,7 @@
       div.innerHTML = `
         <span class="kos-rule-num" style="width: 26px; height: 26px; border-radius: 50%; background: #ccfbf1; color: #0a5661; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${count}</span>
         <input type="text" class="form-control kos-rule-input" value="" placeholder="Tulis poin peraturan kos baru..." style="flex: 1; border-radius: 10px; font-size: 0.85rem;" required>
-        <button type="button" class="btn-secondary" onclick="removeKosRuleRow(this)" style="padding: 6px 10px; border-radius: 8px; color: #ef4444; font-size: 0.78rem; flex-shrink: 0;" title="Hapus Poin">✕</button>
+        <button type="button" class="btn-secondary" onclick="removeKosRuleRow(this)" style="padding: 6px 10px; border-radius: 8px; color: #ef4444; font-size: 0.78rem; flex-shrink: 0;" title="Hapus Poin"></button>
       `;
       list.appendChild(div);
       var inp = div.querySelector('.kos-rule-input');
@@ -3459,7 +3456,7 @@
 
       var statusEl = document.getElementById('kosRulesSaveStatus');
       if (statusEl) {
-        statusEl.textContent = '⏳ Menyimpan...';
+        statusEl.textContent = 'Menyimpan...';
         statusEl.style.color = '#0a5661';
       }
 
@@ -3476,14 +3473,14 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (statusEl) {
-          statusEl.textContent = '✓ Peraturan kos berhasil disimpan!';
+          statusEl.textContent = 'Peraturan kos berhasil disimpan!';
           statusEl.style.color = '#10b981';
           setTimeout(function() { statusEl.textContent = ''; }, 3000);
         }
       })
       .catch(function(err) {
         if (statusEl) {
-          statusEl.textContent = '✕ Gagal menyimpan peraturan';
+          statusEl.textContent = 'Gagal menyimpan peraturan';
           statusEl.style.color = '#ef4444';
         }
       });

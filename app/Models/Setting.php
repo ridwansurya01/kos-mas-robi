@@ -45,12 +45,12 @@ class Setting extends Model
      * Konversi link Google Maps apa pun menjadi URL embed yang berfungsi di iframe.
      *
      * Format input yang didukung (cukup tempel link dari browser):
-     *   ✅ https://www.google.com/maps/place/Nama/@-7.7825,110.3671,17z/...
-     *   ✅ https://maps.google.com/?q=-7.7825,110.3671
-     *   ✅ https://maps.google.com/maps?ll=-7.7825,110.3671&...
-     *   ✅ Kode <iframe> embed dari Google Maps > Bagikan > Sematkan peta
-     *   ✅ https://maps.google.com/maps/embed?pb=...  (langsung dari "Sematkan")
-     *   ⚠️  https://maps.app.goo.gl/... (shortlink) → fallback ke alamat kost
+     *   https://www.google.com/maps/place/Nama/@-7.7825,110.3671,17z/...
+     *   https://maps.google.com/?q=-7.7825,110.3671
+     *   https://maps.google.com/maps?ll=-7.7825,110.3671&...
+     *   Kode <iframe> embed dari Google Maps > Bagikan > Sematkan peta
+     *   https://maps.google.com/maps/embed?pb=...  (langsung dari "Sematkan")
+     *    https://maps.app.goo.gl/... (shortlink) → fallback ke alamat kost
      */
     public function getFinalEmbedUrlAttribute(): string
     {
@@ -128,6 +128,23 @@ class Setting extends Model
     }
 
     /**
+     * Strip any emoji characters recursively from array/string values.
+     */
+    protected function sanitizeEmojisRecursive($val)
+    {
+        if (is_array($val)) {
+            foreach ($val as $k => $v) {
+                $val[$k] = $this->sanitizeEmojisRecursive($v);
+            }
+            return $val;
+        }
+        if (is_string($val)) {
+            return preg_replace('/[\x{1F300}-\x{1F9FF}\x{1FA00}-\x{1FAFF}\x{2600}-\x{27BF}\x{FE0F}\x{200D}\x{2300}-\x{23FF}\x{2B50}\x{2705}\x{274C}\x{2714}\x{2716}\x{2728}]+[ ]?/u', '', $val);
+        }
+        return $val;
+    }
+
+    /**
      * Get location highlights with default fallback.
      */
     public function getLocationHighlightsAttribute($value)
@@ -135,28 +152,28 @@ class Setting extends Model
         if (!empty($value)) {
             $decoded = is_string($value) ? json_decode($value, true) : $value;
             if (is_array($decoded) && count($decoded) > 0) {
-                return $decoded;
+                return $this->sanitizeEmojisRecursive($decoded);
             }
         }
 
         return [
             [
-                'icon' => '🎓',
+                'icon' => '',
                 'title' => '3 – 5 Menit ke Kawasan Kampus',
                 'desc' => 'Akses sangat dekat ke UGM, UNY, UII, dan berbagai fakultas utama.'
             ],
             [
-                'icon' => '☕',
+                'icon' => '',
                 'title' => '1 – 3 Menit ke Cafe & Sentra Kuliner',
                 'desc' => 'Dekat restoran, coffee shop, minimarket 24 jam, dan laundry kiloan.'
             ],
             [
-                'icon' => '🏥',
+                'icon' => '',
                 'title' => '5 Menit ke Rumah Sakit & Fasilitas Umum',
                 'desc' => 'Dekat RS Sardjito, RS Panti Rapih, halte Trans Jogja, dan ATM center.'
             ],
             [
-                'icon' => '🛡️',
+                'icon' => '',
                 'title' => 'Lingkungan Aman & Nyaman',
                 'desc' => 'Portal keamanan satu pintu (one–gate) dan jalan mobil papasan leluasa.'
             ],
@@ -180,12 +197,12 @@ class Setting extends Model
             'bento_desc' => 'Setiap jengkal hunian kami rancang dengan seksama untuk memastikan penghuni mendapatkan istirahat berkualitas dan fokus maksimal dalam menuntut ilmu maupun berkarier.',
             'bento_features' => [
                 [
-                    'icon' => '🚀',
+                    'icon' => '',
                     'title' => 'Internet Fiber 100 Mbps Tanpa Batas',
                     'desc' => 'Koneksi lancar untuk skripsi, kuliah online, zoom meeting, dan hiburan streaming.'
                 ],
                 [
-                    'icon' => '🔐',
+                    'icon' => '',
                     'title' => 'Smart Access Mandiri & CCTV 24 Jam',
                     'desc' => 'Bebas jam malam dengan kunci mandiri dan pengawasan kamera CCTV di seluruh lorong.'
                 ]
@@ -212,11 +229,11 @@ class Setting extends Model
         if (!empty($value)) {
             $decoded = is_string($value) ? json_decode($value, true) : $value;
             if (is_array($decoded)) {
-                return array_merge($defaults, $decoded);
+                return $this->sanitizeEmojisRecursive(array_merge($defaults, $decoded));
             }
         }
 
-        return $defaults;
+        return $this->sanitizeEmojisRecursive($defaults);
     }
 
     /**

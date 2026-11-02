@@ -325,7 +325,7 @@
     <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border: 1.5px solid #99f6e4; border-radius: 18px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
       <div>
         <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661; margin-bottom: 3px;">
-          ✅ Anda sudah masuk sebagai: <strong>{{ Auth::user()->name }}</strong>
+          Anda sudah masuk sebagai: <strong>{{ Auth::user()->name }}</strong>
           ({{ Auth::user()->isOwner() ? 'Admin' : 'Pelanggan' }})
         </div>
         <div style="font-size: 0.74rem; color: #0e7482;">Untuk daftar akun baru, logout terlebih dahulu atau isi form di bawah dengan data akun baru.</div>
@@ -394,7 +394,7 @@
             <div>
               <div style="font-size: 0.78rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 5px;">
                 <span>Foto Profil Diri (Wajib) *</span>
-                <span id="avatarSelectedTag" style="display: none; font-size: 0.65rem; font-weight: 700; color: #047857; background: #dcfce7; padding: 1px 5px; border-radius: 4px;">✓ Terpilih</span>
+                <span id="avatarSelectedTag" style="display: none; font-size: 0.65rem; font-weight: 700; color: #047857; background: #dcfce7; padding: 1px 5px; border-radius: 4px;">Terpilih</span>
               </div>
               <div id="avatarFileName" style="font-size: 0.70rem; color: #64748b; margin-top: 1px;">
                 Klik untuk upload foto diri (Maks. 5MB)
@@ -479,13 +479,11 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
           <label id="cardBranch1" style="display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 1.5px solid {{ old('branch_preference', 'Lokasi 1') === 'Lokasi 1' ? '#0a5661' : '#e2e8f0' }}; border-radius: 9px; padding: 7px 8px; background: {{ old('branch_preference', 'Lokasi 1') === 'Lokasi 1' ? '#f0fdfa' : '#ffffff' }}; transition: all 0.2s;">
             <input type="radio" name="branch_preference" value="Lokasi 1" {{ old('branch_preference', 'Lokasi 1') === 'Lokasi 1' ? 'checked' : '' }} style="display: none;" onchange="handleBranchRegisterChange('Lokasi 1')">
-            <span style="font-size: 0.95rem;">🌿</span>
             <span style="font-size: 0.76rem; font-weight: 800; color: #0a5661;">Cabang 1 (Kampus)</span>
           </label>
 
           <label id="cardBranch2" style="display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; border: 1.5px solid {{ old('branch_preference') === 'Lokasi 2' ? '#0284c7' : '#e2e8f0' }}; border-radius: 9px; padding: 7px 8px; background: {{ old('branch_preference') === 'Lokasi 2' ? '#f0f9ff' : '#ffffff' }}; transition: all 0.2s;">
             <input type="radio" name="branch_preference" value="Lokasi 2" {{ old('branch_preference') === 'Lokasi 2' ? 'checked' : '' }} style="display: none;" onchange="handleBranchRegisterChange('Lokasi 2')">
-            <span style="font-size: 0.95rem;">⚡</span>
             <span style="font-size: 0.76rem; font-weight: 800; color: #0284c7;">Cabang 2 (Ringroad)</span>
           </label>
         </div>
@@ -620,7 +618,7 @@
 
         var info = document.getElementById('avatarFileName');
         if (info) {
-          info.innerHTML = '✅ <strong style="color: #047857;">' + file.name + '</strong> (' + (file.size / 1024).toFixed(0) + ' KB)';
+          info.innerHTML = '<strong style="color: #047857;">' + file.name + '</strong> (' + (file.size / 1024).toFixed(0) + ' KB)';
         }
       };
       reader.readAsDataURL(file);

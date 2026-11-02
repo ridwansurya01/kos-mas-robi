@@ -119,7 +119,6 @@
         {{-- Left Content: Dynamic Typography from Admin Landing Page Settings --}}
         <div class="tp-hero-landing-content">
           <div class="tp-hero-landing-tag">
-            <span>✨</span>
             <span>{{ $landing['bento_card_tag'] ?? 'Kos Eksklusif & Nyaman' }}</span>
           </div>
           <h1 class="tp-hero-landing-title">{!! nl2br(e($heroTitle)) !!}</h1>
@@ -145,12 +144,12 @@
         <div class="tp-branch-select-header">
           <div>
             <div class="tp-branch-subtitle-label">
-              <span>📍 PILIHAN 2 TITIK LOKASI CABANG</span>
+              <span>PILIHAN 2 TITIK LOKASI CABANG</span>
             </div>
             <h3 class="tp-branch-title-text">Pilih Lokasi Cabang Kos</h3>
           </div>
           <div class="tp-branch-overall-pill">
-            <span>🏢 Total Keseluruhan: <strong>{{ $totalRoomsCount }} Kamar</strong></span>
+            <span>Total Keseluruhan: <strong>{{ $totalRoomsCount }} Kamar</strong></span>
           </div>
         </div>
 
@@ -159,13 +158,12 @@
           <div class="tp-branch-card active" id="branchCard1" onclick="selectCatalogBranch('lokasi_1', this)">
             <div class="tp-branch-card-header">
               <div class="tp-branch-tag-pill b1">
-                <span>🌿</span>
                 <span>{{ $b1NamePortal }}</span>
               </div>
-              <span class="tp-branch-selected-badge">✓ Terpilih</span>
+              <span class="tp-branch-selected-badge">Terpilih</span>
             </div>
             <h4 class="tp-branch-card-name">{{ $b1NamePortal }}</h4>
-            <div class="tp-branch-card-addr">📍 {{ $branches['lokasi_1']['address'] ?? 'Jl. Pandega Marta, Caturtunggal (3 Mnt UGM)' }}</div>
+            <div class="tp-branch-card-addr">{{ $branches['lokasi_1']['address'] ?? 'Jl. Pandega Marta, Caturtunggal (3 Mnt UGM)' }}</div>
             <div class="tp-branch-stats-badges">
               <span class="tp-branch-stat available">
                 <span class="tp-stat-dot green"></span>
@@ -185,13 +183,12 @@
           <div class="tp-branch-card" id="branchCard2" onclick="selectCatalogBranch('lokasi_2', this)">
             <div class="tp-branch-card-header">
               <div class="tp-branch-tag-pill b2">
-                <span>⚡</span>
                 <span>{{ $b2NamePortal }}</span>
               </div>
-              <span class="tp-branch-selected-badge">✓ Terpilih</span>
+              <span class="tp-branch-selected-badge">Terpilih</span>
             </div>
             <h4 class="tp-branch-card-name">{{ $b2NamePortal }}</h4>
-            <div class="tp-branch-card-addr">📍 {{ $branches['lokasi_2']['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo (Modern)' }}</div>
+            <div class="tp-branch-card-addr">{{ $branches['lokasi_2']['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo (Modern)' }}</div>
             <div class="tp-branch-stats-badges">
               <span class="tp-branch-stat available">
                 <span class="tp-stat-dot green"></span>
@@ -216,22 +213,22 @@
             Semua Kamar ({{ $totalRoomsCount }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="lokasi_1" onclick="filterCatalogRooms('lokasi_1', this)">
-            🌿 {{ $b1NamePortal }} ({{ $b1Total }})
+            {{ $b1NamePortal }} ({{ $b1Total }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="lokasi_2" onclick="filterCatalogRooms('lokasi_2', this)">
-            ⚡ {{ $b2NamePortal }} ({{ $b2Total }})
+            {{ $b2NamePortal }} ({{ $b2Total }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="available" onclick="filterCatalogRooms('available', this)">
-            🟢 Tersedia / Kosong ({{ $availableRoomsCount }})
+            Tersedia / Kosong ({{ $availableRoomsCount }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="occupied" onclick="filterCatalogRooms('occupied', this)">
-            🔒 Sudah Disewa ({{ $occupiedRoomsCount }})
+            Sudah Disewa ({{ $occupiedRoomsCount }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="floor-1" onclick="filterCatalogRooms('floor-1', this)">
-            🏢 Lantai 1
+            Lantai 1
           </button>
           <button type="button" class="tp-filter-btn" data-filter="floor-2" onclick="filterCatalogRooms('floor-2', this)">
-            🏢 Lantai 2
+            Lantai 2
           </button>
         </div>
       </div>
@@ -243,7 +240,7 @@
             $isMyRoom = ($room && $room->id === $r->id);
             $rThumb = !empty($r->images_list[0]) ? asset($r->images_list[0]) : asset('assets/images/rooms/room_1.jpg');
             $statusClass = $isMyRoom ? 'my-room' : ($r->status === 'available' ? 'available' : 'occupied');
-            $statusText = $isMyRoom ? '⭐ Kamar Anda' : ($r->status === 'available' ? '🟢 Tersedia' : '🔒 Sudah Disewa');
+            $statusText = $isMyRoom ? 'Kamar Anda' : ($r->status === 'available' ? 'Tersedia' : 'Sudah Disewa');
             $hasCustomInterior = $r->custom_interior_status && $r->custom_interior_status !== 'none';
           @endphp
           <div class="tp-room-card room-item"
@@ -258,7 +255,6 @@
               <span class="tp-room-card-status-badge {{ $statusClass }}">{{ $statusText }}</span>
               @if($hasCustomInterior)
                 <span class="tp-room-card-interior-tag" title="Permintaan Custom Interior Aktif">
-                  <span>🎨</span>
                   <span>Custom Interior</span>
                 </span>
               @endif
@@ -272,15 +268,15 @@
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                 <div class="tp-room-card-type">{{ $r->type }}</div>
                 @if(($r->location ?? 'Lokasi 1') === 'Lokasi 2')
-                  <span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px; border: 1px solid #bae6fd;">⚡ {{ $b2NamePortal }}</span>
+                  <span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px; border: 1px solid #bae6fd;">{{ $b2NamePortal }}</span>
                 @else
-                  <span style="font-size: 0.68rem; font-weight: 800; color: #0a5661; background: #f0fdfa; padding: 2px 7px; border-radius: 6px; border: 1px solid #ccfbf1;">🌿 {{ $b1NamePortal }}</span>
+                  <span style="font-size: 0.68rem; font-weight: 800; color: #0a5661; background: #f0fdfa; padding: 2px 7px; border-radius: 6px; border: 1px solid #ccfbf1;">{{ $b1NamePortal }}</span>
                 @endif
               </div>
 
               <div class="tp-room-card-facilities">
                 @foreach(array_slice($r->facilities ?? ['AC', 'WiFi', 'Kasur', 'Lemari', 'KM Dalam'], 0, 4) as $fac)
-                  <span class="tp-room-card-facility-pill">✓ {{ $fac }}</span>
+                  <span class="tp-room-card-facility-pill">{{ $fac }}</span>
                 @endforeach
               </div>
 
@@ -292,7 +288,7 @@
 
                 @if($isMyRoom)
                   <button type="button" class="tp-room-card-action-btn is-my-room" onclick="event.stopPropagation(); switchPortalTab('myroom')">
-                    <span>🏠 Kamarku</span>
+                    <span>Kamarku</span>
                     <span>→</span>
                   </button>
                 @else
@@ -327,24 +323,24 @@
                  alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg" style="display:none;">
             <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial">{{ $userInitial }}</div>
           @endif
-          <span class="tp-welcome-edit-badge" title="Ubah profil">✏️</span>
+          <span class="tp-welcome-edit-badge" title="Ubah profil"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
         </div>
         <div>
-          <div class="tp-welcome-greeting">{{ $greeting }} Selamat datang kembali 👋</div>
+          <div class="tp-welcome-greeting">{{ $greeting }} Selamat datang kembali </div>
           <div class="tp-welcome-name">{{ $user->name }}</div>
           <div class="tp-welcome-meta" style="flex-wrap: wrap; gap: 8px; margin-top: 6px;">
             @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
               <span class="tp-chip" style="background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; font-weight: 800;">
-                ⚡ {{ $b2NamePortal }}
+                {{ $b2NamePortal }}
               </span>
             @else
               <span class="tp-chip" style="background: #f0fdfa; color: #0a5661; border: 1.5px solid #99f6e4; font-weight: 800;">
-                🌿 {{ $b1NamePortal }}
+                {{ $b1NamePortal }}
               </span>
             @endif
-            <span class="tp-chip">🏠 Kamar #{{ $room->number ?? '102' }}</span>
-            <span class="tp-chip">🏢 Lantai {{ $room->floor ?? '1' }}</span>
-            <span class="tp-chip">❄️ {{ $room->type ?? 'Deluxe AC' }}</span>
+            <span class="tp-chip">Kamar #{{ $room->number ?? '102' }}</span>
+            <span class="tp-chip">Lantai {{ $room->floor ?? '1' }}</span>
+            <span class="tp-chip">{{ $room->type ?? 'Deluxe AC' }}</span>
             <span class="tp-chip green">● Aktif Menghuni</span>
           </div>
         </div>
@@ -403,7 +399,7 @@
             </div>
             <span class="tp-status-pill {{ ($room->status ?? '') === 'due' ? 'due' : 'paid' }}">
               @if(($room->status ?? '') === 'due')
-                ⚠️ Menunggu Bayar
+                Menunggu Bayar
               @else
                 ● Sewa Aktif
               @endif
@@ -436,19 +432,15 @@
           {{-- Facilities Quick Icons (Matching Reference App) --}}
           <div class="tp-fac-quick-list">
             <div class="tp-fac-pill">
-              <span class="tp-fac-emoji">🛏️</span>
               <span class="tp-fac-text">Kasur Queen</span>
             </div>
             <div class="tp-fac-pill">
-              <span class="tp-fac-emoji">🚿</span>
               <span class="tp-fac-text">KM Dalam</span>
             </div>
             <div class="tp-fac-pill">
-              <span class="tp-fac-emoji">❄️</span>
               <span class="tp-fac-text">AC Dingin</span>
             </div>
             <div class="tp-fac-pill">
-              <span class="tp-fac-emoji">📶</span>
               <span class="tp-fac-text">WiFi 100M</span>
             </div>
           </div>
@@ -480,19 +472,16 @@
         </div>
         <div class="tp-metrics-grid">
           <div class="tp-metric-box">
-            <span class="tp-metric-emoji">🌡️</span>
             <span class="tp-metric-val">22°C</span>
             <span class="tp-metric-lbl">AC Dingin</span>
             <span class="tp-metric-pill">Normal</span>
           </div>
           <div class="tp-metric-box">
-            <span class="tp-metric-emoji">📡</span>
             <span class="tp-metric-val">100</span>
             <span class="tp-metric-lbl">WiFi (Mbps)</span>
             <span class="tp-metric-pill">Cepat</span>
           </div>
           <div class="tp-metric-box">
-            <span class="tp-metric-emoji">⚡</span>
             <span class="tp-metric-val">On</span>
             <span class="tp-metric-lbl">Token Listrik</span>
             <span class="tp-metric-pill">Aktif</span>
@@ -508,28 +497,28 @@
         </div>
         <div class="tp-roominfo-grid">
           <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico">🏠</div>
+            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div>
               <div class="tp-roominfo-val">Kamar #{{ $room->number ?? '102' }}</div>
               <div class="tp-roominfo-key">Nomor Kamar</div>
             </div>
           </div>
           <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico">📅</div>
+            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div>
               <div class="tp-roominfo-val">{{ $dueDate->format('d M Y') }}</div>
               <div class="tp-roominfo-key">Jatuh Tempo</div>
             </div>
           </div>
           <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico">💰</div>
+            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div>
               <div class="tp-roominfo-val">Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}</div>
               <div class="tp-roominfo-key">Sewa / Bulan</div>
             </div>
           </div>
           <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico">✅</div>
+            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div>
               <div class="tp-roominfo-val green">Lunas</div>
               <div class="tp-roominfo-key">Status Pembayaran</div>
@@ -638,7 +627,7 @@
             <span id="mCustomRoomBadge">Kamar #101</span> • <span id="mCustomRoomFloor">Lantai 1</span>
           </div>
           <div id="mCustomRoomStatusTag">
-            <span class="tp-pill paid">🟢 Tersedia</span>
+            <span class="tp-pill paid">Tersedia</span>
           </div>
         </div>
 
@@ -686,7 +675,6 @@
         @csrf
         <div class="tp-custom-interior-card">
           <div class="tp-custom-interior-title">
-            <span>✨</span>
             <span>Permintaan Custom Interior & Booking Kamar</span>
           </div>
           <p class="tp-custom-interior-desc">
@@ -726,7 +714,7 @@
           <div style="margin-top: 14px; display: flex; justify-content: flex-end; gap: 10px;">
             <button type="button" class="btn-secondary" data-close-modal="modalRoomDetailCustom">Tutup</button>
             <button type="submit" class="btn-primary" id="btnSubmitCustomInterior">
-              🚀 Ajukan Custom Interior & Pesan Kamar
+              Ajukan Custom Interior & Pesan Kamar
             </button>
           </div>
         </div>
@@ -762,7 +750,7 @@
             placeholder="Tuliskan kendala Anda secara lengkap di sini (contoh: AC tidak dingin sejak kemarin malam, lampu kamar mandi padam, atau kran air bocor)..."
             required style="resize: vertical; font-size: 0.92rem; border-radius: 12px;"></textarea>
           <div style="font-size: 0.76rem; color: #64748b; margin-top: 6px;">
-            💡 Laporan Anda akan langsung diterima pengelola kos dan segera ditindaklanjuti.
+            Laporan Anda akan langsung diterima pengelola kos dan segera ditindaklanjuti.
           </div>
         </div>
       </div>
@@ -810,14 +798,14 @@
                 <div class="tp-desc-sub">
                   <span>{{ $p->transaction_code ?? 'TRX' }}</span>
                   @if(!empty($p->proof_image))
-                    <a href="{{ asset($p->proof_image) }}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:none;margin-left:6px;">📎 Foto Bukti</a>
+                    <a href="{{ asset($p->proof_image) }}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:none;margin-left:6px;">Foto Bukti</a>
                   @endif
                 </div>
               </td>
               <td class="tp-cell-muted">
-                <div>📅 {{ $p->date->format('d M Y') }}</div>
+                <div>{{ $p->date->format('d M Y') }}</div>
                 <div style="font-size: 0.74rem; color: #2563eb; font-weight: 700; margin-top: 3px;">
-                  🕒 {{ $p->formatted_payment_time }}
+                  {{ $p->formatted_payment_time }}
                 </div>
               </td>
               <td>
@@ -828,7 +816,7 @@
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                   <span class="tp-pill paid">LUNAS</span>
                   <button type="button" class="tp-btn-receipt-small" onclick="viewDetailedReceipt('{{ $p->transaction_code }}', '{{ $p->date->format('d M Y') }}', '{{ $p->formatted_payment_time }}', '{{ $user->name }}', '{{ $room->number ?? '102' }}', '{{ addslashes($p->description) }}', '{{ $p->payment_method }}', '{{ number_format($p->amount, 0, ',', '.') }}', '{{ $p->proof_image ? asset($p->proof_image) : '' }}')">
-                    🧾 Kuitansi
+                    Kuitansi
                   </button>
                 </div>
               </td>
@@ -836,7 +824,7 @@
             @empty
             <tr>
               <td colspan="5" class="tp-table-empty">
-                <div class="tp-empty-icon">🧾</div>
+                <div class="tp-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                 <div class="tp-empty-title">Belum ada riwayat pembayaran tercatat</div>
                 <div class="tp-empty-desc">Pembayaran yang telah dikonfirmasi akan muncul otomatis di sini.</div>
               </td>
@@ -851,20 +839,20 @@
       @forelse($recentPayments as $p)
         <div class="tp-receipt-item">
           <div class="tp-receipt-left">
-            <div class="tp-receipt-icon">🧾</div>
+            <div class="tp-receipt-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div>
               <div class="tp-receipt-desc">{{ $p->description }}</div>
               <div class="tp-receipt-meta">
-                <span>📅 {{ $p->date->format('d M Y') }}</span>
+                <span>{{ $p->date->format('d M Y') }}</span>
                 <span>•</span>
-                <span style="color:#2563eb; font-weight:700;">🕒 {{ $p->formatted_payment_time }}</span>
+                <span style="color:#2563eb; font-weight:700;">{{ $p->formatted_payment_time }}</span>
                 <span>•</span>
-                <span>💳 {{ $p->payment_method }}</span>
+                <span>{{ $p->payment_method }}</span>
                 <span>•</span>
                 <span>Kamar #{{ $room->number ?? '102' }}</span>
                 @if(!empty($p->proof_image))
                   <span>•</span>
-                  <a href="{{ asset($p->proof_image) }}" target="_blank" style="color: #2563eb; font-weight: 700; text-decoration: none;">📎 Foto Bukti</a>
+                  <a href="{{ asset($p->proof_image) }}" target="_blank" style="color: #2563eb; font-weight: 700; text-decoration: none;">Foto Bukti</a>
                 @endif
               </div>
             </div>
@@ -874,14 +862,14 @@
             <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; margin-top: 4px;">
               <span class="tp-pill paid">LUNAS</span>
               <button type="button" class="tp-btn-receipt-small" onclick="viewDetailedReceipt('{{ $p->transaction_code }}', '{{ $p->date->format('d M Y') }}', '{{ $p->formatted_payment_time }}', '{{ $user->name }}', '{{ $room->number ?? '102' }}', '{{ addslashes($p->description) }}', '{{ $p->payment_method }}', '{{ number_format($p->amount, 0, ',', '.') }}', '{{ $p->proof_image ? asset($p->proof_image) : '' }}')">
-                🧾 Buka Kuitansi
+                Buka Kuitansi
               </button>
             </div>
           </div>
         </div>
       @empty
         <div class="tp-receipt-empty">
-          <div class="tp-empty-icon">📂</div>
+          <div class="tp-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <div class="tp-empty-title">Belum ada kuitansi pembayaran</div>
           <div class="tp-empty-desc">Saat Anda melakukan pembayaran sewa dan dikonfirmasi, kuitansi digital akan otomatis tersimpan di sini.</div>
         </div>
@@ -963,7 +951,7 @@
     <div class="modal-ftr">
       <button type="button" class="btn-secondary" data-close-modal="modalDigitalReceiptDetail">Tutup</button>
       <button type="button" class="btn-primary" onclick="window.print()">
-        🖨️ Cetak / Simpan PDF
+        Cetak / Simpan PDF
       </button>
     </div>
   </div>
@@ -1012,9 +1000,9 @@
 
       {{-- Switcher Lokasi WiFi di Portal Pelanggan --}}
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('all', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #0a5661; background: #0a5661; color: #fff; cursor: pointer;">🏢 Semua Cabang</button>
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 1', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">🌿 {{ $b1NamePortal }}</button>
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 2', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">⚡ {{ $b2NamePortal }}</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('all', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #0a5661; background: #0a5661; color: #fff; cursor: pointer;">Semua Cabang</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 1', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">{{ $b1NamePortal }}</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 2', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">{{ $b2NamePortal }}</button>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 12px;" id="portalWifiCardList">
@@ -1028,12 +1016,12 @@
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="width: 36px; height: 36px; border-radius: 10px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; border: 1px solid {{ $isWfLoc2 ? '#5eead4' : '#86efac' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
-                  📶
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
                 </div>
                 <div>
                   <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <span style="font-size: 0.66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }};">
-                      {{ $isWfLoc2 ? '⚡ ' . $b2NamePortal : '🌿 ' . $b1NamePortal }}
+                      {{ $isWfLoc2 ? '' . $b2NamePortal : '' . $b1NamePortal }}
                     </span>
                     <span style="font-size: 0.66rem; font-weight: 700; color: #64748b;">• {{ $wfSpeed }}</span>
                   </div>
@@ -1041,13 +1029,12 @@
                 </div>
               </div>
               <button type="button" class="tp-btn-copy" onclick="copyText('{{ $wf['name'] ?? '' }}', this)" title="Salin Nama WiFi" style="background: #f8fafc; border: 1.5px solid #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                📋 Salin SSID
+                Salin SSID
               </button>
             </div>
 
             {{-- Info Modem --}}
             <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: {{ !empty($wf['password']) ? '8px' : '0' }};">
-              <span style="font-size: 0.82rem;">📡</span>
               <div style="font-size: 0.76rem; color: #475569;">
                 <strong style="color: #1e293b;">Modem:</strong> {{ $wf['modem'] ?? 'Modem Utama Kos' }}
               </div>
@@ -1089,7 +1076,7 @@
       </script>
 
       <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5; background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
-        💡 <strong>Tips Koneksi:</strong> Hubungkan perangkat Anda ke WiFi modem terdekat di lantai atau area Anda untuk mendapatkan sinyal terbaik dan terkuat.
+        <strong>Tips Koneksi:</strong> Hubungkan perangkat Anda ke WiFi modem terdekat di lantai atau area Anda untuk mendapatkan sinyal terbaik dan terkuat.
       </div>
     </div>
     <div class="modal-ftr">
@@ -1126,7 +1113,7 @@
         <ul class="tp-rules-list">
           @foreach(($setting->kos_rules ?? []) as $ruleText)
             <li>
-              <span class="tp-rule-bullet">✓</span>
+              <span class="tp-rule-bullet">•</span>
               <span>{{ $ruleText }}</span>
             </li>
           @endforeach
@@ -1134,7 +1121,7 @@
 
         {{-- Kontak Darurat / Security --}}
         <div class="tp-emergency-box" style="margin-top: 14px;">
-          <div class="tp-emergency-icon">🚨</div>
+          <div class="tp-emergency-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
           <div class="tp-emergency-content">
             <div class="tp-emergency-label">Kontak Darurat / Pengelola:</div>
             <div class="tp-emergency-phone">{{ $setting->owner_phone ?? '6281234567890' }}</div>
@@ -1226,11 +1213,11 @@
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                     <span style="font-weight: 700;">Ke Kamar #{{ $tr->targetRoom?->number ?? '-' }} ({{ $tr->targetRoom?->type ?? '-' }})</span>
                     @if($tr->status === 'pending')
-                      <span class="tp-transfer-status-badge pending">⏳ Menunggu Peninjauan</span>
+                      <span class="tp-transfer-status-badge pending">Menunggu Peninjauan</span>
                     @elseif($tr->status === 'approved')
-                      <span class="tp-transfer-status-badge approved">✅ Disetujui Pengelola</span>
+                      <span class="tp-transfer-status-badge approved">Disetujui Pengelola</span>
                     @else
-                      <span class="tp-transfer-status-badge rejected">❌ Ditolak</span>
+                      <span class="tp-transfer-status-badge rejected">Ditolak</span>
                     @endif
                   </div>
                   <div style="color: var(--tp-text-secondary); margin-bottom: 2px;">Alasan: {{ $tr->reason }}</div>
@@ -1248,7 +1235,7 @@
       <div class="modal-ftr">
         <button type="button" class="btn-secondary" data-close-modal="modalRoomTransfer">Batal</button>
         <button type="submit" class="btn-primary" style="background: #0d9488; border-color: #0d9488;">
-          🚀 Kirim Pengajuan Pindah
+          Kirim Pengajuan Pindah
         </button>
       </div>
     </form>
@@ -1286,7 +1273,7 @@
               <div class="tp-profile-preview-avatar tp-profile-preview-initial" id="avatarPreviewInitial">{{ $userInitial }}</div>
             @endif
             <label for="avatarFileInput" class="tp-avatar-upload-badge" title="Unggah foto baru">
-              📷
+              
             </label>
           </div>
           <div class="tp-avatar-meta">
@@ -1294,7 +1281,7 @@
             <p class="tp-avatar-sub">Unggah foto profil Anda sendiri (JPG, PNG, atau WEBP, maks 3MB) atau gunakan kamera/galeri.</p>
             <div class="tp-avatar-buttons">
               <label for="avatarFileInput" class="tp-btn-upload-file">
-                📁 Pilih Foto Dari Perangkat
+                Pilih Foto Dari Perangkat
               </label>
               <input type="file" id="avatarFileInput" name="avatar_file" accept="image/*" style="display:none;" onchange="previewSelectedAvatar(event)">
               <input type="hidden" id="avatarPresetInput" name="avatar_preset" value="">
@@ -1357,10 +1344,10 @@
 
           {{-- Info Hunian Saat Ini (Read-only badge info) --}}
           <div class="tp-profile-room-box tp-grid-col-2">
-            <div class="tp-profile-room-icon">🏠</div>
+            <div class="tp-profile-room-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div class="tp-profile-room-details">
-              <strong>Kamar Saat Ini: #{{ $room->number ?? '102' }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? '⚡ Cabang 2 (Ringroad)' : '🌿 Cabang 1 (Kampus)' }}</strong>
-              <p>📍 {{ $tenantBranch['name'] ?? 'Kos Mas Robi' }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
+              <strong>Kamar Saat Ini: #{{ $room->number ?? '102' }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2 (Ringroad)' : 'Cabang 1 (Kampus)' }}</strong>
+              <p>{{ $tenantBranch['name'] ?? 'Kos Mas Robi' }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
             </div>
           </div>
 
@@ -1369,7 +1356,7 @@
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
               <div>
                 <strong style="color: #0f172a; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
-                  <span>🔒 Keamanan & Password</span>
+                  <span>Keamanan & Password</span>
                 </strong>
                 <p style="margin: 3px 0 0; font-size: 0.78rem; color: #64748b;">
                   Ganti kata sandi akun Anda secara aman dengan verifikasi kode OTP 6 digit ke Gmail.
@@ -1385,7 +1372,6 @@
 
             {{-- Info Awal sebelum klik Ganti Password --}}
             <div id="pwdInitialNotice" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; font-size: 0.78rem; color: #64748b; display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 1.05rem;">🛡️</span>
               <span>Klik tombol <strong>Ganti Password</strong> di atas untuk menerima kode OTP 6 digit di Gmail terdaftar ({{ $user->email }}).</span>
             </div>
 
@@ -1402,7 +1388,7 @@
                     </p>
                   </div>
                   <div id="otpTimerBadge" style="font-size: 0.74rem; font-weight: 700; color: #0e7482; background: #f0fdfa; border: 1px solid #99f6e4; padding: 4px 10px; border-radius: 20px;">
-                    ⏱️ Jeda Kirim Ulang: <span id="otpTimerSeconds">60</span>s
+                    Jeda Kirim Ulang: <span id="otpTimerSeconds">60</span>s
                   </div>
                 </div>
 
@@ -1433,7 +1419,6 @@
               {{-- TAHAP 2: FORMULIR PASSWORD BARU (Hanya tampil setelah OTP valid) --}}
               <div id="otpStepNewPassword" style="display: none; background: #ffffff; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);">
                 <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 12px;">
-                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #10b981; color: #fff; font-size: 0.75rem;">✓</span>
                   <span style="font-size: 0.76rem; font-weight: 800; color: #065f46; text-transform: uppercase;">OTP Terverifikasi — Langkah 2: Tentukan Password Baru</span>
                 </div>
 
@@ -1484,7 +1469,7 @@
       </div>
       <div class="modal-ftr">
         <button type="button" class="btn-secondary" data-close-modal="modalProfile">Batal</button>
-        <button type="submit" class="btn-primary">💾 Simpan Perubahan Profil</button>
+        <button type="submit" class="btn-primary">Simpan Perubahan Profil</button>
       </div>
     </form>
   </div>
@@ -1534,7 +1519,7 @@ function showPortalToast(message, type) {
   var toast = document.createElement('div');
   toast.id = 'portalToast';
   toast.className = 'tp-toast tp-toast-' + type;
-  toast.innerHTML = '<span class="tp-toast-icon">' + (type === 'success' ? '✅' : '❌') + '</span>'
+  toast.innerHTML = '<span class="tp-toast-icon">' + (type === 'success' ? '' : '') + '</span>'
     + '<span class="tp-toast-msg">' + message + '</span>';
   document.body.appendChild(toast);
   requestAnimationFrame(function() { toast.classList.add('show'); });
@@ -1708,7 +1693,7 @@ document.addEventListener('click', function(e) {
     if (emptyEl) { var emptyTr = emptyEl.closest('tr'); if (emptyTr) emptyTr.remove(); }
     var tr = document.createElement('tr');
     tr.style.cssText = 'opacity:0;transform:translateY(-12px);';
-    var proofHtml = payment.proof_image ? '<a href="' + payment.proof_image + '" target="_blank" style="font-size:0.72rem;color:#2563eb;font-weight:700;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">📎 Lihat Foto Bukti</a>' : '';
+    var proofHtml = payment.proof_image ? '<a href="' + payment.proof_image + '" target="_blank" style="font-size:0.72rem;color:#2563eb;font-weight:700;display:inline-flex;align-items:center;gap:3px;margin-top:3px;">Lihat Foto Bukti</a>' : '';
     tr.innerHTML =
       '<td class="tp-cell-desc"><div class="tp-desc-main">' + (payment.description || 'Konfirmasi Pembayaran') + '</div>'
       + '<div class="tp-desc-sub">' + (payment.transaction_code || 'TRX') + ' ' + proofHtml + '</div></td>'
@@ -2287,9 +2272,9 @@ function openRoomCustomModal(room) {
   var statusTag = document.getElementById('mCustomRoomStatusTag');
   if (statusTag) {
     if (room.status === 'available') {
-      statusTag.innerHTML = '<span class="tp-pill paid" style="font-size:0.75rem;padding:4px 12px;">🟢 Tersedia (Bisa Booking)</span>';
+      statusTag.innerHTML = '<span class="tp-pill paid" style="font-size:0.75rem;padding:4px 12px;">Tersedia (Bisa Booking)</span>';
     } else {
-      statusTag.innerHTML = '<span class="tp-pill" style="font-size:0.75rem;padding:4px 12px;background:#64748b;color:#ffffff;">🔒 Sudah Disewa</span>';
+      statusTag.innerHTML = '<span class="tp-pill" style="font-size:0.75rem;padding:4px 12px;background:#64748b;color:#ffffff;">Sudah Disewa</span>';
     }
   }
 
@@ -2301,7 +2286,7 @@ function openRoomCustomModal(room) {
     facs.forEach(function(f) {
       var span = document.createElement('span');
       span.className = 'tp-room-card-facility-pill';
-      span.textContent = '✓ ' + f;
+      span.textContent = '' + f;
       facContainer.appendChild(span);
     });
   }
@@ -2312,11 +2297,11 @@ function openRoomCustomModal(room) {
     existingBox.style.display = 'block';
     var badge = document.getElementById('mCustomExistingBadge');
     var statusLabels = {
-      pending: '⏳ Menunggu Konfirmasi Mas Robi',
-      approved: '✅ Disetujui Mas Robi',
-      in_progress: '🛠️ Sedang Dikerjakan',
-      completed: '🎉 Selesai Dipasang',
-      rejected: '❌ Tidak Disetujui'
+      pending: 'Menunggu Konfirmasi Mas Robi',
+      approved: 'Disetujui Mas Robi',
+      in_progress: 'Sedang Dikerjakan',
+      completed: 'Selesai Dipasang',
+      rejected: 'Tidak Disetujui'
     };
     badge.textContent = statusLabels[room.custom_interior_status] || room.custom_interior_status;
     document.getElementById('mCustomExistingReqText').textContent = room.custom_interior_request || '-';
@@ -2451,7 +2436,7 @@ function closeRoomCustomModal() {
         'holder' => 'Kos Mas Robi / Robi Suryanto',
         'isCash' => false,
         'isQris' => true,
-        'instruction' => '⚡ <strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia atau gunakan NMID di atas.'
+        'instruction' => '<strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia atau gunakan NMID di atas.'
       ],
       'Tunai (Cash)' => [
         'badge' => 'Pembayaran Tunai (Cash)',
@@ -2460,7 +2445,7 @@ function closeRoomCustomModal() {
         'holder' => 'Mas Robi (Kamar Pengelola Lt. 1)',
         'isCash' => true,
         'isQris' => false,
-        'instruction' => '💵 <strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.'
+        'instruction' => '<strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.'
       ]
     ];
   }
@@ -2571,7 +2556,7 @@ function screenReceiptImage(dataUrl, file) {
   resultBox.style.background = '#eff6ff';
   resultBox.style.border = '1px solid #bfdbfe';
   resultBox.style.color = '#1e40af';
-  resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span>🔍</span><span><strong>Sedang Memindai Nota:</strong> Memeriksa keabsahan format & struktur bukti transfer...</span></div>';
+  resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span><strong>Sedang Memindai Nota:</strong> Memeriksa keabsahan format & struktur bukti transfer...</span></div>';
 
   // 1. Validasi Tipe & Ukuran File
   var validMimes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
@@ -2651,7 +2636,7 @@ function setScreeningFailed(msg) {
     resultBox.style.background = '#fef2f2';
     resultBox.style.border = '1.5px solid #fecaca';
     resultBox.style.color = '#991b1b';
-    resultBox.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px;"><span style="font-size:1.1rem;">❌</span><div><strong>Screening Gagal — Bukan Nota Valid:</strong><br>' + msg + '</div></div>';
+    resultBox.innerHTML = '<div style="display:flex;align-items:flex-start;gap:8px;"><div><strong>Screening Gagal — Bukan Nota Valid:</strong><br>' + msg + '</div></div>';
   }
 }
 
@@ -2663,7 +2648,7 @@ function setScreeningSuccess(msg) {
     resultBox.style.background = '#f0fdf4';
     resultBox.style.border = '1.5px solid #bbf7d0';
     resultBox.style.color = '#166534';
-    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><span style="font-size:1.1rem;">✅</span><div><strong>' + msg + '</strong></div></div>';
+    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:8px;"><div><strong>' + msg + '</strong></div></div>';
   }
 }
 
@@ -2794,7 +2779,7 @@ function copyText(text, btnElement) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(function() {
       var orig = btnElement.textContent;
-      btnElement.textContent = '✓ Tersalin!';
+      btnElement.textContent = 'Tersalin!';
       btnElement.style.background = '#2563eb';
       btnElement.style.color = '#ffffff';
       setTimeout(function() {

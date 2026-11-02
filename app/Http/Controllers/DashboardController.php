@@ -304,7 +304,7 @@ class DashboardController extends Controller
                         'tenant_id' => $r106->activeTenant->id ?? null,
                         'current_room_id' => $r106->id,
                         'target_room_id' => $r204->id,
-                        'reason' => '[Pindah Lintas Cabang: Kos 1 ➔ Kos 2] Pindah lokasi riset & magang ke kawasan Kaliurang KM 12 sehingga mengajukan pindah ke Cabang 2 Ringroad Exclusive.',
+                        'reason' => '[Pindah Lintas Cabang: Kos 1 → Kos 2] Pindah lokasi riset & magang ke kawasan Kaliurang KM 12 sehingga mengajukan pindah ke Cabang 2 Ringroad Exclusive.',
                         'preferred_date' => now()->subDays(2)->toDateString(),
                         'status' => 'approved',
                         'admin_note' => 'Disetujui Mas Robi. Penyesuaian deposit & akses Smart Lock Cabang 2 selesai.',

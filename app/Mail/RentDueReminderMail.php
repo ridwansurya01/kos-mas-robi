@@ -43,7 +43,7 @@ class RentDueReminderMail extends Mailable
 
     public function build()
     {
-        return $this->subject('🔔 [' . ($this->setting->kos_name ?? 'Kos Mas Robi') . '] ' . $this->reminderTitle)
+        return $this->subject('[' . ($this->setting->kos_name ?? 'Kos Mas Robi') . '] ' . $this->reminderTitle)
                     ->view('emails.rent_reminder');
     }
 }

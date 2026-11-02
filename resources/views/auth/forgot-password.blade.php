@@ -129,7 +129,7 @@
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 0.74rem; color: #64748b;">
           <span>Sisa kesempatan: <strong id="fpRemainingAttempts" style="color: #0a5661;">5</strong> kali</span>
-          <span id="fpTimerBadge" style="font-weight: 700; color: #0e7482;">⏱️ Kirim Ulang: <span id="fpTimerSeconds">60</span>s</span>
+          <span id="fpTimerBadge" style="font-weight: 700; color: #0e7482;">Kirim Ulang: <span id="fpTimerSeconds">60</span>s</span>
         </div>
       </div>
 
@@ -153,7 +153,6 @@
          ===================================================================== --}}
     <div id="fpStepNewPassword" style="display: none;">
       <div style="background: #f0fdfa; border: 1.5px solid #a7f3d0; border-radius: 14px; padding: 12px 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
-        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: #10b981; color: #fff; font-size: 0.75rem;">✓</span>
         <span style="font-size: 0.78rem; font-weight: 800; color: #065f46;">OTP Berhasil Diverifikasi! Silakan buat password baru:</span>
       </div>
 

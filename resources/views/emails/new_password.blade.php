@@ -34,7 +34,7 @@
       </div>
 
       <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #92400e; line-height: 1.5; margin-bottom: 24px;">
-        ⚠️ <strong>Tips Keamanan:</strong> Demi keamanan akun Anda, segera login dan ubah kata sandi ini melalui menu Profil di portal penghuni atau panel admin.
+        <strong>Tips Keamanan:</strong> Demi keamanan akun Anda, segera login dan ubah kata sandi ini melalui menu Profil di portal penghuni atau panel admin.
       </div>
 
       <div style="text-align: center;">

@@ -128,9 +128,9 @@
       case 'available':
         return '<span class="status-badge available">● Kosong</span>';
       case 'due':
-        return '<span class="status-badge due">⚠️ Jatuh Tempo</span>';
+        return '<span class="status-badge due">Jatuh Tempo</span>';
       case 'repair':
-        return '<span class="status-badge repair">🔧 Servis</span>';
+        return '<span class="status-badge repair">Servis</span>';
       default:
         return `<span class="status-badge">${status}</span>`;
     }
@@ -142,7 +142,7 @@
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
-      <div style="font-weight: 600;">${type === 'success' ? '✓' : type === 'warning' ? '⚠️' : 'ℹ️'}</div>
+      <div style="font-weight: 600;">${type === 'success' ? '' : type === 'warning' ? '' : 'ℹ'}</div>
       <div>${message}</div>
     `;
     container.appendChild(toast);
@@ -262,8 +262,8 @@
 
       const isLoc2 = room.location === 'Lokasi 2';
       const locPill = isLoc2
-        ? `<span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;">⚡ ${getBranchName('Lokasi 2')}</span>`
-        : `<span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;">🌿 ${getBranchName('Lokasi 1')}</span>`;
+        ? `<span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;">${getBranchName('Lokasi 2')}</span>`
+        : `<span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;">${getBranchName('Lokasi 1')}</span>`;
 
       if (isLoc2) {
         card.style.borderTop = '3px solid #0284c7';
@@ -403,8 +403,8 @@
     filtered.forEach(room => {
       const isLoc2 = room.location === 'Lokasi 2';
       const locBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">⚡ ${getBranchName('Lokasi 2')}</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">🌿 ${getBranchName('Lokasi 1')}</span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">${getBranchName('Lokasi 2')}</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">${getBranchName('Lokasi 1')}</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -491,10 +491,10 @@
       el.textContent = b2Name;
     });
     document.querySelectorAll('[data-branch-option="lokasi_1"]').forEach(opt => {
-      opt.textContent = '📍 ' + b1Name;
+      opt.textContent = '' + b1Name;
     });
     document.querySelectorAll('[data-branch-option="lokasi_2"]').forEach(opt => {
-      opt.textContent = '📍 ' + b2Name;
+      opt.textContent = '' + b2Name;
     });
   }
   window.syncBranchNamesInDOM = syncBranchNamesInDOM;
@@ -567,14 +567,14 @@
     filtered.forEach(t => {
       const isDue = t.status === 'due';
       const statusLabel = isDue 
-        ? '<span class="status-badge due">⚠️ Jatuh Tempo</span>' 
-        : '<span class="status-badge occupied">🟢 Lunas</span>';
+        ? '<span class="status-badge due">Jatuh Tempo</span>' 
+        : '<span class="status-badge occupied">Lunas</span>';
 
       const tLoc = resolveRoomLocation(t);
       const isLoc2 = tLoc === 'Lokasi 2';
       const branchBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ ${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔐 Smart Door PIN & Co-Working</div>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 ${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔑 Kartu RFID & Area Kampus</div>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Smart Door PIN & Co-Working</div>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Kartu RFID & Area Kampus</div>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -589,7 +589,7 @@
         <td>${branchBadge}</td>
         <td>
           <a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);display:inline-flex;align-items:center;gap:4px;font-weight:600;">
-            📲 ${t.phone || '-'}
+            ${t.phone || '-'}
           </a>
         </td>
         <td>${t.startDate || '-'}</td>
@@ -597,8 +597,8 @@
         <td>${statusLabel}</td>
         <td>
           <div style="display:flex;gap:6px;">
-            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">📲 WA Tagihan</button>
-            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">💳 Bayar</button>
+            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">WA Tagihan</button>
+            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Bayar</button>
             <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')">Keluar</button>
           </div>
         </td>
@@ -614,7 +614,7 @@
         </div>
         <div class="mobile-data-row">
           <span>Cabang Kos:</span>
-          <span>${isLoc2 ? '⚡ ' + getBranchName('Lokasi 2') : '🌿 ' + getBranchName('Lokasi 1')}</span>
+          <span>${isLoc2 ? '' + getBranchName('Lokasi 2') : '' + getBranchName('Lokasi 1')}</span>
         </div>
         <div class="mobile-data-row">
           <span>Kamar:</span>
@@ -633,9 +633,9 @@
           <span style="font-weight:700;color:var(--brand-primary-light);">${formatRupiah(t.price)}</span>
         </div>
         <div style="display:flex;gap:8px;margin-top:10px;">
-          <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">📲 Kirim WA</button>
-          <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">💳 Catat Bayar</button>
-          <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')" title="Penghuni Keluar">✕</button>
+          <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">Kirim WA</button>
+          <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Catat Bayar</button>
+          <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')" title="Penghuni Keluar"></button>
         </div>
       `;
       mobileList.appendChild(mCard);
@@ -703,7 +703,7 @@
       if (kpiExpEl) kpiExpEl.textContent = formatRupiah(branchExpYear);
       if (kpiNetEl) kpiNetEl.textContent = formatRupiah(branchNetYear);
       if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(branchNetYear / 12));
-      if (kpiBadgeEl) kpiBadgeEl.textContent = isB2 ? '⚡ Khusus ' + getBranchName('Lokasi 2') : '🌿 Khusus ' + getBranchName('Lokasi 1');
+      if (kpiBadgeEl) kpiBadgeEl.textContent = isB2 ? 'Khusus ' + getBranchName('Lokasi 2') : 'Khusus ' + getBranchName('Lokasi 1');
       if (kpiUnitEl) kpiUnitEl.textContent = isB2 ? '8 Unit Kamar (#201–#208)' : '8 Unit Kamar (#101–#108)';
       if (finInsightEl) {
         finInsightEl.innerHTML = isB2
@@ -720,7 +720,7 @@
         if (kpiNetEl) kpiNetEl.textContent = formatRupiah(totNetYear);
         if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(totNetYear / 12));
       }
-      if (kpiBadgeEl) kpiBadgeEl.textContent = '🏢 Gabungan 2 Cabang';
+      if (kpiBadgeEl) kpiBadgeEl.textContent = 'Gabungan 2 Cabang';
       if (kpiUnitEl) kpiUnitEl.textContent = `16 Unit Kamar (${getBranchName('Lokasi 1')} & ${getBranchName('Lokasi 2')})`;
     }
 
@@ -744,8 +744,8 @@
       const fLoc = resolveFinanceLocation(trx);
       const isLoc2 = fLoc === 'Lokasi 2';
       const branchPill = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ ${getBranchName('Lokasi 2')}</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 ${getBranchName('Lokasi 1')}</span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -759,11 +759,11 @@
         <td>
           ${trx.proofImage ? `
             <a href="${trx.proofImage}" target="_blank" class="btn-secondary" style="padding:3px 8px;font-size:0.75rem;color:#2563eb;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:3px;margin-right:4px;">
-              📎 Foto Bukti
+              Foto Bukti
             </a>
           ` : ''}
           <button type="button" class="btn-secondary" style="padding:3px 8px;font-size:0.75rem;" onclick="window.kosApp.showReceiptModal('${trx.id}')">
-            🧾 Kuitansi
+            Kuitansi
           </button>
         </td>
       `;
@@ -778,7 +778,7 @@
         </div>
         <div class="mobile-data-row">
           <span>Lokasi Cabang:</span>
-          <span>${isLoc2 ? '⚡ ' + getBranchName('Lokasi 2') : '🌿 ' + getBranchName('Lokasi 1')}</span>
+          <span>${isLoc2 ? '' + getBranchName('Lokasi 2') : '' + getBranchName('Lokasi 1')}</span>
         </div>
         <div class="mobile-data-row">
           <span>Kategori & Tanggal:</span>
@@ -790,7 +790,7 @@
         </div>
         <div style="margin-top:6px;display:flex;justify-content:flex-end;">
           <button type="button" class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="window.kosApp.showReceiptModal('${trx.id}')">
-            🧾 Lihat Kuitansi
+            Lihat Kuitansi
           </button>
         </div>
       `;
@@ -834,8 +834,8 @@
       const mLoc = resolveMaintenanceLocation(item);
       const isLoc2 = mLoc === 'Lokasi 2';
       const branchTechBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ ${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👨‍🔧 PIC: Mas Dani (Smart System)</div>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 ${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👷 PIC: Pak Budi (Utilitas)</div>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">PIC: Mas Dani (Smart System)</div>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">PIC: Pak Budi (Utilitas)</div>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -869,7 +869,7 @@
         <div style="font-size:0.85rem;color:var(--text-secondary);">${item.issue}</div>
         <div class="mobile-data-row" style="margin-top:6px;">
           <span>Cabang & Teknisi:</span>
-          <span>${isLoc2 ? '⚡ ' + getBranchName('Lokasi 2') + ' • Mas Dani' : '🌿 ' + getBranchName('Lokasi 1') + ' • Pak Budi'}</span>
+          <span>${isLoc2 ? '' + getBranchName('Lokasi 2') + ' • Mas Dani' : '' + getBranchName('Lokasi 1') + ' • Pak Budi'}</span>
         </div>
         <div class="mobile-data-row">
           <span>Pelapor / Tgl:</span>
@@ -912,21 +912,21 @@
 
     const set = appData.settings;
     const msg = 
-`Halo Kak *${room.tenant}* 👋,
+`Halo Kak *${room.tenant}* ,
 
 Semoga harinya menyenangkan!
 Kami dari pengelola *${set.kos_name || 'Kos Mas Robi'}* menginfokan seputar tagihan sewa kamar:
 
-📌 *Unit:* Kamar #${room.number} (${room.type})
-💰 *Nominal Sewa:* ${formatRupiah(room.price)}
-📅 *Jatuh Tempo:* Tanggal ${room.dueDay} bulan ini
+*Unit:* Kamar #${room.number} (${room.type})
+*Nominal Sewa:* ${formatRupiah(room.price)}
+*Jatuh Tempo:* Tanggal ${room.dueDay} bulan ini
 
 Pembayaran dapat ditransfer ke:
-🏦 *${set.bank_name || 'BCA'}*
-💳 No. Rek: *${set.bank_account || '-'}*
-👤 A.N: *${set.bank_holder || '-'}*
+*${set.bank_name || 'BCA'}*
+No. Rek: *${set.bank_account || '-'}*
+A.N: *${set.bank_holder || '-'}*
 
-Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayaran ya Kak. Terima kasih banyak atas kerjasamanya! 🙏✨
+Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayaran ya Kak. Terima kasih banyak atas kerjasamanya! 
 
 - Salam Hangat,
 *${set.owner_name || 'Mas Robi'}* (Pengelola)`;
@@ -992,10 +992,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const locBadge = document.getElementById('mRoomDetailLocBadge');
     if (locBadge) {
       if (room.location === 'Lokasi 2') {
-        locBadge.innerHTML = '⚡ ' + getBranchName('Lokasi 2');
+        locBadge.innerHTML = '' + getBranchName('Lokasi 2');
         locBadge.style.color = '#7dd3fc';
       } else {
-        locBadge.innerHTML = '🌿 ' + getBranchName('Lokasi 1');
+        locBadge.innerHTML = '' + getBranchName('Lokasi 1');
         locBadge.style.color = '#a7f3d0';
       }
     }
@@ -1003,14 +1003,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const body = document.getElementById('mRoomDetailBody');
     const footer = document.getElementById('mRoomDetailFooter');
 
-    const facilitiesHtml = (room.facilities || []).map(f => `<span class="feature-pill" style="padding:4px 10px;font-size:0.8rem;background:#f0fdfa;color:#0a5661;border:1px solid #ccfbf1;border-radius:6px;font-weight:600;">✓ ${f}</span>`).join(' ');
+    const facilitiesHtml = (room.facilities || []).map(f => `<span class="feature-pill" style="padding:4px 10px;font-size:0.8rem;background:#f0fdfa;color:#0a5661;border:1px solid #ccfbf1;border-radius:6px;font-weight:600;">${f}</span>`).join(' ');
 
     const roomImgSrc = room.image ? (room.image.startsWith('http') || room.image.startsWith('/') ? room.image : '/' + room.image) : '/assets/images/room_sample.jpg';
 
     body.innerHTML = `
       <div style="margin-bottom:14px;border-radius:16px;overflow:hidden;max-height:200px;border:1px solid var(--border-color);position:relative;box-shadow:0 4px 14px rgba(0,0,0,0.06);">
         <img src="${roomImgSrc}" alt="Foto Kamar #${room.number}" style="width:100%;height:200px;object-fit:cover;display:block;">
-        <span style="position:absolute;bottom:10px;left:10px;background:rgba(3,35,40,0.85);backdrop-filter:blur(4px);color:#ffffff;font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:999px;">📸 Foto Kamar #${room.number}</span>
+        <span style="position:absolute;bottom:10px;left:10px;background:rgba(3,35,40,0.85);backdrop-filter:blur(4px);color:#ffffff;font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:999px;">Foto Kamar #${room.number}</span>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-color);padding-bottom:12px;">
@@ -1029,7 +1029,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         ${room.tenant ? `
           <div style="font-size:1.05rem;font-weight:800;color:#0f172a;">${room.tenant}</div>
           <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">
-            WhatsApp: <a href="https://wa.me/${room.phone}" target="_blank" style="color:#0a5661;font-weight:700;text-decoration:none;">📲 ${room.phone}</a>
+            WhatsApp: <a href="https://wa.me/${room.phone}" target="_blank" style="color:#0a5661;font-weight:700;text-decoration:none;">${room.phone}</a>
           </div>
           <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
             Mulai Masuk: ${room.startDate || '-'} • Jatuh Tempo Tiap Tgl <strong>${room.dueDay}</strong>
@@ -1050,10 +1050,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       <div class="form-group" style="margin-top:6px;">
         <label for="changeRoomStatusSelect" style="font-weight:700;font-size:0.82rem;color:#334155;">Ubah Cepat Status Kamar:</label>
         <select id="changeRoomStatusSelect" class="form-control" style="border-radius:10px;font-weight:700;" onchange="window.kosApp.changeRoomStatusDirect('${room.number}', this.value)">
-          <option value="available" ${room.status === 'available' ? 'selected' : ''}>🔵 Kosong (Tersedia)</option>
-          <option value="occupied" ${room.status === 'occupied' ? 'selected' : ''}>🟢 Terisi (Lunas)</option>
-          <option value="due" ${room.status === 'due' ? 'selected' : ''}>🟡 Terisi (Jatuh Tempo)</option>
-          <option value="repair" ${room.status === 'repair' ? 'selected' : ''}>🔴 Dalam Perbaikan / Servis</option>
+          <option value="available" ${room.status === 'available' ? 'selected' : ''}>Kosong (Tersedia)</option>
+          <option value="occupied" ${room.status === 'occupied' ? 'selected' : ''}>Terisi (Lunas)</option>
+          <option value="due" ${room.status === 'due' ? 'selected' : ''}>Terisi (Jatuh Tempo)</option>
+          <option value="repair" ${room.status === 'repair' ? 'selected' : ''}>Dalam Perbaikan / Servis</option>
         </select>
       </div>
 
@@ -1061,7 +1061,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       <div style="background: #f0fdfa; border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 16px; margin-top: 10px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
           <h4 style="font-size:0.88rem;font-weight:800;color:#0a5661;margin:0;display:flex;align-items:center;gap:6px;">
-            <span>🎨</span> Custom Interior & Anggaran
+            Custom Interior & Anggaran
           </h4>
           <span style="font-size:0.72rem;padding:3px 10px;border-radius:999px;font-weight:800;background:#ccfbf1;color:#0f766e;">
             ${(room.custom_interior_status || 'NONE').toUpperCase()}
@@ -1083,11 +1083,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             <label style="font-size:0.72rem;font-weight:700;color:#0f766e;display:block;margin-bottom:4px;">Status Custom Interior:</label>
             <select id="detailRoomCustomStatus" class="form-control" style="padding:7px 10px;font-size:0.84rem;border-radius:8px;font-weight:600;">
               <option value="none" ${(!room.custom_interior_status || room.custom_interior_status === 'none') ? 'selected' : ''}>Tidak Ada (None)</option>
-              <option value="pending" ${room.custom_interior_status === 'pending' ? 'selected' : ''}>⏳ Menunggu Review</option>
-              <option value="approved" ${room.custom_interior_status === 'approved' ? 'selected' : ''}>✅ Disetujui (Approved)</option>
-              <option value="in_progress" ${room.custom_interior_status === 'in_progress' ? 'selected' : ''}>🛠️ Dikerjakan</option>
-              <option value="completed" ${room.custom_interior_status === 'completed' ? 'selected' : ''}>🎉 Selesai</option>
-              <option value="rejected" ${room.custom_interior_status === 'rejected' ? 'selected' : ''}>❌ Ditolak</option>
+              <option value="pending" ${room.custom_interior_status === 'pending' ? 'selected' : ''}>Menunggu Review</option>
+              <option value="approved" ${room.custom_interior_status === 'approved' ? 'selected' : ''}>Disetujui (Approved)</option>
+              <option value="in_progress" ${room.custom_interior_status === 'in_progress' ? 'selected' : ''}>Dikerjakan</option>
+              <option value="completed" ${room.custom_interior_status === 'completed' ? 'selected' : ''}>Selesai</option>
+              <option value="rejected" ${room.custom_interior_status === 'rejected' ? 'selected' : ''}>Ditolak</option>
             </select>
           </div>
         </div>
@@ -1098,7 +1098,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         </div>
 
         <button type="button" class="btn-primary" style="font-size:0.8rem;padding:9px 14px;width:100%;margin-top:4px;border-radius:10px;font-weight:800;" onclick="window.kosApp.saveCustomInteriorDirect('${room.number}')">
-          💾 Simpan Anggaran & Status Custom Interior
+          Simpan Anggaran & Status Custom Interior
         </button>
       </div>
     `;
@@ -1107,7 +1107,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       <button type="button" class="btn-secondary" data-close-modal="modalRoomDetail" style="border-radius:10px;padding:8px 18px;">Tutup</button>
       ${room.tenant ? `
         <button type="button" class="btn-primary" style="border-radius:10px;padding:8px 18px;font-weight:800;" onclick="window.kosApp.sendWhatsAppReminder('${room.number}')">
-          📲 Kirim WA Tagihan
+          Kirim WA Tagihan
         </button>
       ` : ''}
     `;
@@ -1432,12 +1432,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc1Rooms.length > 0) {
       const grp1 = document.createElement('optgroup');
-      grp1.label = '📍 ' + getBranchName('Lokasi 1');
+      grp1.label = '' + getBranchName('Lokasi 1');
       loc1Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
         opt.setAttribute('data-number', r.number);
-        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? '🟢 Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
+        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? 'Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
         if (targetRoomNumber && r.number === targetRoomNumber) opt.selected = true;
         grp1.appendChild(opt);
       });
@@ -1446,12 +1446,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc2Rooms.length > 0) {
       const grp2 = document.createElement('optgroup');
-      grp2.label = '📍 ' + getBranchName('Lokasi 2');
+      grp2.label = '' + getBranchName('Lokasi 2');
       loc2Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
         opt.setAttribute('data-number', r.number);
-        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? '🟢 Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
+        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? 'Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
         if (targetRoomNumber && r.number === targetRoomNumber) opt.selected = true;
         grp2.appendChild(opt);
       });
@@ -1584,7 +1584,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc1Rooms.length > 0) {
       const grp1 = document.createElement('optgroup');
-      grp1.label = `🌿 ${getBranchName('Lokasi 1')} (Kamar #101–#108)`;
+      grp1.label = `${getBranchName('Lokasi 1')} (Kamar #101–#108)`;
       loc1Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
@@ -1597,7 +1597,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc2Rooms.length > 0) {
       const grp2 = document.createElement('optgroup');
-      grp2.label = `⚡ ${getBranchName('Lokasi 2')} (Kamar #201–#208)`;
+      grp2.label = `${getBranchName('Lokasi 2')} (Kamar #201–#208)`;
       loc2Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
@@ -1758,7 +1758,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
       if (loc1Rooms.length > 0) {
         const grp1 = document.createElement('optgroup');
-        grp1.label = `🌿 ${getBranchName('Lokasi 1')} (PIC: Pak Budi)`;
+        grp1.label = `${getBranchName('Lokasi 1')} (PIC: Pak Budi)`;
         loc1Rooms.forEach(r => {
           const opt = document.createElement('option');
           opt.value = r.id;
@@ -1770,7 +1770,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
       if (loc2Rooms.length > 0) {
         const grp2 = document.createElement('optgroup');
-        grp2.label = `⚡ ${getBranchName('Lokasi 2')} (PIC: Mas Dani)`;
+        grp2.label = `${getBranchName('Lokasi 2')} (PIC: Mas Dani)`;
         loc2Rooms.forEach(r => {
           const opt = document.createElement('option');
           opt.value = r.id;
@@ -2100,7 +2100,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const highlightItems = [];
       const editContainers = document.querySelectorAll('#locationHighlightsEditorList .highlight-edit-item');
       editContainers.forEach(item => {
-        const icon = item.querySelector('.hl-icon')?.value.trim() || '📍';
+        const icon = item.querySelector('.hl-icon')?.value.trim() || '';
         const title = item.querySelector('.hl-title')?.value.trim() || '';
         const desc = item.querySelector('.hl-desc')?.value.trim() || '';
         highlightItems.push({ icon, title, desc });

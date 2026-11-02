@@ -394,7 +394,7 @@
     <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%); border: 1.5px solid #99f6e4; border-radius: 18px; padding: 14px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
       <div>
         <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661; margin-bottom: 3px;">
-          ✅ Anda sudah masuk sebagai: <strong>{{ Auth::user()->name }}</strong>
+          Anda sudah masuk sebagai: <strong>{{ Auth::user()->name }}</strong>
           ({{ Auth::user()->isOwner() ? 'Admin' : 'Pelanggan' }})
         </div>
         <div style="font-size: 0.74rem; color: #0e7482;">Untuk ganti akun, logout terlebih dahulu atau langsung masuk dengan akun lain di bawah.</div>

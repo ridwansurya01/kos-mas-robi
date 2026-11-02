@@ -25,11 +25,11 @@
       <div style="background: #f0fdfa; border: 2px dashed #0e7482; border-radius: 16px; padding: 22px; text-align: center; margin: 24px 0;">
         <span style="display: block; font-size: 12px; font-weight: 700; color: #0a5661; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;">KODE VERIFIKASI OTP</span>
         <div style="font-size: 36px; font-weight: 900; color: #0a5661; letter-spacing: 8px; font-family: monospace; line-height: 1.2;">{{ $otpCode }}</div>
-        <span style="display: block; font-size: 12px; color: #0e7482; font-weight: 600; margin-top: 8px;">⏱️ Berlaku selama 5 menit</span>
+        <span style="display: block; font-size: 12px; color: #0e7482; font-weight: 600; margin-top: 8px;">Berlaku selama 5 menit</span>
       </div>
 
       <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #92400e; line-height: 1.5; margin-bottom: 20px;">
-        🔒 <strong>Ketentuan Keamanan:</strong>
+        <strong>Ketentuan Keamanan:</strong>
         <ul style="margin: 6px 0 0; padding-left: 18px; font-size: 12px;">
           <li>Kode OTP hanya berlaku selama <strong>5 menit</strong> dan hanya dapat digunakan <strong>1 kali</strong>.</li>
           <li>Batas maksimal percobaan verifikasi adalah <strong>5 kali</strong>.</li>

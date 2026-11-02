@@ -9,7 +9,6 @@
     <!-- Header -->
     <tr>
       <td style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); padding: 32px 28px; text-align: center; color: #ffffff;">
-        <div style="font-size: 32px; margin-bottom: 8px;">🏠</div>
         <h1 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em;">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h1>
         <p style="margin: 6px 0 0; font-size: 13px; color: #94a3b8;">Sistem Manajemen & Portal Layanan Anak Kos</p>
       </td>
@@ -18,7 +17,7 @@
     <!-- Body -->
     <tr>
       <td style="padding: 32px 28px;">
-        <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 0;">Halo, {{ $user->name }}! 👋</h2>
+        <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 0;">Halo, {{ $user->name }}! </h2>
         <p style="font-size: 14px; line-height: 1.6; color: #475569;">
           Selamat datang dan terima kasih telah mendaftarkan akun Anda di <strong>{{ $setting->kos_name ?? 'Kos Mas Robi' }}</strong>. Akun Gmail Anda (<strong>{{ $user->email }}</strong>) telah berhasil tersambung ke sistem kami.
         </p>
@@ -26,7 +25,7 @@
         <!-- Information Box -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin: 20px 0;">
           <h3 style="margin: 0 0 10px; font-size: 14px; font-weight: 700; color: #1e40af; text-transform: uppercase; letter-spacing: 0.05em;">
-            ✨ Fitur & Pengingat Otomatis Aktif
+            Fitur & Pengingat Otomatis Aktif
           </h3>
           <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.7; color: #334155;">
             <li><strong>Pengingat Pembayaran Sewa ke Gmail:</strong> Anda akan otomatis menerima notifikasi pengingat pembayaran pada <strong>H-2 Minggu, H-1 Minggu, H-3 Hari, H-1 Hari</strong>, dan <strong>Hari H</strong> tanggal jatuh tempo.</li>
