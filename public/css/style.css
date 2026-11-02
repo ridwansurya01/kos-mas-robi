@@ -357,6 +357,12 @@ ul, ol {
   gap: 16px;
 }
 
+.mobile-header-brand {
+  display: none;
+  align-items: center;
+  gap: 12px;
+}
+
 .mobile-menu-toggle {
   display: none;
   background: transparent;
@@ -1416,6 +1422,10 @@ html[data-device="mobile"] .mobile-bottom-nav {
   display: flex !important;
 }
 
+html[data-device="mobile"] .mobile-header-brand {
+  display: flex !important;
+}
+
 html[data-device="mobile"] .app-main {
   margin-left: 0 !important;
   width: 100% !important;
@@ -1437,6 +1447,18 @@ html[data-device="mobile"] .app-main {
   /* Tampilkan hanya navigasi bawah pada HP */
   .mobile-bottom-nav {
     display: flex !important;
+  }
+
+  /* Tampilkan logo Kos Mas Robi Smart Kost Pro di pojok kiri atas header saat memakai HP */
+  .mobile-header-brand {
+    display: flex !important;
+  }
+  .mobile-header-brand .brand-icon-box {
+    width: 40px;
+    height: 40px;
+  }
+  .mobile-header-brand .brand-details h2 {
+    font-size: 1.05rem;
   }
 
   .app-main {

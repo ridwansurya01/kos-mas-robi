@@ -168,14 +168,21 @@
     <!-- HEADER TOP BAR -->
     <header class="app-header modern-header">
       <div class="header-left">
-        <div class="page-title-box modern-title-box">
-          <div class="header-breadcrumb">
-            <span class="bc-home">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</span>
-            <span class="bc-sep">/</span>
-            <span class="bc-curr" id="breadcrumbCurrent">Panel Kelola</span>
+        <div class="mobile-header-brand">
+          <div class="brand-icon-box modern-brand-box">
+            <div class="brand-icon-glow"></div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+              <path d="M9 21V12h6v9"/>
+            </svg>
           </div>
-          <h1 id="pageTitle" class="header-main-title">Dashboard Ikhtisar</h1>
-          <p id="pageSubtitle" class="header-sub-title">Monitoring real-time hunian, status kamar, dan operasional</p>
+          <div class="brand-details">
+            <h2 class="brand-title">{{ $setting->owner_name ? 'Kos ' . $setting->owner_name : 'Kos Mas Robi' }}</h2>
+            <div class="brand-subtitle-wrap">
+              <span class="brand-status-dot"></span>
+              <span class="brand-badge modern-badge">Smart Kost Pro</span>
+            </div>
+          </div>
         </div>
       </div>
 
