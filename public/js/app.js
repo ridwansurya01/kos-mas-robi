@@ -450,13 +450,9 @@
       `;
       mobileList.appendChild(mCard);
     });
-  }
-      `;
-      mobileList.appendChild(mCard);
-    });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ditemukan kamar yang sesuai</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ditemukan kamar yang sesuai</td></tr>';
       mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ditemukan kamar yang sesuai</div>';
     }
   }
@@ -2084,31 +2080,30 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       }
       if (Array.isArray(data.finances) && data.finances.length > 0) {
         appData.finances = data.finances.map(f => ({
-          id: f.transaction_code,
+          id: f.transaction_code || String(f.id || ''),
           dbId: f.id,
-          date: f.date,
+          date: f.date || '',
           paymentTime: f.formatted_payment_full || (f.date + ', ' + (f.formatted_payment_time || '12:00:00 WIB')),
           timezone: f.timezone || 'WIB',
-          type: f.type,
-          category: f.category,
-          amount: Number(f.amount),
-          desc: f.description,
-          method: f.payment_method,
+          type: f.type || 'income',
+          category: f.category || 'Sewa Kamar',
+          amount: Number(f.amount || 0),
+          desc: f.description || '',
+          method: f.payment_method || 'Transfer',
           roomId: f.room_id ? String(f.room_id) : null,
           proofImage: f.proof_image ? ('/' + f.proof_image.replace(/^\//, '')) : null
         }));
       }
       if (Array.isArray(data.maintenance) && data.maintenance.length > 0) {
         appData.maintenance = data.maintenance.map(m => ({
-          id: m.ticket_code,
+          id: m.ticket_code || String(m.id || ''),
           dbId: m.id,
-          room: m.room ? m.room.number : (m.room_number || '-'),
-          tenant: m.reporter_name,
-          issue: m.issue,
-          desc: m.description,
-          status: m.status,
-          priority: m.priority,
-          date: m.report_date
+          roomId: m.room ? m.room.number : String(m.room_id || '-'),
+          reporter: m.reporter_name || 'Penghuni',
+          issue: m.issue_description || m.issue || '',
+          status: m.status || 'pending',
+          priority: m.priority || 'Sedang',
+          date: m.report_date || ''
         }));
       }
       renderAllViews();
