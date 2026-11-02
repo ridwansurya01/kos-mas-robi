@@ -262,8 +262,8 @@
 
       const isLoc2 = room.location === 'Lokasi 2';
       const locPill = isLoc2
-        ? `<span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;">⚡ Cabang 2</span>`
-        : `<span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;">🌿 Cabang 1</span>`;
+        ? `<span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;">⚡ ${getBranchName('Lokasi 2')}</span>`
+        : `<span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;">🌿 ${getBranchName('Lokasi 1')}</span>`;
 
       if (isLoc2) {
         card.style.borderTop = '3px solid #0284c7';
@@ -403,8 +403,8 @@
     filtered.forEach(room => {
       const isLoc2 = room.location === 'Lokasi 2';
       const locBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">⚡ Cabang 2 (Ringroad)</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">🌿 Cabang 1 (Kampus)</span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">⚡ ${getBranchName('Lokasi 2')}</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">🌿 ${getBranchName('Lokasi 1')}</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -467,6 +467,37 @@
   let activeTenantLocationFilter = 'all';
   let activeFinanceLocationFilter = 'all';
   let activeMaintLocationFilter = 'all';
+
+  function getBranchName(loc) {
+    const isLoc2 = (loc === 'Lokasi 2' || loc === 'lokasi_2');
+    const branches = appData.settings?.branches || {};
+    if (isLoc2) {
+      const inputVal = document.getElementById('b2_name')?.value?.trim();
+      return branches.lokasi_2?.name || inputVal || 'Kos Mas Robi 2 - Ringroad Exclusive';
+    }
+    const inputVal = document.getElementById('b1_name')?.value?.trim();
+    return branches.lokasi_1?.name || inputVal || 'Kos Mas Robi 1 - Kampus Utama';
+  }
+  window.getBranchName = getBranchName;
+
+  function syncBranchNamesInDOM() {
+    const b1Name = getBranchName('Lokasi 1');
+    const b2Name = getBranchName('Lokasi 2');
+
+    document.querySelectorAll('[data-branch-name="lokasi_1"]').forEach(el => {
+      el.textContent = b1Name;
+    });
+    document.querySelectorAll('[data-branch-name="lokasi_2"]').forEach(el => {
+      el.textContent = b2Name;
+    });
+    document.querySelectorAll('[data-branch-option="lokasi_1"]').forEach(opt => {
+      opt.textContent = '📍 ' + b1Name;
+    });
+    document.querySelectorAll('[data-branch-option="lokasi_2"]').forEach(opt => {
+      opt.textContent = '📍 ' + b2Name;
+    });
+  }
+  window.syncBranchNamesInDOM = syncBranchNamesInDOM;
 
   function resolveRoomLocation(roomObjOrNum) {
     if (!roomObjOrNum) return 'Lokasi 1';
@@ -542,8 +573,8 @@
       const tLoc = resolveRoomLocation(t);
       const isLoc2 = tLoc === 'Lokasi 2';
       const branchBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ Kos 2 • Ringroad Exclusive</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔐 Smart Door PIN & Co-Working</div>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 Kos 1 • Kampus Utama</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔑 Kartu RFID & Area Kampus</div>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ ${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔐 Smart Door PIN & Co-Working</div>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 ${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔑 Kartu RFID & Area Kampus</div>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -583,7 +614,7 @@
         </div>
         <div class="mobile-data-row">
           <span>Cabang Kos:</span>
-          <span>${isLoc2 ? '⚡ Kos 2 (Ringroad Exclusive)' : '🌿 Kos 1 (Kampus Utama)'}</span>
+          <span>${isLoc2 ? '⚡ ' + getBranchName('Lokasi 2') : '🌿 ' + getBranchName('Lokasi 1')}</span>
         </div>
         <div class="mobile-data-row">
           <span>Kamar:</span>
@@ -672,12 +703,12 @@
       if (kpiExpEl) kpiExpEl.textContent = formatRupiah(branchExpYear);
       if (kpiNetEl) kpiNetEl.textContent = formatRupiah(branchNetYear);
       if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(branchNetYear / 12));
-      if (kpiBadgeEl) kpiBadgeEl.textContent = isB2 ? '⚡ Khusus Kos 2 (Ringroad)' : '🌿 Khusus Kos 1 (Kampus)';
+      if (kpiBadgeEl) kpiBadgeEl.textContent = isB2 ? '⚡ Khusus ' + getBranchName('Lokasi 2') : '🌿 Khusus ' + getBranchName('Lokasi 1');
       if (kpiUnitEl) kpiUnitEl.textContent = isB2 ? '8 Unit Kamar (#201–#208)' : '8 Unit Kamar (#101–#108)';
       if (finInsightEl) {
         finInsightEl.innerHTML = isB2
-          ? '<strong>Insight Kas Kos 2 (Ringroad Exclusive):</strong> Pendapatan didominasi unit Royal Suite & Executive dengan fasilitas Smart Door Lock & Co-Working Space.'
-          : '<strong>Insight Kas Kos 1 (Kampus Utama):</strong> Tingkat hunian mahasiswa UGM/UNY sangat stabil dengan rasio beban operasional yang efisien.';
+          ? `<strong>Insight Kas ${getBranchName('Lokasi 2')}:</strong> Pendapatan didominasi unit Royal Suite & Executive dengan fasilitas Smart Door Lock & Co-Working Space.`
+          : `<strong>Insight Kas ${getBranchName('Lokasi 1')}:</strong> Tingkat hunian mahasiswa UGM/UNY sangat stabil dengan rasio beban operasional yang efisien.`;
       }
     } else {
       const totIncYear = (b1Inc + b2Inc) * 12;
@@ -690,7 +721,7 @@
         if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(totNetYear / 12));
       }
       if (kpiBadgeEl) kpiBadgeEl.textContent = '🏢 Gabungan 2 Cabang';
-      if (kpiUnitEl) kpiUnitEl.textContent = '16 Unit Kamar (Kos 1 & Kos 2)';
+      if (kpiUnitEl) kpiUnitEl.textContent = `16 Unit Kamar (${getBranchName('Lokasi 1')} & ${getBranchName('Lokasi 2')})`;
     }
 
     const q = search.toLowerCase();
@@ -713,8 +744,8 @@
       const fLoc = resolveFinanceLocation(trx);
       const isLoc2 = fLoc === 'Lokasi 2';
       const branchPill = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ Kos 2 • Ringroad</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 Kos 1 • Kampus</span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ ${getBranchName('Lokasi 2')}</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 ${getBranchName('Lokasi 1')}</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -747,7 +778,7 @@
         </div>
         <div class="mobile-data-row">
           <span>Lokasi Cabang:</span>
-          <span>${isLoc2 ? '⚡ Kos 2 (Ringroad)' : '🌿 Kos 1 (Kampus)'}</span>
+          <span>${isLoc2 ? '⚡ ' + getBranchName('Lokasi 2') : '🌿 ' + getBranchName('Lokasi 1')}</span>
         </div>
         <div class="mobile-data-row">
           <span>Kategori & Tanggal:</span>
@@ -803,8 +834,8 @@
       const mLoc = resolveMaintenanceLocation(item);
       const isLoc2 = mLoc === 'Lokasi 2';
       const branchTechBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ Kos 2 • Ringroad</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👨‍🔧 PIC: Mas Dani (Smart System)</div>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 Kos 1 • Kampus</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👷 PIC: Pak Budi (Utilitas)</div>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ ${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👨‍🔧 PIC: Mas Dani (Smart System)</div>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 ${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👷 PIC: Pak Budi (Utilitas)</div>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -832,13 +863,13 @@
       mCard.className = 'mobile-data-card';
       mCard.innerHTML = `
         <div class="mobile-data-header">
-          <span class="mobile-data-title">Kamar #${item.roomId} (${isLoc2 ? 'Kos 2' : 'Kos 1'})</span>
+          <span class="mobile-data-title">Kamar #${item.roomId} (${isLoc2 ? getBranchName('Lokasi 2') : getBranchName('Lokasi 1')})</span>
           ${statusBadge}
         </div>
         <div style="font-size:0.85rem;color:var(--text-secondary);">${item.issue}</div>
         <div class="mobile-data-row" style="margin-top:6px;">
           <span>Cabang & Teknisi:</span>
-          <span>${isLoc2 ? '⚡ Kos 2 • Mas Dani' : '🌿 Kos 1 • Pak Budi'}</span>
+          <span>${isLoc2 ? '⚡ ' + getBranchName('Lokasi 2') + ' • Mas Dani' : '🌿 ' + getBranchName('Lokasi 1') + ' • Pak Budi'}</span>
         </div>
         <div class="mobile-data-row">
           <span>Pelapor / Tgl:</span>
@@ -961,10 +992,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const locBadge = document.getElementById('mRoomDetailLocBadge');
     if (locBadge) {
       if (room.location === 'Lokasi 2') {
-        locBadge.innerHTML = '⚡ Cabang 2 - Ringroad Exclusive (Kaliurang KM 12)';
+        locBadge.innerHTML = '⚡ ' + getBranchName('Lokasi 2');
         locBadge.style.color = '#7dd3fc';
       } else {
-        locBadge.innerHTML = '🌿 Cabang 1 - Kampus Utama (Gang Pandega Marta)';
+        locBadge.innerHTML = '🌿 ' + getBranchName('Lokasi 1');
         locBadge.style.color = '#a7f3d0';
       }
     }
@@ -1401,7 +1432,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc1Rooms.length > 0) {
       const grp1 = document.createElement('optgroup');
-      grp1.label = '📍 Lokasi 1 - Kampus Utama (Pandega Marta)';
+      grp1.label = '📍 ' + getBranchName('Lokasi 1');
       loc1Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
@@ -1415,7 +1446,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc2Rooms.length > 0) {
       const grp2 = document.createElement('optgroup');
-      grp2.label = '📍 Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)';
+      grp2.label = '📍 ' + getBranchName('Lokasi 2');
       loc2Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
@@ -1544,8 +1575,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   function openTransactionModal(defaultRoomNumber = null) {
     const select = document.getElementById('transRoomId');
     select.innerHTML = `
-      <option value="">-- Tanpa Kamar Spesifik (Operasional Kos 1 - Kampus) --</option>
-      <option value="loc2_general">-- Tanpa Kamar Spesifik (Operasional Kos 2 - Ringroad) --</option>
+      <option value="">-- Tanpa Kamar Spesifik (Operasional ${getBranchName('Lokasi 1')}) --</option>
+      <option value="loc2_general">-- Tanpa Kamar Spesifik (Operasional ${getBranchName('Lokasi 2')}) --</option>
     `;
 
     const loc1Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 1');
@@ -1553,7 +1584,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc1Rooms.length > 0) {
       const grp1 = document.createElement('optgroup');
-      grp1.label = '🌿 Kos 1 - Kampus Utama (Kamar #101–#108)';
+      grp1.label = `🌿 ${getBranchName('Lokasi 1')} (Kamar #101–#108)`;
       loc1Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
@@ -1566,7 +1597,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     if (loc2Rooms.length > 0) {
       const grp2 = document.createElement('optgroup');
-      grp2.label = '⚡ Kos 2 - Ringroad Exclusive (Kamar #201–#208)';
+      grp2.label = `⚡ ${getBranchName('Lokasi 2')} (Kamar #201–#208)`;
       loc2Rooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r.id;
@@ -1727,7 +1758,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
       if (loc1Rooms.length > 0) {
         const grp1 = document.createElement('optgroup');
-        grp1.label = '🌿 Kos 1 - Kampus Utama (PIC: Pak Budi)';
+        grp1.label = `🌿 ${getBranchName('Lokasi 1')} (PIC: Pak Budi)`;
         loc1Rooms.forEach(r => {
           const opt = document.createElement('option');
           opt.value = r.id;
@@ -1739,7 +1770,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
       if (loc2Rooms.length > 0) {
         const grp2 = document.createElement('optgroup');
-        grp2.label = '⚡ Kos 2 - Ringroad Exclusive (PIC: Mas Dani)';
+        grp2.label = `⚡ ${getBranchName('Lokasi 2')} (PIC: Mas Dani)`;
         loc2Rooms.forEach(r => {
           const opt = document.createElement('option');
           opt.value = r.id;
@@ -2000,6 +2031,23 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       if (iframe2) iframe2.src = resolveLiveEmbed(e.target.value, addr2);
     });
 
+    // Live sync branch names across all Admin UI as Admin types in #b1_name / #b2_name
+    document.getElementById('b1_name')?.addEventListener('input', (e) => {
+      if (!appData.settings.branches) appData.settings.branches = {};
+      if (!appData.settings.branches.lokasi_1) appData.settings.branches.lokasi_1 = {};
+      appData.settings.branches.lokasi_1.name = e.target.value.trim() || 'Kos Mas Robi 1 - Kampus Utama';
+      syncBranchNamesInDOM();
+      renderAllViews();
+    });
+
+    document.getElementById('b2_name')?.addEventListener('input', (e) => {
+      if (!appData.settings.branches) appData.settings.branches = {};
+      if (!appData.settings.branches.lokasi_2) appData.settings.branches.lokasi_2 = {};
+      appData.settings.branches.lokasi_2.name = e.target.value.trim() || 'Kos Mas Robi 2 - Ringroad Exclusive';
+      syncBranchNamesInDOM();
+      renderAllViews();
+    });
+
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -2030,7 +2078,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           gmaps_embed: b1_gmaps_embed,
           room_types: b1_room_types,
           facilities: b1_facilities,
-          badge: 'Kampus Utama',
+          badge: b1_name,
           color: '#0a5661'
         },
         lokasi_2: {
@@ -2043,7 +2091,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           gmaps_embed: b2_gmaps_embed,
           room_types: b2_room_types,
           facilities: b2_facilities,
-          badge: 'Ringroad Exclusive',
+          badge: b2_name,
           color: '#0d9488'
         }
       };
@@ -2073,9 +2121,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           })
         });
         const data = await res.json();
-        showToast('Pengaturan 2 Titik Lokasi & Peta Google Maps berhasil disimpan!', 'success');
+        showToast('Pengaturan 2 Titik Lokasi & Nama Cabang berhasil disinkronkan!', 'success');
         
         if (data.setting && data.setting.branches) {
+          appData.settings = Object.assign({}, appData.settings, data.setting);
           const if1 = document.getElementById('iframePreviewB1');
           const if2 = document.getElementById('iframePreviewB2');
           if (if1 && data.setting.branches.lokasi_1) {
@@ -2084,7 +2133,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           if (if2 && data.setting.branches.lokasi_2) {
             if2.src = resolveLiveEmbed(data.setting.branches.lokasi_2.gmaps_embed || data.setting.branches.lokasi_2.gmaps_url, b2_address);
           }
+        } else {
+          appData.settings.branches = branchesPayload;
         }
+        syncBranchNamesInDOM();
+        renderAllViews();
       } catch (err) {
         showToast('Gagal menyimpan pengaturan lokasi ke server', 'warning');
       }
@@ -2292,6 +2345,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
   // --- RENDER ALL VIEWS ---
   function renderAllViews() {
+    syncBranchNamesInDOM();
     renderRoomGrid();
     renderRoomsMasterTable();
     renderTenantsTable('', 'all', activeTenantLocationFilter);

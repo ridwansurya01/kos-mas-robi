@@ -69,6 +69,12 @@
     };
   </script>
 
+  @php
+    $allBranchesGlobal = $setting->branches ?? [];
+    $branch1Name = $allBranchesGlobal['lokasi_1']['name'] ?? 'Kos Mas Robi 1 - Kampus Utama';
+    $branch2Name = $allBranchesGlobal['lokasi_2']['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive';
+  @endphp
+
   <!-- =========================================================================
        SIDEBAR (Desktop Fixed, Mobile Slide-out Drawer)
        ========================================================================= -->
@@ -326,10 +332,10 @@
                 <span>🏢</span> Semua Cabang ({{ $totalRooms }})
               </button>
               <button type="button" class="loc-filter-btn" data-location="Lokasi 1" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(10,86,97,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661;">
-                <span>📍</span> Lokasi 1 - Kampus Utama ({{ $roomsLoc1->count() }})
+                <span>📍</span> <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $roomsLoc1->count() }})
               </button>
               <button type="button" class="loc-filter-btn" data-location="Lokasi 2" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(13,148,136,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0d9488;">
-                <span>📍</span> Lokasi 2 - Ringroad Exclusive ({{ $roomsLoc2->count() }})
+                <span>📍</span> <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $roomsLoc2->count() }})
               </button>
             </div>
           </div>
@@ -382,8 +388,8 @@
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="tenantLocationFilters">
             <button type="button" class="filter-pill active" data-tloc="all">🏢 Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
-            <button type="button" class="filter-pill" data-tloc="Lokasi 1">🌿 Kos 1 - Kampus Utama ({{ $b1TenantsCount }})</button>
-            <button type="button" class="filter-pill" data-tloc="Lokasi 2">⚡ Kos 2 - Ringroad Exclusive ({{ $b2TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 1">🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 2">⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2TenantsCount }})</button>
           </div>
         </div>
 
@@ -455,8 +461,8 @@
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="billingLocationFilters">
             <button type="button" class="filter-pill active" onclick="filterBillingLocation('all', this)">🏢 Semua Cabang ({{ $totalRooms }} Unit)</button>
-            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 1', this)">🌿 Kos 1 - Kampus Utama ({{ $b1RoomsList->count() }} Unit)</button>
-            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 2', this)">⚡ Kos 2 - Ringroad Exclusive ({{ $b2RoomsList->count() }} Unit)</button>
+            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 1', this)">🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1RoomsList->count() }} Unit)</button>
+            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 2', this)">⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2RoomsList->count() }} Unit)</button>
           </div>
         </div>
 
@@ -472,7 +478,7 @@
             <div class="stat-card-value" id="billKpiPaidVal" style="color:#10b981;">{{ $occupiedRooms - $dueRooms }} Kamar</div>
             <div class="stat-card-meta">
               <span class="stat-trend-up">● Terverifikasi Admin</span>
-              <span>Kos 1: {{ $b1PaidCount }} • Kos 2: {{ $b2PaidCount }}</span>
+              <span><span data-branch-name="lokasi_1">{{ $branch1Name }}</span>: {{ $b1PaidCount }} • <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>: {{ $b2PaidCount }}</span>
             </div>
           </div>
 
@@ -554,12 +560,12 @@
                 <td>
                   @if($isLoc2)
                     <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">
-                      ⚡ Kos 2 • Ringroad Exclusive
+                      ⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
                     </span>
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 3px;">Incl. Co-Working & Cleaning 2x</div>
                   @else
                     <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">
-                      🌿 Kos 1 • Kampus Utama
+                      🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
                     </span>
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 3px;">Incl. Air PDAM & WiFi Kampus</div>
                   @endif
@@ -679,8 +685,8 @@
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="financeLocationFilters">
             <button type="button" class="filter-pill active" data-floc="all">🏢 Gabungan 2 Kos</button>
-            <button type="button" class="filter-pill" data-floc="Lokasi 1">🌿 Buku Kas Kos 1 (Kampus)</button>
-            <button type="button" class="filter-pill" data-floc="Lokasi 2">⚡ Buku Kas Kos 2 (Ringroad)</button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 1">🌿 Buku Kas <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 2">⚡ Buku Kas <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
           </div>
         </div>
 
@@ -856,8 +862,8 @@
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="maintenanceLocationFilters">
             <button type="button" class="filter-pill active" data-mloc="all">🏢 Semua Cabang</button>
-            <button type="button" class="filter-pill" data-mloc="Lokasi 1">🌿 Servis Kos 1 (Kampus)</button>
-            <button type="button" class="filter-pill" data-mloc="Lokasi 2">⚡ Servis Kos 2 (Ringroad)</button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 1">🌿 Servis <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 2">⚡ Servis <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
           </div>
         </div>
 
@@ -907,9 +913,9 @@
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="transferLocationFilters">
             <button type="button" class="filter-pill active" onclick="filterTransferLocation('all', this)">🏢 Semua Mutasi</button>
-            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 1', this)">🌿 Internal Kos 1 (Kampus)</button>
-            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 2', this)">⚡ Internal Kos 2 (Ringroad)</button>
-            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lintas Cabang', this)">🔄 Lintas Cabang (Kos 1 ⇄ Kos 2)</button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 1', this)">🌿 Internal <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 2', this)">⚡ Internal <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lintas Cabang', this)">🔄 Lintas Cabang (<span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ⇄ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>)</button>
           </div>
         </div>
 
@@ -963,15 +969,15 @@
                   <td>
                     @if($isCrossBranch)
                       <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd;">
-                        🔄 Lintas Cabang ({{ $fromLoc === 'Lokasi 1' ? 'Kos 1 ➔ Kos 2' : 'Kos 2 ➔ Kos 1' }})
+                        🔄 Lintas Cabang (@if($fromLoc === 'Lokasi 1')<span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ➔ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>@else<span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ➔ <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>@endif)
                       </span>
                     @elseif($fromLoc === 'Lokasi 2')
                       <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">
-                        ⚡ Internal Kos 2 (Ringroad)
+                        ⚡ Internal <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
                       </span>
                     @else
                       <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">
-                        🌿 Internal Kos 1 (Kampus)
+                        🌿 Internal <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
                       </span>
                     @endif
                     <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px;">
@@ -1272,10 +1278,10 @@
               </div>
               <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.18);">
                 <button type="button" class="branch-pill-tab active" id="btnTabBranch1" onclick="switchBranchSettings('lokasi_1')" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                  <span>📍</span> Lokasi 1 (Kampus Utama)
+                  <span>📍</span> <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
                 </button>
                 <button type="button" class="branch-pill-tab" id="btnTabBranch2" onclick="switchBranchSettings('lokasi_2')" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: rgba(255,255,255,0.8);">
-                  <span>📍</span> Lokasi 2 (Ringroad Exclusive)
+                  <span>📍</span> <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
                 </button>
               </div>
             </div>
@@ -1287,11 +1293,10 @@
                   <div class="settings-card-title-group">
                     <div class="settings-card-icon-badge" style="background: rgba(10,86,97,0.1); color: #0a5661;">📍</div>
                     <div>
-                      <h3 class="settings-card-title">Pengaturan Lokasi 1 - Kampus Utama (Pandega Marta)</h3>
+                      <h3 class="settings-card-title">Pengaturan <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></h3>
                       <div class="settings-card-subtitle">Alamat resmi, peta Google Maps, dan kontak WhatsApp untuk Cabang 1</div>
                     </div>
                   </div>
-                  <span style="font-size: 0.76rem; background: #f0fdfa; color: #0a5661; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1px solid #ccfbf1;">Cabang Utama</span>
                 </div>
 
                 <div class="form-row" style="gap: 16px;">
@@ -1353,11 +1358,10 @@
                   <div class="settings-card-title-group">
                     <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.1); color: #0d9488;">📍</div>
                     <div>
-                      <h3 class="settings-card-title">Pengaturan Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)</h3>
+                      <h3 class="settings-card-title">Pengaturan <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></h3>
                       <div class="settings-card-subtitle">Alamat resmi, peta Google Maps, dan kontak WhatsApp untuk Cabang 2</div>
                     </div>
                   </div>
-                  <span style="font-size: 0.76rem; background: #ccfbf1; color: #0f766e; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1px solid #99f6e4;">Cabang Premium 2</span>
                 </div>
 
                 <div class="form-row" style="gap: 16px;">
@@ -1511,6 +1515,52 @@
               </div>
             </div>
 
+            <!-- Tata Tertib & Peraturan Kos Card -->
+            <div class="settings-modern-card" style="margin-bottom: 0;">
+              <div class="settings-card-header">
+                <div class="settings-card-title-group">
+                  <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.12); color: #0d9488;">📜</div>
+                  <div>
+                    <h3 class="settings-card-title">Tata Tertib & Peraturan Kos</h3>
+                    <div class="settings-card-subtitle">Kelola poin peraturan kos yang otomatis tampil di Portal Pelanggan</div>
+                  </div>
+                </div>
+              </div>
+
+              @php
+                $kosRulesList = $setting->kos_rules ?? [
+                  'Pembayaran sewa dilakukan maksimal pada tanggal jatuh tempo setiap bulannya.',
+                  'Tamu lawan jenis dilarang menginap di dalam kamar. Jam kunjung tamu maksimal pukul 22.00 WIB.',
+                  'Jaga ketenangan, kebersihan kamar, dan fasilitas bersama (dapur, lorong, area parkir).',
+                  'Matikan AC, lampu, dan keran air saat meninggalkan kamar dalam waktu lama.',
+                  'Dilarang keras membawa barang terlarang, senjata tajam, narkoba, atau minuman keras ke lingkungan kos.',
+                ];
+              @endphp
+
+              <form id="settingsKosRulesForm" onsubmit="saveKosRulesToServer(event)" style="display: flex; flex-direction: column; gap: 12px;">
+                <div id="kosRulesEditorList" style="display: flex; flex-direction: column; gap: 10px;">
+                  @foreach($kosRulesList as $rIdx => $ruleText)
+                    <div class="kos-rule-edit-item" style="display: flex; align-items: center; gap: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 12px;">
+                      <span class="kos-rule-num" style="width: 26px; height: 26px; border-radius: 50%; background: #ccfbf1; color: #0a5661; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">{{ $rIdx + 1 }}</span>
+                      <input type="text" class="form-control kos-rule-input" value="{{ $ruleText }}" placeholder="Tulis poin peraturan kos..." style="flex: 1; border-radius: 10px; font-size: 0.85rem;" required>
+                      <button type="button" class="btn-secondary" onclick="removeKosRuleRow(this)" style="padding: 6px 10px; border-radius: 8px; color: #ef4444; font-size: 0.78rem; flex-shrink: 0;" title="Hapus Poin">✕</button>
+                    </div>
+                  @endforeach
+                </div>
+
+                <button type="button" class="btn-secondary" onclick="addKosRuleRow()" style="width: 100%; border-style: dashed; padding: 10px; font-weight: 700; border-radius: 10px; font-size: 0.84rem;">
+                  ➕ Tambah Poin Peraturan Baru
+                </button>
+
+                <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                  <button type="submit" class="btn-primary" style="padding: 10px 22px; border-radius: 12px; font-weight: 800;">
+                    💾 Simpan Peraturan Kos
+                  </button>
+                  <span id="kosRulesSaveStatus" style="font-size: 0.8rem; font-weight: 700;"></span>
+                </div>
+              </form>
+            </div>
+
           </div>
         </div>
 
@@ -1529,8 +1579,8 @@
             <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div class="filter-pills" id="wifiLocationFilters">
                 <button type="button" class="filter-pill active" onclick="filterWifiByLocation('all', this)">🏢 Semua Cabang ({{ count($allWifis) }})</button>
-                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 1', this)">🌿 WiFi Kos 1 - Kampus ({{ $wfLoc1Count }})</button>
-                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 2', this)">⚡ WiFi Kos 2 - Ringroad ({{ $wfLoc2Count }})</button>
+                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 1', this)">🌿 WiFi <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $wfLoc1Count }})</button>
+                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 2', this)">⚡ WiFi <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $wfLoc2Count }})</button>
               </div>
             </div>
 
@@ -1552,9 +1602,9 @@
                         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                           <span style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</span>
                           @if($isWfLoc2)
-                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ Kos 2 • Ringroad Exclusive</span>
+                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
                           @else
-                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 Kos 1 • Kampus Utama</span>
+                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
                           @endif
                           <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">🚀 {{ $wfSpeed }}</span>
                         </div>
@@ -1581,7 +1631,7 @@
                         <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
                         <code style="font-family: monospace; font-weight: 700; color: var(--text-primary); margin-left: 6px;" class="wf-pass-text">{{ $wf['password'] }}</code>
                       </div>
-                      <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong>{{ $wfLoc }}</strong></span>
+                      <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong><span data-branch-name="{{ $isWfLoc2 ? 'lokasi_2' : 'lokasi_1' }}">{{ $isWfLoc2 ? $branch2Name : $branch1Name }}</span></strong></span>
                     </div>
                   @endif
 
@@ -1593,7 +1643,7 @@
             {{-- Tombol & Box Tambah WiFi Baru --}}
             <div style="margin-bottom: 20px;">
               <button type="button" id="btnToggleAddWf" onclick="toggleAddWifiForm()" class="btn-secondary" style="width: 100%; border-style: dashed; padding: 12px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>➕ Tambah Jaringan WiFi & Modem Baru (Pilih Kos 1 / Kos 2)</span>
+                <span>➕ Tambah Jaringan WiFi & Modem Baru</span>
               </button>
 
               <div id="addWifiFormBox" style="display: none; background: var(--bg-surface); border: 1.5px solid #0a5661; border-radius: 16px; padding: 18px; margin-top: 14px;">
@@ -1604,8 +1654,8 @@
                   <div class="form-group">
                     <label style="font-size: 0.78rem; font-weight: 700;">Lokasi Cabang Kos *</label>
                     <select id="newWfLocation" class="form-control" style="font-weight: 700;">
-                      <option value="Lokasi 1">🌿 Kos 1 - Kampus Utama (Kamar #101–#108)</option>
-                      <option value="Lokasi 2">⚡ Kos 2 - Ringroad Exclusive (Kamar #201–#208)</option>
+                      <option value="Lokasi 1" data-branch-option="lokasi_1">🌿 {{ $branch1Name }}</option>
+                      <option value="Lokasi 2" data-branch-option="lokasi_2">⚡ {{ $branch2Name }}</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -1703,7 +1753,7 @@
           <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🛏️</div>
           <div>
             <h3 id="mRoomDetailTitle" style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Detail Kamar #101</h3>
-            <span id="mRoomDetailLocBadge" style="display: inline-block; font-size: 0.72rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px;">📍 Lokasi 1 - Kampus Utama</span>
+            <span id="mRoomDetailLocBadge" style="display: inline-block; font-size: 0.72rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px;">📍 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
           </div>
         </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalRoomDetail">
@@ -1827,8 +1877,8 @@
                 <span style="font-weight: 500; font-size: 0.7rem; color: #0f766e;">Otomatis sinkron tipe & fasilitas</span>
               </label>
               <select id="roomLocationInput" class="form-control" required style="border-color: #99f6e4; border-radius: 10px; font-weight: 700; color: #0a5661; background: #ffffff;">
-                <option value="Lokasi 1">📍 Lokasi 1 - Kampus Utama (Pandega Marta)</option>
-                <option value="Lokasi 2">📍 Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)</option>
+                <option value="Lokasi 1" data-branch-option="lokasi_1">📍 {{ $branch1Name }}</option>
+                <option value="Lokasi 2" data-branch-option="lokasi_2">📍 {{ $branch2Name }}</option>
               </select>
             </div>
 
@@ -3238,9 +3288,14 @@
       card.setAttribute('data-location', location);
       card.style.cssText = 'background: var(--bg-surface); border: 1.5px solid ' + (isActive ? '#10b981' : 'var(--border-color)') + '; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;';
 
+      var currentB1Name = document.getElementById('b1_name')?.value?.trim() || @json($branch1Name);
+      var currentB2Name = document.getElementById('b2_name')?.value?.trim() || @json($branch2Name);
+      var branchDisplayName = isWfLoc2 ? currentB2Name : currentB1Name;
+      var branchKeyAttr = isWfLoc2 ? 'lokasi_2' : 'lokasi_1';
+
       var branchBadgeHtml = isWfLoc2
-        ? '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ Kos 2 • Ringroad Exclusive</span>'
-        : '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 Kos 1 • Kampus Utama</span>';
+        ? '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ <span data-branch-name="lokasi_2">' + branchDisplayName + '</span></span>'
+        : '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 <span data-branch-name="lokasi_1">' + branchDisplayName + '</span></span>';
 
       card.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
@@ -3276,7 +3331,7 @@
               <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
               <code style="font-family: monospace; font-weight: 700; color: var(--text-primary); margin-left: 6px;" class="wf-pass-text">${password}</code>
             </div>
-            <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong>${location}</strong></span>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong><span data-branch-name="${branchKeyAttr}">${branchDisplayName}</span></strong></span>
           </div>
         ` : ''}
         <input type="hidden" class="wf-raw-data" value='${JSON.stringify(rawObj)}'>
@@ -3346,6 +3401,89 @@
       .catch(function(err) {
         if (statusEl) {
           statusEl.textContent = '✕ Gagal menyimpan WiFi';
+          statusEl.style.color = '#ef4444';
+        }
+      });
+    }
+
+    // =========================================================================
+    // POINT 6: PENGELOLAAN TATA TERTIB & PERATURAN KOS (DINAMIS)
+    // =========================================================================
+    function renumberKosRules() {
+      var items = document.querySelectorAll('#kosRulesEditorList .kos-rule-edit-item');
+      items.forEach(function(item, idx) {
+        var numEl = item.querySelector('.kos-rule-num');
+        if (numEl) numEl.textContent = idx + 1;
+      });
+    }
+
+    function addKosRuleRow() {
+      var list = document.getElementById('kosRulesEditorList');
+      if (!list) return;
+      var count = list.querySelectorAll('.kos-rule-edit-item').length + 1;
+      var div = document.createElement('div');
+      div.className = 'kos-rule-edit-item';
+      div.style.cssText = 'display: flex; align-items: center; gap: 10px; background: var(--bg-surface); border: 1px solid var(--border-color); padding: 10px 12px; border-radius: 12px;';
+      div.innerHTML = `
+        <span class="kos-rule-num" style="width: 26px; height: 26px; border-radius: 50%; background: #ccfbf1; color: #0a5661; font-size: 0.78rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${count}</span>
+        <input type="text" class="form-control kos-rule-input" value="" placeholder="Tulis poin peraturan kos baru..." style="flex: 1; border-radius: 10px; font-size: 0.85rem;" required>
+        <button type="button" class="btn-secondary" onclick="removeKosRuleRow(this)" style="padding: 6px 10px; border-radius: 8px; color: #ef4444; font-size: 0.78rem; flex-shrink: 0;" title="Hapus Poin">✕</button>
+      `;
+      list.appendChild(div);
+      var inp = div.querySelector('.kos-rule-input');
+      if (inp) inp.focus();
+    }
+
+    function removeKosRuleRow(btn) {
+      var list = document.getElementById('kosRulesEditorList');
+      var items = list ? list.querySelectorAll('.kos-rule-edit-item') : [];
+      if (items.length <= 1) {
+        alert('Minimal harus terdapat 1 poin peraturan kos.');
+        return;
+      }
+      var row = btn.closest('.kos-rule-edit-item');
+      if (row) {
+        row.remove();
+        renumberKosRules();
+      }
+    }
+
+    function saveKosRulesToServer(e) {
+      if (e) e.preventDefault();
+      var inputs = document.querySelectorAll('#kosRulesEditorList .kos-rule-input');
+      var rules = [];
+      inputs.forEach(function(inp) {
+        var val = (inp.value || '').trim();
+        if (val !== '') rules.push(val);
+      });
+
+      var statusEl = document.getElementById('kosRulesSaveStatus');
+      if (statusEl) {
+        statusEl.textContent = '⏳ Menyimpan...';
+        statusEl.style.color = '#0a5661';
+      }
+
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+          kos_rules: rules
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (statusEl) {
+          statusEl.textContent = '✓ Peraturan kos berhasil disimpan!';
+          statusEl.style.color = '#10b981';
+          setTimeout(function() { statusEl.textContent = ''; }, 3000);
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) {
+          statusEl.textContent = '✕ Gagal menyimpan peraturan';
           statusEl.style.color = '#ef4444';
         }
       });

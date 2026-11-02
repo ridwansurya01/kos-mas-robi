@@ -38,6 +38,7 @@ class Setting extends Model
         'final_embed_url',
         'active_payment_methods',
         'active_wifi_list',
+        'kos_rules',
     ];
 
     /**
@@ -495,5 +496,26 @@ class Setting extends Model
         return array_values(array_filter($list, function ($w) use ($location) {
             return !empty($w['is_active']) && (($w['location'] ?? 'Lokasi 1') === $location);
         }));
+    }
+
+    /**
+     * Get editable Tata Tertib & Peraturan Kos.
+     */
+    public function getKosRulesAttribute(): array
+    {
+        $defaultRules = [
+            'Pembayaran sewa dilakukan maksimal pada tanggal jatuh tempo setiap bulannya.',
+            'Tamu lawan jenis dilarang menginap di dalam kamar. Jam kunjung tamu maksimal pukul 22.00 WIB.',
+            'Jaga ketenangan, kebersihan kamar, dan fasilitas bersama (dapur, lorong, area parkir).',
+            'Matikan AC, lampu, dan keran air saat meninggalkan kamar dalam waktu lama.',
+            'Dilarang keras membawa barang terlarang, senjata tajam, narkoba, atau minuman keras ke lingkungan kos.',
+        ];
+
+        $lc = $this->landing_content ?? [];
+        if (!empty($lc['kos_rules']) && is_array($lc['kos_rules'])) {
+            return array_values($lc['kos_rules']);
+        }
+
+        return $defaultRules;
     }
 }

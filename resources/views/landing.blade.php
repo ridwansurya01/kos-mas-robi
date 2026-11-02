@@ -205,15 +205,19 @@
       </div>
 
       {{-- 2 TITIK LOKASI SWITCHER BANNER --}}
+      @php
+        $b1NameLanding = $setting->branches['lokasi_1']['name'] ?? 'Kos 1 (Kampus Utama)';
+        $b2NameLanding = $setting->branches['lokasi_2']['name'] ?? 'Kos 2 (Ringroad Exclusive)';
+      @endphp
       <div style="margin: 20px 0 28px; display: flex; gap: 10px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 8px; border-radius: 16px;">
         <a href="{{ route('home') }}#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ !request('location') || request('location') == 'all' ? 'background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: var(--teal-primary); border: 1px solid rgba(10,86,97,0.15);' }}">
           🏢 Semua Cabang
         </a>
         <a href="{{ route('home') }}?location=Lokasi+1#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 1' ? 'background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: #0a5661; border: 1px solid rgba(10,86,97,0.15);' }}">
-          🌿 Cabang 1: Kampus Utama (Pandega)
+          🌿 {{ $b1NameLanding }}
         </a>
         <a href="{{ route('home') }}?location=Lokasi+2#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 2' ? 'background: #0284c7; color: #ffffff; box-shadow: 0 2px 8px rgba(2,132,199,0.25);' : 'background: #ffffff; color: #0284c7; border: 1px solid rgba(2,132,199,0.15);' }}">
-          ⚡ Cabang 2: Ringroad Exclusive (Kaliurang)
+          ⚡ {{ $b2NameLanding }}
         </a>
       </div>
 
@@ -235,11 +239,11 @@
               <!-- Lokasi Badge -->
               @if($isLoc2)
                 <span style="position: absolute; top: 12px; left: 12px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(6px); color: #7dd3fc; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; z-index: 2; border: 1.5px solid #0284c7; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                  ⚡ Cabang 2 - Ringroad Exclusive
+                  ⚡ {{ $b2NameLanding }}
                 </span>
               @else
                 <span style="position: absolute; top: 12px; left: 12px; background: rgba(3, 35, 40, 0.9); backdrop-filter: blur(6px); color: #a7f3d0; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; z-index: 2; border: 1.5px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                  🌿 Cabang 1 - Kampus Utama
+                  🌿 {{ $b1NameLanding }}
                 </span>
               @endif
 
@@ -431,10 +435,10 @@
         {{-- Switcher Tab Peta Lokasi 1 & 2 --}}
         <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 16px; border: 1.5px solid var(--border-subtle); box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
           <button type="button" id="btnLandingLoc1" onclick="switchLandingMap(1)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
-            📍 Cabang 1: Kampus Utama
+            📍 {{ $b1NameLanding }}
           </button>
           <button type="button" id="btnLandingLoc2" onclick="switchLandingMap(2)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-dark);">
-            📍 Cabang 2: Ringroad Exclusive
+            📍 {{ $b2NameLanding }}
           </button>
         </div>
       </div>

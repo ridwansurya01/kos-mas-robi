@@ -905,6 +905,19 @@ class DashboardController extends Controller
         }
 
         $setting = Setting::first() ?? new Setting();
+
+        if ($request->has('kos_rules')) {
+            $kr = $request->input('kos_rules');
+            if (is_string($kr)) {
+                $kr = json_decode($kr, true);
+            }
+            if (is_array($kr)) {
+                $existingLc = $validated['landing_content'] ?? ($setting->landing_content ?? []);
+                $existingLc['kos_rules'] = array_values(array_filter(array_map('trim', $kr), fn($r) => $r !== ''));
+                $validated['landing_content'] = $existingLc;
+            }
+        }
+
         $setting->fill($validated);
         $setting->save();
 

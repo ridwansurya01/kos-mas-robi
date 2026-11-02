@@ -8,9 +8,11 @@
     $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
     $userInitial = strtoupper(substr($user->name ?? 'P', 0, 1));
     $isB2 = ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2';
-    $branchName = $isB2 ? 'Kos Mas Robi 2 — Ringroad Exclusive' : 'Kos Mas Robi 1 — Kampus Utama';
-    $branchAddr = $isB2 ? 'Jl. Kaliurang KM 12, Sardonoharjo, Sleman' : 'Jl. Pandega Marta, Pogung, Sinduadi (3 Mnt UGM)';
-    $branchMaps = $isB2 ? 'https://maps.google.com/?q=Kos+Mas+Robi+Ringroad' : 'https://maps.google.com/?q=Kos+Mas+Robi+Kampus';
+    $b1NamePortal = $branches['lokasi_1']['name'] ?? ($setting->branches['lokasi_1']['name'] ?? 'Kos Mas Robi 1 - Kampus Utama');
+    $b2NamePortal = $branches['lokasi_2']['name'] ?? ($setting->branches['lokasi_2']['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive');
+    $branchName = $isB2 ? $b2NamePortal : $b1NamePortal;
+    $branchAddr = $isB2 ? ($branches['lokasi_2']['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo, Sleman') : ($branches['lokasi_1']['address'] ?? 'Jl. Pandega Marta, Pogung, Sinduadi (3 Mnt UGM)');
+    $branchMaps = $isB2 ? ($branches['lokasi_2']['gmaps_url'] ?? 'https://maps.google.com/?q=Kos+Mas+Robi+Ringroad') : ($branches['lokasi_1']['gmaps_url'] ?? 'https://maps.google.com/?q=Kos+Mas+Robi+Kampus');
   @endphp
 
   {{-- ======================================================= NAVBAR ======================================================= --}}
@@ -158,11 +160,11 @@
             <div class="tp-branch-card-header">
               <div class="tp-branch-tag-pill b1">
                 <span>🌿</span>
-                <span>Cabang 1 (Kampus Utama)</span>
+                <span>{{ $b1NamePortal }}</span>
               </div>
               <span class="tp-branch-selected-badge">✓ Terpilih</span>
             </div>
-            <h4 class="tp-branch-card-name">{{ $branches['lokasi_1']['name'] ?? 'Kos Mas Robi 1 - Kampus Utama' }}</h4>
+            <h4 class="tp-branch-card-name">{{ $b1NamePortal }}</h4>
             <div class="tp-branch-card-addr">📍 {{ $branches['lokasi_1']['address'] ?? 'Jl. Pandega Marta, Caturtunggal (3 Mnt UGM)' }}</div>
             <div class="tp-branch-stats-badges">
               <span class="tp-branch-stat available">
@@ -184,11 +186,11 @@
             <div class="tp-branch-card-header">
               <div class="tp-branch-tag-pill b2">
                 <span>⚡</span>
-                <span>Cabang 2 (Ringroad Exclusive)</span>
+                <span>{{ $b2NamePortal }}</span>
               </div>
               <span class="tp-branch-selected-badge">✓ Terpilih</span>
             </div>
-            <h4 class="tp-branch-card-name">{{ $branches['lokasi_2']['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive' }}</h4>
+            <h4 class="tp-branch-card-name">{{ $b2NamePortal }}</h4>
             <div class="tp-branch-card-addr">📍 {{ $branches['lokasi_2']['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo (Modern)' }}</div>
             <div class="tp-branch-stats-badges">
               <span class="tp-branch-stat available">
@@ -214,10 +216,10 @@
             Semua Kamar ({{ $totalRoomsCount }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="lokasi_1" onclick="filterCatalogRooms('lokasi_1', this)">
-            🌿 Cabang 1 ({{ $b1Total }})
+            🌿 {{ $b1NamePortal }} ({{ $b1Total }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="lokasi_2" onclick="filterCatalogRooms('lokasi_2', this)">
-            ⚡ Cabang 2 ({{ $b2Total }})
+            ⚡ {{ $b2NamePortal }} ({{ $b2Total }})
           </button>
           <button type="button" class="tp-filter-btn" data-filter="available" onclick="filterCatalogRooms('available', this)">
             🟢 Tersedia / Kosong ({{ $availableRoomsCount }})
@@ -270,9 +272,9 @@
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
                 <div class="tp-room-card-type">{{ $r->type }}</div>
                 @if(($r->location ?? 'Lokasi 1') === 'Lokasi 2')
-                  <span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px; border: 1px solid #bae6fd;">⚡ Cabang 2</span>
+                  <span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px; border: 1px solid #bae6fd;">⚡ {{ $b2NamePortal }}</span>
                 @else
-                  <span style="font-size: 0.68rem; font-weight: 800; color: #0a5661; background: #f0fdfa; padding: 2px 7px; border-radius: 6px; border: 1px solid #ccfbf1;">🌿 Cabang 1</span>
+                  <span style="font-size: 0.68rem; font-weight: 800; color: #0a5661; background: #f0fdfa; padding: 2px 7px; border-radius: 6px; border: 1px solid #ccfbf1;">🌿 {{ $b1NamePortal }}</span>
                 @endif
               </div>
 
@@ -333,11 +335,11 @@
           <div class="tp-welcome-meta" style="flex-wrap: wrap; gap: 8px; margin-top: 6px;">
             @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
               <span class="tp-chip" style="background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; font-weight: 800;">
-                ⚡ Cabang 2 - Ringroad Exclusive
+                ⚡ {{ $b2NamePortal }}
               </span>
             @else
               <span class="tp-chip" style="background: #f0fdfa; color: #0a5661; border: 1.5px solid #99f6e4; font-weight: 800;">
-                🌿 Cabang 1 - Kampus Utama
+                🌿 {{ $b1NamePortal }}
               </span>
             @endif
             <span class="tp-chip">🏠 Kamar #{{ $room->number ?? '102' }}</span>
@@ -1004,15 +1006,15 @@
       @endphp
 
       <div class="tp-wifi-status-card" style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 14px; border-radius: 12px; flex-wrap: wrap; gap: 8px;">
-        <span class="tp-wifi-status-text" style="color: #166534; font-weight: 700; font-size: 0.8rem;">● Status Jaringan: Aktif & Stabil ({{ $myBranchLoc === 'Lokasi 2' ? 'Kos 2 - Ringroad' : 'Kos 1 - Kampus' }})</span>
+        <span class="tp-wifi-status-text" style="color: #166534; font-weight: 700; font-size: 0.8rem;">● Status Jaringan: Aktif & Stabil ({{ $myBranchLoc === 'Lokasi 2' ? $b2NamePortal : $b1NamePortal }})</span>
         <span class="tp-badge green" style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.74rem; padding: 3px 8px; border-radius: 6px;">{{ $myBranchLoc === 'Lokasi 2' ? 'Dedicated 300 Mbps' : 'Fiber 100 Mbps' }}</span>
       </div>
 
       {{-- Switcher Lokasi WiFi di Portal Pelanggan --}}
       <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('all', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #0a5661; background: #0a5661; color: #fff; cursor: pointer;">🏢 Semua Cabang</button>
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 1', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">🌿 Kos 1 (Kampus)</button>
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 2', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">⚡ Kos 2 (Ringroad)</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 1', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">🌿 {{ $b1NamePortal }}</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 2', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">⚡ {{ $b2NamePortal }}</button>
       </div>
 
       <div style="display: flex; flex-direction: column; gap: 12px;" id="portalWifiCardList">
@@ -1031,7 +1033,7 @@
                 <div>
                   <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                     <span style="font-size: 0.66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }};">
-                      {{ $isWfLoc2 ? '⚡ Kos 2 (Ringroad)' : '🌿 Kos 1 (Kampus)' }}
+                      {{ $isWfLoc2 ? '⚡ ' . $b2NamePortal : '🌿 ' . $b1NamePortal }}
                     </span>
                     <span style="font-size: 0.66rem; font-weight: 700; color: #64748b;">• {{ $wfSpeed }}</span>
                   </div>
@@ -1122,26 +1124,12 @@
     <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
       <div class="tp-rules-body">
         <ul class="tp-rules-list">
-          <li>
-            <span class="tp-rule-bullet">✓</span>
-            <span>Akses gerbang utama 24 jam dengan smart card / kunci masing-masing penghuni.</span>
-          </li>
-          <li>
-            <span class="tp-rule-bullet">✓</span>
-            <span>Tamu lawan jenis dilarang menginap di dalam kamar demi kenyamanan bersama.</span>
-          </li>
-          <li>
-            <span class="tp-rule-bullet">✓</span>
-            <span>Jaga kebersihan area bersama (dapur umum, kulkas bersama, tempat jemuran & parkiran).</span>
-          </li>
-          <li>
-            <span class="tp-rule-bullet">✓</span>
-            <span>Jam tenang penghuni mulai pukul 22:00 WIB untuk menjaga istirahat & waktu belajar.</span>
-          </li>
-          <li>
-            <span class="tp-rule-bullet">✓</span>
-            <span>Dilarang merokok di dalam kamar ber-AC atau koridor tertutup.</span>
-          </li>
+          @foreach(($setting->kos_rules ?? []) as $ruleText)
+            <li>
+              <span class="tp-rule-bullet">✓</span>
+              <span>{{ $ruleText }}</span>
+            </li>
+          @endforeach
         </ul>
 
         {{-- Kontak Darurat / Security --}}
