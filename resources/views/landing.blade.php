@@ -191,17 +191,30 @@
             Featured.listings <span>+ Type</span>
           </h2>
           <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
-            Pilihan unit kamar kos eksklusif dengan kenyamanan maksimal dan fasilitas lengkap.
+            Pilihan unit kamar kos eksklusif di <strong>2 Titik Lokasi Strategis</strong> dengan kenyamanan maksimal dan fasilitas lengkap.
           </p>
         </div>
 
         {{-- Quick Filter Pills --}}
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a href="{{ route('home') }}#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ !request('type') || request('type') == 'all' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Semua Unit</a>
+          <a href="{{ route('home') }}#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ !request('type') || request('type') == 'all' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Semua Tipe</a>
           <a href="{{ route('home') }}?type=VIP#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ request('type') == 'VIP' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">VIP AC</a>
           <a href="{{ route('home') }}?type=Deluxe#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ request('type') == 'Deluxe' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Deluxe AC</a>
           <a href="{{ route('home') }}?type=Standard#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ request('type') == 'Standard' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Standard Fan</a>
         </div>
+      </div>
+
+      {{-- 2 TITIK LOKASI SWITCHER BANNER --}}
+      <div style="margin: 20px 0 28px; display: flex; gap: 10px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 8px; border-radius: 16px;">
+        <a href="{{ route('home') }}#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ !request('location') || request('location') == 'all' ? 'background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: var(--teal-primary); border: 1px solid rgba(10,86,97,0.15);' }}">
+          🏢 Semua Cabang
+        </a>
+        <a href="{{ route('home') }}?location=Lokasi+1#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 1' ? 'background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: var(--teal-primary); border: 1px solid rgba(10,86,97,0.15);' }}">
+          📍 Lokasi 1 - Kampus Utama (Pandega)
+        </a>
+        <a href="{{ route('home') }}?location=Lokasi+2#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 2' ? 'background: #0d9488; color: #ffffff; box-shadow: 0 2px 8px rgba(13,148,136,0.25);' : 'background: #ffffff; color: #0d9488; border: 1px solid rgba(13,148,136,0.15);' }}">
+          📍 Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)
+        </a>
       </div>
 
       <div class="lr-featured-grid">
@@ -210,13 +223,19 @@
             $imgs = $room->images_list ?? [$room->image ?? 'assets/images/rooms/room_1.jpg'];
             $mainImg = $imgs[0] ?? 'assets/images/rooms/room_1.jpg';
             $isAvail = $room->status === 'available';
+            $isLoc2 = ($room->location ?? '') === 'Lokasi 2';
           @endphp
           <div class="lr-card-featured">
-            <div class="lr-card-thumb-wrap">
+            <div class="lr-card-thumb-wrap" style="position: relative;">
               <img src="{{ asset($mainImg) }}"
                    alt="Kamar #{{ $room->number }}"
                    class="lr-card-thumb"
                    onerror="this.src='{{ asset('assets/images/room_sample.jpg') }}'">
+
+              <!-- Lokasi Badge -->
+              <span style="position: absolute; top: 12px; left: 12px; background: rgba(3, 35, 40, 0.85); backdrop-filter: blur(4px); color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 2; border: 1px solid rgba(255,255,255,0.2);">
+                📍 {{ $isLoc2 ? 'Ringroad Exclusive' : 'Kampus Utama' }}
+              </span>
 
               <span class="lr-pill-avail" style="{{ $isAvail ? 'background: #10b981;' : 'background: #64748b;' }}">
                 {{ $isAvail ? 'Siap Huni' : 'Terisi' }}
@@ -367,21 +386,51 @@
   </section>
 
   {{-- =========================================================================
-       6. GOOGLE MAPS & STRATEGIC LOCATION HIGHLIGHTS (100% WORKING & EDITABLE)
+       6. GOOGLE MAPS & 2 TITIK LOKASI CABANG KOS (100% INTERAKTIF & MODERN)
        ========================================================================= --}}
   <section class="lr-location-section" id="lokasi">
     <div class="lr-container">
 
-      <div style="margin-bottom: 40px;">
-        <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal-primary); background: #ffffff; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-teal-soft); display: inline-block; margin-bottom: 12px;">
-          {{ $landing['location_tag'] ?? '📍 PETA & AKSES STRATEGIS' }}
-        </span>
-        <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 900; color: var(--text-dark); letter-spacing: -0.02em;">
-          {{ $landing['location_title'] ?? 'Lokasi Sangat Strategis' }}
-        </h2>
-        <p style="font-size: 0.95rem; color: var(--text-muted); max-width: 640px; margin-top: 6px;">
-          {{ $landing['location_desc'] ?? 'Akses cepat dan tenang untuk belajar, aman 24 jam, serta dekat dengan berbagai kampus utama dan fasilitas publik.' }}
-        </p>
+      @php
+        $allBranches = $setting->branches ?? [];
+        $b1 = $allBranches['lokasi_1'] ?? [
+          'name' => 'Kos Mas Robi 1 - Kampus Utama',
+          'tagline' => 'Hunian Tenang, Nyaman & 3 Menit ke Kampus Utama',
+          'address' => $setting->kos_address ?? 'Jl. Pandega Marta No. 88, Caturtunggal, Depok, Sleman, D.I. Yogyakarta',
+          'gmaps_url' => $setting->gmaps_url ?: 'https://maps.google.com/?q=Jl.+Pandega+Marta+No.88+Yogyakarta',
+        ];
+        $b2 = $allBranches['lokasi_2'] ?? [
+          'name' => 'Kos Mas Robi 2 - Ringroad Exclusive',
+          'tagline' => 'Smart Living, Co-Working Space & Fasilitas Modern',
+          'address' => 'Jl. Kaliurang KM 12, Sardonoharjo, Ngaglik, Sleman, D.I. Yogyakarta',
+          'gmaps_url' => 'https://maps.google.com/?q=Jl.+Kaliurang+KM+12+Yogyakarta',
+        ];
+        $embedB1 = $setting->getBranchEmbedUrl('lokasi_1');
+        $embedB2 = $setting->getBranchEmbedUrl('lokasi_2');
+      @endphp
+
+      <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+        <div>
+          <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal-primary); background: #ffffff; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-teal-soft); display: inline-block; margin-bottom: 12px;">
+            {{ $landing['location_tag'] ?? '📍 2 TITIK LOKASI & PETA STRATEGIS' }}
+          </span>
+          <h2 style="font-family: 'Outfit', sans-serif; font-size: 2.2rem; font-weight: 900; color: var(--text-dark); letter-spacing: -0.02em; margin: 0;">
+            {{ $landing['location_title'] ?? '2 Titik Lokasi Strategis di Sleman' }}
+          </h2>
+          <p style="font-size: 0.95rem; color: var(--text-muted); max-width: 640px; margin-top: 6px;">
+            Tersedia dua pilihan lokasi kost istimewa: Dekat kampus utama & kawasan Ringroad eksklusif.
+          </p>
+        </div>
+
+        {{-- Switcher Tab Peta Lokasi 1 & 2 --}}
+        <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 16px; border: 1.5px solid var(--border-subtle); box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+          <button type="button" id="btnLandingLoc1" onclick="switchLandingMap(1)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
+            📍 Cabang 1: Kampus Utama
+          </button>
+          <button type="button" id="btnLandingLoc2" onclick="switchLandingMap(2)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-dark);">
+            📍 Cabang 2: Ringroad Exclusive
+          </button>
+        </div>
       </div>
 
       <div class="lr-location-grid">
@@ -394,12 +443,12 @@
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               </div>
               <div>
-                <h3 class="lr-loc-title">{{ $setting->kos_name ?? 'Kos Mas Robi - Kampus Terpadu' }}</h3>
-                <p class="lr-loc-address">{{ $setting->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta' }}</p>
+                <h3 class="lr-loc-title" id="landingLocTitle">{{ $b1['name'] }}</h3>
+                <p class="lr-loc-address" id="landingLocAddress">{{ $b1['address'] }}</p>
               </div>
             </div>
 
-            {{-- 4 POI Location Highlights (Dapat diedit via Admin) --}}
+            {{-- 4 POI Location Highlights --}}
             <div class="lr-poi-list">
               @foreach($setting->location_highlights as $poi)
                 <div class="lr-poi-item">
@@ -414,21 +463,18 @@
           </div>
 
           <div class="lr-loc-actions">
-            @php
-              $mapsUrl = $setting->gmaps_url ?: ('https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi'));
-            @endphp
-            <a href="{{ $mapsUrl }}" target="_blank" rel="noopener noreferrer" class="lr-btn-gmaps">
+            <a href="{{ $b1['gmaps_url'] }}" id="landingGmapsLink" target="_blank" rel="noopener noreferrer" class="lr-btn-gmaps">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               <span>Buka Google Maps ↗</span>
             </a>
             <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20mau%20tanya%20patokan%20lokasi%20atau%20jadwal%20survey%20ke%20Kos%20Mas%20Robi"
-               target="_blank" class="lr-btn-survey">
+               id="landingWaSurveyLink" target="_blank" class="lr-btn-survey">
               <span>💬 Janji Survey Lokasi</span>
             </a>
           </div>
         </div>
 
-        {{-- Right: Interactive Google Maps Iframe Frame (Anti-Gagal) --}}
+        {{-- Right: Interactive Google Maps Iframe Frame --}}
         <div class="lr-map-card-right">
           <div class="lr-map-chrome-bar">
             <div class="lr-map-dots">
@@ -438,15 +484,76 @@
             </div>
             <div class="lr-map-badge">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              <span>maps.google.com/kos-mas-robi</span>
+              <span id="landingMapLabel">maps.google.com/kos-mas-robi-cabang-1</span>
             </div>
           </div>
           <div class="lr-map-frame">
-            <iframe src="{{ $setting->final_embed_url }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Maps Lokasi {{ $setting->kos_name ?? 'Kos Mas Robi' }}"></iframe>
+            <iframe id="landingMapIframe" src="{{ $embedB1 }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Google Maps Lokasi {{ $setting->kos_name ?? 'Kos Mas Robi' }}"></iframe>
           </div>
         </div>
 
       </div>
+
+      <script>
+        var branchData1 = {
+          title: @json($b1['name']),
+          address: @json($b1['address']),
+          gmapsUrl: @json($b1['gmaps_url']),
+          embedUrl: @json($embedB1),
+          label: 'maps.google.com/kos-mas-robi-cabang-1'
+        };
+        var branchData2 = {
+          title: @json($b2['name']),
+          address: @json($b2['address']),
+          gmapsUrl: @json($b2['gmaps_url']),
+          embedUrl: @json($embedB2),
+          label: 'maps.google.com/kos-mas-robi-cabang-2'
+        };
+
+        function switchLandingMap(branchNum) {
+          var btn1 = document.getElementById('btnLandingLoc1');
+          var btn2 = document.getElementById('btnLandingLoc2');
+          var titleEl = document.getElementById('landingLocTitle');
+          var addrEl = document.getElementById('landingLocAddress');
+          var linkEl = document.getElementById('landingGmapsLink');
+          var frameEl = document.getElementById('landingMapIframe');
+          var labelEl = document.getElementById('landingMapLabel');
+          var waEl = document.getElementById('landingWaSurveyLink');
+
+          if (branchNum === 2) {
+            titleEl.textContent = branchData2.title;
+            addrEl.textContent = branchData2.address;
+            linkEl.href = branchData2.gmapsUrl;
+            frameEl.src = branchData2.embedUrl;
+            labelEl.textContent = branchData2.label;
+            waEl.href = "https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20mau%20survey%20ke%20Cabang%202%20(Ringroad%20Exclusive)";
+
+            btn2.style.background = '#0d9488';
+            btn2.style.color = '#ffffff';
+            btn2.style.boxShadow = '0 2px 8px rgba(13,148,136,0.25)';
+            btn1.style.background = 'transparent';
+            btn1.style.color = 'var(--text-dark)';
+            btn1.style.boxShadow = 'none';
+          } else {
+            titleEl.textContent = branchData1.title;
+            addrEl.textContent = branchData1.address;
+            linkEl.href = branchData1.gmapsUrl;
+            frameEl.src = branchData1.embedUrl;
+            labelEl.textContent = branchData1.label;
+            waEl.href = "https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20mau%20survey%20ke%20Cabang%201%20(Kampus%20Utama)";
+
+            btn1.style.background = 'var(--teal-primary)';
+            btn1.style.color = '#ffffff';
+            btn1.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+            btn2.style.background = 'transparent';
+            btn2.style.color = 'var(--text-dark)';
+            btn2.style.boxShadow = 'none';
+          }
+        }
+      </script>
+
+    </div>
+  </section>
 
     </div>
   </section>

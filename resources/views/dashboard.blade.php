@@ -254,15 +254,30 @@
         </div>
 
         <div class="table-card-container">
-          <div class="table-toolbar">
-            <div class="table-search">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="roomSearchInput" placeholder="Cari nomor kamar atau tipe...">
+          <div class="table-toolbar" style="display: flex; flex-direction: column; gap: 14px; padding: 18px 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+              <div class="table-search" style="flex: 1; min-width: 260px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="roomSearchInput" placeholder="Cari nomor kamar, tipe, atau penghuni...">
+              </div>
+              <div class="filter-pills" id="roomTabFilters">
+                <button type="button" class="filter-pill active" data-floor="all">Semua Lantai</button>
+                <button type="button" class="filter-pill" data-floor="1">Lantai 1</button>
+                <button type="button" class="filter-pill" data-floor="2">Lantai 2</button>
+              </div>
             </div>
-            <div class="filter-pills" id="roomTabFilters">
-              <button type="button" class="filter-pill active" data-floor="all">Semua Lantai</button>
-              <button type="button" class="filter-pill" data-floor="1">Lantai 1</button>
-              <button type="button" class="filter-pill" data-floor="2">Lantai 2</button>
+
+            <!-- 2 TITIK LOKASI TABS FILTER -->
+            <div class="location-switcher-bar" id="roomLocationFilters" style="display: flex; gap: 8px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 6px; border-radius: 14px;">
+              <button type="button" class="loc-filter-btn active" data-location="all" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: none; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
+                <span>🏢</span> Semua Cabang ({{ $totalRooms }})
+              </button>
+              <button type="button" class="loc-filter-btn" data-location="Lokasi 1" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(10,86,97,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661;">
+                <span>📍</span> Lokasi 1 - Kampus Utama ({{ $roomsLoc1->count() }})
+              </button>
+              <button type="button" class="loc-filter-btn" data-location="Lokasi 2" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(13,148,136,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0d9488;">
+                <span>📍</span> Lokasi 2 - Ringroad Exclusive ({{ $roomsLoc2->count() }})
+              </button>
             </div>
           </div>
 
@@ -271,6 +286,7 @@
             <thead>
               <tr>
                 <th>No Kamar</th>
+                <th>Lokasi Cabang</th>
                 <th>Tipe & Fasilitas</th>
                 <th>Lantai</th>
                 <th>Harga Bulanan</th>
@@ -872,7 +888,7 @@
       </div>
       <div class="tab-pane" id="tab-settings">
         <!-- ====== SUPER PREMIUM SETTINGS HEADER ====== -->
-        <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 28px 32px; margin-bottom: 28px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35);">
+        <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 24px 30px; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35);">
           <!-- Decorative blobs -->
           <div style="position:absolute; top:-40px; right:-40px; width:200px; height:200px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none;"></div>
           <div style="position:absolute; bottom:-60px; left:60px; width:150px; height:150px; background:rgba(20, 184, 166, 0.1); border-radius:50%; pointer-events:none;"></div>
@@ -881,34 +897,7 @@
               <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px);">⚙️</div>
               <div>
                 <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
-                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil & rekening pembayaran kost</p>
-              </div>
-            </div>
-            <a href="{{ route('home') }}" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #fff; padding: 10px 20px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.84rem; backdrop-filter: blur(4px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.12)'">
-              <span>🌐</span> Lihat Landing Page ↗
-            </a>
-          </div>
-          <!-- Stats bar -->
-          <div style="display: flex; gap: 20px; margin-top: 22px; flex-wrap: wrap; position: relative; z-index: 1;">
-            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.1rem;">🎨</span>
-              <div>
-                <div style="color: rgba(255,255,255,0.55); font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Tampilan</div>
-                <div style="color: #fff; font-size: 0.82rem; font-weight: 800;">Landing Page</div>
-              </div>
-            </div>
-            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.1rem;">📍</span>
-              <div>
-                <div style="color: rgba(255,255,255,0.55); font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Peta & Lokasi</div>
-                <div style="color: #fff; font-size: 0.82rem; font-weight: 800;">Google Maps</div>
-              </div>
-            </div>
-            <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 10px;">
-              <span style="font-size: 1.1rem;">💳</span>
-              <div>
-                <div style="color: rgba(255,255,255,0.55); font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Pembayaran</div>
-                <div style="color: #fff; font-size: 0.82rem; font-weight: 800;">Rekening & Metode</div>
+                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & rekening pembayaran kost</p>
               </div>
             </div>
           </div>
@@ -1104,71 +1093,175 @@
         </div>
 
         <!-- =========================================================================
-             SUBTAB 2: TITIK LOKASI GOOGLE MAPS & 4 POI
+             SUBTAB 2: KELOLA 2 TITIK LOKASI (CABANG), GOOGLE MAPS & FASILITAS
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-location" style="display: none;">
           <form id="settingsProfileForm" style="display: flex; flex-direction: column; gap: 24px;">
 
-            <!-- MAPS CARD -->
-            <div class="settings-modern-card">
-              <div class="settings-card-header">
-                <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge coral">📍</div>
-                  <div>
-                    <h3 class="settings-card-title">Titik Lokasi Google Maps & Embed Interaktif</h3>
-                    <div class="settings-card-subtitle">Pengaturan alamat dan peta interaktif yang dapat diakses langsung oleh calon penghuni</div>
+            @php
+              $allBranches = $setting->branches ?? [];
+              $b1 = $allBranches['lokasi_1'] ?? [];
+              $b2 = $allBranches['lokasi_2'] ?? [];
+            @endphp
+
+            <!-- CARD SELECTOR TITIK LOKASI (CABANG) -->
+            <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 20px; padding: 22px 26px; box-shadow: 0 14px 30px -8px rgba(3, 35, 40, 0.35); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem;">🏢</div>
+                <div>
+                  <h3 style="color: #fff; font-size: 1.15rem; font-weight: 800; margin: 0;">Sistem Manajemen 2 Titik Lokasi Kos</h3>
+                  <p style="color: rgba(255,255,255,0.7); font-size: 0.78rem; margin: 3px 0 0;">Setiap lokasi memiliki fasilitas, tipe kamar, alamat & link Google Maps sendiri</p>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.18);">
+                <button type="button" class="branch-pill-tab active" id="btnTabBranch1" onclick="switchBranchSettings('lokasi_1')" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                  <span>📍</span> Lokasi 1 (Kampus Utama)
+                </button>
+                <button type="button" class="branch-pill-tab" id="btnTabBranch2" onclick="switchBranchSettings('lokasi_2')" style="display: flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 10px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: rgba(255,255,255,0.8);">
+                  <span>📍</span> Lokasi 2 (Ringroad Exclusive)
+                </button>
+              </div>
+            </div>
+
+            <!-- ================= PANEL LOKASI 1: KAMPUS UTAMA ================= -->
+            <div id="panelBranch1" class="branch-settings-panel" style="display: flex; flex-direction: column; gap: 20px;">
+              <div class="settings-modern-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title-group">
+                    <div class="settings-card-icon-badge" style="background: rgba(10,86,97,0.1); color: #0a5661;">📍</div>
+                    <div>
+                      <h3 class="settings-card-title">Pengaturan Lokasi 1 - Kampus Utama (Pandega Marta)</h3>
+                      <div class="settings-card-subtitle">Alamat resmi, peta Google Maps, dan kontak WhatsApp untuk Cabang 1</div>
+                    </div>
+                  </div>
+                  <span style="font-size: 0.76rem; background: #f0fdfa; color: #0a5661; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1px solid #ccfbf1;">Cabang Utama</span>
+                </div>
+
+                <div class="form-row" style="gap: 16px;">
+                  <div class="form-group" style="flex: 2;">
+                    <label style="font-weight: 700; font-size: 0.82rem;">Nama Resmi Cabang 1 *</label>
+                    <input type="text" id="b1_name" class="form-control" value="{{ $b1['name'] ?? 'Kos Mas Robi 1 - Kampus Utama' }}" placeholder="Contoh: Kos Mas Robi 1 - Kampus Utama" style="border-radius: 12px;">
+                  </div>
+                  <div class="form-group" style="flex: 2;">
+                    <label style="font-weight: 700; font-size: 0.82rem;">Tagline / Keunggulan Utama *</label>
+                    <input type="text" id="b1_tagline" class="form-control" value="{{ $b1['tagline'] ?? 'Hunian Tenang, Nyaman & 3 Menit ke Kampus Utama' }}" placeholder="Contoh: Hunian Tenang, Nyaman..." style="border-radius: 12px;">
                   </div>
                 </div>
-                <a href="{{ $setting->gmaps_url ?: ('https://maps.google.com/?q=' . urlencode($setting->kos_address ?? 'Kos Mas Robi')) }}" id="btnTestGmapsUrl" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 0.78rem; font-weight: 800; padding: 6px 14px; border-radius: 9999px;">
-                  <span>Uji Buka Peta ↗</span>
-                </a>
-              </div>
 
-              <div class="form-group" style="margin-bottom: 18px;">
-                <label for="setKosAddress" style="font-weight: 700;">Alamat Lengkap Properti Kos</label>
-                <textarea id="setKosAddress" class="form-control" rows="2" placeholder="Contoh: Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta">{{ $setting->kos_address }}</textarea>
-              </div>
-
-              {{-- PANDUAN MUDAH HANYA PAKAI LINK GOOGLE MAPS --}}
-              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.84rem; color: #166534; line-height: 1.6;">
-                <strong>💡 Cara Mengganti Titik Lokasi:</strong><br>
-                Buka <a href="https://maps.google.com" target="_blank" style="color:#047857; font-weight:700; text-decoration:underline;">Google Maps</a> di browser / aplikasi HP &rarr; cari lokasi kost Anda &rarr; klik tombol <strong>Bagikan</strong> &rarr; pilih <strong>Salin Link</strong> (atau cukup salin link dari kolom URL browser Anda), lalu tempelkan link tersebut pada kolom di bawah. Sistem akan otomatis memproses peta dan navigasi!
-              </div>
-
-              <div class="form-group" style="margin-bottom: 20px;">
-                <label for="setGmapsUrl" style="font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 6px;">
-                  <span>🔗 Link Lokasi Google Maps</span>
-                  <span style="font-size: 0.75rem; color: #047857; font-weight: 600; background: #dcfce7; padding: 2px 8px; border-radius: 6px;">Cukup Tempel Link Maps</span>
-                </label>
-                <input type="text" id="setGmapsUrl" class="form-control"
-                       placeholder="Contoh: https://maps.app.goo.gl/... atau salin link dari browser Google Maps"
-                       value="{{ $setting->gmaps_url ?: $setting->gmaps_embed }}"
-                       style="font-size: 0.92rem; padding: 12px 14px; border-radius: 10px;">
-                <input type="hidden" id="setGmapsEmbed" value="{{ $setting->gmaps_embed }}">
-                <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 6px; line-height: 1.5;">
-                  Bisa berupa link bagikan (<code>maps.app.goo.gl/...</code>), link browser (<code>google.com/maps/place/...</code>), atau kode sematkan (<code>&lt;iframe&gt;</code>).
+                <div class="form-group" style="margin-top: 14px;">
+                  <label style="font-weight: 700; font-size: 0.82rem;">Alamat Lengkap Cabang 1 *</label>
+                  <textarea id="b1_address" class="form-control" rows="2" placeholder="Jl. Pandega Marta No. 88, Caturtunggal, Sleman, Yogyakarta" style="border-radius: 12px;">{{ $b1['address'] ?? ($setting->kos_address ?? 'Jl. Pandega Marta No. 88, Caturtunggal, Depok, Sleman, D.I. Yogyakarta') }}</textarea>
                 </div>
-              </div>
 
-              <!-- Live Preview Peta di Admin -->
-              <div class="form-group">
-                <label style="font-weight: 800; color: var(--text-primary); font-size: 0.85rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                  <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981;"></span>
-                  Pratinjau Langsung Peta Google Maps (Live Preview):
-                </label>
-                <div id="gmapsLivePreviewWrap" style="width: 100%; height: 280px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
-                  <iframe id="gmapsPreviewIframe" src="{{ $setting->final_embed_url }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Pratinjau Lokasi Kos Mas Robi"></iframe>
+                <div class="form-group" style="margin-top: 14px;">
+                  <label style="font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🔗 Link Google Maps Cabang 1</span>
+                    <span style="font-size: 0.72rem; color: #047857; background: #dcfce7; padding: 2px 8px; border-radius: 6px; font-weight: 600;">Cukup Tempel Link Maps</span>
+                  </label>
+                  <input type="text" id="b1_gmaps_url" class="form-control" placeholder="https://maps.app.goo.gl/... atau link dari browser" value="{{ $b1['gmaps_url'] ?? ($setting->gmaps_url ?: $setting->gmaps_embed) }}" style="border-radius: 12px;">
+                  <input type="hidden" id="b1_gmaps_embed" value="{{ $b1['gmaps_embed'] ?? $setting->gmaps_embed }}">
+                </div>
+
+                <!-- Tipe Kamar & Fasilitas Cabang 1 -->
+                <div class="form-row" style="gap: 16px; margin-top: 16px;">
+                  <div class="form-group" style="flex: 1;">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0a5661;">🛏️ Daftar Tipe Kamar Cabang 1 (Pisahkan koma)</label>
+                    <textarea id="b1_room_types" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b1['room_types'] ?? null) ? implode(', ', $b1['room_types']) : 'VIP AC (KM Dalam), Deluxe AC, Standard Fan (KM Luar)' }}</textarea>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Otomatis menjadi pilihan tipe saat menambah kamar di Cabang 1.</span>
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0a5661;">✨ Daftar Fasilitas Khas Cabang 1 (Pisahkan koma)</label>
+                    <textarea id="b1_facilities" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b1['facilities'] ?? null) ? implode(', ', $b1['facilities']) : 'AC Dingin & Hemat Listrik, Kamar Mandi Dalam & Water Heater, WiFi Fiber Ultra Cepat 100 Mbps, Dapur Bersama Komplit, Parkir Mobil & Motor Luas Beratap, Keamanan CCTV 24 Jam & One-Gate System, Rooftop Jemuran & Ruang Santai' }}</textarea>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Tampil di detail hunian & landing page untuk Cabang 1.</span>
+                  </div>
+                </div>
+
+                <!-- Live Preview Peta Cabang 1 -->
+                <div class="form-group" style="margin-top: 16px;">
+                  <label style="font-weight: 800; font-size: 0.84rem; display: flex; align-items: center; gap: 8px;">
+                    <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:#10b981;"></span>
+                    Pratinjau Peta Google Maps Cabang 1:
+                  </label>
+                  <div style="width: 100%; height: 260px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); margin-top: 6px;">
+                    <iframe id="iframePreviewB1" src="{{ $setting->getBranchEmbedUrl('lokasi_1') }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- 4 POI CARD -->
+            <!-- ================= PANEL LOKASI 2: RINGROAD EXCLUSIVE ================= -->
+            <div id="panelBranch2" class="branch-settings-panel" style="display: none; flex-direction: column; gap: 20px;">
+              <div class="settings-modern-card">
+                <div class="settings-card-header">
+                  <div class="settings-card-title-group">
+                    <div class="settings-card-icon-badge" style="background: rgba(13,148,136,0.1); color: #0d9488;">📍</div>
+                    <div>
+                      <h3 class="settings-card-title">Pengaturan Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)</h3>
+                      <div class="settings-card-subtitle">Alamat resmi, peta Google Maps, dan kontak WhatsApp untuk Cabang 2</div>
+                    </div>
+                  </div>
+                  <span style="font-size: 0.76rem; background: #ccfbf1; color: #0f766e; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1px solid #99f6e4;">Cabang Premium 2</span>
+                </div>
+
+                <div class="form-row" style="gap: 16px;">
+                  <div class="form-group" style="flex: 2;">
+                    <label style="font-weight: 700; font-size: 0.82rem;">Nama Resmi Cabang 2 *</label>
+                    <input type="text" id="b2_name" class="form-control" value="{{ $b2['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive' }}" placeholder="Contoh: Kos Mas Robi 2 - Ringroad Exclusive" style="border-radius: 12px;">
+                  </div>
+                  <div class="form-group" style="flex: 2;">
+                    <label style="font-weight: 700; font-size: 0.82rem;">Tagline / Keunggulan Utama *</label>
+                    <input type="text" id="b2_tagline" class="form-control" value="{{ $b2['tagline'] ?? 'Smart Living, Co-Working Space & Fasilitas Modern' }}" placeholder="Contoh: Smart Living, Co-Working Space..." style="border-radius: 12px;">
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                  <label style="font-weight: 700; font-size: 0.82rem;">Alamat Lengkap Cabang 2 *</label>
+                  <textarea id="b2_address" class="form-control" rows="2" placeholder="Jl. Kaliurang KM 12, Sardonoharjo, Ngaglik, Sleman, Yogyakarta" style="border-radius: 12px;">{{ $b2['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo, Ngaglik, Sleman, D.I. Yogyakarta' }}</textarea>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                  <label style="font-weight: 700; font-size: 0.82rem; display: flex; align-items: center; justify-content: space-between;">
+                    <span>🔗 Link Google Maps Cabang 2</span>
+                    <span style="font-size: 0.72rem; color: #047857; background: #dcfce7; padding: 2px 8px; border-radius: 6px; font-weight: 600;">Cukup Tempel Link Maps</span>
+                  </label>
+                  <input type="text" id="b2_gmaps_url" class="form-control" placeholder="https://maps.app.goo.gl/... atau link dari browser" value="{{ $b2['gmaps_url'] ?? 'https://maps.google.com/?q=Jl.+Kaliurang+KM+12+Yogyakarta' }}" style="border-radius: 12px;">
+                  <input type="hidden" id="b2_gmaps_embed" value="{{ $b2['gmaps_embed'] ?? '' }}">
+                </div>
+
+                <!-- Tipe Kamar & Fasilitas Cabang 2 -->
+                <div class="form-row" style="gap: 16px; margin-top: 16px;">
+                  <div class="form-group" style="flex: 1;">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0d9488;">🛏️ Daftar Tipe Kamar Cabang 2 (Pisahkan koma)</label>
+                    <textarea id="b2_room_types" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b2['room_types'] ?? null) ? implode(', ', $b2['room_types']) : 'Executive Suite (Balkon), Superior AC Plus, Studio Mezzanine' }}</textarea>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Otomatis menjadi pilihan tipe saat menambah kamar di Cabang 2.</span>
+                  </div>
+                  <div class="form-group" style="flex: 1;">
+                    <label style="font-weight: 700; font-size: 0.82rem; color: #0d9488;">✨ Daftar Fasilitas Khas Cabang 2 (Pisahkan koma)</label>
+                    <textarea id="b2_facilities" class="form-control" rows="3" style="border-radius: 12px; font-size: 0.84rem;">{{ is_array($b2['facilities'] ?? null) ? implode(', ', $b2['facilities']) : 'Smart Digital Door Lock (Kartu & PIN), Balkon Pribadi dengan View Menarik, Smart Android TV & Meja Kerja Ergonomis, Co-Working Lounge & Area Diskusi, Mini Gym & Gazebo Santai Outdoor, Pantry Bersih & Dispenser Tiap Lantai, Free Pembersihan Kamar 1x per Minggu' }}</textarea>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 4px;">Tampil di detail hunian & landing page untuk Cabang 2.</span>
+                  </div>
+                </div>
+
+                <!-- Live Preview Peta Cabang 2 -->
+                <div class="form-group" style="margin-top: 16px;">
+                  <label style="font-weight: 800; font-size: 0.84rem; display: flex; align-items: center; gap: 8px;">
+                    <span style="display:inline-block; width:9px; height:9px; border-radius:50%; background:#10b981;"></span>
+                    Pratinjau Peta Google Maps Cabang 2:
+                  </label>
+                  <div style="width: 100%; height: 260px; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-surface); margin-top: 6px;">
+                    <iframe id="iframePreviewB2" src="{{ $setting->getBranchEmbedUrl('lokasi_2') }}" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4 POI / AKSES STRATEGIS KOS CARD -->
             <div class="settings-modern-card">
               <div class="settings-card-header">
                 <div class="settings-card-title-group">
                   <div class="settings-card-icon-badge">📌</div>
                   <div>
-                    <h3 class="settings-card-title">4 Poin Akses & Keunggulan Lokasi</h3>
+                    <h3 class="settings-card-title">4 Poin Akses & Keunggulan Strategis</h3>
                     <div class="settings-card-subtitle">4 kartu akses strategis yang tampil mendampingi peta pada Landing Page</div>
                   </div>
                 </div>
@@ -1206,7 +1299,11 @@
                 @endfor
               </div>
 
-              <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 18px; padding: 11px 26px; font-weight: 800; border-radius: 12px;">Simpan Perubahan Lokasi & Peta</button>
+              <div style="display: flex; gap: 14px; align-items: center; margin-top: 20px;">
+                <button type="submit" class="btn-primary" style="padding: 12px 28px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
+                  <span>💾</span> Simpan Seluruh Pengaturan 2 Lokasi & Peta
+                </button>
+              </div>
             </div>
 
           </form>
@@ -1419,17 +1516,23 @@
   </nav>
 
   <!-- =========================================================================
-       MODAL: DETAIL KAMAR
+       MODAL: DETAIL KAMAR (MODERN LUXURY TEAL)
        ========================================================================= -->
   <div class="modal-backdrop" id="modalRoomDetail">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
-        <h3 id="mRoomDetailTitle">Detail Kamar #101</h3>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🛏️</div>
+          <div>
+            <h3 id="mRoomDetailTitle" style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Detail Kamar #101</h3>
+            <span id="mRoomDetailLocBadge" style="display: inline-block; font-size: 0.72rem; color: rgba(255,255,255,0.75); font-weight: 600; margin-top: 2px;">📍 Lokasi 1 - Kampus Utama</span>
+          </div>
+        </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalRoomDetail">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="modal-body" id="mRoomDetailBody">
+      <div class="modal-body" id="mRoomDetailBody" style="padding: 22px;">
         <!-- Rendered by JS -->
       </div>
       <div class="modal-footer" id="mRoomDetailFooter">
@@ -1439,62 +1542,68 @@
   </div>
 
   <!-- =========================================================================
-       MODAL: FORM TAMBAH PENGHUNI
+       MODAL: FORM TAMBAH PENGHUNI (MODERN LUXURY TEAL)
        ========================================================================= -->
   <div class="modal-backdrop" id="modalAddTenant">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 600px;">
       <div class="modal-header">
-        <h3>Daftarkan Penghuni Baru</h3>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">👤</div>
+          <div>
+            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Daftarkan Penghuni Baru</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Registrasi data anak kos, tanggal masuk & penempatan kamar</p>
+          </div>
+        </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalAddTenant">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <form id="formAddTenant">
-        <div class="modal-body">
+        <div class="modal-body" style="padding: 22px; gap: 16px;">
           <div class="form-group">
-            <label for="tenantFullName">Nama Lengkap Anak Kos *</label>
-            <input type="text" id="tenantFullName" class="form-control" placeholder="Contoh: Muhammad Dimas Satria" required>
+            <label for="tenantFullName" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nama Lengkap Anak Kos *</label>
+            <input type="text" id="tenantFullName" class="form-control" placeholder="Contoh: Muhammad Dimas Satria" required style="border-radius: 12px;">
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tenantPhone">No. WhatsApp *</label>
-              <input type="tel" id="tenantPhone" class="form-control" placeholder="0812xxxxxxxx" required>
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="tenantPhone" style="font-weight: 700; font-size: 0.82rem; color: #334155;">No. WhatsApp *</label>
+              <input type="tel" id="tenantPhone" class="form-control" placeholder="0812xxxxxxxx" required style="border-radius: 12px;">
             </div>
-            <div class="form-group">
-              <label for="tenantIdNumber">No. KTP / NIK</label>
-              <input type="text" id="tenantIdNumber" class="form-control" placeholder="33xxxxxxxxxxxxxx">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="tenantIdNumber" style="font-weight: 700; font-size: 0.82rem; color: #334155;">No. KTP / NIK</label>
+              <input type="text" id="tenantIdNumber" class="form-control" placeholder="33xxxxxxxxxxxxxx" style="border-radius: 12px;">
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tenantSelectRoom">Pilih Kamar *</label>
-              <select id="tenantSelectRoom" class="form-control" required>
-                <!-- Populated dynamically -->
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="tenantSelectRoom" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Pilih Kamar & Lokasi *</label>
+              <select id="tenantSelectRoom" class="form-control" required style="border-radius: 12px; font-weight: 600;">
+                <!-- Populated dynamically with location groupings -->
               </select>
             </div>
-            <div class="form-group">
-              <label for="tenantStartDate">Tanggal Masuk *</label>
-              <input type="date" id="tenantStartDate" class="form-control" required>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="tenantStartDate" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tanggal Masuk *</label>
+              <input type="date" id="tenantStartDate" class="form-control" required style="border-radius: 12px;">
             </div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="tenantDueDay">Tgl Jatuh Tempo Tiap Bulan</label>
-              <input type="number" id="tenantDueDay" class="form-control" min="1" max="31" value="1" required>
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="tenantDueDay" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tgl Jatuh Tempo Bulanan</label>
+              <input type="number" id="tenantDueDay" class="form-control" min="1" max="31" value="1" required style="border-radius: 12px;">
             </div>
-            <div class="form-group">
-              <label for="tenantRentAmount">Tarif Sewa (Rp / Bulan)</label>
-              <input type="number" id="tenantRentAmount" class="form-control" placeholder="1500000" required>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="tenantRentAmount" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tarif Sewa (Rp / Bulan)</label>
+              <input type="number" id="tenantRentAmount" class="form-control" placeholder="1500000" required style="border-radius: 12px;">
             </div>
           </div>
           <div class="form-group">
-            <label for="tenantEmergencyContact">Kontak Darurat (Ortu / Saudara)</label>
-            <input type="text" id="tenantEmergencyContact" class="form-control" placeholder="Nama & No HP Orang Tua">
+            <label for="tenantEmergencyContact" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Kontak Darurat (Ortu / Wali / Saudara)</label>
+            <input type="text" id="tenantEmergencyContact" class="form-control" placeholder="Contoh: Bpk. Joko (0813xxxxxxxx) - Orang Tua" style="border-radius: 12px;">
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modalAddTenant">Batal</button>
-          <button type="submit" class="btn-primary">Simpan Penghuni</button>
+          <button type="submit" class="btn-primary" style="padding: 10px 24px; border-radius: 12px; font-weight: 800;">Simpan Penghuni</button>
         </div>
       </form>
     </div>
@@ -1525,10 +1634,26 @@
 
           <!-- SECTION 1: INFO DASAR KAMAR -->
           <div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1.5px solid #99f6e4; border-radius: 16px; padding: 18px;">
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
-              <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">📋</div>
-              <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Informasi Dasar Kamar</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">📋</div>
+                <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Informasi Dasar Kamar</span>
+              </div>
+              <span style="font-size: 0.72rem; color: #0f766e; background: #ccfbf1; padding: 3px 8px; border-radius: 6px; font-weight: 700;">2 Titik Lokasi Tersedia</span>
             </div>
+
+            <!-- PILIHAN CABANG LOKASI KOS -->
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label for="roomLocationInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e; display: flex; align-items: center; justify-content: space-between;">
+                <span>🏢 Titik Lokasi / Cabang Kos *</span>
+                <span style="font-weight: 500; font-size: 0.7rem; color: #0f766e;">Otomatis sinkron tipe & fasilitas</span>
+              </label>
+              <select id="roomLocationInput" class="form-control" required style="border-color: #99f6e4; border-radius: 10px; font-weight: 700; color: #0a5661; background: #ffffff;">
+                <option value="Lokasi 1">📍 Lokasi 1 - Kampus Utama (Pandega Marta)</option>
+                <option value="Lokasi 2">📍 Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)</option>
+              </select>
+            </div>
+
             <div class="form-row" style="gap: 14px;">
               <div class="form-group" style="margin-bottom: 0;">
                 <label for="roomNumberInput" style="font-size: 0.78rem; font-weight: 700; color: #0f766e;">Nomor Kamar *</label>
@@ -1759,49 +1884,55 @@
   </div>
 
   <!-- =========================================================================
-       MODAL: FORM CATAT TRANSAKSI KEUANGAN
+       MODAL: FORM CATAT TRANSAKSI KEUANGAN (MODERN LUXURY TEAL)
        ========================================================================= -->
   <div class="modal-backdrop" id="modalTransaction">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
-        <h3>Catat Pembayaran / Pengeluaran</h3>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">💳</div>
+          <div>
+            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Catat Pembayaran / Transaksi</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Pemasukan sewa kamar atau pengeluaran operasional kos</p>
+          </div>
+        </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalTransaction">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <form id="formTransaction">
-        <div class="modal-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="transType">Jenis Transaksi *</label>
-              <select id="transType" class="form-control" required>
+        <div class="modal-body" style="padding: 22px; gap: 16px;">
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="transType" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Jenis Transaksi *</label>
+              <select id="transType" class="form-control" required style="border-radius: 12px; font-weight: 700;">
                 <option value="income">🟢 Pemasukan (Sewa / Token / Laundry)</option>
                 <option value="expense">🔴 Pengeluaran (WiFi, Listrik, Kebersihan)</option>
               </select>
             </div>
-            <div class="form-group">
-              <label for="transDate">Tanggal Transaksi *</label>
-              <input type="date" id="transDate" class="form-control" required>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="transDate" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tanggal Transaksi *</label>
+              <input type="date" id="transDate" class="form-control" required style="border-radius: 12px;">
             </div>
           </div>
           <div class="form-group" id="transRoomSelectGroup">
-            <label for="transRoomId">Kaitkan dengan Kamar / Penghuni</label>
-            <select id="transRoomId" class="form-control">
+            <label for="transRoomId" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Kaitkan dengan Kamar / Penghuni</label>
+            <select id="transRoomId" class="form-control" style="border-radius: 12px; font-weight: 600;">
               <!-- Populated by JS -->
             </select>
           </div>
           <div class="form-group">
-            <label for="transDescription">Keterangan Transaksi *</label>
-            <input type="text" id="transDescription" class="form-control" placeholder="Contoh: Pembayaran Sewa Kamar 102 Bulan November 2026" required>
+            <label for="transDescription" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Keterangan Transaksi *</label>
+            <input type="text" id="transDescription" class="form-control" placeholder="Contoh: Pembayaran Sewa Kamar 102 Bulan November 2026" required style="border-radius: 12px;">
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="transAmount">Nominal (Rp) *</label>
-              <input type="number" id="transAmount" class="form-control" placeholder="1500000" required>
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="transAmount" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nominal (Rp) *</label>
+              <input type="number" id="transAmount" class="form-control" placeholder="1500000" required style="border-radius: 12px;">
             </div>
-            <div class="form-group">
-              <label for="transMethod">Metode Pembayaran</label>
-              <select id="transMethod" class="form-control">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="transMethod" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Metode Pembayaran</label>
+              <select id="transMethod" class="form-control" style="border-radius: 12px; font-weight: 600;">
                 <option value="Transfer BCA">Transfer BCA</option>
                 <option value="Transfer QRIS">Transfer QRIS</option>
                 <option value="Transfer Mandiri">Transfer Mandiri</option>
@@ -1812,28 +1943,34 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modalTransaction">Batal</button>
-          <button type="submit" class="btn-primary">Simpan Transaksi</button>
+          <button type="submit" class="btn-primary" style="padding: 10px 24px; border-radius: 12px; font-weight: 800;">Simpan Transaksi</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- =========================================================================
-       MODAL: KUITANSI DIGITAL (SIAP CETAK / PDF)
+       MODAL: KUITANSI DIGITAL (MODERN LUXURY TEAL)
        ========================================================================= -->
   <div class="modal-backdrop" id="modalReceipt">
-    <div class="modal-dialog" style="max-width: 480px;">
+    <div class="modal-dialog" style="max-width: 500px;">
       <div class="modal-header">
-        <h3>Kuitansi Pembayaran Digital</h3>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🧾</div>
+          <div>
+            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Kuitansi Digital Resmi</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Bukti pembayaran sah tercatat di pembukuan kost</p>
+          </div>
+        </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalReceipt">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="modal-body" style="background: #f8fafc; padding: 18px;">
+      <div class="modal-body" style="background: #f8fafc; padding: 20px;">
         <div class="receipt-paper" id="receiptPrintArea">
           <div class="receipt-header">
             <h4>{{ $setting->kos_name }}</h4>
-            <p>Smart Living & Kost Eksklusif</p>
+            <p>Smart Living & Kost Eksklusif (2 Lokasi Strategis)</p>
             <p>{{ $setting->kos_address }}</p>
             <p style="font-weight: 700; margin-top: 6px; letter-spacing: 0.05em;" id="recNumber">NO: KMR-2026-10-001</p>
           </div>
@@ -1874,7 +2011,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn-secondary" data-close-modal="modalReceipt">Tutup</button>
-        <button type="button" class="btn-primary" id="btnPrintReceipt">
+        <button type="button" class="btn-primary" id="btnPrintReceipt" style="padding: 10px 22px; border-radius: 12px; font-weight: 800;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline-block; vertical-align: middle; margin-right: 4px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Cetak / Download PDF
         </button>
@@ -1883,42 +2020,48 @@
   </div>
 
   <!-- =========================================================================
-       MODAL: FORM BUAT TIKET KELUHAN
+       MODAL: FORM BUAT TIKET KELUHAN (MODERN LUXURY TEAL)
        ========================================================================= -->
   <div class="modal-backdrop" id="modalRepairTicket">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
-        <h3>Laporan Keluhan / Servis Fasilitas</h3>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">🛠️</div>
+          <div>
+            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Laporan Keluhan & Servis Fasilitas</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Catat kendala teknis atau perbaikan fasilitas kamar</p>
+          </div>
+        </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalRepairTicket">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <form id="formRepairTicket">
-        <div class="modal-body">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="repairRoomSelect">Pilih Kamar Terkait *</label>
-              <select id="repairRoomSelect" class="form-control" required>
+        <div class="modal-body" style="padding: 22px; gap: 16px;">
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="repairRoomSelect" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Pilih Kamar Terkait *</label>
+              <select id="repairRoomSelect" class="form-control" required style="border-radius: 12px; font-weight: 600;">
                 <!-- Populated by JS -->
               </select>
             </div>
-            <div class="form-group">
-              <label for="repairPriority">Tingkat Urgensi</label>
-              <select id="repairPriority" class="form-control">
-                <option value="Normal">Normal</option>
-                <option value="Mendesak">Mendesak (Penting)</option>
-                <option value="Rendah">Rendah</option>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="repairPriority" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tingkat Urgensi</label>
+              <select id="repairPriority" class="form-control" style="border-radius: 12px; font-weight: 700;">
+                <option value="Normal">🟡 Normal</option>
+                <option value="Mendesak">🔴 Mendesak (Penting)</option>
+                <option value="Rendah">🟢 Rendah</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label for="repairDescription">Rincian Keluhan / Kerusakan *</label>
-            <textarea id="repairDescription" class="form-control" rows="3" placeholder="Contoh: Keran air wastafel di kamar mandi menetes terus menerus atau AC kurang dingin..." required></textarea>
+            <label for="repairDescription" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Rincian Keluhan / Kerusakan *</label>
+            <textarea id="repairDescription" class="form-control" rows="3" placeholder="Contoh: Keran air wastafel di kamar mandi menetes terus menerus atau AC kurang dingin..." required style="border-radius: 12px;"></textarea>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modalRepairTicket">Batal</button>
-          <button type="submit" class="btn-primary">Kirim Laporan</button>
+          <button type="submit" class="btn-primary" style="padding: 10px 24px; border-radius: 12px; font-weight: 800;">Kirim Laporan</button>
         </div>
       </form>
     </div>

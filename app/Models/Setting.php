@@ -17,6 +17,7 @@ class Setting extends Model
         'gmaps_url',
         'gmaps_embed',
         'location_highlights',
+        'branches',
         'landing_content',
         'bank_name',
         'bank_account',
@@ -26,6 +27,7 @@ class Setting extends Model
 
     protected $casts = [
         'location_highlights' => 'array',
+        'branches' => 'array',
         'landing_content' => 'array',
         'payment_methods' => 'array',
     ];
@@ -290,5 +292,97 @@ class Setting extends Model
         return array_values(array_filter($methods, function ($m) {
             return !empty($m['is_active']);
         }));
+    }
+
+    /**
+     * Get 2 Branches / Titik Lokasi with rich defaults.
+     */
+    public function getBranchesAttribute($value): array
+    {
+        $defaults = [
+            'lokasi_1' => [
+                'id' => 'lokasi_1',
+                'code' => 'Lokasi 1',
+                'name' => 'Kos Mas Robi 1 - Kampus Utama',
+                'tagline' => 'Hunian Tenang, Nyaman & 3 Menit ke Kampus Utama',
+                'address' => $this->kos_address ?: 'Jl. Pandega Marta No. 88, Caturtunggal, Depok, Sleman, D.I. Yogyakarta',
+                'gmaps_url' => $this->gmaps_url ?: 'https://maps.google.com/?q=Jl.+Pandega+Marta+No.88+Yogyakarta',
+                'gmaps_embed' => $this->gmaps_embed ?: '',
+                'phone' => $this->owner_phone ?: '081234567890',
+                'room_types' => ['VIP AC (KM Dalam)', 'Deluxe AC', 'Standard Fan (KM Luar)'],
+                'facilities' => [
+                    'AC Dingin & Hemat Listrik',
+                    'Kamar Mandi Dalam & Water Heater',
+                    'WiFi Fiber Ultra Cepat 100 Mbps',
+                    'Dapur Bersama Komplit (Kulkas & Kompor)',
+                    'Parkir Mobil & Motor Luas Beratap',
+                    'Keamanan CCTV 24 Jam & One-Gate System',
+                    'Rooftop Jemuran & Ruang Santai'
+                ],
+                'badge' => 'Kampus Utama',
+                'color' => '#0a5661',
+            ],
+            'lokasi_2' => [
+                'id' => 'lokasi_2',
+                'code' => 'Lokasi 2',
+                'name' => 'Kos Mas Robi 2 - Ringroad Exclusive',
+                'tagline' => 'Smart Living, Co-Working Space & Fasilitas Modern',
+                'address' => 'Jl. Kaliurang KM 12, Sardonoharjo, Ngaglik, Sleman, D.I. Yogyakarta',
+                'gmaps_url' => 'https://maps.google.com/?q=Jl.+Kaliurang+KM+12+Yogyakarta',
+                'gmaps_embed' => '',
+                'phone' => $this->owner_phone ?: '081234567890',
+                'room_types' => ['Executive Suite (Balkon)', 'Superior AC Plus', 'Studio Mezzanine'],
+                'facilities' => [
+                    'Smart Digital Door Lock (Kartu & PIN)',
+                    'Balkon Pribadi dengan View Menarik',
+                    'Smart Android TV & Meja Kerja Ergonomis',
+                    'Co-Working Lounge & Area Diskusi',
+                    'Mini Gym & Gazebo Santai Outdoor',
+                    'Pantry Bersih & Dispenser Tiap Lantai',
+                    'Free Pembersihan Kamar 1x per Minggu'
+                ],
+                'badge' => 'Ringroad Exclusive',
+                'color' => '#0d9488',
+            ]
+        ];
+
+        if (!empty($value)) {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+            if (is_array($decoded) && !empty($decoded)) {
+                return array_merge($defaults, $decoded);
+            }
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Resolve embed URL for a specific branch.
+     */
+    public function getBranchEmbedUrl(string $branchKey = 'lokasi_1'): string
+    {
+        $branches = $this->branches;
+        $b = $branches[$branchKey] ?? ($branches['lokasi_1'] ?? []);
+        $raw = trim($b['gmaps_embed'] ?? ($b['gmaps_url'] ?? ''));
+        $addressFallback = trim($b['address'] ?? ($this->kos_address ?? 'Yogyakarta'));
+
+        if (empty($raw) && $branchKey === 'lokasi_1') {
+            return $this->final_embed_url;
+        }
+
+        if (str_contains($raw, '<iframe') && preg_match('/src=["\']([^"\']+)["\']/', $raw, $m)) {
+            $raw = trim($m[1]);
+        }
+        if (str_contains($raw, 'google.com/maps/embed') || (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
+            return $raw;
+        }
+        if (str_contains($raw, 'q=')) {
+            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
+            parse_str($qs, $params);
+            if (!empty($params['q'])) {
+                return 'https://maps.google.com/maps?q=' . urlencode(trim($params['q'])) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            }
+        }
+        return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
     }
 }

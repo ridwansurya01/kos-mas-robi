@@ -19,6 +19,9 @@ class LandingPageController extends Controller
         $roomsQuery = Room::query()->with('activeTenant');
 
         // Optional filtering from landing search bar
+        if ($request->filled('location') && $request->location !== 'all') {
+            $roomsQuery->where('location', $request->location);
+        }
         if ($request->filled('floor') && $request->floor !== 'all') {
             $roomsQuery->where('floor', $request->floor);
         }
@@ -37,9 +40,11 @@ class LandingPageController extends Controller
         $popularRooms = Room::orderBy('price', 'desc')->take(3)->get();
         $availableCount = Room::where('status', 'available')->count();
         $totalRooms = Room::count();
+        $branches = $setting->branches;
 
         return view('landing', compact(
             'setting',
+            'branches',
             'allRooms',
             'popularRooms',
             'availableCount',

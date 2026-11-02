@@ -66,9 +66,18 @@
           number: r.number,
           floor: r.floor,
           type: r.type,
+          location: r.location || 'Lokasi 1',
           price: Number(r.price),
           status: r.status,
           facilities: r.facilities || [],
+          image: r.image || '',
+          images: r.images || [],
+          images_list: r.images_list || [],
+          custom_interior_status: r.custom_interior_status || 'none',
+          custom_interior_budget: Number(r.custom_interior_budget || 0),
+          custom_interior_request: r.custom_interior_request || '',
+          custom_interior_admin_notes: r.custom_interior_admin_notes || '',
+          booked_by_name: r.booked_by_name || '',
           tenant: r.active_tenant ? r.active_tenant.name : null,
           phone: r.active_tenant ? r.active_tenant.phone : '',
           startDate: r.active_tenant ? r.active_tenant.start_date : '',
@@ -359,7 +368,7 @@
   }
 
   // --- TAB: MASTER KAMAR ---
-  function renderRoomsMasterTable(search = '', floorFilter = 'all') {
+  function renderRoomsMasterTable(search = '', floorFilter = 'all', locationFilter = 'all') {
     const tbody = document.getElementById('roomsMasterTableBody');
     const mobileList = document.getElementById('roomsMobileCardList');
     if (!tbody || !mobileList) return;
@@ -370,27 +379,35 @@
     const filtered = appData.rooms.filter(r => {
       const matchSearch = r.number.toLowerCase().includes(search.toLowerCase()) ||
                           r.type.toLowerCase().includes(search.toLowerCase()) ||
+                          (r.location && r.location.toLowerCase().includes(search.toLowerCase())) ||
                           (r.tenant && r.tenant.toLowerCase().includes(search.toLowerCase()));
       const matchFloor = floorFilter === 'all' || String(r.floor) === String(floorFilter);
-      return matchSearch && matchFloor;
+      const matchLocation = locationFilter === 'all' || (r.location || 'Lokasi 1') === locationFilter;
+      return matchSearch && matchFloor && matchLocation;
     });
 
     filtered.forEach(room => {
+      const isLoc2 = room.location === 'Lokasi 2';
+      const locBadge = isLoc2
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;background:#ccfbf1;color:#0f766e;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid #99f6e4;">📍 Lokasi 2 (Ringroad)</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;background:#f0fdfa;color:#0a5661;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid #b2f5ea;">📍 Lokasi 1 (Kampus)</span>`;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-weight:700;font-size:1rem;">#${room.number}</td>
+        <td style="font-weight:800;font-size:1rem;color:#0a5661;">#${room.number}</td>
+        <td>${locBadge}</td>
         <td>
-          <div style="font-weight:600;">${room.type}</div>
-          <div style="font-size:0.75rem;color:var(--text-muted);">${(room.facilities || []).join(', ')}</div>
+          <div style="font-weight:700;color:#1e293b;">${room.type}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">${(room.facilities || []).join(', ')}</div>
         </td>
         <td>Lantai ${room.floor}</td>
-        <td style="font-weight:600;color:var(--brand-primary-light);">${formatRupiah(room.price)}</td>
+        <td style="font-weight:800;color:#0a5661;">${formatRupiah(room.price)}</td>
         <td>${getStatusBadge(room.status)}</td>
         <td>${room.tenant ? `<strong>${room.tenant}</strong>` : '<span style="color:var(--text-muted)">-</span>'}</td>
         <td>
           <div style="display:flex;gap:6px;">
-            <button type="button" class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="window.kosApp.editRoom('${room.number}')">Edit</button>
-            <button type="button" class="btn-secondary" style="padding:4px 10px;font-size:0.78rem;" onclick="window.kosApp.openRoomDetailModal('${room.number}')">Detail</button>
+            <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:0.78rem;font-weight:700;border-radius:8px;" onclick="window.kosApp.editRoom('${room.number}')">Edit</button>
+            <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:0.78rem;font-weight:700;border-radius:8px;" onclick="window.kosApp.openRoomDetailModal('${room.number}')">Detail</button>
           </div>
         </td>
       `;
@@ -400,7 +417,10 @@
       mCard.className = 'mobile-data-card';
       mCard.innerHTML = `
         <div class="mobile-data-header">
-          <span class="mobile-data-title">Kamar #${room.number} (${room.type})</span>
+          <div>
+            <span class="mobile-data-title">Kamar #${room.number} (${room.type})</span>
+            <div style="margin-top:3px;">${locBadge}</div>
+          </div>
           ${getStatusBadge(room.status)}
         </div>
         <div class="mobile-data-row">
@@ -409,16 +429,20 @@
         </div>
         <div class="mobile-data-row">
           <span>Tarif Sewa:</span>
-          <span style="color:var(--brand-primary-light);font-weight:700;">${formatRupiah(room.price)} /bln</span>
+          <span style="color:#0a5661;font-weight:700;">${formatRupiah(room.price)} /bln</span>
         </div>
         <div class="mobile-data-row">
           <span>Penghuni:</span>
           <span>${room.tenant || 'Kosong'}</span>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:6px;" onclick="window.kosApp.editRoom('${room.number}')">Edit Kamar</button>
-          <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:6px;" onclick="window.kosApp.openRoomDetailModal('${room.number}')">Lihat Detail</button>
+          <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:6px;border-radius:8px;" onclick="window.kosApp.editRoom('${room.number}')">Edit Kamar</button>
+          <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:6px;border-radius:8px;" onclick="window.kosApp.openRoomDetailModal('${room.number}')">Lihat Detail</button>
         </div>
+      `;
+      mobileList.appendChild(mCard);
+    });
+  }
       `;
       mobileList.appendChild(mCard);
     });
@@ -751,56 +775,61 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     if (!room) return;
 
     document.getElementById('mRoomDetailTitle').textContent = `Detail Kamar #${room.number} (${room.type})`;
+    const locBadge = document.getElementById('mRoomDetailLocBadge');
+    if (locBadge) {
+      locBadge.textContent = '📍 ' + (room.location === 'Lokasi 2' ? 'Lokasi 2 - Ringroad Exclusive' : 'Lokasi 1 - Kampus Utama');
+    }
+
     const body = document.getElementById('mRoomDetailBody');
     const footer = document.getElementById('mRoomDetailFooter');
 
-    const facilitiesHtml = (room.facilities || []).map(f => `<span class="feature-pill" style="padding:4px 10px;font-size:0.8rem;">✓ ${f}</span>`).join(' ');
+    const facilitiesHtml = (room.facilities || []).map(f => `<span class="feature-pill" style="padding:4px 10px;font-size:0.8rem;background:#f0fdfa;color:#0a5661;border:1px solid #ccfbf1;border-radius:6px;font-weight:600;">✓ ${f}</span>`).join(' ');
 
     const roomImgSrc = room.image ? (room.image.startsWith('http') || room.image.startsWith('/') ? room.image : '/' + room.image) : '/assets/images/room_sample.jpg';
 
     body.innerHTML = `
-      <div style="margin-bottom:14px;border-radius:12px;overflow:hidden;max-height:190px;border:1px solid var(--border-color);position:relative;">
-        <img src="${roomImgSrc}" alt="Foto Kamar #${room.number}" style="width:100%;height:190px;object-fit:cover;display:block;">
-        <span style="position:absolute;bottom:10px;left:10px;background:rgba(15,23,42,0.8);color:#ffffff;font-size:0.75rem;font-weight:700;padding:4px 10px;border-radius:999px;">📸 Foto Kamar #${room.number}</span>
+      <div style="margin-bottom:14px;border-radius:16px;overflow:hidden;max-height:200px;border:1px solid var(--border-color);position:relative;box-shadow:0 4px 14px rgba(0,0,0,0.06);">
+        <img src="${roomImgSrc}" alt="Foto Kamar #${room.number}" style="width:100%;height:200px;object-fit:cover;display:block;">
+        <span style="position:absolute;bottom:10px;left:10px;background:rgba(3,35,40,0.85);backdrop-filter:blur(4px);color:#ffffff;font-size:0.75rem;font-weight:700;padding:4px 12px;border-radius:999px;">📸 Foto Kamar #${room.number}</span>
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-color);padding-bottom:12px;">
         <div>
-          <div style="font-size:0.8rem;color:var(--text-muted);">Status Saat Ini</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Status Saat Ini</div>
           <div style="margin-top:4px;">${getStatusBadge(room.status)}</div>
         </div>
         <div style="text-align:right;">
-          <div style="font-size:0.8rem;color:var(--text-muted);">Harga Sewa / Bulan</div>
-          <div style="font-size:1.25rem;font-weight:700;color:var(--brand-primary-light);">${formatRupiah(room.price)}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);font-weight:600;">Harga Sewa / Bulan</div>
+          <div style="font-size:1.25rem;font-weight:800;color:#0a5661;">${formatRupiah(room.price)}</div>
         </div>
       </div>
 
-      <div style="background:var(--bg-surface);padding:14px;border-radius:var(--border-radius-md);">
-        <h4 style="font-size:0.9rem;margin-bottom:8px;color:var(--text-secondary);">Informasi Penghuni:</h4>
+      <div style="background:#f8fafc;padding:14px;border-radius:14px;border:1px solid #e2e8f0;">
+        <h4 style="font-size:0.88rem;margin-bottom:8px;color:#334155;font-weight:700;">Informasi Penghuni:</h4>
         ${room.tenant ? `
-          <div style="font-size:1.05rem;font-weight:700;">${room.tenant}</div>
+          <div style="font-size:1.05rem;font-weight:800;color:#0f172a;">${room.tenant}</div>
           <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:4px;">
-            WhatsApp: <a href="https://wa.me/${room.phone}" target="_blank" style="color:var(--accent-blue);font-weight:600;">${room.phone}</a>
+            WhatsApp: <a href="https://wa.me/${room.phone}" target="_blank" style="color:#0a5661;font-weight:700;text-decoration:none;">📲 ${room.phone}</a>
           </div>
           <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px;">
             Mulai Masuk: ${room.startDate || '-'} • Jatuh Tempo Tiap Tgl <strong>${room.dueDay}</strong>
           </div>
         ` : `
-          <p style="color:var(--text-muted);font-size:0.88rem;">Kamar ini saat ini belum ditempati penghuni.</p>
-          <button type="button" class="btn-primary" style="margin-top:10px;font-size:0.82rem;padding:6px 14px;" onclick="window.kosApp.assignNewTenantToRoom('${room.number}')">
+          <p style="color:var(--text-muted);font-size:0.88rem;margin:0;">Kamar ini saat ini belum ditempati penghuni.</p>
+          <button type="button" class="btn-primary" style="margin-top:10px;font-size:0.82rem;padding:7px 16px;border-radius:10px;font-weight:700;" onclick="window.kosApp.assignNewTenantToRoom('${room.number}')">
             + Isi Penghuni Baru di Kamar Ini
           </button>
         `}
       </div>
 
       <div>
-        <h4 style="font-size:0.88rem;margin-bottom:8px;color:var(--text-secondary);">Fasilitas Lengkap Kamar:</h4>
+        <h4 style="font-size:0.88rem;margin-bottom:8px;color:#334155;font-weight:700;">Fasilitas Lengkap Kamar:</h4>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">${facilitiesHtml}</div>
       </div>
 
       <div class="form-group" style="margin-top:6px;">
-        <label for="changeRoomStatusSelect">Ubah Cepat Status Kamar:</label>
-        <select id="changeRoomStatusSelect" class="form-control" onchange="window.kosApp.changeRoomStatusDirect('${room.number}', this.value)">
+        <label for="changeRoomStatusSelect" style="font-weight:700;font-size:0.82rem;color:#334155;">Ubah Cepat Status Kamar:</label>
+        <select id="changeRoomStatusSelect" class="form-control" style="border-radius:10px;font-weight:700;" onchange="window.kosApp.changeRoomStatusDirect('${room.number}', this.value)">
           <option value="available" ${room.status === 'available' ? 'selected' : ''}>🔵 Kosong (Tersedia)</option>
           <option value="occupied" ${room.status === 'occupied' ? 'selected' : ''}>🟢 Terisi (Lunas)</option>
           <option value="due" ${room.status === 'due' ? 'selected' : ''}>🟡 Terisi (Jatuh Tempo)</option>
@@ -809,30 +838,30 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       </div>
 
       <!-- Custom Interior & Dynamic Budget Admin Section -->
-      <div style="background: rgba(37,99,235,0.04); border: 1px solid rgba(37,99,235,0.2); border-radius: var(--border-radius-md); padding: 14px; margin-top: 14px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <h4 style="font-size:0.88rem;font-weight:700;color:#1e40af;margin:0;display:flex;align-items:center;gap:6px;">
+      <div style="background: #f0fdfa; border: 1.5px solid #ccfbf1; border-radius: 14px; padding: 16px; margin-top: 10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <h4 style="font-size:0.88rem;font-weight:800;color:#0a5661;margin:0;display:flex;align-items:center;gap:6px;">
             <span>🎨</span> Custom Interior & Anggaran
           </h4>
-          <span style="font-size:0.72rem;padding:2px 8px;border-radius:999px;font-weight:700;background:#dbeafe;color:#1e40af;">
+          <span style="font-size:0.72rem;padding:3px 10px;border-radius:999px;font-weight:800;background:#ccfbf1;color:#0f766e;">
             ${(room.custom_interior_status || 'NONE').toUpperCase()}
           </span>
         </div>
 
         ${room.custom_interior_request ? `
-          <div style="font-size:0.82rem;color:var(--text-secondary);background:#ffffff;padding:8px 10px;border-radius:8px;border:1px solid var(--border-color);margin-bottom:10px;">
+          <div style="font-size:0.82rem;color:var(--text-secondary);background:#ffffff;padding:10px 12px;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:10px;">
             <strong>Permintaan Pelanggan (${room.booked_by_name || 'Penghuni'}):</strong><br>${room.custom_interior_request}
           </div>
         ` : `<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:8px;">Belum ada catatan custom interior khusus dari penyewa.</p>`}
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
           <div>
-            <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">Atur Anggaran / Budget (Rp):</label>
-            <input type="number" id="detailRoomCustomBudget" class="form-control" value="${room.custom_interior_budget || 0}" step="10000" style="padding:6px 10px;font-size:0.84rem;">
+            <label style="font-size:0.72rem;font-weight:700;color:#0f766e;display:block;margin-bottom:4px;">Atur Anggaran / Budget (Rp):</label>
+            <input type="number" id="detailRoomCustomBudget" class="form-control" value="${room.custom_interior_budget || 0}" step="10000" style="padding:7px 10px;font-size:0.84rem;border-radius:8px;">
           </div>
           <div>
-            <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">Status Custom Interior:</label>
-            <select id="detailRoomCustomStatus" class="form-control" style="padding:6px 10px;font-size:0.84rem;">
+            <label style="font-size:0.72rem;font-weight:700;color:#0f766e;display:block;margin-bottom:4px;">Status Custom Interior:</label>
+            <select id="detailRoomCustomStatus" class="form-control" style="padding:7px 10px;font-size:0.84rem;border-radius:8px;font-weight:600;">
               <option value="none" ${(!room.custom_interior_status || room.custom_interior_status === 'none') ? 'selected' : ''}>Tidak Ada (None)</option>
               <option value="pending" ${room.custom_interior_status === 'pending' ? 'selected' : ''}>⏳ Menunggu Review</option>
               <option value="approved" ${room.custom_interior_status === 'approved' ? 'selected' : ''}>✅ Disetujui (Approved)</option>
@@ -844,20 +873,20 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         </div>
 
         <div>
-          <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">Catatan Mas Robi untuk Pelanggan:</label>
-          <input type="text" id="detailRoomCustomNotes" class="form-control" value="${room.custom_interior_admin_notes || ''}" placeholder="Catatan respons terkait bahan/waktu pengerjaan..." style="padding:6px 10px;font-size:0.84rem;margin-bottom:8px;">
+          <label style="font-size:0.72rem;font-weight:700;color:#0f766e;display:block;margin-bottom:4px;">Catatan Mas Robi untuk Pelanggan:</label>
+          <input type="text" id="detailRoomCustomNotes" class="form-control" value="${room.custom_interior_admin_notes || ''}" placeholder="Catatan respons terkait bahan/waktu pengerjaan..." style="padding:7px 10px;font-size:0.84rem;margin-bottom:8px;border-radius:8px;">
         </div>
 
-        <button type="button" class="btn-primary" style="font-size:0.78rem;padding:7px 12px;width:100%;margin-top:2px;" onclick="window.kosApp.saveCustomInteriorDirect('${room.number}')">
+        <button type="button" class="btn-primary" style="font-size:0.8rem;padding:9px 14px;width:100%;margin-top:4px;border-radius:10px;font-weight:800;" onclick="window.kosApp.saveCustomInteriorDirect('${room.number}')">
           💾 Simpan Anggaran & Status Custom Interior
         </button>
       </div>
     `;
 
     footer.innerHTML = `
-      <button type="button" class="btn-secondary" data-close-modal="modalRoomDetail">Tutup</button>
+      <button type="button" class="btn-secondary" data-close-modal="modalRoomDetail" style="border-radius:10px;padding:8px 18px;">Tutup</button>
       ${room.tenant ? `
-        <button type="button" class="btn-primary" onclick="window.kosApp.sendWhatsAppReminder('${room.number}')">
+        <button type="button" class="btn-primary" style="border-radius:10px;padding:8px 18px;font-weight:800;" onclick="window.kosApp.sendWhatsAppReminder('${room.number}')">
           📲 Kirim WA Tagihan
         </button>
       ` : ''}
@@ -951,6 +980,42 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     }
   }
 
+  function syncRoomTypesForLocation(loc, selectedType = null) {
+    const typeSelect = document.getElementById('roomTypeInput');
+    const facInput = document.getElementById('roomFacilitiesInput');
+    if (!typeSelect) return;
+
+    if (loc === 'Lokasi 2') {
+      typeSelect.innerHTML = `
+        <option value="Executive Suite (Balkon)">Executive Suite (Balkon)</option>
+        <option value="Superior AC Plus">Superior AC Plus</option>
+        <option value="Studio Mezzanine">Studio Mezzanine</option>
+      `;
+      if (!selectedType && facInput) {
+        facInput.value = 'Smart Digital Door Lock, Balkon Pribadi, Smart Android TV, AC Inverter, Meja Kerja Ergonomis, KM Dalam, WiFi 100 Mbps';
+      }
+    } else {
+      typeSelect.innerHTML = `
+        <option value="VIP AC (KM Dalam)">VIP AC (KM Dalam)</option>
+        <option value="Deluxe AC">Deluxe AC</option>
+        <option value="Standard Fan (KM Luar)">Standard Fan (KM Luar)</option>
+      `;
+      if (!selectedType && facInput) {
+        facInput.value = 'AC Dingin & Hemat Listrik, Kasur Springbed, Lemari 2 Pintu, Meja Belajar, KM Dalam, Water Heater, WiFi Fiber';
+      }
+    }
+
+    if (selectedType) {
+      if (![...typeSelect.options].some(o => o.value === selectedType)) {
+        const opt = document.createElement('option');
+        opt.value = selectedType;
+        opt.textContent = selectedType;
+        typeSelect.appendChild(opt);
+      }
+      typeSelect.value = selectedType;
+    }
+  }
+
   function editRoom(roomNumber) {
     const room = appData.rooms.find(r => r.number === roomNumber);
     if (!room) return;
@@ -960,7 +1025,16 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     document.getElementById('roomNumberInput').value = room.number;
     document.getElementById('roomNumberInput').disabled = true;
     document.getElementById('roomFloorInput').value = room.floor;
-    document.getElementById('roomTypeInput').value = room.type;
+
+    const locInput = document.getElementById('roomLocationInput');
+    const roomLoc = room.location || 'Lokasi 1';
+    if (locInput) {
+      locInput.value = roomLoc;
+      syncRoomTypesForLocation(roomLoc, room.type);
+    } else {
+      document.getElementById('roomTypeInput').value = room.type;
+    }
+
     document.getElementById('roomPriceInput').value = room.price;
     document.getElementById('roomFacilitiesInput').value = (room.facilities || []).join(', ');
     document.getElementById('roomStatusInput').value = room.status;
@@ -996,6 +1070,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   function initRoomForm() {
     const form = document.getElementById('formAddRoom');
     const btnNew = document.getElementById('btnAddNewRoom');
+    const locInput = document.getElementById('roomLocationInput');
+
+    locInput?.addEventListener('change', (e) => {
+      syncRoomTypesForLocation(e.target.value);
+    });
 
     btnNew?.addEventListener('click', () => {
       document.getElementById('mRoomFormTitle').textContent = 'Tambah Master Kamar Baru';
@@ -1004,7 +1083,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       document.getElementById('roomNumberInput').disabled = false;
       document.getElementById('roomFloorInput').value = '1';
       document.getElementById('roomPriceInput').value = '1500000';
-      document.getElementById('roomFacilitiesInput').value = 'AC, Springbed, Lemari, Meja Belajar, KM Dalam';
+      
+      if (locInput) {
+        locInput.value = 'Lokasi 1';
+        syncRoomTypesForLocation('Lokasi 1');
+      } else {
+        document.getElementById('roomFacilitiesInput').value = 'AC, Springbed, Lemari, Meja Belajar, KM Dalam';
+      }
+
       document.getElementById('roomStatusInput').value = 'available';
       const customStatus = document.getElementById('roomCustomInteriorStatusInput');
       const customBudget = document.getElementById('roomCustomInteriorBudgetInput');
@@ -1032,6 +1118,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const editId = document.getElementById('roomEditId').value;
       const number = document.getElementById('roomNumberInput').value.trim();
       const floor = Number(document.getElementById('roomFloorInput').value);
+      const location = document.getElementById('roomLocationInput')?.value || 'Lokasi 1';
       const type = document.getElementById('roomTypeInput').value;
       const price = Number(document.getElementById('roomPriceInput').value);
       const facilities = document.getElementById('roomFacilitiesInput').value.split(',').map(s => s.trim()).filter(Boolean);
@@ -1061,6 +1148,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             number,
             floor,
             type,
+            location,
             price,
             facilities,
             status,
@@ -1119,16 +1207,36 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const select = document.getElementById('tenantSelectRoom');
     select.innerHTML = '';
 
-    appData.rooms.forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.id; // DB ID
-      opt.setAttribute('data-number', r.number);
-      opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? 'Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
-      if (targetRoomNumber && r.number === targetRoomNumber) {
-        opt.selected = true;
-      }
-      select.appendChild(opt);
-    });
+    const loc1Rooms = appData.rooms.filter(r => (r.location || 'Lokasi 1') === 'Lokasi 1');
+    const loc2Rooms = appData.rooms.filter(r => r.location === 'Lokasi 2');
+
+    if (loc1Rooms.length > 0) {
+      const grp1 = document.createElement('optgroup');
+      grp1.label = '📍 Lokasi 1 - Kampus Utama (Pandega Marta)';
+      loc1Rooms.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.setAttribute('data-number', r.number);
+        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? '🟢 Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
+        if (targetRoomNumber && r.number === targetRoomNumber) opt.selected = true;
+        grp1.appendChild(opt);
+      });
+      select.appendChild(grp1);
+    }
+
+    if (loc2Rooms.length > 0) {
+      const grp2 = document.createElement('optgroup');
+      grp2.label = '📍 Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)';
+      loc2Rooms.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.setAttribute('data-number', r.number);
+        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? '🟢 Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
+        if (targetRoomNumber && r.number === targetRoomNumber) opt.selected = true;
+        grp2.appendChild(opt);
+      });
+      select.appendChild(grp2);
+    }
 
     function updateRentTariff() {
       const selectedId = select.value;
@@ -1567,106 +1675,140 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       }
     });
 
-    // Live update Google Maps preview & test button
-    const setGmapsUrlInput = document.getElementById('setGmapsUrl');
-    const setGmapsEmbedInput = document.getElementById('setGmapsEmbed');
-    const setKosAddressInput = document.getElementById('setKosAddress');
-    const gmapsPreviewIframe = document.getElementById('gmapsPreviewIframe');
-    const btnTestGmapsUrl = document.getElementById('btnTestGmapsUrl');
+    // Switcher 2 Titik Lokasi Settings
+    window.switchBranchSettings = function(branchKey) {
+      const p1 = document.getElementById('panelBranch1');
+      const p2 = document.getElementById('panelBranch2');
+      const t1 = document.getElementById('btnTabBranch1');
+      const t2 = document.getElementById('btnTabBranch2');
 
-    function updateGmapsPreview() {
-      if (!gmapsPreviewIframe) return;
-      const inputVal = setGmapsUrlInput?.value.trim() || '';
-      if (!inputVal) return;
-      let embedVal = inputVal;
+      if (branchKey === 'lokasi_2') {
+        if (p1) p1.style.display = 'none';
+        if (p2) p2.style.display = 'flex';
+        if (t1) {
+          t1.style.background = 'transparent';
+          t1.style.color = 'rgba(255,255,255,0.8)';
+          t1.style.boxShadow = 'none';
+        }
+        if (t2) {
+          t2.style.background = '#ffffff';
+          t2.style.color = '#0d9488';
+          t2.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        }
+      } else {
+        if (p1) p1.style.display = 'flex';
+        if (p2) p2.style.display = 'none';
+        if (t1) {
+          t1.style.background = '#ffffff';
+          t1.style.color = '#0a5661';
+          t1.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        }
+        if (t2) {
+          t2.style.background = 'transparent';
+          t2.style.color = 'rgba(255,255,255,0.8)';
+          t2.style.boxShadow = 'none';
+        }
+      }
+    };
 
+    function resolveLiveEmbed(rawUrl, fallbackAddr) {
+      let embedVal = (rawUrl || '').trim();
+      if (!embedVal) {
+        return 'https://maps.google.com/maps?q=' + encodeURIComponent(fallbackAddr || 'Yogyakarta') + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+      }
       if (embedVal.includes('<iframe')) {
         const match = embedVal.match(/src=["']([^"']+)["']/);
         if (match && match[1]) embedVal = match[1];
       }
-
-      // Prioritas 1: Nama tempat (/place/Nama+Tempat)
       const placeMatch = embedVal.match(/place\/([^\/@?#]+)/);
       if (placeMatch && placeMatch[1]) {
         const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
         if (placeName && placeName.toLowerCase() !== 'dropped pin') {
-          embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(placeName) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-          gmapsPreviewIframe.src = embedVal;
-          if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
-          return;
+          return 'https://maps.google.com/maps?q=' + encodeURIComponent(placeName) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
         }
       }
-
-      // Prioritas 2: Pin asli (!3d<lat>!4d<lng>)
       const pinMatch = embedVal.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/);
       if (pinMatch) {
-        embedVal = 'https://maps.google.com/maps?q=' + pinMatch[1] + ',' + pinMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-        gmapsPreviewIframe.src = embedVal;
-        if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
-        return;
+        return 'https://maps.google.com/maps?q=' + pinMatch[1] + ',' + pinMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
       }
-
-      // Prioritas 3: Parameter q=
       if (embedVal.includes('q=')) {
         try {
           const urlObj = new URL(embedVal.startsWith('http') ? embedVal : 'https://' + embedVal);
           const qParam = urlObj.searchParams.get('q');
           if (qParam) {
-            embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(qParam) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-            gmapsPreviewIframe.src = embedVal;
-            if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
-            return;
+            return 'https://maps.google.com/maps?q=' + encodeURIComponent(qParam) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
           }
         } catch (e) {}
       }
-
-      // Prioritas 4: @lat,lng kamera hanya jika bukan shortlink
-      const coordMatch = embedVal.match(/@(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/);
-      if (coordMatch) {
-        embedVal = 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-        gmapsPreviewIframe.src = embedVal;
-        if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
-        return;
-      }
-
-      // Jika shortlink, jangan generate koordinat samudra
       if (embedVal.includes('maps.app.goo.gl') || embedVal.includes('goo.gl/maps')) {
-        const addr = setKosAddressInput?.value.trim() || 'Universitas Jember';
-        embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-      } else if (!embedVal.includes('google.com/maps/embed') && !embedVal.includes('output=embed')) {
-        embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(embedVal) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        return 'https://maps.google.com/maps?q=' + encodeURIComponent(fallbackAddr || 'Yogyakarta') + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
       }
-
-      if (embedVal && gmapsPreviewIframe) {
-        gmapsPreviewIframe.src = embedVal;
+      if (!embedVal.includes('google.com/maps/embed') && !embedVal.includes('output=embed')) {
+        return 'https://maps.google.com/maps?q=' + encodeURIComponent(embedVal) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
       }
-
-      if (btnTestGmapsUrl) {
-        btnTestGmapsUrl.href = inputVal || '#';
-      }
+      return embedVal;
     }
 
-    setGmapsUrlInput?.addEventListener('input', () => {
-      if (setGmapsEmbedInput) setGmapsEmbedInput.value = setGmapsUrlInput.value;
-      updateGmapsPreview();
+    // Live update maps on input for Branch 1 and Branch 2
+    document.getElementById('b1_gmaps_url')?.addEventListener('input', (e) => {
+      const iframe1 = document.getElementById('iframePreviewB1');
+      const addr1 = document.getElementById('b1_address')?.value.trim();
+      if (iframe1) iframe1.src = resolveLiveEmbed(e.target.value, addr1);
     });
-    setGmapsUrlInput?.addEventListener('paste', () => {
-      setTimeout(() => {
-        if (setGmapsEmbedInput) setGmapsEmbedInput.value = setGmapsUrlInput.value;
-        updateGmapsPreview();
-      }, 50);
-    });
-    setKosAddressInput?.addEventListener('change', () => {
-      if (!setGmapsUrlInput?.value.trim()) {
-        updateGmapsPreview();
-      }
+
+    document.getElementById('b2_gmaps_url')?.addEventListener('input', (e) => {
+      const iframe2 = document.getElementById('iframePreviewB2');
+      const addr2 = document.getElementById('b2_address')?.value.trim();
+      if (iframe2) iframe2.src = resolveLiveEmbed(e.target.value, addr2);
     });
 
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const kosAddress = document.getElementById('setKosAddress').value.trim();
-      const gmapsUrl = setGmapsUrlInput ? setGmapsUrlInput.value.trim() : '';
-      const gmapsEmbed = setGmapsEmbedInput ? setGmapsEmbedInput.value.trim() : '';
+
+      const b1_name = document.getElementById('b1_name')?.value.trim() || 'Kos Mas Robi 1 - Kampus Utama';
+      const b1_tagline = document.getElementById('b1_tagline')?.value.trim() || '';
+      const b1_address = document.getElementById('b1_address')?.value.trim() || '';
+      const b1_gmaps_url = document.getElementById('b1_gmaps_url')?.value.trim() || '';
+      const b1_gmaps_embed = document.getElementById('b1_gmaps_embed')?.value.trim() || '';
+      const b1_room_types = (document.getElementById('b1_room_types')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+      const b1_facilities = (document.getElementById('b1_facilities')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+
+      const b2_name = document.getElementById('b2_name')?.value.trim() || 'Kos Mas Robi 2 - Ringroad Exclusive';
+      const b2_tagline = document.getElementById('b2_tagline')?.value.trim() || '';
+      const b2_address = document.getElementById('b2_address')?.value.trim() || '';
+      const b2_gmaps_url = document.getElementById('b2_gmaps_url')?.value.trim() || '';
+      const b2_gmaps_embed = document.getElementById('b2_gmaps_embed')?.value.trim() || '';
+      const b2_room_types = (document.getElementById('b2_room_types')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+      const b2_facilities = (document.getElementById('b2_facilities')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+
+      const branchesPayload = {
+        lokasi_1: {
+          id: 'lokasi_1',
+          code: 'Lokasi 1',
+          name: b1_name,
+          tagline: b1_tagline,
+          address: b1_address,
+          gmaps_url: b1_gmaps_url,
+          gmaps_embed: b1_gmaps_embed,
+          room_types: b1_room_types,
+          facilities: b1_facilities,
+          badge: 'Kampus Utama',
+          color: '#0a5661'
+        },
+        lokasi_2: {
+          id: 'lokasi_2',
+          code: 'Lokasi 2',
+          name: b2_name,
+          tagline: b2_tagline,
+          address: b2_address,
+          gmaps_url: b2_gmaps_url,
+          gmaps_embed: b2_gmaps_embed,
+          room_types: b2_room_types,
+          facilities: b2_facilities,
+          badge: 'Ringroad Exclusive',
+          color: '#0d9488'
+        }
+      };
 
       // Collect 4 location highlights
       const highlightItems = [];
@@ -1686,19 +1828,27 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             'X-CSRF-TOKEN': getCsrfToken()
           },
           body: JSON.stringify({
-            kos_address: kosAddress,
-            gmaps_url: gmapsUrl,
-            gmaps_embed: gmapsEmbed,
+            branches: branchesPayload,
+            kos_address: b1_address,
+            gmaps_url: b1_gmaps_url,
             location_highlights: highlightItems
           })
         });
         const data = await res.json();
-        showToast('Titik lokasi Google Maps & 4 poin akses berhasil disimpan!', 'success');
-        if (data.setting && data.setting.final_embed_url && gmapsPreviewIframe) {
-          gmapsPreviewIframe.src = data.setting.final_embed_url;
+        showToast('Pengaturan 2 Titik Lokasi & Peta Google Maps berhasil disimpan!', 'success');
+        
+        if (data.setting && data.setting.branches) {
+          const if1 = document.getElementById('iframePreviewB1');
+          const if2 = document.getElementById('iframePreviewB2');
+          if (if1 && data.setting.branches.lokasi_1) {
+            if1.src = resolveLiveEmbed(data.setting.branches.lokasi_1.gmaps_embed || data.setting.branches.lokasi_1.gmaps_url, b1_address);
+          }
+          if (if2 && data.setting.branches.lokasi_2) {
+            if2.src = resolveLiveEmbed(data.setting.branches.lokasi_2.gmaps_embed || data.setting.branches.lokasi_2.gmaps_url, b2_address);
+          }
         }
       } catch (err) {
-        showToast('Gagal menyimpan lokasi ke server', 'warning');
+        showToast('Gagal menyimpan pengaturan lokasi ke server', 'warning');
       }
     });
 
@@ -1792,8 +1942,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     const roomSearch = document.getElementById('roomSearchInput');
     let currentFloor = 'all';
+    let currentLocation = 'all';
+
     roomSearch?.addEventListener('input', (e) => {
-      renderRoomsMasterTable(e.target.value, currentFloor);
+      renderRoomsMasterTable(e.target.value, currentFloor, currentLocation);
     });
 
     document.querySelectorAll('#roomTabFilters .filter-pill').forEach(btn => {
@@ -1801,7 +1953,26 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         document.querySelectorAll('#roomTabFilters .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFloor = btn.getAttribute('data-floor');
-        renderRoomsMasterTable(roomSearch?.value || '', currentFloor);
+        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation);
+      });
+    });
+
+    document.querySelectorAll('#roomLocationFilters .loc-filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#roomLocationFilters .loc-filter-btn').forEach(b => {
+          b.classList.remove('active');
+          b.style.background = '#ffffff';
+          b.style.color = b.getAttribute('data-location') === 'Lokasi 2' ? '#0d9488' : '#0a5661';
+          b.style.boxShadow = 'none';
+          b.style.border = '1px solid rgba(10,86,97,0.15)';
+        });
+        btn.classList.add('active');
+        currentLocation = btn.getAttribute('data-location');
+        btn.style.background = currentLocation === 'Lokasi 2' ? '#0d9488' : '#0a5661';
+        btn.style.color = '#ffffff';
+        btn.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+        btn.style.border = 'none';
+        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation);
       });
     });
 

@@ -46,6 +46,10 @@ class DashboardController extends Controller
         $netCashflow = $monthlyIncome - $totalExpense;
         $dueAmount = $rooms->where('status', 'due')->sum('price');
 
+        $branches = $setting->branches;
+        $roomsLoc1 = $rooms->filter(fn($r) => ($r->location ?? 'Lokasi 1') === 'Lokasi 1');
+        $roomsLoc2 = $rooms->filter(fn($r) => ($r->location ?? '') === 'Lokasi 2');
+
         // Analisis Keuangan Berdasarkan Tahun (Mulai 2026 s/d Tak Terhingga)
         $selectedYear = (int)$request->input('year', 2026);
         if ($selectedYear < 2026) {
@@ -148,7 +152,10 @@ class DashboardController extends Controller
             'billingList',
             'activeTickets',
             'roomTransfers',
-            'pendingTransfersCount'
+            'pendingTransfersCount',
+            'branches',
+            'roomsLoc1',
+            'roomsLoc2'
         ));
     }
 
@@ -231,6 +238,7 @@ class DashboardController extends Controller
             'number' => 'required|string',
             'floor' => 'required|integer',
             'type' => 'required|string',
+            'location' => 'nullable|string',
             'price' => 'required|numeric',
             'facilities' => 'nullable|array',
             'status' => 'required|in:available,occupied,due,repair',
@@ -241,6 +249,10 @@ class DashboardController extends Controller
             'custom_interior_status' => 'nullable|string|in:none,pending,approved,in_progress,completed,rejected',
             'custom_interior_admin_notes' => 'nullable|string',
         ]);
+
+        if (empty($validated['location'])) {
+            $validated['location'] = 'Lokasi 1';
+        }
 
         // Support array of up to 4 slide images
         if ($request->has('images') && is_array($request->input('images'))) {
@@ -601,12 +613,35 @@ class DashboardController extends Controller
             'gmaps_url' => 'nullable|string',
             'gmaps_embed' => 'nullable|string',
             'location_highlights' => 'nullable',
+            'branches' => 'nullable',
             'landing_content' => 'nullable',
             'bank_name' => 'nullable|string',
             'bank_account' => 'nullable|string',
             'bank_holder' => 'nullable|string',
             'payment_methods' => 'nullable',
         ]);
+
+        if ($request->has('branches')) {
+            $branches = $request->input('branches');
+            if (is_string($branches)) {
+                $branches = json_decode($branches, true);
+            }
+            if (is_array($branches)) {
+                foreach ($branches as $k => $b) {
+                    $mapIn = trim($b['gmaps_url'] ?? $b['gmaps_embed'] ?? '');
+                    $addr = $b['address'] ?? null;
+                    if (!empty($mapIn)) {
+                        $res = $this->resolveGmapsEmbed($mapIn, $addr);
+                        $branches[$k]['gmaps_embed'] = $res['embed'];
+                        $branches[$k]['gmaps_url'] = $res['url'];
+                    } elseif (!empty($addr)) {
+                        $branches[$k]['gmaps_url'] = 'https://maps.google.com/?q=' . urlencode($addr);
+                        $branches[$k]['gmaps_embed'] = 'https://maps.google.com/maps?q=' . urlencode($addr) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                    }
+                }
+                $validated['branches'] = $branches;
+            }
+        }
 
         if ($request->has('payment_methods')) {
             $pm = $request->input('payment_methods');

@@ -1090,16 +1090,16 @@ ul, ol {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(3, 35, 40, 0.68);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-normal);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   padding: 16px;
 }
 
@@ -1110,17 +1110,17 @@ ul, ol {
 
 .modal-dialog {
   background: #ffffff;
-  border: 1px solid var(--border-color);
-  border-radius: 26px;
+  border: 1px solid rgba(10, 86, 97, 0.15);
+  border-radius: 24px;
   width: 100%;
-  max-width: 540px;
+  max-width: 560px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.2);
-  transform: translateY(20px) scale(0.97);
-  transition: all var(--transition-normal);
+  box-shadow: 0 28px 65px -12px rgba(3, 35, 40, 0.38);
+  transform: translateY(24px) scale(0.96);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-backdrop.open .modal-dialog {
@@ -1128,46 +1128,67 @@ ul, ol {
 }
 
 .modal-header {
-  padding: 18px 22px;
-  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%);
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-radius: 24px 24px 0 0;
 }
 
 .modal-header h3 {
   font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .modal-close-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color var(--transition-fast);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
 }
 
 .modal-close-btn:hover {
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  transform: rotate(90deg);
 }
 
 .modal-body {
-  padding: 22px;
+  padding: 24px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  color: var(--text-primary);
+  background: #ffffff;
 }
 
 .modal-footer {
-  padding: 16px 22px;
-  border-top: 1px solid var(--border-color);
+  padding: 16px 24px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 0 0 24px 24px;
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
@@ -5035,6 +5056,29 @@ body:has(.tp-page) {
 .pm-card-item:hover {
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   transform: translateY(-1px);
+}
+
+/* 2 TITIK LOKASI & MODAL ENHANCEMENTS */
+.loc-filter-btn {
+  font-family: inherit;
+  outline: none;
+}
+.loc-filter-btn:hover {
+  transform: translateY(-1px);
+}
+.branch-pill-tab {
+  font-family: inherit;
+  outline: none;
+}
+.branch-pill-tab:hover {
+  opacity: 0.95;
+}
+.branch-settings-panel {
+  animation: fadeInPanel 0.25s ease;
+}
+@keyframes fadeInPanel {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 640px) {
