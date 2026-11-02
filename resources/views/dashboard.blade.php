@@ -371,59 +371,6 @@
           $b2DueTenantsCount = $rooms->where('location', 'Lokasi 2')->where('status', 'due')->count();
         @endphp
 
-        <!-- PERBEDAAN 2 KOS: KARTU PROFIL & KOMUNITAS PENGHUNI -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
-          <!-- Kos 1 Card -->
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px; position: relative; overflow: hidden; box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.15);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: #059669; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">🌿</div>
-                <div>
-                  <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">Cabang 1 • Area Kampus</span>
-                  <h4 style="margin: 4px 0 0; font-size: 1rem; font-weight: 800; color: #064e3b;">Penghuni Kos Mas Robi 1 (Kampus Utama)</h4>
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 1.35rem; font-weight: 900; color: #059669;" id="tenantCountLoc1">{{ $b1TenantsCount }} Orang</div>
-                <div style="font-size: 0.72rem; color: #047857; font-weight: 700;">Unit #101 – #108</div>
-              </div>
-            </div>
-            <div style="font-size: 0.78rem; color: #065f46; line-height: 1.5; margin-bottom: 12px;">
-              Mayoritas <strong>Mahasiswa UGM & UNY</strong>. Menggunakan sistem <strong>Kunci RFID Gerbang 24 Jam</strong>, fasilitas Dapur Bersama, Parkir Motor Kanopi & jemuran lantai 2.
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
-              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">🔑 Akses: Kartu RFID</span>
-              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">🎓 Mayoritas: Mahasiswa S1/S2</span>
-              <span style="background: rgba(255,255,255,0.85); color: {{ $b1DueTenantsCount > 0 ? '#d97706' : '#059669' }}; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">{{ $b1DueTenantsCount > 0 ? $b1DueTenantsCount . ' Jatuh Tempo' : '✓ Semua Lunas' }}</span>
-            </div>
-          </div>
-
-          <!-- Kos 2 Card -->
-          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px; position: relative; overflow: hidden; box-shadow: 0 8px 24px -8px rgba(13, 148, 136, 0.15);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: #0a5661; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(10, 86, 97, 0.3);">⚡</div>
-                <div>
-                  <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">Cabang 2 • Ringroad Exclusive</span>
-                  <h4 style="margin: 4px 0 0; font-size: 1rem; font-weight: 800; color: #042f2e;">Penghuni Kos Mas Robi 2 (Kaliurang KM 12)</h4>
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 1.35rem; font-weight: 900; color: #0a5661;" id="tenantCountLoc2">{{ $b2TenantsCount }} Orang</div>
-                <div style="font-size: 0.72rem; color: #0f766e; font-weight: 700;">Unit #201 – #208</div>
-              </div>
-            </div>
-            <div style="font-size: 0.78rem; color: #115e59; line-height: 1.5; margin-bottom: 12px;">
-              Mayoritas <strong>Karyawan Eksekutif, Remote Worker & Mahasiswa UII</strong>. Menggunakan <strong>Smart Door Lock PIN & Fingerprint</strong>, Co-Working Space VIP & Parkir Mobil Basement.
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
-              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">🔐 Akses: Smart Door PIN/Biometrik</span>
-              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">💼 Mayoritas: Profesional & Eksekutif</span>
-              <span style="background: rgba(255,255,255,0.85); color: {{ $b2DueTenantsCount > 0 ? '#d97706' : '#0d9488' }}; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">{{ $b2DueTenantsCount > 0 ? $b2DueTenantsCount . ' Jatuh Tempo' : '✓ Semua Lunas' }}</span>
-            </div>
-          </div>
-        </div>
-
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (DATA PENGHUNI) -->
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -503,53 +450,6 @@
           $b2MonthlyPot = $b2RoomsList->whereIn('status', ['occupied', 'due'])->sum('price');
           $b2DueNominal = $b2RoomsList->where('status', 'due')->sum('price');
         @endphp
-
-        <!-- PERBEDAAN 2 KOS: SKEMA TAGIHAN & TARIF SEWA -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
-          <!-- Tagihan Kos 1 -->
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div>
-                <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 TAGIHAN KOS 1 (KAMPUS UTAMA)</span>
-                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #064e3b;">Skema Sewa Mahasiswa & Reguler</h4>
-                <div style="font-size: 0.75rem; color: #047857;">Rentang Tarif: <strong>Rp 850.000 – Rp 1.650.000 / bln</strong></div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 0.7rem; color: #065f46; font-weight: 700;">Total Tagihan Aktif</div>
-                <div style="font-size: 1.15rem; font-weight: 900; color: #059669;">Rp {{ number_format($b1MonthlyPot, 0, ',', '.') }}</div>
-              </div>
-            </div>
-            <div style="font-size: 0.76rem; color: #065f46; margin-bottom: 12px; line-height: 1.45;">
-              Sudah termasuk <strong>Air PDAM, Iuran Sampah & WiFi Kampus 100 Mbps</strong>. Listrik sistem Token Prabayar mandiri per kamar.
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed #6ee7b7; font-size: 0.75rem; font-weight: 700;">
-              <span style="color: #059669;">🟢 Lunas: {{ $b1PaidCount }} Kamar</span>
-              <span style="color: {{ $b1DueCount > 0 ? '#d97706' : '#059669' }};">🟡 Belum Lunas: {{ $b1DueCount }} Kamar (Rp {{ number_format($b1DueNominal, 0, ',', '.') }})</span>
-            </div>
-          </div>
-
-          <!-- Tagihan Kos 2 -->
-          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div>
-                <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ TAGIHAN KOS 2 (RINGROAD EXCLUSIVE)</span>
-                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #042f2e;">Skema Sewa Eksklusif & Smart Living</h4>
-                <div style="font-size: 0.75rem; color: #0f766e;">Rentang Tarif: <strong>Rp 1.450.000 – Rp 2.150.000 / bln</strong></div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 0.7rem; color: #115e59; font-weight: 700;">Total Tagihan Aktif</div>
-                <div style="font-size: 1.15rem; font-weight: 900; color: #0a5661;">Rp {{ number_format($b2MonthlyPot, 0, ',', '.') }}</div>
-              </div>
-            </div>
-            <div style="font-size: 0.76rem; color: #115e59; margin-bottom: 12px; line-height: 1.45;">
-              Sudah termasuk <strong>Akses Co-Working Space VIP, Dedicated WiFi 300 Mbps, Room Cleaning 2x/Bulan</strong> & Parkir Mobil Basement.
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed #5eead4; font-size: 0.75rem; font-weight: 700;">
-              <span style="color: #0d9488;">🟢 Lunas: {{ $b2PaidCount }} Kamar</span>
-              <span style="color: {{ $b2DueCount > 0 ? '#d97706' : '#0d9488' }};">🟡 Belum Lunas: {{ $b2DueCount }} Kamar (Rp {{ number_format($b2DueNominal, 0, ',', '.') }})</span>
-            </div>
-          </div>
-        </div>
 
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (TAGIHAN SEWA) -->
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
@@ -782,65 +682,6 @@
           </div>
         </div>
 
-        <!-- PERBEDAAN 2 KOS: KOMPARASI KINERJA FINANSIAL KOS 1 VS KOS 2 -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
-          <!-- Keuangan Kos 1 -->
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div>
-                <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 NERACA KAS KOS 1 (KAMPUS UTAMA)</span>
-                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #064e3b;">Arus Kas Cabang Pandega Marta</h4>
-              </div>
-              <span style="font-size: 0.72rem; font-weight: 800; color: #059669; background: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 8px; border: 1px solid #a7f3d0;">Unit #101–#108</span>
-            </div>
-            <div style="font-size: 0.76rem; color: #065f46; margin-bottom: 12px; line-height: 1.45;">
-              Karakteristik Kas: <strong>Okupansi stabil mahasiswa tahunan</strong>, pengeluaran operasional hemat (Internet IndiHome 100 Mbps, Air PDAM & Kebersihan Reguler).
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.8); padding: 10px 12px; border-radius: 12px; border: 1px solid #a7f3d0; font-size: 0.74rem;">
-              <div>
-                <div style="color: #047857; font-size: 0.68rem;">Pemasukan Kas</div>
-                <div style="font-weight: 800; color: #059669;" id="finBranch1Inc">Rp 8.400.000</div>
-              </div>
-              <div>
-                <div style="color: #047857; font-size: 0.68rem;">Beban Opex</div>
-                <div style="font-weight: 800; color: #dc2626;" id="finBranch1Exp">Rp 1.650.000</div>
-              </div>
-              <div>
-                <div style="color: #047857; font-size: 0.68rem;">Surplus Bersih</div>
-                <div style="font-weight: 900; color: #064e3b;" id="finBranch1Net">Rp 6.750.000</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Keuangan Kos 2 -->
-          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div>
-                <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ NERACA KAS KOS 2 (RINGROAD EXCLUSIVE)</span>
-                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #042f2e;">Arus Kas Cabang Kaliurang KM 12</h4>
-              </div>
-              <span style="font-size: 0.72rem; font-weight: 800; color: #0a5661; background: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 8px; border: 1px solid #99f6e4;">Unit #201–#208</span>
-            </div>
-            <div style="font-size: 0.76rem; color: #115e59; margin-bottom: 12px; line-height: 1.45;">
-              Karakteristik Kas: <strong>Margin sewa premium Royal Suite & Executive</strong>, beban operasional mencakup Dedicated Fiber 300 Mbps, Smart Lock & Maintenance Co-Working Space.
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.8); padding: 10px 12px; border-radius: 12px; border: 1px solid #99f6e4; font-size: 0.74rem;">
-              <div>
-                <div style="color: #0f766e; font-size: 0.68rem;">Pemasukan Kas</div>
-                <div style="font-weight: 800; color: #0d9488;" id="finBranch2Inc">Rp 13.100.000</div>
-              </div>
-              <div>
-                <div style="color: #0f766e; font-size: 0.68rem;">Beban Opex</div>
-                <div style="font-weight: 800; color: #dc2626;" id="finBranch2Exp">Rp 2.050.000</div>
-              </div>
-              <div>
-                <div style="color: #0f766e; font-size: 0.68rem;">Surplus Bersih</div>
-                <div style="font-weight: 900; color: #042f2e;" id="finBranch2Net">Rp 11.050.000</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (LAPORAN KEUANGAN) -->
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -1025,51 +866,6 @@
           </button>
         </div>
 
-        <!-- PERBEDAAN 2 KOS: TIM TEKNISI & SLA SERVIS FASILITAS -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
-          <!-- Servis Kos 1 -->
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 40px; height: 40px; border-radius: 10px; background: #059669; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🛠️</div>
-                <div>
-                  <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 DIVISI TEKNIS KOS 1 (KAMPUS)</span>
-                  <h4 style="margin: 4px 0 0; font-size: 0.96rem; font-weight: 800; color: #064e3b;">Tim Servis Bangunan & Utilitas Kampus</h4>
-                </div>
-              </div>
-              <span style="font-size: 0.72rem; font-weight: 800; color: #059669; background: #fff; padding: 3px 8px; border-radius: 8px; border: 1px solid #86efac;">Kamar #101–#108</span>
-            </div>
-            <div style="font-size: 0.76rem; color: #065f46; margin-bottom: 10px; line-height: 1.45;">
-              Fokus Perawatan: <strong>AC Split Standard/VIP, Pompa Air & Kran PDAM, Kunci Pintu Konvensional/RFID, Lampu & Instalasi Listrik</strong>.
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
-              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">👷 PIC Teknis: Pak Budi (0812-3344-5566)</span>
-              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">⏱️ Jadwal Cuci AC: Tiap 3 Bulan</span>
-            </div>
-          </div>
-
-          <!-- Servis Kos 2 -->
-          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 40px; height: 40px; border-radius: 10px; background: #0a5661; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">⚡</div>
-                <div>
-                  <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ DIVISI SMART SYSTEM KOS 2 (RINGROAD)</span>
-                  <h4 style="margin: 4px 0 0; font-size: 0.96rem; font-weight: 800; color: #042f2e;">Tim Teknisi Smart Home & Co-Working</h4>
-                </div>
-              </div>
-              <span style="font-size: 0.72rem; font-weight: 800; color: #0a5661; background: #fff; padding: 3px 8px; border-radius: 8px; border: 1px solid #5eead4;">Kamar #201–#208</span>
-            </div>
-            <div style="font-size: 0.76rem; color: #115e59; margin-bottom: 10px; line-height: 1.45;">
-              Fokus Perawatan: <strong>Smart Door Lock PIN/Biometrik, Water Heater Ariston, Smart TV Android, AC Inverter & Mesh WiFi 6 Co-Working</strong>.
-            </div>
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
-              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">👨‍🔧 PIC Smart Tech: Mas Dani (0813-9988-7766)</span>
-              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">🚀 Respon Prioritas: &lt; 2 Jam</span>
-            </div>
-          </div>
-        </div>
-
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (KELUHAN & SERVIS) -->
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -1128,33 +924,6 @@
            PANE 5B: TAB PERSETUJUAN PINDAH KAMAR (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-transfers">
-        <!-- PERBEDAAN 2 KOS: ATURAN MUTASI INTERNAL VS LINTAS CABANG -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 18px;">
-          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 16px; padding: 16px;">
-            <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 MUTASI INTERNAL KOS 1</span>
-            <h4 style="margin: 6px 0 4px; font-size: 0.92rem; font-weight: 800; color: #064e3b;">Antar Kamar #101 s/d #108</h4>
-            <p style="font-size: 0.75rem; color: #065f46; margin: 0; line-height: 1.45;">
-              Upgrade dari <strong>Standard Fan ➔ Deluxe/VIP AC</strong> di Kampus Utama. Gratis biaya admin pindah kamar, hanya penyesuaian selisih harga sewa prorata.
-            </p>
-          </div>
-
-          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 16px; padding: 16px;">
-            <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ MUTASI INTERNAL KOS 2</span>
-            <h4 style="margin: 6px 0 4px; font-size: 0.92rem; font-weight: 800; color: #042f2e;">Antar Kamar #201 s/d #208</h4>
-            <p style="font-size: 0.75rem; color: #115e59; margin: 0; line-height: 1.45;">
-              Perpindahan <strong>Executive Studio ➔ Royal Suite / Smart Corner</strong> di Ringroad Exclusive. Termasuk reset kode PIN Smart Door Lock otomatis.
-            </p>
-          </div>
-
-          <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1.5px solid #93c5fd; border-radius: 16px; padding: 16px;">
-            <span style="font-size: 0.68rem; font-weight: 800; background: #1d4ed8; color: #fff; padding: 2px 8px; border-radius: 999px;">🔄 MUTASI LINTAS CABANG (KOS 1 ⇄ KOS 2)</span>
-            <h4 style="margin: 6px 0 4px; font-size: 0.92rem; font-weight: 800; color: #1e3a8a;">Pindah Lokasi Kampus ⇄ Ringroad</h4>
-            <p style="font-size: 0.75rem; color: #1e40af; margin: 0; line-height: 1.45;">
-              Memfasilitasi penghuni yang pindah kerja/kampus antar lokasi. Deposit sewa otomatis ditransfer ke pembukuan cabang tujuan.
-            </p>
-          </div>
-        </div>
-
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (PINDAH KAMAR) -->
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -1309,7 +1078,7 @@
               <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px);">⚙️</div>
               <div>
                 <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
-                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & rekening pembayaran kost</p>
+                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & jaringan WiFi kost</p>
               </div>
             </div>
           </div>
@@ -1328,7 +1097,7 @@
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span style="font-size: 1.1rem;">⚙️</span>
-              <span>Profil & Rekening</span>
+              <span>Profil Kos</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span style="font-size: 1.1rem;">📶</span>
@@ -1726,7 +1495,7 @@
         </div>
 
         <!-- =========================================================================
-             SUBTAB 3: PROFIL KOS & REKENING PEMBAYARAN
+             SUBTAB 3: PROFIL KOS & MANAJEMEN DATA
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-profile" style="display: none;">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
@@ -1757,138 +1526,12 @@
                 </div>
                 <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 6px; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Profil Kos</button>
               </form>
-            </div>
 
-            <!-- Payment Account Card -->
-            <div class="settings-modern-card" style="margin-bottom: 0;">
-              <div class="settings-card-header">
-                <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge teal">💳</div>
-                  <div>
-                    <h3 class="settings-card-title">Kelola Rekening & Metode Pembayaran Sewa</h3>
-                    <div class="settings-card-subtitle">Buat metode pembayaran apa saja (Bank, QRIS, dll) & pilih mana yang ditayangkan ke pelanggan</div>
-                  </div>
-                </div>
-              </div>
-
-              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.82rem; color: #166534; line-height: 1.5;">
-                <strong>💡 Pengaturan Pembayaran Pelanggan:</strong> Anda dapat membuat metode pembayaran baru (Transfer Bank apa saja, QRIS, e-Wallet, atau Tunai) dan mengaktifkan centang <strong>"Tayangkan di Pelanggan"</strong> untuk menentukan metode mana yang muncul pada form pembayaran anak kos.
-              </div>
-
-              {{-- Daftar Metode Pembayaran Dinamis --}}
-              <div id="paymentMethodsList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-                @php
-                  $allMethods = $setting->payment_methods ?? [];
-                @endphp
-                @foreach($allMethods as $i => $m)
-                  <div class="pm-card-item" data-index="{{ $i }}" data-id="{{ $m['id'] ?? 'pm_'.$i }}" style="background: var(--bg-surface); border: 1.5px solid {{ !empty($m['is_active']) ? '#10b981' : 'var(--border-color)' }}; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                      <div style="display: flex; align-items: center; gap: 10px;">
-                        <span style="font-size: 1.3rem;">
-                          @if(($m['type'] ?? '') === 'qris') 📱 @elseif(($m['type'] ?? '') === 'cash') 💵 @elseif(($m['type'] ?? '') === 'ewallet') 💳 @else 🏦 @endif
-                        </span>
-                        <div>
-                          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);" class="pm-name-text">{{ $m['name'] }}</div>
-                          <div style="font-size: 0.76rem; color: var(--text-secondary);" class="pm-bank-text">{{ $m['bank_name'] ?? $m['name'] }}</div>
-                        </div>
-                      </div>
-                      <div style="display: flex; align-items: center; gap: 8px;">
-                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; background: {{ !empty($m['is_active']) ? '#dcfce7' : '#f1f5f9' }}; color: {{ !empty($m['is_active']) ? '#15803d' : '#64748b' }}; padding: 4px 10px; border-radius: 999px;">
-                          <input type="checkbox" class="pm-active-toggle" {{ !empty($m['is_active']) ? 'checked' : '' }} onchange="togglePmActive(this)">
-                          <span class="pm-toggle-label">{{ !empty($m['is_active']) ? '● Ditayangkan' : '○ Disembunyikan' }}</span>
-                        </label>
-                        <button type="button" class="btn-secondary" onclick="deletePmItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus Metode">
-                          ✕
-                        </button>
-                      </div>
-                    </div>
-                    
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
-                      <div>
-                        <span style="color: var(--text-secondary); font-size: 0.7rem; display: block;">No. Rekening / NMID:</span>
-                        <strong class="pm-number-text" style="color: var(--text-primary); font-family: monospace; font-size: 0.85rem;">{{ $m['account_number'] ?? '-' }}</strong>
-                      </div>
-                      <div>
-                        <span style="color: var(--text-secondary); font-size: 0.7rem; display: block;">Atas Nama:</span>
-                        <strong class="pm-holder-text" style="color: var(--text-primary);">{{ $m['account_holder'] ?? '-' }}</strong>
-                      </div>
-                    </div>
-
-                    @if(!empty($m['instructions']))
-                      <div style="font-size: 0.74rem; color: var(--text-secondary); font-style: italic;" class="pm-inst-text">
-                        📝 {{ $m['instructions'] }}
-                      </div>
-                    @endif
-                    <input type="hidden" class="pm-raw-data" value="{{ json_encode($m) }}">
-                  </div>
-                @endforeach
-              </div>
-
-              {{-- Tombol Tambah & Form Tambah Metode Baru --}}
-              <div style="margin-bottom: 20px;">
-                <button type="button" id="btnToggleAddPm" onclick="toggleAddPmForm()" class="btn-secondary" style="width: 100%; border-style: dashed; padding: 12px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                  <span>➕ Tambah Rekening / Metode Pembayaran Baru (Bank / QRIS / dll)</span>
-                </button>
-
-                <div id="addPmFormBox" style="display: none; background: var(--bg-surface); border: 1.5px solid var(--primary); border-radius: 16px; padding: 18px; margin-top: 14px;">
-                  <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px;">Tambah Metode Pembayaran Baru</h4>
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
-                    <div class="form-group">
-                      <label style="font-size: 0.78rem; font-weight: 700;">Tipe Pembayaran</label>
-                      <select id="newPmType" class="form-control" onchange="handleNewPmTypeChange(this.value)">
-                        <option value="bank">Transfer Bank (BCA, Mandiri, BRI, BNI, Jago, dll)</option>
-                        <option value="qris">QRIS All Payment / Barcode</option>
-                        <option value="ewallet">E-Wallet (GoPay, OVO, Dana, ShopeePay)</option>
-                        <option value="cash">Tunai (Cash ke Mas Robi)</option>
-                      </select>
-                    </div>
-                    <div class="form-group">
-                      <label style="font-size: 0.78rem; font-weight: 700;">Nama Metode Tampilan *</label>
-                      <input type="text" id="newPmName" class="form-control" placeholder="Contoh: Transfer Bank Jago / QRIS Toko">
-                    </div>
-                    <div class="form-group">
-                      <label style="font-size: 0.78rem; font-weight: 700;">Nama Bank / Penyedia</label>
-                      <input type="text" id="newPmBank" class="form-control" placeholder="Contoh: Bank Jago / QRIS Resmi">
-                    </div>
-                    <div class="form-group">
-                      <label style="font-size: 0.78rem; font-weight: 700;">Nomor Rekening / NMID / No HP</label>
-                      <input type="text" id="newPmNumber" class="form-control" placeholder="Contoh: 1029384756 / 0812xxxx">
-                    </div>
-                    <div class="form-group">
-                      <label style="font-size: 0.78rem; font-weight: 700;">Atas Nama Pemilik</label>
-                      <input type="text" id="newPmHolder" class="form-control" placeholder="Contoh: Robi Suryanto" value="{{ $setting->owner_name ?? 'Robi Suryanto' }}">
-                    </div>
-                  </div>
-                  <div class="form-group" style="margin-bottom: 16px;">
-                    <label style="font-size: 0.78rem; font-weight: 700;">Instruksi Pembayaran untuk Pelanggan (Opsional)</label>
-                    <input type="text" id="newPmInstructions" class="form-control" placeholder="Contoh: Scan QRIS via m-Banking atau transfer ke nomor di atas lalu unggah bukti transfer.">
-                  </div>
-                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
-                      <input type="checkbox" id="newPmIsActive" checked>
-                      <span>Langsung Tayangkan ke Pelanggan</span>
-                    </label>
-                    <div style="display: flex; gap: 8px;">
-                      <button type="button" class="btn-secondary" onclick="toggleAddPmForm()" style="padding: 8px 16px; border-radius: 10px;">Batal</button>
-                      <button type="button" class="btn-primary" onclick="submitAddNewPaymentMethod()" style="padding: 8px 18px; border-radius: 10px; font-weight: 800;">Simpan Metode Baru</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {{-- Tombol Simpan Permanen Semua Perubahan Pembayaran --}}
-              <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px;">
-                <button type="button" id="btnSaveAllPaymentMethods" onclick="saveAllPaymentMethodsToServer()" class="btn-primary" style="padding: 11px 24px; border-radius: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
-                  <span>💾 Simpan Perubahan Metode Pembayaran</span>
-                </button>
-                <span id="pmSaveStatus" style="font-size: 0.82rem; font-weight: 700;"></span>
-              </div>
-
-              <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
+              <hr style="border: none; border-top: 1px solid var(--border-color); margin: 22px 0;">
 
               <div>
                 <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data & Cadangan</h4>
-                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database SQLite Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
+                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                   <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">📥 Unduh Cadangan JSON</button>
                   <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">🔄 Reset Data Sampel</button>
@@ -1920,45 +1563,6 @@
               $wfLoc1Count = collect($allWifis)->filter(fn($w) => ($w['location'] ?? 'Lokasi 1') === 'Lokasi 1')->count();
               $wfLoc2Count = collect($allWifis)->filter(fn($w) => ($w['location'] ?? 'Lokasi 1') === 'Lokasi 2')->count();
             @endphp
-
-            <!-- PERBEDAAN 2 KOS: INFRASTRUKTUR JARINGAN INTERNET KOS 1 VS KOS 2 -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; margin-bottom: 18px;">
-              <!-- Infrastruktur WiFi Kos 1 -->
-              <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 16px; padding: 16px 18px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
-                  <div>
-                    <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 INFRASTRUKTUR WIFI KOS 1</span>
-                    <h4 style="margin: 5px 0 2px; font-size: 0.95rem; font-weight: 800; color: #064e3b;">Kampus Utama (Pandega Marta)</h4>
-                  </div>
-                  <span style="font-size: 0.74rem; font-weight: 800; color: #059669; background: #fff; padding: 3px 9px; border-radius: 8px; border: 1px solid #86efac;">{{ $wfLoc1Count }} SSID</span>
-                </div>
-                <p style="font-size: 0.75rem; color: #065f46; margin: 0 0 10px; line-height: 1.45;">
-                  Provider: <strong>IndiHome & Biznet Fiber 100 Mbps</strong>. Menggunakan Router ZTE F670L Dual-Band (Lt. 1), TP-Link Archer AX23 (Lt. 2) & Access Point Gazebo Belajar.
-                </p>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.7rem; font-weight: 700;">
-                  <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">⚡ Bandwidth: Up to 100 Mbps</span>
-                  <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">🏠 Cakupan: Kamar #101–#108</span>
-                </div>
-              </div>
-
-              <!-- Infrastruktur WiFi Kos 2 -->
-              <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 16px; padding: 16px 18px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
-                  <div>
-                    <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ INFRASTRUKTUR WIFI KOS 2</span>
-                    <h4 style="margin: 5px 0 2px; font-size: 0.95rem; font-weight: 800; color: #042f2e;">Ringroad Exclusive (Kaliurang KM 12)</h4>
-                  </div>
-                  <span style="font-size: 0.74rem; font-weight: 800; color: #0a5661; background: #fff; padding: 3px 9px; border-radius: 8px; border: 1px solid #5eead4;">{{ $wfLoc2Count }} SSID</span>
-                </div>
-                <p style="font-size: 0.75rem; color: #115e59; margin: 0 0 10px; line-height: 1.45;">
-                  Provider: <strong>Biznet Dedicated Metro 300 Mbps</strong>. Menggunakan Ruijie Reyee Mesh WiFi 6 AX3200, Ubiquiti UniFi 6 Pro (Co-Working Space) & Xiaomi AX3000.
-                </p>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.7rem; font-weight: 700;">
-                  <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 3px 8px; border-radius: 6px; border: 1px solid #99f6e4;">🚀 Bandwidth: Dedicated 300 Mbps</span>
-                  <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 3px 8px; border-radius: 6px; border: 1px solid #99f6e4;">🏢 Cakupan: Kamar #201–#208 & Co-Working</span>
-                </div>
-              </div>
-            </div>
 
             <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (JARINGAN WIFI) -->
             <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
