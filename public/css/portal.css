@@ -4045,3 +4045,163 @@ textarea.form-control {
     font-size: 0.72rem;
   }
 }
+
+/* ==========================================================================
+   ENHANCED MODERN UI REFINEMENTS (PORTAL PELANGGAN KOS MAS ROBI)
+   ========================================================================== */
+.tp-details-branch-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(135deg, #032328 0%, #063d45 50%, #0a5661 100%);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin: 12px 0 16px;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 14px rgba(3, 35, 40, 0.18);
+}
+
+.tp-details-branch-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.tp-details-branch-icon {
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.12);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tp-details-branch-title {
+  font-weight: 800;
+  font-size: 0.88rem;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.tp-details-branch-addr {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tp-details-branch-maps {
+  background: #ffffff;
+  color: #0a5661;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tp-details-branch-maps:hover {
+  background: #f0fdfa;
+  transform: translateY(-1px);
+  color: #0d9488;
+}
+
+/* Polished WhatsApp Primary Button */
+.tp-btn-wa-green {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35) !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  padding: 14px 24px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tp-btn-wa-green:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #0e7467 100%) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.45) !important;
+}
+
+/* Polished Navbar Brand & Profile */
+.tp-navbar {
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04) !important;
+}
+
+.tp-btn-profile {
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  padding: 4px 14px 4px 5px !important;
+  border-radius: 999px !important;
+  transition: all 0.2s ease !important;
+}
+
+.tp-btn-profile:hover {
+  background: #ffffff !important;
+  border-color: #0a5661 !important;
+  box-shadow: 0 4px 14px rgba(10, 86, 97, 0.12) !important;
+  transform: translateY(-1px) !important;
+}
+
+.tp-btn-profile-initial {
+  background: linear-gradient(135deg, #0d9488 0%, #0a5661 100%) !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(10, 86, 97, 0.3) !important;
+}
+
+/* Polished Quick Access Tiles */
+.tp-quick-tile {
+  background: #ffffff !important;
+  border: 1.5px solid #f1f5f9 !important;
+  border-radius: 18px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tp-quick-tile:hover {
+  border-color: #0a5661 !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 25px -4px rgba(10, 86, 97, 0.12) !important;
+}
+
+/* Polished Room Cards */
+.tp-room-card {
+  border-radius: 20px !important;
+  border: 1.5px solid #e2e8f0 !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tp-room-card:hover {
+  border-color: #0a5661 !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 14px 30px -6px rgba(10, 86, 97, 0.15) !important;
+}
+
+.tp-room-card-thumb-wrap {
+  border-radius: 18px 18px 0 0 !important;
+}
