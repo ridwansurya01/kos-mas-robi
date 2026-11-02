@@ -64,9 +64,9 @@ body {
 
 .lr-container {
   width: 100%;
-  max-width: 1260px;
+  max-width: 1520px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 40px;
 }
 
 /* ==========================================================================
@@ -1113,6 +1113,13 @@ body {
 }
 
 /* Responsive */
+/* Large Desktop (≥ 1600px) */
+@media (min-width: 1600px) {
+  .lr-container {
+    padding: 0 60px;
+  }
+}
+
 @media (max-width: 1024px) {
   .lr-hero-photo-bg {
     width: 100%;
