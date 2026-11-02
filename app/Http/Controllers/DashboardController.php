@@ -477,71 +477,82 @@ class DashboardController extends Controller
             ];
         }
 
-        // 3. Browser address bar URL or text containing @lat,lng coordinates
-        // Example: https://www.google.com/maps/place/Kos+Mas+Robi/@-7.782543,110.367123,17z/...
-        if (preg_match('/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $raw, $coords)) {
-            $lat = (float) $coords[1];
-            $lng = (float) $coords[2];
-            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                return [
-                    'url' => $navUrl,
-                    'embed' => 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed'
-                ];
-            }
-        }
-
-        // 4. Shortlinks (maps.app.goo.gl or goo.gl/maps) -> resolve redirect via cURL
+        // 3. Resolve shortlinks (maps.app.goo.gl or goo.gl/maps) via cURL to get full URL
+        $targetUrl = $raw;
         if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
             try {
                 $ch = curl_init($raw);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 6);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
                 curl_exec($ch);
                 $effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
                 curl_close($ch);
-
-                if ($effective && preg_match('/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $effective, $coords)) {
-                    $lat = (float) $coords[1];
-                    $lng = (float) $coords[2];
-                    return [
-                        'url' => $navUrl,
-                        'embed' => 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed'
-                    ];
-                }
-                if ($effective && preg_match('/place\/([^\/@]+)/', $effective, $pm)) {
-                    $place = str_replace('+', ' ', urldecode($pm[1]));
-                    return [
-                        'url' => $navUrl,
-                        'embed' => 'https://maps.google.com/maps?q=' . urlencode($place) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
-                    ];
+                if (!empty($effective)) {
+                    $targetUrl = $effective;
                 }
             } catch (\Throwable $e) {}
         }
 
-        // 5. Query param q=
-        if (str_contains($raw, 'q=')) {
-            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
-            parse_str($qs, $params);
-            if (!empty($params['q'])) {
-                if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
-                    $lat = (float) $coords[1];
-                    $lng = (float) $coords[2];
-                    return [
-                        'url' => $navUrl,
-                        'embed' => 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed'
-                    ];
-                }
-                return [
-                    'url' => $navUrl,
-                    'embed' => 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
-                ];
+        // Priority A: Check place name (/place/Place+Name) in Google Maps URL
+        $placeName = null;
+        if (preg_match('/place\/([^\/@?#]+)/', $targetUrl, $pm)) {
+            $candidate = urldecode(str_replace('+', ' ', $pm[1]));
+            if (!empty($candidate) && strtolower($candidate) !== 'dropped pin') {
+                $placeName = $candidate;
             }
         }
 
-        // 6. Plain text or address entered by user
+        // Priority B: Check exact pin coordinates (!3d<lat>!4d<lng>)
+        $exactLat = null;
+        $exactLng = null;
+        if (preg_match('/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/', $targetUrl, $m)) {
+            $exactLat = (float) $m[1];
+            $exactLng = (float) $m[2];
+        }
+
+        // Priority C: Check q parameter (e.g. ?q=-8.123,113.123 or ?q=Place+Name)
+        if (str_contains($targetUrl, 'q=')) {
+            $qs = parse_url($targetUrl, PHP_URL_QUERY) ?? '';
+            parse_str($qs, $params);
+            if (!empty($params['q'])) {
+                $qVal = trim($params['q']);
+                if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', $qVal, $qm)) {
+                    $exactLat = (float) $qm[1];
+                    $exactLng = (float) $qm[2];
+                } elseif (empty($placeName)) {
+                    $placeName = $qVal;
+                }
+            }
+        }
+
+        // Priority D: Viewport coordinates (@lat,lng) ONLY IF neither place name nor exact pin coordinates exist!
+        if (empty($placeName) && $exactLat === null) {
+            if (preg_match('/@(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $targetUrl, $vm)) {
+                $exactLat = (float) $vm[1];
+                $exactLng = (float) $vm[2];
+            }
+        }
+
+        // If place name exists, search embed shows building, campus, marker pin, and rating
+        if (!empty($placeName)) {
+            return [
+                'url' => $navUrl,
+                'embed' => 'https://maps.google.com/maps?q=' . urlencode($placeName) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+            ];
+        }
+
+        // If exact coordinates exist
+        if ($exactLat !== null && $exactLng !== null) {
+            return [
+                'url' => $navUrl,
+                'embed' => 'https://maps.google.com/maps?q=' . $exactLat . ',' . $exactLng . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+            ];
+        }
+
+        // Plain text or address
         if (!str_starts_with($raw, 'http')) {
             return [
                 'url' => 'https://maps.google.com/?q=' . urlencode($raw),
@@ -549,7 +560,7 @@ class DashboardController extends Controller
             ];
         }
 
-        // 7. Fallback to address
+        // Fallback to address
         return [
             'url' => $navUrl,
             'embed' => 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'

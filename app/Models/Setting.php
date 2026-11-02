@@ -61,78 +61,60 @@ class Setting extends Model
             return $raw;
         }
 
-        // Langkah 2: Ekstrak koordinat @lat,lng dari URL Google Maps biasa
-        // Contoh: /maps/place/Nama/@-7.7825,110.3671,17z
-        if (preg_match('/@(-?\d{1,3}\.\d{4,}),(-?\d{1,3}\.\d{4,})/', $raw, $m)) {
-            $lat = (float) $m[1];
-            $lng = (float) $m[2];
-            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
-                    . '&q=' . $lat . ',' . $lng
-                    . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
-            }
-        }
-
-        // Langkah 3: Ekstrak dari parameter q= (misal: ?q=-7.7825,110.3671)
-        if (str_contains($raw, 'q=')) {
-            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
-            parse_str($qs, $params);
-            $q = trim($params['q'] ?? '');
-            if ($q !== '') {
-                // Jika q berisi koordinat
-                if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', $q, $m)) {
-                    $lat = (float) $m[1];
-                    $lng = (float) $m[2];
-                    return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
-                        . '&q=' . $lat . ',' . $lng
-                        . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
-                }
-                // Jika q berisi nama tempat
-                return 'https://maps.google.com/maps?q=' . urlencode($q) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-            }
-        }
-
-        // Langkah 4: Ekstrak dari parameter ll= (center koordinat)
-        if (str_contains($raw, 'll=')) {
-            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
-            parse_str($qs, $params);
-            $ll = trim($params['ll'] ?? '');
-            if (preg_match('/^(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)$/', $ll, $m)) {
-                $lat = (float) $m[1];
-                $lng = (float) $m[2];
-                return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
-                    . '&q=' . $lat . ',' . $lng
-                    . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
-            }
-        }
-
-        // Langkah 5: Shortlink goo.gl — coba resolve redirect
+        // Langkah 2: Cek apakah shortlink goo.gl -> resolve redirect
+        $targetUrl = $raw;
         if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
             try {
                 $ch = curl_init($raw);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 6);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
                 curl_exec($ch);
                 $effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
                 curl_close($ch);
-
-                if ($effective && preg_match('/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $effective, $coords)) {
-                    $lat = (float) $coords[1];
-                    $lng = (float) $coords[2];
-                    return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
-                }
-                if ($effective && preg_match('/place\/([^\/@]+)/', $effective, $pm)) {
-                    $place = str_replace('+', ' ', urldecode($pm[1]));
-                    return 'https://maps.google.com/maps?q=' . urlencode($place) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                if (!empty($effective)) {
+                    $targetUrl = $effective;
                 }
             } catch (\Throwable $e) {}
-            return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
         }
 
-        // Langkah 6: Fallback — gunakan alamat kost
+        // Prioritas A: Cek nama tempat (/place/Nama+Tempat)
+        if (preg_match('/place\/([^\/@?#]+)/', $targetUrl, $pm)) {
+            $candidate = urldecode(str_replace('+', ' ', $pm[1]));
+            if (!empty($candidate) && strtolower($candidate) !== 'dropped pin') {
+                return 'https://maps.google.com/maps?q=' . urlencode($candidate) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            }
+        }
+
+        // Prioritas B: Cek koordinat pin asli (!3d<lat>!4d<lng>)
+        if (preg_match('/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/', $targetUrl, $m)) {
+            $lat = (float) $m[1];
+            $lng = (float) $m[2];
+            return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        }
+
+        // Prioritas C: Cek query parameter q=
+        if (str_contains($targetUrl, 'q=')) {
+            $qs = parse_url($targetUrl, PHP_URL_QUERY) ?? '';
+            parse_str($qs, $params);
+            if (!empty($params['q'])) {
+                $qVal = trim($params['q']);
+                return 'https://maps.google.com/maps?q=' . urlencode($qVal) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            }
+        }
+
+        // Prioritas D: Koordinat kamera (@lat,lng) HANYA jika tidak ada nama tempat & koordinat pin
+        if (preg_match('/@(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $targetUrl, $vm)) {
+            $lat = (float) $vm[1];
+            $lng = (float) $vm[2];
+            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            }
+        }
+
+        // Langkah Terakhir: Fallback ke alamat
         return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
     }
 
