@@ -95,12 +95,14 @@
           desc: f.description,
           method: f.payment_method,
           roomId: f.room_id ? String(f.room_id) : null,
+          location: f.room && f.room.location ? f.room.location : null,
           proofImage: f.proof_image ? ('/' + f.proof_image.replace(/^\//, '')) : null
         }));
         appData.maintenance = (json.maintenance || []).map(m => ({
           id: m.ticket_code,
           dbId: m.id,
           roomId: m.room ? m.room.number : String(m.room_id),
+          location: m.room && m.room.location ? m.room.location : null,
           reporter: m.reporter_name,
           issue: m.issue_description,
           date: m.report_date,
@@ -461,8 +463,44 @@
     }
   }
 
-  // --- TAB: DATA PENGHUNI ---
-  function renderTenantsTable(search = '', statusFilter = 'all') {
+  // --- HELPER: RESOLVE CABANG KOS (LOKASI 1 VS LOKASI 2) ---
+  let activeTenantLocationFilter = 'all';
+  let activeFinanceLocationFilter = 'all';
+  let activeMaintLocationFilter = 'all';
+
+  function resolveRoomLocation(roomObjOrNum) {
+    if (!roomObjOrNum) return 'Lokasi 1';
+    if (typeof roomObjOrNum === 'object' && roomObjOrNum.location) {
+      return roomObjOrNum.location;
+    }
+    const numStr = String(typeof roomObjOrNum === 'object' ? roomObjOrNum.number : roomObjOrNum);
+    const found = appData.rooms.find(r => r.number === numStr || String(r.id) === numStr);
+    if (found && found.location) return found.location;
+    const numVal = parseInt(numStr.replace(/[^0-9]/g, ''), 10);
+    return numVal >= 200 ? 'Lokasi 2' : 'Lokasi 1';
+  }
+
+  function resolveFinanceLocation(trx) {
+    if (trx.location) return trx.location;
+    if (trx.roomId) {
+      const found = appData.rooms.find(r => String(r.id) === String(trx.roomId) || r.number === String(trx.roomId));
+      if (found && found.location) return found.location;
+    }
+    const text = ((trx.id || '') + ' ' + (trx.desc || '')).toLowerCase();
+    if (text.includes('lokasi 2') || text.includes('ringroad') || text.includes('cabang 2') || text.includes('kmr2') || /kamar\s*#?20\d/i.test(text) || /#20\d/.test(text)) {
+      return 'Lokasi 2';
+    }
+    return 'Lokasi 1';
+  }
+
+  function resolveMaintenanceLocation(item) {
+    if (item.location) return item.location;
+    return resolveRoomLocation(item.roomId);
+  }
+
+  // --- TAB: DATA PENGHUNI (2 KOS) ---
+  function renderTenantsTable(search = '', statusFilter = 'all', locationFilter = activeTenantLocationFilter) {
+    activeTenantLocationFilter = locationFilter;
     const tbody = document.getElementById('tenantsTableBody');
     const mobileList = document.getElementById('tenantsMobileCardList');
     if (!tbody || !mobileList) return;
@@ -472,14 +510,27 @@
 
     const tenants = appData.rooms.filter(r => r.tenant && r.tenant.trim() !== '');
 
+    const loc1Count = tenants.filter(t => resolveRoomLocation(t) === 'Lokasi 1').length;
+    const loc2Count = tenants.filter(t => resolveRoomLocation(t) === 'Lokasi 2').length;
+    const elLoc1 = document.getElementById('tenantCountLoc1');
+    const elLoc2 = document.getElementById('tenantCountLoc2');
+    if (elLoc1) elLoc1.textContent = `${loc1Count} Orang`;
+    if (elLoc2) elLoc2.textContent = `${loc2Count} Orang`;
+
     const filtered = tenants.filter(t => {
-      const matchSearch = t.tenant.toLowerCase().includes(search.toLowerCase()) ||
-                          t.phone.includes(search) ||
-                          t.number.includes(search);
+      const tLoc = resolveRoomLocation(t);
+      const matchLoc = (locationFilter === 'all' || tLoc === locationFilter);
+      const q = search.toLowerCase();
+      const matchSearch = !q ||
+                          t.tenant.toLowerCase().includes(q) ||
+                          (t.phone || '').includes(q) ||
+                          String(t.number).toLowerCase().includes(q) ||
+                          tLoc.toLowerCase().includes(q) ||
+                          (t.type || '').toLowerCase().includes(q);
       let matchStatus = true;
       if (statusFilter === 'active') matchStatus = t.status === 'occupied';
       if (statusFilter === 'due') matchStatus = t.status === 'due';
-      return matchSearch && matchStatus;
+      return matchLoc && matchSearch && matchStatus;
     });
 
     filtered.forEach(t => {
@@ -488,16 +539,26 @@
         ? '<span class="status-badge due">⚠️ Jatuh Tempo</span>' 
         : '<span class="status-badge occupied">🟢 Lunas</span>';
 
+      const tLoc = resolveRoomLocation(t);
+      const isLoc2 = tLoc === 'Lokasi 2';
+      const branchBadge = isLoc2
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ Kos 2 • Ringroad Exclusive</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔐 Smart Door PIN & Co-Working</div>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 Kos 1 • Kampus Utama</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">🔑 Kartu RFID & Area Kampus</div>`;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>
           <div style="font-weight:700;">${t.tenant}</div>
           <div style="font-size:0.75rem;color:var(--text-muted);">${t.type}</div>
         </td>
-        <td><strong style="color:var(--brand-primary-light);">Kamar #${t.number}</strong></td>
         <td>
-          <a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);display:inline-flex;align-items:center;gap:4px;">
-            ${t.phone || '-'}
+          <strong style="color:var(--brand-primary-light);">Kamar #${t.number}</strong>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Lantai ${t.floor || 1} • ${formatRupiah(t.price)}/bln</div>
+        </td>
+        <td>${branchBadge}</td>
+        <td>
+          <a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);display:inline-flex;align-items:center;gap:4px;font-weight:600;">
+            📲 ${t.phone || '-'}
           </a>
         </td>
         <td>${t.startDate || '-'}</td>
@@ -519,6 +580,10 @@
         <div class="mobile-data-header">
           <span class="mobile-data-title">${t.tenant}</span>
           ${statusLabel}
+        </div>
+        <div class="mobile-data-row">
+          <span>Cabang Kos:</span>
+          <span>${isLoc2 ? '⚡ Kos 2 (Ringroad Exclusive)' : '🌿 Kos 1 (Kampus Utama)'}</span>
         </div>
         <div class="mobile-data-row">
           <span>Kamar:</span>
@@ -546,13 +611,14 @@
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada data penghuni</td></tr>';
-      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada data penghuni</div>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada data penghuni pada filter cabang ini</td></tr>';
+      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada data penghuni pada filter cabang ini</div>';
     }
   }
 
-  // --- TAB: KEUANGAN ---
-  function renderFinancesTable(search = '', filterType = 'all') {
+  // --- TAB: KEUANGAN (2 KOS) ---
+  function renderFinancesTable(search = '', filterType = 'all', locationFilter = activeFinanceLocationFilter) {
+    activeFinanceLocationFilter = locationFilter;
     const tbody = document.getElementById('financesTableBody');
     const mobileList = document.getElementById('financesMobileCardList');
     if (!tbody || !mobileList) return;
@@ -560,26 +626,104 @@
     tbody.innerHTML = '';
     mobileList.innerHTML = '';
 
+    // Hitung Neraca Kas Kos 1 vs Kos 2 secara real-time
+    let b1Inc = 0, b1Exp = 0, b2Inc = 0, b2Exp = 0;
+    appData.finances.forEach(f => {
+      const fLoc = resolveFinanceLocation(f);
+      const amt = Number(f.amount || 0);
+      if (fLoc === 'Lokasi 2') {
+        if (f.type === 'income') b2Inc += amt;
+        else b2Exp += amt;
+      } else {
+        if (f.type === 'income') b1Inc += amt;
+        else b1Exp += amt;
+      }
+    });
+
+    const elB1Inc = document.getElementById('finBranch1Inc');
+    const elB1Exp = document.getElementById('finBranch1Exp');
+    const elB1Net = document.getElementById('finBranch1Net');
+    const elB2Inc = document.getElementById('finBranch2Inc');
+    const elB2Exp = document.getElementById('finBranch2Exp');
+    const elB2Net = document.getElementById('finBranch2Net');
+
+    if (elB1Inc) elB1Inc.textContent = formatRupiah(b1Inc);
+    if (elB1Exp) elB1Exp.textContent = formatRupiah(b1Exp);
+    if (elB1Net) elB1Net.textContent = formatRupiah(b1Inc - b1Exp);
+    if (elB2Inc) elB2Inc.textContent = formatRupiah(b2Inc);
+    if (elB2Exp) elB2Exp.textContent = formatRupiah(b2Exp);
+    if (elB2Net) elB2Net.textContent = formatRupiah(b2Inc - b2Exp);
+
+    // Update 4 KPI Cards sesuai filter cabang jika sedang difilter per Kos
+    const kpiIncEl = document.getElementById('finKpiIncomeVal');
+    const kpiExpEl = document.getElementById('finKpiExpenseVal');
+    const kpiNetEl = document.getElementById('finKpiNetVal');
+    const kpiAvgEl = document.getElementById('finKpiAvgVal');
+    const kpiBadgeEl = document.getElementById('finKpiBranchBadge');
+    const kpiUnitEl = document.getElementById('finKpiUnitCountLabel');
+    const finInsightEl = document.getElementById('finInsightText');
+
+    if (locationFilter === 'Lokasi 1' || locationFilter === 'Lokasi 2') {
+      const isB2 = locationFilter === 'Lokasi 2';
+      const branchIncYear = (isB2 ? b2Inc : b1Inc) * 12;
+      const branchExpYear = (isB2 ? b2Exp : b1Exp) * 12;
+      const branchNetYear = branchIncYear - branchExpYear;
+      if (kpiIncEl) kpiIncEl.textContent = formatRupiah(branchIncYear);
+      if (kpiExpEl) kpiExpEl.textContent = formatRupiah(branchExpYear);
+      if (kpiNetEl) kpiNetEl.textContent = formatRupiah(branchNetYear);
+      if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(branchNetYear / 12));
+      if (kpiBadgeEl) kpiBadgeEl.textContent = isB2 ? '⚡ Khusus Kos 2 (Ringroad)' : '🌿 Khusus Kos 1 (Kampus)';
+      if (kpiUnitEl) kpiUnitEl.textContent = isB2 ? '8 Unit Kamar (#201–#208)' : '8 Unit Kamar (#101–#108)';
+      if (finInsightEl) {
+        finInsightEl.innerHTML = isB2
+          ? '<strong>Insight Kas Kos 2 (Ringroad Exclusive):</strong> Pendapatan didominasi unit Royal Suite & Executive dengan fasilitas Smart Door Lock & Co-Working Space.'
+          : '<strong>Insight Kas Kos 1 (Kampus Utama):</strong> Tingkat hunian mahasiswa UGM/UNY sangat stabil dengan rasio beban operasional yang efisien.';
+      }
+    } else {
+      const totIncYear = (b1Inc + b2Inc) * 12;
+      const totExpYear = (b1Exp + b2Exp) * 12;
+      const totNetYear = totIncYear - totExpYear;
+      if (totIncYear > 0) {
+        if (kpiIncEl) kpiIncEl.textContent = formatRupiah(totIncYear);
+        if (kpiExpEl) kpiExpEl.textContent = formatRupiah(totExpYear);
+        if (kpiNetEl) kpiNetEl.textContent = formatRupiah(totNetYear);
+        if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(totNetYear / 12));
+      }
+      if (kpiBadgeEl) kpiBadgeEl.textContent = '🏢 Gabungan 2 Cabang';
+      if (kpiUnitEl) kpiUnitEl.textContent = '16 Unit Kamar (Kos 1 & Kos 2)';
+    }
+
+    const q = search.toLowerCase();
     const filtered = appData.finances.filter(f => {
-      const matchSearch = f.desc.toLowerCase().includes(search.toLowerCase()) ||
-                          f.id.toLowerCase().includes(search.toLowerCase()) ||
-                          f.category.toLowerCase().includes(search.toLowerCase());
+      const fLoc = resolveFinanceLocation(f);
+      const matchLoc = (locationFilter === 'all' || fLoc === locationFilter);
+      const matchSearch = !q ||
+                          (f.desc || '').toLowerCase().includes(q) ||
+                          (f.id || '').toLowerCase().includes(q) ||
+                          (f.category || '').toLowerCase().includes(q) ||
+                          fLoc.toLowerCase().includes(q);
       const matchType = filterType === 'all' || f.type === filterType;
-      return matchSearch && matchType;
+      return matchLoc && matchSearch && matchType;
     });
 
     filtered.forEach(trx => {
       const isIncome = trx.type === 'income';
-      const colorClass = isIncome ? '#34d399' : '#f87171';
+      const colorClass = isIncome ? '#10b981' : '#ef4444';
       const prefix = isIncome ? '+ ' : '- ';
+      const fLoc = resolveFinanceLocation(trx);
+      const isLoc2 = fLoc === 'Lokasi 2';
+      const branchPill = isLoc2
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ Kos 2 • Ringroad</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 Kos 1 • Kampus</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-family:monospace;font-size:0.85rem;">${trx.id}</td>
+        <td style="font-family:monospace;font-size:0.85rem;font-weight:700;">${trx.id}</td>
         <td>${trx.date}</td>
+        <td>${branchPill}</td>
         <td style="font-weight:600;">${trx.desc}</td>
         <td><span class="feature-pill">${trx.category}</span></td>
-        <td style="font-weight:700;color:${colorClass};">${prefix}${formatRupiah(trx.amount)}</td>
+        <td style="font-weight:800;color:${colorClass};">${prefix}${formatRupiah(trx.amount)}</td>
         <td>${trx.method}</td>
         <td>
           ${trx.proofImage ? `
@@ -602,6 +746,10 @@
           <span style="font-weight:700;color:${colorClass};font-size:0.95rem;">${prefix}${formatRupiah(trx.amount)}</span>
         </div>
         <div class="mobile-data-row">
+          <span>Lokasi Cabang:</span>
+          <span>${isLoc2 ? '⚡ Kos 2 (Ringroad)' : '🌿 Kos 1 (Kampus)'}</span>
+        </div>
+        <div class="mobile-data-row">
           <span>Kategori & Tanggal:</span>
           <span>${trx.category} • ${trx.date}</span>
         </div>
@@ -619,13 +767,14 @@
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada data transaksi</td></tr>';
-      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada data transaksi</div>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada data transaksi pada filter cabang ini</td></tr>';
+      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada data transaksi pada filter cabang ini</div>';
     }
   }
 
-  // --- TAB: KELUHAN & SERVIS ---
-  function renderMaintenanceTable(search = '', filterStatus = 'all') {
+  // --- TAB: KELUHAN & SERVIS (2 KOS) ---
+  function renderMaintenanceTable(search = '', filterStatus = 'all', locationFilter = activeMaintLocationFilter) {
+    activeMaintLocationFilter = locationFilter;
     const tbody = document.getElementById('maintenanceTableBody');
     const mobileList = document.getElementById('maintenanceMobileCardList');
     if (!tbody || !mobileList) return;
@@ -633,26 +782,41 @@
     tbody.innerHTML = '';
     mobileList.innerHTML = '';
 
+    const q = search.toLowerCase();
     const filtered = appData.maintenance.filter(m => {
-      const matchSearch = m.issue.toLowerCase().includes(search.toLowerCase()) ||
-                          String(m.roomId).includes(search) ||
-                          m.reporter.toLowerCase().includes(search.toLowerCase());
+      const mLoc = resolveMaintenanceLocation(m);
+      const matchLoc = (locationFilter === 'all' || mLoc === locationFilter);
+      const matchSearch = !q ||
+                          (m.issue || '').toLowerCase().includes(q) ||
+                          String(m.roomId).toLowerCase().includes(q) ||
+                          (m.reporter || '').toLowerCase().includes(q) ||
+                          mLoc.toLowerCase().includes(q);
       const matchStatus = filterStatus === 'all' || m.status === filterStatus;
-      return matchSearch && matchStatus;
+      return matchLoc && matchSearch && matchStatus;
     });
 
     filtered.forEach(item => {
-      let statusBadge = '<span class="status-badge repair">Pending</span>';
+      let statusBadge = '<span class="status-badge repair">Menunggu</span>';
       if (item.status === 'progress') statusBadge = '<span class="status-badge due">Dikerjakan</span>';
       if (item.status === 'done') statusBadge = '<span class="status-badge occupied">Selesai</span>';
 
+      const mLoc = resolveMaintenanceLocation(item);
+      const isLoc2 = mLoc === 'Lokasi 2';
+      const branchTechBadge = isLoc2
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">⚡ Kos 2 • Ringroad</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👨‍🔧 PIC: Mas Dani (Smart System)</div>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">🌿 Kos 1 • Kampus</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">👷 PIC: Pak Budi (Utilitas)</div>`;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-family:monospace;font-size:0.85rem;">#${item.id}</td>
-        <td><strong>Kamar #${item.roomId}</strong> (${item.reporter})</td>
-        <td style="max-width:320px;">${item.issue}</td>
+        <td style="font-family:monospace;font-size:0.85rem;font-weight:700;">#${item.id}</td>
+        <td>
+          <strong>Kamar #${item.roomId}</strong>
+          <div style="font-size:0.75rem;color:var(--text-secondary);">Pelapor: ${item.reporter}</div>
+        </td>
+        <td>${branchTechBadge}</td>
+        <td style="max-width:300px;line-height:1.45;">${item.issue}</td>
         <td>${item.date}</td>
-        <td><span class="feature-pill" style="color:${item.priority === 'Mendesak' ? '#f87171' : 'inherit'};">${item.priority}</span></td>
+        <td><span class="feature-pill" style="color:${item.priority === 'Mendesak' || item.priority === 'Tinggi' ? '#ef4444' : 'inherit'};font-weight:700;">${item.priority}</span></td>
         <td>${statusBadge}</td>
         <td>
           <select class="form-control" style="padding:4px 8px;font-size:0.78rem;" onchange="window.kosApp.updateRepairStatus('${item.id}', this.value)">
@@ -668,11 +832,15 @@
       mCard.className = 'mobile-data-card';
       mCard.innerHTML = `
         <div class="mobile-data-header">
-          <span class="mobile-data-title">Kamar #${item.roomId} - ${item.priority}</span>
+          <span class="mobile-data-title">Kamar #${item.roomId} (${isLoc2 ? 'Kos 2' : 'Kos 1'})</span>
           ${statusBadge}
         </div>
         <div style="font-size:0.85rem;color:var(--text-secondary);">${item.issue}</div>
         <div class="mobile-data-row" style="margin-top:6px;">
+          <span>Cabang & Teknisi:</span>
+          <span>${isLoc2 ? '⚡ Kos 2 • Mas Dani' : '🌿 Kos 1 • Pak Budi'}</span>
+        </div>
+        <div class="mobile-data-row">
           <span>Pelapor / Tgl:</span>
           <span>${item.reporter} • ${item.date}</span>
         </div>
@@ -688,8 +856,8 @@
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada tiket keluhan</td></tr>';
-      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada tiket keluhan</div>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada tiket keluhan pada filter cabang ini</td></tr>';
+      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada tiket keluhan pada filter cabang ini</div>';
     }
   }
 
@@ -1375,17 +1543,39 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   // --- TRANSACTION MODAL ---
   function openTransactionModal(defaultRoomNumber = null) {
     const select = document.getElementById('transRoomId');
-    select.innerHTML = '<option value="">-- Tanpa Kamar Spesifik (Umum) --</option>';
+    select.innerHTML = `
+      <option value="">-- Tanpa Kamar Spesifik (Operasional Kos 1 - Kampus) --</option>
+      <option value="loc2_general">-- Tanpa Kamar Spesifik (Operasional Kos 2 - Ringroad) --</option>
+    `;
 
-    appData.rooms.forEach(r => {
-      const opt = document.createElement('option');
-      opt.value = r.id; // DB ID
-      opt.textContent = `Kamar #${r.number} ${r.tenant ? '(' + r.tenant + ')' : ''}`;
-      if (defaultRoomNumber && r.number === defaultRoomNumber) {
-        opt.selected = true;
-      }
-      select.appendChild(opt);
-    });
+    const loc1Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 1');
+    const loc2Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 2');
+
+    if (loc1Rooms.length > 0) {
+      const grp1 = document.createElement('optgroup');
+      grp1.label = '🌿 Kos 1 - Kampus Utama (Kamar #101–#108)';
+      loc1Rooms.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = `Kamar #${r.number} ${r.tenant ? '(' + r.tenant + ')' : '(Kosong)'}`;
+        if (defaultRoomNumber && r.number === defaultRoomNumber) opt.selected = true;
+        grp1.appendChild(opt);
+      });
+      select.appendChild(grp1);
+    }
+
+    if (loc2Rooms.length > 0) {
+      const grp2 = document.createElement('optgroup');
+      grp2.label = '⚡ Kos 2 - Ringroad Exclusive (Kamar #201–#208)';
+      loc2Rooms.forEach(r => {
+        const opt = document.createElement('option');
+        opt.value = r.id;
+        opt.textContent = `Kamar #${r.number} ${r.tenant ? '(' + r.tenant + ')' : '(Kosong)'}`;
+        if (defaultRoomNumber && r.number === defaultRoomNumber) opt.selected = true;
+        grp2.appendChild(opt);
+      });
+      select.appendChild(grp2);
+    }
 
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('transDate').value = today;
@@ -1394,7 +1584,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const r = appData.rooms.find(room => room.number === defaultRoomNumber);
       if (r) {
         document.getElementById('transAmount').value = r.price;
-        document.getElementById('transDescription').value = `Pembayaran Sewa Kamar #${r.number} (${r.tenant || ''}) Bulan Ini`;
+        document.getElementById('transDescription').value = `Pembayaran Sewa Kamar #${r.number} (${r.tenant || ''}) - ${resolveRoomLocation(r)}`;
       }
     }
 
@@ -1415,8 +1605,13 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       e.preventDefault();
       const type = document.getElementById('transType').value;
       const date = document.getElementById('transDate').value;
-      const roomId = document.getElementById('transRoomId').value || null;
-      const description = document.getElementById('transDescription').value.trim();
+      const rawRoomVal = document.getElementById('transRoomId').value || null;
+      const isLoc2General = rawRoomVal === 'loc2_general';
+      const roomId = isLoc2General ? null : rawRoomVal;
+      let description = document.getElementById('transDescription').value.trim();
+      if (isLoc2General && !/lokasi 2|ringroad|cabang 2/i.test(description)) {
+        description += ' (Lokasi 2 - Ringroad Exclusive)';
+      }
       const amount = Number(document.getElementById('transAmount').value);
       const paymentMethod = document.getElementById('transMethod').value;
 
@@ -1526,12 +1721,34 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     btnNew?.addEventListener('click', () => {
       const select = document.getElementById('repairRoomSelect');
       select.innerHTML = '';
-      appData.rooms.forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = r.id; // DB ID
-        opt.textContent = `Kamar #${r.number} ${r.tenant ? '(' + r.tenant + ')' : ''}`;
-        select.appendChild(opt);
-      });
+
+      const loc1Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 1');
+      const loc2Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 2');
+
+      if (loc1Rooms.length > 0) {
+        const grp1 = document.createElement('optgroup');
+        grp1.label = '🌿 Kos 1 - Kampus Utama (PIC: Pak Budi)';
+        loc1Rooms.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.id;
+          opt.textContent = `Kamar #${r.number} ${r.tenant ? '(' + r.tenant + ')' : '(Kosong)'}`;
+          grp1.appendChild(opt);
+        });
+        select.appendChild(grp1);
+      }
+
+      if (loc2Rooms.length > 0) {
+        const grp2 = document.createElement('optgroup');
+        grp2.label = '⚡ Kos 2 - Ringroad Exclusive (PIC: Mas Dani)';
+        loc2Rooms.forEach(r => {
+          const opt = document.createElement('option');
+          opt.value = r.id;
+          opt.textContent = `Kamar #${r.number} ${r.tenant ? '(' + r.tenant + ')' : '(Kosong)'}`;
+          grp2.appendChild(opt);
+        });
+        select.appendChild(grp2);
+      }
+
       openModal('modalRepairTicket');
     });
 
@@ -1999,8 +2216,9 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     const tenantSearch = document.getElementById('tenantSearchInput');
     let currentTStatus = 'all';
+    let currentTLoc = 'all';
     tenantSearch?.addEventListener('input', (e) => {
-      renderTenantsTable(e.target.value, currentTStatus);
+      renderTenantsTable(e.target.value, currentTStatus, currentTLoc);
     });
 
     document.querySelectorAll('#tenantStatusFilter .filter-pill').forEach(btn => {
@@ -2008,14 +2226,24 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         document.querySelectorAll('#tenantStatusFilter .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTStatus = btn.getAttribute('data-tstatus');
-        renderTenantsTable(tenantSearch?.value || '', currentTStatus);
+        renderTenantsTable(tenantSearch?.value || '', currentTStatus, currentTLoc);
+      });
+    });
+
+    document.querySelectorAll('#tenantLocationFilters .filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#tenantLocationFilters .filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTLoc = btn.getAttribute('data-tloc') || 'all';
+        renderTenantsTable(tenantSearch?.value || '', currentTStatus, currentTLoc);
       });
     });
 
     const financeSearch = document.getElementById('financeSearchInput');
     let currentFType = 'all';
+    let currentFLoc = 'all';
     financeSearch?.addEventListener('input', (e) => {
-      renderFinancesTable(e.target.value, currentFType);
+      renderFinancesTable(e.target.value, currentFType, currentFLoc);
     });
 
     document.querySelectorAll('#financeTypeFilter .filter-pill').forEach(btn => {
@@ -2023,14 +2251,24 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         document.querySelectorAll('#financeTypeFilter .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFType = btn.getAttribute('data-ftype');
-        renderFinancesTable(financeSearch?.value || '', currentFType);
+        renderFinancesTable(financeSearch?.value || '', currentFType, currentFLoc);
+      });
+    });
+
+    document.querySelectorAll('#financeLocationFilters .filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#financeLocationFilters .filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFLoc = btn.getAttribute('data-floc') || 'all';
+        renderFinancesTable(financeSearch?.value || '', currentFType, currentFLoc);
       });
     });
 
     const maintSearch = document.getElementById('maintenanceSearchInput');
     let currentMStatus = 'all';
+    let currentMLoc = 'all';
     maintSearch?.addEventListener('input', (e) => {
-      renderMaintenanceTable(e.target.value, currentMStatus);
+      renderMaintenanceTable(e.target.value, currentMStatus, currentMLoc);
     });
 
     document.querySelectorAll('#repairStatusFilter .filter-pill').forEach(btn => {
@@ -2038,7 +2276,16 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         document.querySelectorAll('#repairStatusFilter .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentMStatus = btn.getAttribute('data-rstatus');
-        renderMaintenanceTable(maintSearch?.value || '', currentMStatus);
+        renderMaintenanceTable(maintSearch?.value || '', currentMStatus, currentMLoc);
+      });
+    });
+
+    document.querySelectorAll('#maintenanceLocationFilters .filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#maintenanceLocationFilters .filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMLoc = btn.getAttribute('data-mloc') || 'all';
+        renderMaintenanceTable(maintSearch?.value || '', currentMStatus, currentMLoc);
       });
     });
   }
@@ -2047,9 +2294,9 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   function renderAllViews() {
     renderRoomGrid();
     renderRoomsMasterTable();
-    renderTenantsTable();
-    renderFinancesTable();
-    renderMaintenanceTable();
+    renderTenantsTable('', 'all', activeTenantLocationFilter);
+    renderFinancesTable('', 'all', activeFinanceLocationFilter);
+    renderMaintenanceTable('', 'all', activeMaintLocationFilter);
     updateDashboardStats();
   }
 
@@ -2095,6 +2342,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           desc: f.description || '',
           method: f.payment_method || 'Transfer',
           roomId: f.room_id ? String(f.room_id) : null,
+          location: f.room && f.room.location ? f.room.location : null,
           proofImage: f.proof_image ? ('/' + f.proof_image.replace(/^\//, '')) : null
         }));
       }
@@ -2103,6 +2351,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           id: m.ticket_code || String(m.id || ''),
           dbId: m.id,
           roomId: m.room ? m.room.number : String(m.room_id || '-'),
+          location: m.room && m.room.location ? m.room.location : null,
           reporter: m.reporter_name || 'Penghuni',
           issue: m.issue_description || m.issue || '',
           status: m.status || 'pending',

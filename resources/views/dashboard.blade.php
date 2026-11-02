@@ -357,12 +357,13 @@
       </div>
 
       <!-- =====================================================================
-           PANE 3: TAB DATA PENGHUNI
+           PANE 3: TAB DATA PENGHUNI (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-tenants">
         <div class="section-header">
           <div class="section-title">
-            <h2>Data & Kontak Penghuni Kos</h2>
+            <h2>Data & Kontak Penghuni Kos (2 Cabang)</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Kelola profil penghuni, kartu akses cabang, kontak darurat, dan masa sewa di Kos 1 (Kampus) & Kos 2 (Ringroad).</p>
           </div>
           <button type="button" class="btn-primary-action" id="btnAddNewTenant">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -370,11 +371,87 @@
           </button>
         </div>
 
+        @php
+          $b1TenantsCount = $rooms->where('location', 'Lokasi 1')->filter(fn($r) => $r->activeTenant)->count();
+          $b2TenantsCount = $rooms->where('location', 'Lokasi 2')->filter(fn($r) => $r->activeTenant)->count();
+          $b1DueTenantsCount = $rooms->where('location', 'Lokasi 1')->where('status', 'due')->count();
+          $b2DueTenantsCount = $rooms->where('location', 'Lokasi 2')->where('status', 'due')->count();
+        @endphp
+
+        <!-- PERBEDAAN 2 KOS: KARTU PROFIL & KOMUNITAS PENGHUNI -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
+          <!-- Kos 1 Card -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px; position: relative; overflow: hidden; box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #059669; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">🌿</div>
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">Cabang 1 • Area Kampus</span>
+                  <h4 style="margin: 4px 0 0; font-size: 1rem; font-weight: 800; color: #064e3b;">Penghuni Kos Mas Robi 1 (Kampus Utama)</h4>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.35rem; font-weight: 900; color: #059669;" id="tenantCountLoc1">{{ $b1TenantsCount }} Orang</div>
+                <div style="font-size: 0.72rem; color: #047857; font-weight: 700;">Unit #101 – #108</div>
+              </div>
+            </div>
+            <div style="font-size: 0.78rem; color: #065f46; line-height: 1.5; margin-bottom: 12px;">
+              Mayoritas <strong>Mahasiswa UGM & UNY</strong>. Menggunakan sistem <strong>Kunci RFID Gerbang 24 Jam</strong>, fasilitas Dapur Bersama, Parkir Motor Kanopi & jemuran lantai 2.
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
+              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">🔑 Akses: Kartu RFID</span>
+              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">🎓 Mayoritas: Mahasiswa S1/S2</span>
+              <span style="background: rgba(255,255,255,0.85); color: {{ $b1DueTenantsCount > 0 ? '#d97706' : '#059669' }}; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">{{ $b1DueTenantsCount > 0 ? $b1DueTenantsCount . ' Jatuh Tempo' : '✓ Semua Lunas' }}</span>
+            </div>
+          </div>
+
+          <!-- Kos 2 Card -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px; position: relative; overflow: hidden; box-shadow: 0 8px 24px -8px rgba(13, 148, 136, 0.15);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #0a5661; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(10, 86, 97, 0.3);">⚡</div>
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">Cabang 2 • Ringroad Exclusive</span>
+                  <h4 style="margin: 4px 0 0; font-size: 1rem; font-weight: 800; color: #042f2e;">Penghuni Kos Mas Robi 2 (Kaliurang KM 12)</h4>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.35rem; font-weight: 900; color: #0a5661;" id="tenantCountLoc2">{{ $b2TenantsCount }} Orang</div>
+                <div style="font-size: 0.72rem; color: #0f766e; font-weight: 700;">Unit #201 – #208</div>
+              </div>
+            </div>
+            <div style="font-size: 0.78rem; color: #115e59; line-height: 1.5; margin-bottom: 12px;">
+              Mayoritas <strong>Karyawan Eksekutif, Remote Worker & Mahasiswa UII</strong>. Menggunakan <strong>Smart Door Lock PIN & Fingerprint</strong>, Co-Working Space VIP & Parkir Mobil Basement.
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
+              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">🔐 Akses: Smart Door PIN/Biometrik</span>
+              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">💼 Mayoritas: Profesional & Eksekutif</span>
+              <span style="background: rgba(255,255,255,0.85); color: {{ $b2DueTenantsCount > 0 ? '#d97706' : '#0d9488' }}; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">{{ $b2DueTenantsCount > 0 ? $b2DueTenantsCount . ' Jatuh Tempo' : '✓ Semua Lunas' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (DATA PENGHUNI) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">👥</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Penghuni Kos</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Pilih cabang kos untuk memisahkan daftar penghuni Kos 1 dan Kos 2</div>
+            </div>
+          </div>
+          <div class="filter-pills" id="tenantLocationFilters">
+            <button type="button" class="filter-pill active" data-tloc="all">🏢 Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 1">🌿 Kos 1 - Kampus Utama ({{ $b1TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 2">⚡ Kos 2 - Ringroad Exclusive ({{ $b2TenantsCount }})</button>
+          </div>
+        </div>
+
         <div class="table-card-container">
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="tenantSearchInput" placeholder="Cari nama atau nomor WhatsApp...">
+              <input type="text" id="tenantSearchInput" placeholder="Cari nama, kamar, cabang, atau nomor WhatsApp...">
             </div>
             <div class="filter-pills" id="tenantStatusFilter">
               <button type="button" class="filter-pill active" data-tstatus="all">Semua</button>
@@ -388,6 +465,7 @@
               <tr>
                 <th>Nama Penghuni</th>
                 <th>Kamar</th>
+                <th>Lokasi Cabang & Akses</th>
                 <th>No. WhatsApp</th>
                 <th>Tgl Masuk</th>
                 <th>Jatuh Tempo</th>
@@ -406,20 +484,97 @@
         </div>
       </div>
 
-            <!-- =====================================================================
-           PANE 3: TAB TAGIHAN & INVOICE SEWA (TERPISAH DARI KEUANGAN)
+      <!-- =====================================================================
+           PANE 3B: TAB TAGIHAN & INVOICE SEWA (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-bills">
         <div class="section-header">
           <div class="section-title">
-            <h2>Manajemen Tagihan & Invoice Sewa</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Pantau jatuh tempo sewa, kirim pengingat tagihan via WhatsApp, dan konfirmasi pelunasan.</p>
+            <h2>Manajemen Tagihan & Invoice Sewa (2 Cabang)</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Pantau jatuh tempo sewa per lokasi kos, rincian tarif & layanan cabang, kirim WA penagihan, dan konfirmasi pelunasan manual oleh Admin.</p>
           </div>
           <div style="display: flex; gap: 10px;">
             <button type="button" class="btn-primary-action" onclick="exportBillingReport()">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Export Rekap Tagihan</span>
             </button>
+          </div>
+        </div>
+
+        @php
+          $b1RoomsList = $rooms->where('location', 'Lokasi 1');
+          $b2RoomsList = $rooms->where('location', 'Lokasi 2');
+          $b1PaidCount = $b1RoomsList->where('status', 'occupied')->count();
+          $b1DueCount = $b1RoomsList->where('status', 'due')->count();
+          $b1MonthlyPot = $b1RoomsList->whereIn('status', ['occupied', 'due'])->sum('price');
+          $b1DueNominal = $b1RoomsList->where('status', 'due')->sum('price');
+
+          $b2PaidCount = $b2RoomsList->where('status', 'occupied')->count();
+          $b2DueCount = $b2RoomsList->where('status', 'due')->count();
+          $b2MonthlyPot = $b2RoomsList->whereIn('status', ['occupied', 'due'])->sum('price');
+          $b2DueNominal = $b2RoomsList->where('status', 'due')->sum('price');
+        @endphp
+
+        <!-- PERBEDAAN 2 KOS: SKEMA TAGIHAN & TARIF SEWA -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
+          <!-- Tagihan Kos 1 -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 TAGIHAN KOS 1 (KAMPUS UTAMA)</span>
+                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #064e3b;">Skema Sewa Mahasiswa & Reguler</h4>
+                <div style="font-size: 0.75rem; color: #047857;">Rentang Tarif: <strong>Rp 850.000 – Rp 1.650.000 / bln</strong></div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.7rem; color: #065f46; font-weight: 700;">Total Tagihan Aktif</div>
+                <div style="font-size: 1.15rem; font-weight: 900; color: #059669;">Rp {{ number_format($b1MonthlyPot, 0, ',', '.') }}</div>
+              </div>
+            </div>
+            <div style="font-size: 0.76rem; color: #065f46; margin-bottom: 12px; line-height: 1.45;">
+              Sudah termasuk <strong>Air PDAM, Iuran Sampah & WiFi Kampus 100 Mbps</strong>. Listrik sistem Token Prabayar mandiri per kamar.
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed #6ee7b7; font-size: 0.75rem; font-weight: 700;">
+              <span style="color: #059669;">🟢 Lunas: {{ $b1PaidCount }} Kamar</span>
+              <span style="color: {{ $b1DueCount > 0 ? '#d97706' : '#059669' }};">🟡 Belum Lunas: {{ $b1DueCount }} Kamar (Rp {{ number_format($b1DueNominal, 0, ',', '.') }})</span>
+            </div>
+          </div>
+
+          <!-- Tagihan Kos 2 -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ TAGIHAN KOS 2 (RINGROAD EXCLUSIVE)</span>
+                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #042f2e;">Skema Sewa Eksklusif & Smart Living</h4>
+                <div style="font-size: 0.75rem; color: #0f766e;">Rentang Tarif: <strong>Rp 1.450.000 – Rp 2.150.000 / bln</strong></div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 0.7rem; color: #115e59; font-weight: 700;">Total Tagihan Aktif</div>
+                <div style="font-size: 1.15rem; font-weight: 900; color: #0a5661;">Rp {{ number_format($b2MonthlyPot, 0, ',', '.') }}</div>
+              </div>
+            </div>
+            <div style="font-size: 0.76rem; color: #115e59; margin-bottom: 12px; line-height: 1.45;">
+              Sudah termasuk <strong>Akses Co-Working Space VIP, Dedicated WiFi 300 Mbps, Room Cleaning 2x/Bulan</strong> & Parkir Mobil Basement.
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 10px; border-top: 1px dashed #5eead4; font-size: 0.75rem; font-weight: 700;">
+              <span style="color: #0d9488;">🟢 Lunas: {{ $b2PaidCount }} Kamar</span>
+              <span style="color: {{ $b2DueCount > 0 ? '#d97706' : '#0d9488' }};">🟡 Belum Lunas: {{ $b2DueCount }} Kamar (Rp {{ number_format($b2DueNominal, 0, ',', '.') }})</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (TAGIHAN SEWA) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">💳</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Tagihan & Invoice Sewa</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Tampilkan daftar tagihan berdasarkan cabang kos untuk verifikasi pembayaran manual</div>
+            </div>
+          </div>
+          <div class="filter-pills" id="billingLocationFilters">
+            <button type="button" class="filter-pill active" onclick="filterBillingLocation('all', this)">🏢 Semua Cabang ({{ $totalRooms }} Unit)</button>
+            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 1', this)">🌿 Kos 1 - Kampus Utama ({{ $b1RoomsList->count() }} Unit)</button>
+            <button type="button" class="filter-pill" onclick="filterBillingLocation('Lokasi 2', this)">⚡ Kos 2 - Ringroad Exclusive ({{ $b2RoomsList->count() }} Unit)</button>
           </div>
         </div>
 
@@ -432,10 +587,10 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" style="color:#10b981;">{{ $occupiedRooms - $dueRooms }} Kamar</div>
+            <div class="stat-card-value" id="billKpiPaidVal" style="color:#10b981;">{{ $occupiedRooms - $dueRooms }} Kamar</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-up">● Terverifikasi</span>
-              <span>Anak kos tertib bayar</span>
+              <span class="stat-trend-up">● Terverifikasi Admin</span>
+              <span>Kos 1: {{ $b1PaidCount }} • Kos 2: {{ $b2PaidCount }}</span>
             </div>
           </div>
 
@@ -446,9 +601,9 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" style="color:#f59e0b;">{{ $dueRooms }} Kamar</div>
+            <div class="stat-card-value" id="billKpiDueVal" style="color:#f59e0b;">{{ $dueRooms }} Kamar</div>
             <div class="stat-card-meta">
-              <span style="color:#d97706;font-weight:700;">Rp {{ number_format($dueAmount, 0, ',', '.') }}</span>
+              <span id="billKpiDueNom" style="color:#d97706;font-weight:700;">Rp {{ number_format($dueAmount, 0, ',', '.') }}</span>
               <span>perlu pengingat tagihan</span>
             </div>
           </div>
@@ -460,10 +615,10 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
             </div>
-            <div class="stat-card-value">{{ $occupiedRooms > 0 ? round((($occupiedRooms - $dueRooms) / $occupiedRooms) * 100, 1) : 100 }}%</div>
+            <div class="stat-card-value" id="billKpiRateVal">{{ $occupiedRooms > 0 ? round((($occupiedRooms - $dueRooms) / $occupiedRooms) * 100, 1) : 100 }}%</div>
             <div class="stat-card-meta">
               <span class="stat-badge-info">Collection Rate</span>
-              <span>Kepatuhan bayar sewa</span>
+              <span>Kepatuhan bayar 2 cabang</span>
             </div>
           </div>
         </div>
@@ -472,7 +627,7 @@
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="billingSearchInput" placeholder="Cari kamar, nama anak kos, status..." onkeyup="filterBillingTable()">
+              <input type="text" id="billingSearchInput" placeholder="Cari kamar, cabang, nama anak kos, status..." onkeyup="filterBillingTable()">
             </div>
             <div class="filter-pills" id="billingStatusFilter">
               <button type="button" class="filter-pill active" onclick="filterBillingStatus('all', this)">Semua Unit ({{ $totalRooms }})</button>
@@ -487,11 +642,12 @@
             <thead>
               <tr>
                 <th>Unit Kamar</th>
+                <th>Lokasi Cabang & Layanan</th>
                 <th>Nama Penghuni</th>
                 <th>Nominal Sewa / Bln</th>
                 <th>Jatuh Tempo</th>
                 <th>Status Pembayaran</th>
-                <th>Aksi Penagihan & Invoice</th>
+                <th>Aksi Penagihan & Input Manual</th>
               </tr>
             </thead>
             <tbody id="billingTableBody">
@@ -505,11 +661,26 @@
                 $tenantName = $t ? $t->name : '-';
                 $tenantPhone = $t ? $t->phone : '';
                 $dueDay = $t ? $t->due_day : 5;
+                $rLoc = $r->location ?? (intval($r->number) >= 200 ? 'Lokasi 2' : 'Lokasi 1');
+                $isLoc2 = $rLoc === 'Lokasi 2';
               @endphp
-              <tr data-status="{{ $statusType }}" data-search="{{ strtolower($r->number . ' ' . $r->type . ' ' . $tenantName . ' ' . ($isDue ? 'jatuh tempo belum lunas' : ($isOccupied ? 'lunas' : 'kosong'))) }}">
+              <tr data-status="{{ $statusType }}" data-location="{{ $rLoc }}" data-price="{{ (int)$r->price }}" data-search="{{ strtolower($r->number . ' ' . $rLoc . ' ' . $r->type . ' ' . $tenantName . ' ' . ($isDue ? 'jatuh tempo belum lunas' : ($isOccupied ? 'lunas' : 'kosong'))) }}">
                 <td>
                   <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">Kamar #{{ $r->number }}</div>
                   <div style="font-size: 0.74rem; color: var(--text-secondary);">Lt. {{ $r->floor }} • {{ $r->type }}</div>
+                </td>
+                <td>
+                  @if($isLoc2)
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">
+                      ⚡ Kos 2 • Ringroad Exclusive
+                    </span>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 3px;">Incl. Co-Working & Cleaning 2x</div>
+                  @else
+                    <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">
+                      🌿 Kos 1 • Kampus Utama
+                    </span>
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 3px;">Incl. Air PDAM & WiFi Kampus</div>
+                  @endif
                 </td>
                 <td>
                   @if($t)
@@ -557,16 +728,17 @@
                         if (str_starts_with($cleanPhone, '0')) {
                             $cleanPhone = '62' . substr($cleanPhone, 1);
                         }
-                        $waText = rawurlencode("Halo Kak {$t->name}, kami dari Pengelola Kos Mas Robi ingin menginformasikan terkait tagihan sewa Kamar #{$r->number} sebesar Rp " . number_format($r->price, 0, ',', '.') . ". Silakan melakukan pembayaran ke Rekening BCA: 8830192831 (a.n. Robi Suryanto) atau Mandiri: 1370019283100. Jika sudah transfer, mohon kirimkan bukti transfer. Terima kasih banyak Kak!");
+                        $branchLabel = $isLoc2 ? 'Kos Mas Robi 2 (Ringroad Exclusive)' : 'Kos Mas Robi 1 (Kampus Utama)';
+                        $waText = rawurlencode("Halo Kak {$t->name}, kami dari Pengelola {$branchLabel} ingin menginformasikan terkait tagihan sewa Kamar #{$r->number} sebesar Rp " . number_format($r->price, 0, ',', '.') . ". Silakan melakukan pembayaran ke Rekening BCA: 8830192831 (a.n. Robi Suryanto) atau Mandiri: 1370019283100. Terima kasih banyak Kak!");
                       @endphp
                       <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" target="_blank" class="btn-secondary" style="background:#059669;color:#ffffff;border:none;padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Kirim Pesan WhatsApp Penagihan">
                         💬 WA Tagihan
                       </a>
                       <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;" onclick="quickMarkPaid('{{ $r->number }}', '{{ $t->name }}', {{ (int)$r->price }})">
-                        ✓ Konfirmasi Lunas
+                        ✓ Input Lunas Manual
                       </button>
                     @else
-                      <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;" onclick="document.getElementById('btnQuickAdd')?.click()">
+                      <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;" onclick="document.getElementById('btnAddNewTenant')?.click()">
                         + Tambah Penghuni
                       </button>
                     @endif
@@ -575,7 +747,7 @@
               </tr>
               @empty
               <tr>
-                <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data unit kamar.</td>
+                <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data unit kamar.</td>
               </tr>
               @endforelse
             </tbody>
@@ -585,13 +757,13 @@
       </div>
 
       <!-- =====================================================================
-           PANE 4: TAB LAPORAN KEUANGAN & KURVA ARUS KAS (KOMPLEKS & LENGKAP)
+           PANE 4: TAB LAPORAN KEUANGAN & KURVA ARUS KAS (DENGAN PERBEDAAN 2 KOS)
            ===================================================================== -->
       <div class="tab-pane" id="tab-finances">
         <div class="section-header">
           <div class="section-title">
-            <h2>Laporan Keuangan & Analisis Arus Kas</h2>
-            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Analisis kurva pendapatan bulanan s/d 1 tahun penuh, rasio pengeluaran operasional, dan buku kas transaksi resmi.</p>
+            <h2>Laporan Keuangan & Analisis Arus Kas (2 Cabang)</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Analisis komparasi pendapatan & beban operasional Kos 1 (Kampus Utama) vs Kos 2 (Ringroad Exclusive) beserta buku kas resmi.</p>
           </div>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             @php
@@ -625,7 +797,82 @@
           </div>
         </div>
 
-        <!-- 4 KPI Cards Keuangan Kompleks (Dinamis Berdasarkan Filter Tahun) -->
+        <!-- PERBEDAAN 2 KOS: KOMPARASI KINERJA FINANSIAL KOS 1 VS KOS 2 -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
+          <!-- Keuangan Kos 1 -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 NERACA KAS KOS 1 (KAMPUS UTAMA)</span>
+                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #064e3b;">Arus Kas Cabang Pandega Marta</h4>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 800; color: #059669; background: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 8px; border: 1px solid #a7f3d0;">Unit #101–#108</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #065f46; margin-bottom: 12px; line-height: 1.45;">
+              Karakteristik Kas: <strong>Okupansi stabil mahasiswa tahunan</strong>, pengeluaran operasional hemat (Internet IndiHome 100 Mbps, Air PDAM & Kebersihan Reguler).
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.8); padding: 10px 12px; border-radius: 12px; border: 1px solid #a7f3d0; font-size: 0.74rem;">
+              <div>
+                <div style="color: #047857; font-size: 0.68rem;">Pemasukan Kas</div>
+                <div style="font-weight: 800; color: #059669;" id="finBranch1Inc">Rp 8.400.000</div>
+              </div>
+              <div>
+                <div style="color: #047857; font-size: 0.68rem;">Beban Opex</div>
+                <div style="font-weight: 800; color: #dc2626;" id="finBranch1Exp">Rp 1.650.000</div>
+              </div>
+              <div>
+                <div style="color: #047857; font-size: 0.68rem;">Surplus Bersih</div>
+                <div style="font-weight: 900; color: #064e3b;" id="finBranch1Net">Rp 6.750.000</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Keuangan Kos 2 -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ NERACA KAS KOS 2 (RINGROAD EXCLUSIVE)</span>
+                <h4 style="margin: 6px 0 2px; font-size: 0.98rem; font-weight: 800; color: #042f2e;">Arus Kas Cabang Kaliurang KM 12</h4>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 800; color: #0a5661; background: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 8px; border: 1px solid #99f6e4;">Unit #201–#208</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #115e59; margin-bottom: 12px; line-height: 1.45;">
+              Karakteristik Kas: <strong>Margin sewa premium Royal Suite & Executive</strong>, beban operasional mencakup Dedicated Fiber 300 Mbps, Smart Lock & Maintenance Co-Working Space.
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: rgba(255,255,255,0.8); padding: 10px 12px; border-radius: 12px; border: 1px solid #99f6e4; font-size: 0.74rem;">
+              <div>
+                <div style="color: #0f766e; font-size: 0.68rem;">Pemasukan Kas</div>
+                <div style="font-weight: 800; color: #0d9488;" id="finBranch2Inc">Rp 13.100.000</div>
+              </div>
+              <div>
+                <div style="color: #0f766e; font-size: 0.68rem;">Beban Opex</div>
+                <div style="font-weight: 800; color: #dc2626;" id="finBranch2Exp">Rp 2.050.000</div>
+              </div>
+              <div>
+                <div style="color: #0f766e; font-size: 0.68rem;">Surplus Bersih</div>
+                <div style="font-weight: 900; color: #042f2e;" id="finBranch2Net">Rp 11.050.000</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (LAPORAN KEUANGAN) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">📊</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Buku Kas & Laporan Cabang Kos</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Pilih cabang untuk memfilter KPI, kurva pendapatan, dan riwayat transaksi Buku Kas</div>
+            </div>
+          </div>
+          <div class="filter-pills" id="financeLocationFilters">
+            <button type="button" class="filter-pill active" data-floc="all">🏢 Gabungan 2 Kos</button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 1">🌿 Buku Kas Kos 1 (Kampus)</button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 2">⚡ Buku Kas Kos 2 (Ringroad)</button>
+          </div>
+        </div>
+
+        <!-- 4 KPI Cards Keuangan Kompleks (Dinamis Berdasarkan Filter Tahun & Cabang) -->
         <div class="stats-grid financial-kpi-grid" style="padding: 0; margin-bottom: 24px;">
           <div class="stat-card">
             <div class="stat-card-header">
@@ -637,7 +884,7 @@
             <div class="stat-card-value" id="finKpiIncomeVal" style="color:#10b981;">Rp {{ number_format($yearlyIncome ?? ($monthlyIncome * 12), 0, ',', '.') }}</div>
             <div class="stat-card-meta">
               <span class="stat-trend-up">▲ 100% Terverifikasi</span>
-              <span>Arus kas masuk setahun</span>
+              <span id="finKpiBranchBadge">Gabungan 2 Cabang</span>
             </div>
           </div>
 
@@ -677,7 +924,7 @@
             <div class="stat-card-value" id="finKpiAvgVal">Rp {{ number_format(($yearlyNet ?? 176400000) / 12, 0, ',', '.') }}</div>
             <div class="stat-card-meta">
               <span class="stat-badge-info">Tahun <span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span></span>
-              <span>16 Unit Kamar</span>
+              <span id="finKpiUnitCountLabel">16 Unit Kamar</span>
             </div>
           </div>
         </div>
@@ -736,7 +983,7 @@
           <div style="margin-top: 16px; padding: 12px 18px; border-radius: 14px; background: rgba(13, 148, 136, 0.08); border: 1px solid rgba(13, 148, 136, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-primary);">
               <span>💡</span>
-              <span><strong>Insight Keuangan:</strong> Rata-rata pemasukan per unit kamar mencapai <strong>Rp 1.512.000/bln</strong> dengan tingkat perputaran kas sehat.</span>
+              <span id="finInsightText"><strong>Insight Keuangan 2 Cabang:</strong> Kos 1 menyumbang stabilitas arus kas mahasiswa, sedangkan Kos 2 memberikan margin sewa eksklusif tertinggi.</span>
             </div>
             <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661;">
               Status Kas: Surplus Finansial ✓
@@ -749,7 +996,7 @@
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="financeSearchInput" placeholder="Cari nomor bukti, keterangan, kategori kas...">
+              <input type="text" id="financeSearchInput" placeholder="Cari nomor bukti, cabang kos, keterangan, kategori kas...">
             </div>
             <div class="filter-pills" id="financeTypeFilter">
               <button type="button" class="filter-pill active" data-ftype="all">Semua Transaksi</button>
@@ -763,6 +1010,7 @@
               <tr>
                 <th>No. Bukti</th>
                 <th>Tanggal</th>
+                <th>Lokasi Cabang</th>
                 <th>Keterangan Transaksi</th>
                 <th>Kategori</th>
                 <th>Nominal</th>
@@ -782,12 +1030,13 @@
       </div>
 
       <!-- =====================================================================
-           PANE 5: TAB KELUHAN & PERAWATAN
+           PANE 5: TAB KELUHAN & PERAWATAN (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-maintenance">
         <div class="section-header">
           <div class="section-title">
-            <h2>Laporan Keluhan & Servis Fasilitas</h2>
+            <h2>Laporan Keluhan & Servis Fasilitas (2 Cabang)</h2>
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-top: 4px;">Penanganan tiket komplain & perawatan rutin dengan tim teknisi terpisah untuk Kos 1 (Kampus) & Kos 2 (Ringroad Exclusive).</p>
           </div>
           <button type="button" class="btn-primary-action" id="btnNewRepairTicket">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -795,11 +1044,72 @@
           </button>
         </div>
 
+        <!-- PERBEDAAN 2 KOS: TIM TEKNISI & SLA SERVIS FASILITAS -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 16px; margin-bottom: 18px;">
+          <!-- Servis Kos 1 -->
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 18px; padding: 18px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 10px; background: #059669; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">🛠️</div>
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 DIVISI TEKNIS KOS 1 (KAMPUS)</span>
+                  <h4 style="margin: 4px 0 0; font-size: 0.96rem; font-weight: 800; color: #064e3b;">Tim Servis Bangunan & Utilitas Kampus</h4>
+                </div>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 800; color: #059669; background: #fff; padding: 3px 8px; border-radius: 8px; border: 1px solid #86efac;">Kamar #101–#108</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #065f46; margin-bottom: 10px; line-height: 1.45;">
+              Fokus Perawatan: <strong>AC Split Standard/VIP, Pompa Air & Kran PDAM, Kunci Pintu Konvensional/RFID, Lampu & Instalasi Listrik</strong>.
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
+              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">👷 PIC Teknis: Pak Budi (0812-3344-5566)</span>
+              <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 4px 10px; border-radius: 8px; border: 1px solid #a7f3d0;">⏱️ Jadwal Cuci AC: Tiap 3 Bulan</span>
+            </div>
+          </div>
+
+          <!-- Servis Kos 2 -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 18px; padding: 18px 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 10px; background: #0a5661; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">⚡</div>
+                <div>
+                  <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ DIVISI SMART SYSTEM KOS 2 (RINGROAD)</span>
+                  <h4 style="margin: 4px 0 0; font-size: 0.96rem; font-weight: 800; color: #042f2e;">Tim Teknisi Smart Home & Co-Working</h4>
+                </div>
+              </div>
+              <span style="font-size: 0.72rem; font-weight: 800; color: #0a5661; background: #fff; padding: 3px 8px; border-radius: 8px; border: 1px solid #5eead4;">Kamar #201–#208</span>
+            </div>
+            <div style="font-size: 0.76rem; color: #115e59; margin-bottom: 10px; line-height: 1.45;">
+              Fokus Perawatan: <strong>Smart Door Lock PIN/Biometrik, Water Heater Ariston, Smart TV Android, AC Inverter & Mesh WiFi 6 Co-Working</strong>.
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.72rem; font-weight: 700;">
+              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">👨‍🔧 PIC Smart Tech: Mas Dani (0813-9988-7766)</span>
+              <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 4px 10px; border-radius: 8px; border: 1px solid #99f6e4;">🚀 Respon Prioritas: &lt; 2 Jam</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (KELUHAN & SERVIS) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">🔧</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Keluhan & Servis</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Pilih cabang kos untuk memisahkan antrean perbaikan teknisi Kos 1 dan Kos 2</div>
+            </div>
+          </div>
+          <div class="filter-pills" id="maintenanceLocationFilters">
+            <button type="button" class="filter-pill active" data-mloc="all">🏢 Semua Cabang</button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 1">🌿 Servis Kos 1 (Kampus)</button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 2">⚡ Servis Kos 2 (Ringroad)</button>
+          </div>
+        </div>
+
         <div class="table-card-container">
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="maintenanceSearchInput" placeholder="Cari keluhan atau kamar...">
+              <input type="text" id="maintenanceSearchInput" placeholder="Cari tiket, keluhan, cabang, atau nomor kamar...">
             </div>
             <div class="filter-pills" id="repairStatusFilter">
               <button type="button" class="filter-pill active" data-rstatus="all">Semua</button>
@@ -814,6 +1124,7 @@
               <tr>
                 <th>Tiket #</th>
                 <th>Kamar & Pelapor</th>
+                <th>Lokasi Cabang & PIC</th>
                 <th>Deskripsi Keluhan</th>
                 <th>Tgl Lapor</th>
                 <th>Prioritas</th>
@@ -833,13 +1144,57 @@
       </div>
 
       <!-- =====================================================================
-           PANE 5B: TAB PERSETUJUAN PINDAH KAMAR (FITUR ADMIN BARU)
+           PANE 5B: TAB PERSETUJUAN PINDAH KAMAR (DENGAN PERBEDAAN 2 KOS MODERN)
            ===================================================================== -->
       <div class="tab-pane" id="tab-transfers">
         <div class="section-header">
           <div class="section-title">
-            <h2>Pengajuan Pindah Kamar Penghuni</h2>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Tinjau dan setujui permohonan perpindahan unit kamar anak kos</p>
+            <h2>Pengajuan Pindah Kamar & Mutasi Antar Cabang (2 Kos)</h2>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">Kelola perpindahan kamar internal di dalam cabang yang sama maupun mutasi lintas cabang (Upgrade Kos 1 ➔ Kos 2).</p>
+          </div>
+        </div>
+
+        <!-- PERBEDAAN 2 KOS: ATURAN MUTASI INTERNAL VS LINTAS CABANG -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 18px;">
+          <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 16px; padding: 16px;">
+            <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 MUTASI INTERNAL KOS 1</span>
+            <h4 style="margin: 6px 0 4px; font-size: 0.92rem; font-weight: 800; color: #064e3b;">Antar Kamar #101 s/d #108</h4>
+            <p style="font-size: 0.75rem; color: #065f46; margin: 0; line-height: 1.45;">
+              Upgrade dari <strong>Standard Fan ➔ Deluxe/VIP AC</strong> di Kampus Utama. Gratis biaya admin pindah kamar, hanya penyesuaian selisih harga sewa prorata.
+            </p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 16px; padding: 16px;">
+            <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ MUTASI INTERNAL KOS 2</span>
+            <h4 style="margin: 6px 0 4px; font-size: 0.92rem; font-weight: 800; color: #042f2e;">Antar Kamar #201 s/d #208</h4>
+            <p style="font-size: 0.75rem; color: #115e59; margin: 0; line-height: 1.45;">
+              Perpindahan <strong>Executive Studio ➔ Royal Suite / Smart Corner</strong> di Ringroad Exclusive. Termasuk reset kode PIN Smart Door Lock otomatis.
+            </p>
+          </div>
+
+          <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1.5px solid #93c5fd; border-radius: 16px; padding: 16px;">
+            <span style="font-size: 0.68rem; font-weight: 800; background: #1d4ed8; color: #fff; padding: 2px 8px; border-radius: 999px;">🔄 MUTASI LINTAS CABANG (KOS 1 ⇄ KOS 2)</span>
+            <h4 style="margin: 6px 0 4px; font-size: 0.92rem; font-weight: 800; color: #1e3a8a;">Pindah Lokasi Kampus ⇄ Ringroad</h4>
+            <p style="font-size: 0.75rem; color: #1e40af; margin: 0; line-height: 1.45;">
+              Memfasilitasi penghuni yang pindah kerja/kampus antar lokasi. Deposit sewa otomatis ditransfer ke pembukuan cabang tujuan.
+            </p>
+          </div>
+        </div>
+
+        <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (PINDAH KAMAR) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.2rem;">🔀</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">Filter Cabang Pindah Kamar</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">Saring permohonan pindah kamar berdasarkan cabang asal/tujuan atau mutasi lintas cabang</div>
+            </div>
+          </div>
+          <div class="filter-pills" id="transferLocationFilters">
+            <button type="button" class="filter-pill active" onclick="filterTransferLocation('all', this)">🏢 Semua Mutasi</button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 1', this)">🌿 Internal Kos 1 (Kampus)</button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lokasi 2', this)">⚡ Internal Kos 2 (Ringroad)</button>
+            <button type="button" class="filter-pill" onclick="filterTransferLocation('Lintas Cabang', this)">🔄 Lintas Cabang (Kos 1 ⇄ Kos 2)</button>
           </div>
         </div>
 
@@ -847,7 +1202,7 @@
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="transferSearchInput" placeholder="Cari penghuni atau kamar..." onkeyup="filterTransferTable()">
+              <input type="text" id="transferSearchInput" placeholder="Cari penghuni, cabang, atau nomor kamar..." onkeyup="filterTransferTable()">
             </div>
             <div class="filter-pills" id="transferStatusFilter">
               <button type="button" class="filter-pill active" onclick="filterTransferStatus('all', this)">Semua</button>
@@ -863,6 +1218,7 @@
               <tr>
                 <th>Tgl Pengajuan</th>
                 <th>Penghuni & Kontak</th>
+                <th>Jenis & Cabang Mutasi</th>
                 <th>Kamar Asal ➔ Tujuan</th>
                 <th>Alasan & Rencana</th>
                 <th>Status</th>
@@ -871,7 +1227,16 @@
             </thead>
             <tbody id="transfersTableBody">
               @forelse($roomTransfers ?? [] as $tr)
-                <tr data-status="{{ $tr->status }}" data-search="{{ strtolower(($tr->user->name ?? $tr->tenant->name ?? '') . ' ' . ($tr->currentRoom->number ?? '') . ' ' . ($tr->targetRoom->number ?? '') . ' ' . $tr->reason) }}">
+                @php
+                  $fromNum = $tr->currentRoom->number ?? '101';
+                  $toNum = $tr->targetRoom->number ?? '102';
+                  $fromLoc = $tr->currentRoom->location ?? (intval($fromNum) >= 200 ? 'Lokasi 2' : 'Lokasi 1');
+                  $toLoc = $tr->targetRoom->location ?? (intval($toNum) >= 200 ? 'Lokasi 2' : 'Lokasi 1');
+                  $isCrossBranch = $fromLoc !== $toLoc;
+                  $transferLocCategory = $isCrossBranch ? 'Lintas Cabang' : $fromLoc;
+                  $priceDiff = (int)($tr->targetRoom->price ?? 0) - (int)($tr->currentRoom->price ?? 0);
+                @endphp
+                <tr data-status="{{ $tr->status }}" data-location="{{ $transferLocCategory }}" data-from-loc="{{ $fromLoc }}" data-to-loc="{{ $toLoc }}" data-search="{{ strtolower(($tr->user->name ?? $tr->tenant->name ?? '') . ' ' . $fromNum . ' ' . $toNum . ' ' . $fromLoc . ' ' . $toLoc . ' ' . $transferLocCategory . ' ' . $tr->reason) }}">
                   <td>
                     <div style="font-weight: 700;">{{ $tr->created_at->format('d/m/Y') }}</div>
                     <div style="font-size: 0.72rem; color: var(--text-muted);">{{ $tr->created_at->format('H:i') }} WIB</div>
@@ -881,10 +1246,34 @@
                     <div style="font-size: 0.78rem; color: var(--text-muted);">📞 {{ $tr->user->phone ?? $tr->tenant->phone ?? '-' }}</div>
                   </td>
                   <td>
+                    @if($isCrossBranch)
+                      <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd;">
+                        🔄 Lintas Cabang ({{ $fromLoc === 'Lokasi 1' ? 'Kos 1 ➔ Kos 2' : 'Kos 2 ➔ Kos 1' }})
+                      </span>
+                    @elseif($fromLoc === 'Lokasi 2')
+                      <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">
+                        ⚡ Internal Kos 2 (Ringroad)
+                      </span>
+                    @else
+                      <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">
+                        🌿 Internal Kos 1 (Kampus)
+                      </span>
+                    @endif
+                    <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 4px;">
+                      @if($priceDiff > 0)
+                        <span style="color: #059669; font-weight: 700;">▲ Upgrade (+Rp {{ number_format($priceDiff, 0, ',', '.') }}/bln)</span>
+                      @elseif($priceDiff < 0)
+                        <span style="color: #d97706; font-weight: 700;">▼ Penyesuaian (-Rp {{ number_format(abs($priceDiff), 0, ',', '.') }}/bln)</span>
+                      @else
+                        <span>● Tarif Setara</span>
+                      @endif
+                    </div>
+                  </td>
+                  <td>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <span class="badge" style="background: var(--bg-surface); color: var(--text-primary); font-weight: 700; padding: 4px 8px; border-radius: 6px;">#{{ $tr->currentRoom->number ?? '-' }}</span>
+                      <span class="badge" style="background: var(--bg-surface); color: var(--text-primary); font-weight: 700; padding: 4px 8px; border-radius: 6px;">#{{ $fromNum }}</span>
                       <span style="color: var(--brand-primary); font-weight: 800;">➔</span>
-                      <span class="badge" style="background: var(--brand-soft-bg); color: var(--brand-primary); font-weight: 800; padding: 4px 8px; border-radius: 6px;">#{{ $tr->targetRoom->number ?? '-' }}</span>
+                      <span class="badge" style="background: var(--brand-soft-bg); color: var(--brand-primary); font-weight: 800; padding: 4px 8px; border-radius: 6px;">#{{ $toNum }}</span>
                     </div>
                     <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">
                       {{ $tr->targetRoom->type ?? '' }} (Lt {{ $tr->targetRoom->floor ?? '1' }})
@@ -925,7 +1314,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                  <td colspan="7" style="text-align: center; padding: 32px; color: var(--text-muted);">
                     Belum ada pengajuan pindah kamar dari penghuni kos.
                   </td>
                 </tr>
@@ -1537,40 +1926,108 @@
         </div>
 
         <!-- =========================================================================
-             SUBTAB 4: KELOLA JARINGAN WIFI KOS & MODEM
+             SUBTAB 4: KELOLA JARINGAN WIFI KOS & MODEM (DENGAN PERBEDAAN 2 KOS MODERN)
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-wifi" style="display: none;">
-          <div class="settings-modern-card" style="max-width: 900px; margin: 0 auto;">
+          <div class="settings-modern-card" style="max-width: 960px; margin: 0 auto;">
             <div class="settings-card-header">
               <div class="settings-card-title-group">
                 <div class="settings-card-icon-badge" style="background: rgba(14, 116, 130, 0.12); color: #0a5661;">📶</div>
                 <div>
-                  <h3 class="settings-card-title">Kelola Jaringan WiFi Kos (Nama WiFi & Modem)</h3>
-                  <div class="settings-card-subtitle">Tambahkan beberapa jenis jaringan WiFi dan modem. Tentukan berapa banyak WiFi yang muncul di portal pelanggan melalui toggle switch.</div>
+                  <h3 class="settings-card-title">Kelola Jaringan WiFi & Infrastruktur Modem (2 Cabang Kos)</h3>
+                  <div class="settings-card-subtitle">Atur SSID, password, lokasi modem router, dan pembagian jaringan antara Kos 1 (Kampus Utama) & Kos 2 (Ringroad Exclusive).</div>
                 </div>
               </div>
-              <span style="font-size: 0.76rem; background: #e0f2fe; color: #0284c7; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1.5px solid #bae6fd;">Multi-WiFi Support</span>
+              <span style="font-size: 0.76rem; background: #e0f2fe; color: #0284c7; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1.5px solid #bae6fd;">Dual-Branch Multi-WiFi</span>
+            </div>
+
+            @php
+              $allWifis = $setting->wifi_list ?? [];
+              $wfLoc1Count = collect($allWifis)->filter(fn($w) => ($w['location'] ?? 'Lokasi 1') === 'Lokasi 1')->count();
+              $wfLoc2Count = collect($allWifis)->filter(fn($w) => ($w['location'] ?? 'Lokasi 1') === 'Lokasi 2')->count();
+            @endphp
+
+            <!-- PERBEDAAN 2 KOS: INFRASTRUKTUR JARINGAN INTERNET KOS 1 VS KOS 2 -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; margin-bottom: 18px;">
+              <!-- Infrastruktur WiFi Kos 1 -->
+              <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1.5px solid #86efac; border-radius: 16px; padding: 16px 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+                  <div>
+                    <span style="font-size: 0.68rem; font-weight: 800; background: #059669; color: #fff; padding: 2px 8px; border-radius: 999px;">🌿 INFRASTRUKTUR WIFI KOS 1</span>
+                    <h4 style="margin: 5px 0 2px; font-size: 0.95rem; font-weight: 800; color: #064e3b;">Kampus Utama (Pandega Marta)</h4>
+                  </div>
+                  <span style="font-size: 0.74rem; font-weight: 800; color: #059669; background: #fff; padding: 3px 9px; border-radius: 8px; border: 1px solid #86efac;">{{ $wfLoc1Count }} SSID</span>
+                </div>
+                <p style="font-size: 0.75rem; color: #065f46; margin: 0 0 10px; line-height: 1.45;">
+                  Provider: <strong>IndiHome & Biznet Fiber 100 Mbps</strong>. Menggunakan Router ZTE F670L Dual-Band (Lt. 1), TP-Link Archer AX23 (Lt. 2) & Access Point Gazebo Belajar.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.7rem; font-weight: 700;">
+                  <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">⚡ Bandwidth: Up to 100 Mbps</span>
+                  <span style="background: rgba(255,255,255,0.85); color: #065f46; padding: 3px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">🏠 Cakupan: Kamar #101–#108</span>
+                </div>
+              </div>
+
+              <!-- Infrastruktur WiFi Kos 2 -->
+              <div style="background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%); border: 1.5px solid #5eead4; border-radius: 16px; padding: 16px 18px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+                  <div>
+                    <span style="font-size: 0.68rem; font-weight: 800; background: #0a5661; color: #fff; padding: 2px 8px; border-radius: 999px;">⚡ INFRASTRUKTUR WIFI KOS 2</span>
+                    <h4 style="margin: 5px 0 2px; font-size: 0.95rem; font-weight: 800; color: #042f2e;">Ringroad Exclusive (Kaliurang KM 12)</h4>
+                  </div>
+                  <span style="font-size: 0.74rem; font-weight: 800; color: #0a5661; background: #fff; padding: 3px 9px; border-radius: 8px; border: 1px solid #5eead4;">{{ $wfLoc2Count }} SSID</span>
+                </div>
+                <p style="font-size: 0.75rem; color: #115e59; margin: 0 0 10px; line-height: 1.45;">
+                  Provider: <strong>Biznet Dedicated Metro 300 Mbps</strong>. Menggunakan Ruijie Reyee Mesh WiFi 6 AX3200, Ubiquiti UniFi 6 Pro (Co-Working Space) & Xiaomi AX3000.
+                </p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.7rem; font-weight: 700;">
+                  <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 3px 8px; border-radius: 6px; border: 1px solid #99f6e4;">🚀 Bandwidth: Dedicated 300 Mbps</span>
+                  <span style="background: rgba(255,255,255,0.85); color: #0f766e; padding: 3px 8px; border-radius: 6px; border: 1px solid #99f6e4;">🏢 Cakupan: Kamar #201–#208 & Co-Working</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (JARINGAN WIFI) -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 16px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+              <div style="font-size: 0.82rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                <span>📡</span>
+                <span>Filter Jaringan WiFi per Cabang Kos:</span>
+              </div>
+              <div class="filter-pills" id="wifiLocationFilters">
+                <button type="button" class="filter-pill active" onclick="filterWifiByLocation('all', this)">🏢 Semua Cabang ({{ count($allWifis) }})</button>
+                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 1', this)">🌿 WiFi Kos 1 - Kampus ({{ $wfLoc1Count }})</button>
+                <button type="button" class="filter-pill" onclick="filterWifiByLocation('Lokasi 2', this)">⚡ WiFi Kos 2 - Ringroad ({{ $wfLoc2Count }})</button>
+              </div>
             </div>
 
             <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.82rem; color: #166534; line-height: 1.5;">
-              <strong>💡 Pengaturan WiFi untuk Pelanggan:</strong> Anda dapat menambahkan beberapa jenis WiFi (misal: WiFi Lantai 1, WiFi Lantai 2, WiFi Ruang Bersama). Aktifkan toggle <strong>"● Ditayangkan"</strong> untuk menentukan berapa dan mana saja WiFi yang dapat dilihat oleh anak kos di portal pelanggan mereka.
+              <strong>💡 Sinkronisasi Otomatis ke Portal Pelanggan:</strong> Jaringan WiFi yang berlabel <strong>Kos 1 (Lokasi 1)</strong> akan otomatis tampil di portal penghuni Kamar #101–#108, sedangkan jaringan berlabel <strong>Kos 2 (Lokasi 2)</strong> tampil di portal penghuni Kamar #201–#208 saat toggle <strong>"● Ditayangkan"</strong> aktif.
             </div>
 
             {{-- Daftar Jaringan WiFi Dinamis --}}
             <div id="wifiNetworksList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-              @php
-                $allWifis = $setting->wifi_list ?? [];
-              @endphp
               @foreach($allWifis as $idx => $wf)
-                <div class="wf-card-item" data-id="{{ $wf['id'] ?? 'wifi_'.$idx }}" style="background: var(--bg-surface); border: 1.5px solid {{ !empty($wf['is_active']) ? '#10b981' : 'var(--border-color)' }}; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;">
-                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                @php
+                  $wfLoc = $wf['location'] ?? 'Lokasi 1';
+                  $isWfLoc2 = $wfLoc === 'Lokasi 2';
+                  $wfSpeed = $wf['speed'] ?? ($isWfLoc2 ? '300 Mbps Mesh WiFi 6' : '100 Mbps Dual-Band');
+                @endphp
+                <div class="wf-card-item" data-id="{{ $wf['id'] ?? 'wifi_'.$idx }}" data-location="{{ $wfLoc }}" style="background: var(--bg-surface); border: 1.5px solid {{ !empty($wf['is_active']) ? '#10b981' : 'var(--border-color)' }}; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                      <div style="width: 40px; height: 40px; border-radius: 12px; background: #ecfeff; border: 1px solid #a5f3fc; color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                      <div style="width: 42px; height: 42px; border-radius: 12px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; border: 1px solid {{ $isWfLoc2 ? '#5eead4' : '#86efac' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
                         📶
                       </div>
                       <div>
-                        <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
-                        <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                          <span style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</span>
+                          @if($isWfLoc2)
+                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ Kos 2 • Ringroad Exclusive</span>
+                          @else
+                            <span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 Kos 1 • Kampus Utama</span>
+                          @endif
+                          <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">🚀 {{ $wfSpeed }}</span>
+                        </div>
+                        <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
                           <span>📡 Modem:</span>
                           <span class="wf-modem-text" style="color: var(--text-secondary); font-weight: 500;">{{ $wf['modem'] ?? 'Modem Utama' }}</span>
                         </div>
@@ -1588,9 +2045,12 @@
                   </div>
 
                   @if(!empty($wf['password']))
-                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px;">
-                      <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
-                      <code style="font-family: monospace; font-weight: 700; color: var(--text-primary);" class="wf-pass-text">{{ $wf['password'] }}</code>
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                      <div>
+                        <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
+                        <code style="font-family: monospace; font-weight: 700; color: var(--text-primary); margin-left: 6px;" class="wf-pass-text">{{ $wf['password'] }}</code>
+                      </div>
+                      <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong>{{ $wfLoc }}</strong></span>
                     </div>
                   @endif
 
@@ -1602,32 +2062,43 @@
             {{-- Tombol & Box Tambah WiFi Baru --}}
             <div style="margin-bottom: 20px;">
               <button type="button" id="btnToggleAddWf" onclick="toggleAddWifiForm()" class="btn-secondary" style="width: 100%; border-style: dashed; padding: 12px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span>➕ Tambah Jaringan WiFi & Modem Baru</span>
+                <span>➕ Tambah Jaringan WiFi & Modem Baru (Pilih Kos 1 / Kos 2)</span>
               </button>
 
               <div id="addWifiFormBox" style="display: none; background: var(--bg-surface); border: 1.5px solid #0a5661; border-radius: 16px; padding: 18px; margin-top: 14px;">
                 <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
-                  <span>📶</span> Tambah Jaringan WiFi Baru
+                  <span>📶</span> Tambah Jaringan WiFi Baru untuk Cabang Kos
                 </h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                  <div class="form-group">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Lokasi Cabang Kos *</label>
+                    <select id="newWfLocation" class="form-control" style="font-weight: 700;">
+                      <option value="Lokasi 1">🌿 Kos 1 - Kampus Utama (Kamar #101–#108)</option>
+                      <option value="Lokasi 2">⚡ Kos 2 - Ringroad Exclusive (Kamar #201–#208)</option>
+                    </select>
+                  </div>
                   <div class="form-group">
                     <label style="font-size: 0.78rem; font-weight: 700;">Nama WiFi (SSID) *</label>
-                    <input type="text" id="newWfName" class="form-control" placeholder="Contoh: KOS_MAS_ROBI_LANTAI_1">
+                    <input type="text" id="newWfName" class="form-control" placeholder="Contoh: KOS_MAS_ROBI_2_ROOFTOP">
                   </div>
                   <div class="form-group">
                     <label style="font-size: 0.78rem; font-weight: 700;">Modem / Lokasi Modem *</label>
-                    <input type="text" id="newWfModem" class="form-control" placeholder="Contoh: Modem ZTE F670L - Lantai 1">
+                    <input type="text" id="newWfModem" class="form-control" placeholder="Contoh: Modem Ruijie Mesh - Lantai 2">
                   </div>
                   <div class="form-group">
-                    <label style="font-size: 0.78rem; font-weight: 700;">Kata Sandi (Opsional)</label>
+                    <label style="font-size: 0.78rem; font-weight: 700;">Kata Sandi (Password)</label>
                     <input type="text" id="newWfPassword" class="form-control" placeholder="Contoh: kostnyaman2026">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Kecepatan / Spek Jaringan</label>
+                    <input type="text" id="newWfSpeed" class="form-control" placeholder="Contoh: 200 Mbps Fiber 5GHz">
                   </div>
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                   <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--text-primary);">
                     <input type="checkbox" id="newWfIsActive" checked style="accent-color: #10b981; width: 16px; height: 16px;">
-                    <span>Langsung Tayangkan ke Portal Pelanggan</span>
+                    <span>Langsung Tayangkan ke Portal Pelanggan Cabang Terkait</span>
                   </label>
                   <div style="display: flex; gap: 8px;">
                     <button type="button" class="btn-secondary" onclick="toggleAddWifiForm()" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">Batal</button>
@@ -2343,33 +2814,52 @@
       });
     }
 
-    // Filter Table Pindah Kamar
-    function filterTransferTable() {
-      var input = document.getElementById('transferSearchInput').value.toLowerCase();
-      var rows = document.querySelectorAll('#transfersTableBody tr');
+    // Filter Table Pindah Kamar (2 Cabang & Lintas Cabang)
+    var currentTransferStatus = 'all';
+    var currentTransferLocation = 'all';
+
+    function applyTransferFilters() {
+      var inputEl = document.getElementById('transferSearchInput');
+      var input = inputEl ? inputEl.value.toLowerCase() : '';
+      var rows = document.querySelectorAll('#transfersTableBody tr[data-status]');
       rows.forEach(function(r) {
         var searchData = r.getAttribute('data-search') || '';
-        if (searchData.includes(input)) {
-          r.style.display = '';
-        } else {
-          r.style.display = 'none';
+        var rStatus = r.getAttribute('data-status') || '';
+        var rLoc = r.getAttribute('data-location') || '';
+        var rFrom = r.getAttribute('data-from-loc') || '';
+        var rTo = r.getAttribute('data-to-loc') || '';
+
+        var matchSearch = !input || searchData.includes(input);
+        var matchStatus = (currentTransferStatus === 'all' || rStatus === currentTransferStatus);
+        var matchLoc = true;
+        if (currentTransferLocation === 'Lintas Cabang') {
+          matchLoc = (rLoc === 'Lintas Cabang');
+        } else if (currentTransferLocation !== 'all') {
+          matchLoc = (rLoc === currentTransferLocation || rFrom === currentTransferLocation || rTo === currentTransferLocation);
         }
+
+        r.style.display = (matchSearch && matchStatus && matchLoc) ? '' : 'none';
       });
     }
 
-    function filterTransferStatus(status, btn) {
-      document.querySelectorAll('#transferStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
-      btn.classList.add('active');
-      var rows = document.querySelectorAll('#transfersTableBody tr');
-      rows.forEach(function(r) {
-        var rStatus = r.getAttribute('data-status');
-        if (status === 'all' || rStatus === status) {
-          r.style.display = '';
-        } else {
-          r.style.display = 'none';
-        }
-      });
+    function filterTransferTable() {
+      applyTransferFilters();
     }
+
+    function filterTransferStatus(status, btn) {
+      currentTransferStatus = status;
+      document.querySelectorAll('#transferStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyTransferFilters();
+    }
+
+    function filterTransferLocation(loc, btn) {
+      currentTransferLocation = loc;
+      document.querySelectorAll('#transferLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyTransferFilters();
+    }
+    window.filterTransferLocation = filterTransferLocation;
 
     // =========================================================================
     // KURVA PERTUMBUHAN PENDAPATAN & ARUS KAS (CANVAS SPLINE CURVE INTERACTIVE)
@@ -2681,30 +3171,73 @@
     });
 
     // =========================================================================
-    // TAGIHAN SEWA (TAB-BILLS) FILTER & AKSI CEPAT
+    // TAGIHAN SEWA (TAB-BILLS) FILTER 2 CABANG & AKSI CEPAT
     // =========================================================================
-    function filterBillingTable() {
-      var input = document.getElementById("billingSearchInput").value.toLowerCase();
-      var rows = document.querySelectorAll("#billingTableBody tr");
+    var currentBillingStatus = "all";
+    var currentBillingLocation = "all";
+
+    function applyBillingFilters() {
+      var inputEl = document.getElementById("billingSearchInput");
+      var input = inputEl ? inputEl.value.toLowerCase() : "";
+      var rows = document.querySelectorAll("#billingTableBody tr[data-status]");
+      var paidCount = 0;
+      var dueCount = 0;
+      var dueNominal = 0;
+
       rows.forEach(function(r) {
         var s = r.getAttribute("data-search") || "";
-        r.style.display = s.includes(input) ? "" : "none";
+        var rStatus = r.getAttribute("data-status") || "";
+        var rLoc = r.getAttribute("data-location") || "Lokasi 1";
+        var rPrice = parseInt(r.getAttribute("data-price") || "0", 10);
+
+        var matchLoc = (currentBillingLocation === "all" || rLoc === currentBillingLocation);
+        if (matchLoc) {
+          if (rStatus === "paid") paidCount++;
+          if (rStatus === "due") {
+            dueCount++;
+            dueNominal += rPrice;
+          }
+        }
+
+        var matchSearch = !input || s.includes(input);
+        var matchStatus = (currentBillingStatus === "all" || rStatus === currentBillingStatus);
+
+        r.style.display = (matchLoc && matchSearch && matchStatus) ? "" : "none";
       });
+
+      var paidEl = document.getElementById("billKpiPaidVal");
+      var dueEl = document.getElementById("billKpiDueVal");
+      var dueNomEl = document.getElementById("billKpiDueNom");
+      var rateEl = document.getElementById("billKpiRateVal");
+
+      if (paidEl) paidEl.textContent = paidCount + " Kamar";
+      if (dueEl) dueEl.textContent = dueCount + " Kamar";
+      if (dueNomEl) dueNomEl.textContent = "Rp " + dueNominal.toLocaleString("id-ID");
+      if (rateEl) {
+        var totOcc = paidCount + dueCount;
+        var rate = totOcc > 0 ? Math.round((paidCount / totOcc) * 1000) / 10 : 100;
+        rateEl.textContent = rate + "%";
+      }
+    }
+
+    function filterBillingTable() {
+      applyBillingFilters();
     }
 
     function filterBillingStatus(status, btn) {
+      currentBillingStatus = status;
       document.querySelectorAll("#billingStatusFilter .filter-pill").forEach(function(p) { p.classList.remove("active"); });
       if (btn) btn.classList.add("active");
-      var rows = document.querySelectorAll("#billingTableBody tr");
-      rows.forEach(function(r) {
-        var rStatus = r.getAttribute("data-status");
-        if (status === "all" || rStatus === status) {
-          r.style.display = "";
-        } else {
-          r.style.display = "none";
-        }
-      });
+      applyBillingFilters();
     }
+
+    function filterBillingLocation(loc, btn) {
+      currentBillingLocation = loc;
+      document.querySelectorAll("#billingLocationFilters .filter-pill").forEach(function(p) { p.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      applyBillingFilters();
+    }
+    window.filterBillingLocation = filterBillingLocation;
 
     function quickMarkPaid(roomNumber, tenantName, price) {
       if (!confirm("Konfirmasi bahwa tagihan Kamar #" + roomNumber + " (" + tenantName + ") sebesar Rp " + price.toLocaleString("id-ID") + " telah lunas diterima?")) return;
@@ -3122,10 +3655,27 @@
       }
     }
 
+    function filterWifiByLocation(loc, btn) {
+      document.querySelectorAll('#wifiLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      var cards = document.querySelectorAll('#wifiNetworksList .wf-card-item');
+      cards.forEach(function(card) {
+        var cLoc = card.getAttribute('data-location') || 'Lokasi 1';
+        if (loc === 'all' || cLoc === loc) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+    window.filterWifiByLocation = filterWifiByLocation;
+
     function submitAddNewWifi() {
+      var location = document.getElementById('newWfLocation')?.value || 'Lokasi 1';
       var name = document.getElementById('newWfName')?.value.trim();
       var modem = document.getElementById('newWfModem')?.value.trim();
       var password = document.getElementById('newWfPassword')?.value.trim() || '';
+      var speed = document.getElementById('newWfSpeed')?.value.trim() || (location === 'Lokasi 2' ? '300 Mbps Mesh WiFi 6' : '100 Mbps Dual-Band');
       var isActive = document.getElementById('newWfIsActive')?.checked ?? true;
 
       if (!name) {
@@ -3139,29 +3689,41 @@
         return;
       }
 
+      var isWfLoc2 = (location === 'Lokasi 2');
       var newId = 'wifi_' + Date.now();
       var rawObj = {
         id: newId,
+        location: location,
         name: name,
         modem: modem,
         password: password,
+        speed: speed,
         is_active: isActive
       };
 
       var card = document.createElement('div');
       card.className = 'wf-card-item';
       card.setAttribute('data-id', newId);
+      card.setAttribute('data-location', location);
       card.style.cssText = 'background: var(--bg-surface); border: 1.5px solid ' + (isActive ? '#10b981' : 'var(--border-color)') + '; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;';
 
+      var branchBadgeHtml = isWfLoc2
+        ? '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #ccfbf1; color: #0a5661; border: 1px solid #5eead4;">⚡ Kos 2 • Ringroad Exclusive</span>'
+        : '<span class="wf-branch-badge" style="font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: #dcfce7; color: #059669; border: 1px solid #86efac;">🌿 Kos 1 • Kampus Utama</span>';
+
       card.innerHTML = `
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 12px; background: #ecfeff; border: 1px solid #a5f3fc; color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: ${isWfLoc2 ? '#ccfbf1' : '#dcfce7'}; border: 1px solid ${isWfLoc2 ? '#5eead4' : '#86efac'}; color: ${isWfLoc2 ? '#0a5661' : '#059669'}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
               📶
             </div>
             <div>
-              <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">${name}</div>
-              <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">${name}</span>
+                ${branchBadgeHtml}
+                <span style="font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; color: #475569;">🚀 ${speed}</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 4px;">
                 <span>📡 Modem:</span>
                 <span class="wf-modem-text" style="color: var(--text-secondary); font-weight: 500;">${modem}</span>
               </div>
@@ -3178,9 +3740,12 @@
           </div>
         </div>
         ${password ? `
-          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px;">
-            <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
-            <code style="font-family: monospace; font-weight: 700; color: var(--text-primary);" class="wf-pass-text">${password}</code>
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
+              <code style="font-family: monospace; font-weight: 700; color: var(--text-primary); margin-left: 6px;" class="wf-pass-text">${password}</code>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--text-secondary);">📍 Cabang: <strong>${location}</strong></span>
           </div>
         ` : ''}
         <input type="hidden" class="wf-raw-data" value='${JSON.stringify(rawObj)}'>
@@ -3192,6 +3757,7 @@
       document.getElementById('newWfName').value = '';
       document.getElementById('newWfModem').value = '';
       document.getElementById('newWfPassword').value = '';
+      if (document.getElementById('newWfSpeed')) document.getElementById('newWfSpeed').value = '';
       toggleAddWifiForm();
 
       saveAllWifiNetworksToServer();

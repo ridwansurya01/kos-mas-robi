@@ -981,8 +981,8 @@
           </svg>
         </div>
         <div>
-          <h3 class="modal-title" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">Info Jaringan WiFi Kos</h3>
-          <p class="modal-subtitle" style="font-size: 0.76rem; color: #64748b; margin: 2px 0 0;">Daftar koneksi WiFi dan modem aktif untuk penghuni kost</p>
+          <h3 class="modal-title" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">Info Jaringan WiFi Kos (2 Cabang)</h3>
+          <p class="modal-subtitle" style="font-size: 0.76rem; color: #64748b; margin: 2px 0 0;">Daftar koneksi WiFi & modem aktif sesuai lokasi cabang kos Anda</p>
         </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalWifi" aria-label="Tutup Modal">
@@ -992,32 +992,50 @@
       </button>
     </div>
     <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
-      <div class="tp-wifi-status-card" style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 14px; border-radius: 12px;">
-        <span class="tp-wifi-status-text" style="color: #166534; font-weight: 700; font-size: 0.8rem;">● Status Jaringan: Aktif & Stabil</span>
-        <span class="tp-badge green" style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.74rem; padding: 3px 8px; border-radius: 6px;">Fiber Dedicated</span>
-      </div>
-
       @php
+        $myBranchLoc = ($room->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'Lokasi 2' : 'Lokasi 1';
         $activeWifis = $setting->active_wifi_list ?? [];
         if (empty($activeWifis)) {
             $activeWifis = [
-                ['name' => 'KOS_MAS_ROBI_5G', 'modem' => 'Modem Fiber Utama (Lantai 1)', 'password' => 'kostnyaman2026'],
-                ['name' => 'KOS_MAS_ROBI_LANTAI_2', 'modem' => 'Modem Extender TP-Link (Lantai 2)', 'password' => 'kostnyaman2026'],
+                ['name' => 'KOS_MAS_ROBI_1_5G', 'location' => 'Lokasi 1', 'modem' => 'Modem Fiber Utama (Lantai 1)', 'password' => 'kostnyaman2026', 'speed' => '100 Mbps Dual-Band'],
+                ['name' => 'ROBI_EXCLUSIVE_2_ULTRA5G', 'location' => 'Lokasi 2', 'modem' => 'Router Mesh WiFi 6 (Ringroad)', 'password' => 'ringroadvip2026', 'speed' => '300 Mbps Mesh WiFi 6'],
             ];
         }
       @endphp
 
+      <div class="tp-wifi-status-card" style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 14px; border-radius: 12px; flex-wrap: wrap; gap: 8px;">
+        <span class="tp-wifi-status-text" style="color: #166534; font-weight: 700; font-size: 0.8rem;">● Status Jaringan: Aktif & Stabil ({{ $myBranchLoc === 'Lokasi 2' ? 'Kos 2 - Ringroad' : 'Kos 1 - Kampus' }})</span>
+        <span class="tp-badge green" style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.74rem; padding: 3px 8px; border-radius: 6px;">{{ $myBranchLoc === 'Lokasi 2' ? 'Dedicated 300 Mbps' : 'Fiber 100 Mbps' }}</span>
+      </div>
+
+      {{-- Switcher Lokasi WiFi di Portal Pelanggan --}}
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('all', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #0a5661; background: #0a5661; color: #fff; cursor: pointer;">🏢 Semua Cabang</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 1', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">🌿 Kos 1 (Kampus)</button>
+        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 2', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">⚡ Kos 2 (Ringroad)</button>
+      </div>
+
       <div style="display: flex; flex-direction: column; gap: 12px;" id="portalWifiCardList">
         @foreach($activeWifis as $idx => $wf)
-          <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;">
+          @php
+            $wfLoc = $wf['location'] ?? 'Lokasi 1';
+            $isWfLoc2 = $wfLoc === 'Lokasi 2';
+            $wfSpeed = $wf['speed'] ?? ($isWfLoc2 ? '300 Mbps Mesh WiFi 6' : '100 Mbps Dual-Band');
+          @endphp
+          <div class="portal-wf-card" data-location="{{ $wfLoc }}" style="background: #ffffff; border: 1.5px solid {{ $wfLoc === $myBranchLoc ? '#0d9488' : '#e2e8f0' }}; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
               <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: #ecfeff; border: 1px solid #a5f3fc; color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; border: 1px solid {{ $isWfLoc2 ? '#5eead4' : '#86efac' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
                   📶
                 </div>
                 <div>
-                  <div style="font-size: 0.68rem; font-weight: 800; color: #0a5661; text-transform: uppercase; letter-spacing: 0.5px;">WiFi #{{ $idx + 1 }}</div>
-                  <div style="font-size: 0.96rem; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span style="font-size: 0.66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }};">
+                      {{ $isWfLoc2 ? '⚡ Kos 2 (Ringroad)' : '🌿 Kos 1 (Kampus)' }}
+                    </span>
+                    <span style="font-size: 0.66rem; font-weight: 700; color: #64748b;">• {{ $wfSpeed }}</span>
+                  </div>
+                  <div style="font-size: 0.96rem; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-top: 2px;">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
                 </div>
               </div>
               <button type="button" class="tp-btn-copy" onclick="copyText('{{ $wf['name'] ?? '' }}', this)" title="Salin Nama WiFi" style="background: #f8fafc; border: 1.5px solid #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
@@ -1048,6 +1066,25 @@
           </div>
         @endforeach
       </div>
+
+      <script>
+        function filterPortalWifi(loc, btn) {
+          document.querySelectorAll('.tp-wf-filter-btn').forEach(function(b) {
+            b.style.background = '#f8fafc';
+            b.style.color = '#334155';
+            b.style.borderColor = '#cbd5e1';
+          });
+          if (btn) {
+            btn.style.background = '#0a5661';
+            btn.style.color = '#ffffff';
+            btn.style.borderColor = '#0a5661';
+          }
+          document.querySelectorAll('#portalWifiCardList .portal-wf-card').forEach(function(c) {
+            var cLoc = c.getAttribute('data-location') || 'Lokasi 1';
+            c.style.display = (loc === 'all' || cLoc === loc) ? 'block' : 'none';
+          });
+        }
+      </script>
 
       <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5; background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
         💡 <strong>Tips Koneksi:</strong> Hubungkan perangkat Anda ke WiFi modem terdekat di lantai atau area Anda untuk mendapatkan sinyal terbaik dan terkuat.

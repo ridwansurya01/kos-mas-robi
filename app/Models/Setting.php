@@ -390,38 +390,84 @@ class Setting extends Model
     }
 
     /**
-     * Get WiFi networks list with sensible defaults.
-     * Isinya hanya Nama WiFi dan Modem (opsional password jika diperlukan).
+     * Get WiFi networks list with sensible defaults for both Kos locations (Lokasi 1 & Lokasi 2).
+     * Isinya Nama WiFi, Modem, Lokasi Kos, dan status tayang.
      */
     public function getWifiListAttribute($value): array
     {
-        $defaults = [
+        $defaultsLoc1 = [
             [
                 'id' => 'wifi_1',
-                'name' => 'KOS_MAS_ROBI_5G',
-                'modem' => 'Modem Fiber Utama (Lantai 1)',
+                'location' => 'Lokasi 1',
+                'name' => 'KOS_MAS_ROBI_1_5G',
+                'modem' => 'Modem Fiber Utama ZTE — Lantai 1 (Kampus Utama)',
                 'password' => 'kostnyaman2026',
                 'is_active' => true,
             ],
             [
                 'id' => 'wifi_2',
-                'name' => 'KOS_MAS_ROBI_LANTAI_2',
-                'modem' => 'Modem Extender TP-Link (Lantai 2)',
+                'location' => 'Lokasi 1',
+                'name' => 'KOS_MAS_ROBI_1_LT2',
+                'modem' => 'Modem Extender TP-Link — Lantai 2 (Kampus Utama)',
                 'password' => 'kostnyaman2026',
                 'is_active' => true,
             ],
             [
                 'id' => 'wifi_3',
-                'name' => 'KOS_MAS_ROBI_LOUNGE',
-                'modem' => 'Modem Ruang Bersama & Dapur',
+                'location' => 'Lokasi 1',
+                'name' => 'KOS_MAS_ROBI_1_LOUNGE',
+                'modem' => 'Modem Ruang Bersama & Dapur (Kampus Utama)',
                 'password' => 'kostnyaman2026',
                 'is_active' => false,
             ],
         ];
 
+        $defaultsLoc2 = [
+            [
+                'id' => 'wifi_4',
+                'location' => 'Lokasi 2',
+                'name' => 'ROBI_EXCLUSIVE_2_ULTRA5G',
+                'modem' => 'Modem Huawei OptiXstar — Lantai 1 & 2 (Ringroad KM 12)',
+                'password' => 'exclusive2026',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'wifi_5',
+                'location' => 'Lokasi 2',
+                'name' => 'ROBI_EXCLUSIVE_2_COWORKING',
+                'modem' => 'Modem Mesh WiFi 6 — Co-Working & Lounge (Ringroad)',
+                'password' => 'exclusive2026',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'wifi_6',
+                'location' => 'Lokasi 2',
+                'name' => 'ROBI_EXCLUSIVE_2_GYM',
+                'modem' => 'Modem Area Mini Gym & Gazebo Outdoor (Ringroad)',
+                'password' => 'exclusive2026',
+                'is_active' => false,
+            ],
+        ];
+
+        $defaults = array_merge($defaultsLoc1, $defaultsLoc2);
+
         if (!empty($value)) {
             $decoded = is_string($value) ? json_decode($value, true) : $value;
             if (is_array($decoded) && count($decoded) > 0) {
+                $hasLoc2 = false;
+                foreach ($decoded as &$item) {
+                    if (empty($item['location'])) {
+                        $item['location'] = 'Lokasi 1';
+                    }
+                    if ($item['location'] === 'Lokasi 2') {
+                        $hasLoc2 = true;
+                    }
+                }
+                unset($item);
+
+                if (!$hasLoc2) {
+                    $decoded = array_merge($decoded, $defaultsLoc2);
+                }
                 return $decoded;
             }
         }
@@ -437,6 +483,17 @@ class Setting extends Model
         $list = $this->wifi_list;
         return array_values(array_filter($list, function ($w) {
             return !empty($w['is_active']);
+        }));
+    }
+
+    /**
+     * Get active WiFi networks filtered by Kos branch location ('Lokasi 1' or 'Lokasi 2').
+     */
+    public function getActiveWifiForLocation(string $location = 'Lokasi 1'): array
+    {
+        $list = $this->wifi_list;
+        return array_values(array_filter($list, function ($w) use ($location) {
+            return !empty($w['is_active']) && (($w['location'] ?? 'Lokasi 1') === $location);
         }));
     }
 }
