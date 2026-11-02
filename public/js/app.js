@@ -208,18 +208,14 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    sidebarItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const tab = item.getAttribute('data-tab');
-        if (tab) switchTab(tab);
-      });
-    });
+    window.switchTab = switchTab;
 
-    bottomNavItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const tab = item.getAttribute('data-tab');
+    document.addEventListener('click', (e) => {
+      const tabTarget = e.target.closest('[data-tab]');
+      if (tabTarget) {
+        const tab = tabTarget.getAttribute('data-tab');
         if (tab) switchTab(tab);
-      });
+      }
     });
 
     const mobileMenuToggle = document.getElementById('btnToggleMobileSidebar');
@@ -258,10 +254,22 @@
 
       const featuresHtml = (room.facilities || []).slice(0, 3).map(f => `<span class="feature-pill">${f}</span>`).join('');
 
+      const isLoc2 = room.location === 'Lokasi 2';
+      const locPill = isLoc2
+        ? `<span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;">⚡ Cabang 2</span>`
+        : `<span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;">🌿 Cabang 1</span>`;
+
+      if (isLoc2) {
+        card.style.borderTop = '3px solid #0284c7';
+      } else {
+        card.style.borderTop = '3px solid #0a5661';
+      }
+
       card.innerHTML = `
         <div class="room-card-top">
           <div class="room-number-wrap">
             <span class="room-number">#${room.number}</span>
+            ${locPill}
             <span class="room-type-tag">${room.type}</span>
           </div>
           ${getStatusBadge(room.status)}
@@ -389,8 +397,8 @@
     filtered.forEach(room => {
       const isLoc2 = room.location === 'Lokasi 2';
       const locBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;background:#ccfbf1;color:#0f766e;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid #99f6e4;">📍 Lokasi 2 (Ringroad)</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;background:#f0fdfa;color:#0a5661;font-weight:700;padding:3px 9px;border-radius:6px;border:1px solid #b2f5ea;">📍 Lokasi 1 (Kampus)</span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">⚡ Cabang 2 (Ringroad)</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">🌿 Cabang 1 (Kampus)</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -734,6 +742,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.add('open');
+      modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
       document.body.style.overflow = 'hidden';
     }
   }
@@ -742,9 +752,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.remove('open');
+      modal.style.display = 'none';
+      modal.style.pointerEvents = 'none';
       document.body.style.overflow = '';
     }
   }
+
+  window.openModal = openModal;
+  window.closeModal = closeModal;
 
   function initModalDismissHandlers() {
     document.querySelectorAll('[data-close-modal]').forEach(btn => {
@@ -754,7 +769,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       });
     });
 
-    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+    document.querySelectorAll('.modal-backdrop, .kmr-logout-overlay').forEach(backdrop => {
       backdrop.addEventListener('click', (e) => {
         if (e.target === backdrop) {
           closeModal(backdrop.id);
@@ -764,7 +779,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-backdrop.open').forEach(m => closeModal(m.id));
+        document.querySelectorAll('.modal-backdrop.open, .kmr-logout-overlay.open').forEach(m => closeModal(m.id));
       }
     });
   }
@@ -777,7 +792,13 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     document.getElementById('mRoomDetailTitle').textContent = `Detail Kamar #${room.number} (${room.type})`;
     const locBadge = document.getElementById('mRoomDetailLocBadge');
     if (locBadge) {
-      locBadge.textContent = '📍 ' + (room.location === 'Lokasi 2' ? 'Lokasi 2 - Ringroad Exclusive' : 'Lokasi 1 - Kampus Utama');
+      if (room.location === 'Lokasi 2') {
+        locBadge.innerHTML = '⚡ Cabang 2 - Ringroad Exclusive (Kaliurang KM 12)';
+        locBadge.style.color = '#7dd3fc';
+      } else {
+        locBadge.innerHTML = '🌿 Cabang 1 - Kampus Utama (Gang Pandega Marta)';
+        locBadge.style.color = '#a7f3d0';
+      }
     }
 
     const body = document.getElementById('mRoomDetailBody');
@@ -2034,25 +2055,40 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
   // --- INITIALIZE APPLICATION ---
   async function init() {
-    initAutoDeviceDetector();
-    initTheme();
-    initNavigation();
-    initDashboardFilters();
-    initModalDismissHandlers();
-    initRoomForm();
-    initTenantForm();
-    initTransactionForm();
-    initReceiptPrint();
-    initMaintenanceForm();
-    initSettings();
-    initSearchListeners();
+    const safeRun = (fnName, fn) => {
+      try {
+        fn();
+      } catch (err) {
+        console.error(`Error in ${fnName}:`, err);
+      }
+    };
 
-    await fetchServerData();
+    safeRun('initAutoDeviceDetector', initAutoDeviceDetector);
+    safeRun('initTheme', initTheme);
+    safeRun('initNavigation', initNavigation);
+    safeRun('initDashboardFilters', initDashboardFilters);
+    safeRun('initModalDismissHandlers', initModalDismissHandlers);
+    safeRun('initRoomForm', initRoomForm);
+    safeRun('initTenantForm', initTenantForm);
+    safeRun('initTransactionForm', initTransactionForm);
+    safeRun('initReceiptPrint', initReceiptPrint);
+    safeRun('initMaintenanceForm', initMaintenanceForm);
+    safeRun('initSettings', initSettings);
+    safeRun('initSearchListeners', initSearchListeners);
+
+    try {
+      await fetchServerData();
+    } catch (e) {
+      console.warn('fetchServerData error:', e);
+    }
     console.log('Kos Mas Robi Laravel System initialized.');
   }
 
   window.kosApp = {
     openRoomDetailModal,
+    openModal,
+    closeModal,
+    switchTab,
     changeRoomStatusDirect,
     saveCustomInteriorDirect,
     editRoom,

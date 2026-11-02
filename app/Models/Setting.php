@@ -23,6 +23,7 @@ class Setting extends Model
         'bank_account',
         'bank_holder',
         'payment_methods',
+        'wifi_list',
     ];
 
     protected $casts = [
@@ -30,11 +31,13 @@ class Setting extends Model
         'branches' => 'array',
         'landing_content' => 'array',
         'payment_methods' => 'array',
+        'wifi_list' => 'array',
     ];
 
     protected $appends = [
         'final_embed_url',
         'active_payment_methods',
+        'active_wifi_list',
     ];
 
     /**
@@ -384,5 +387,56 @@ class Setting extends Model
             }
         }
         return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+    }
+
+    /**
+     * Get WiFi networks list with sensible defaults.
+     * Isinya hanya Nama WiFi dan Modem (opsional password jika diperlukan).
+     */
+    public function getWifiListAttribute($value): array
+    {
+        $defaults = [
+            [
+                'id' => 'wifi_1',
+                'name' => 'KOS_MAS_ROBI_5G',
+                'modem' => 'Modem Fiber Utama (Lantai 1)',
+                'password' => 'kostnyaman2026',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'wifi_2',
+                'name' => 'KOS_MAS_ROBI_LANTAI_2',
+                'modem' => 'Modem Extender TP-Link (Lantai 2)',
+                'password' => 'kostnyaman2026',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'wifi_3',
+                'name' => 'KOS_MAS_ROBI_LOUNGE',
+                'modem' => 'Modem Ruang Bersama & Dapur',
+                'password' => 'kostnyaman2026',
+                'is_active' => false,
+            ],
+        ];
+
+        if (!empty($value)) {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+            if (is_array($decoded) && count($decoded) > 0) {
+                return $decoded;
+            }
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Get only active WiFi networks to show to tenants.
+     */
+    public function getActiveWifiListAttribute(): array
+    {
+        $list = $this->wifi_list;
+        return array_values(array_filter($list, function ($w) {
+            return !empty($w['is_active']);
+        }));
     }
 }

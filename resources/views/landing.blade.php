@@ -209,11 +209,11 @@
         <a href="{{ route('home') }}#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ !request('location') || request('location') == 'all' ? 'background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: var(--teal-primary); border: 1px solid rgba(10,86,97,0.15);' }}">
           🏢 Semua Cabang
         </a>
-        <a href="{{ route('home') }}?location=Lokasi+1#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 1' ? 'background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: var(--teal-primary); border: 1px solid rgba(10,86,97,0.15);' }}">
-          📍 Lokasi 1 - Kampus Utama (Pandega)
+        <a href="{{ route('home') }}?location=Lokasi+1#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 1' ? 'background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: #0a5661; border: 1px solid rgba(10,86,97,0.15);' }}">
+          🌿 Cabang 1: Kampus Utama (Pandega)
         </a>
-        <a href="{{ route('home') }}?location=Lokasi+2#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 2' ? 'background: #0d9488; color: #ffffff; box-shadow: 0 2px 8px rgba(13,148,136,0.25);' : 'background: #ffffff; color: #0d9488; border: 1px solid rgba(13,148,136,0.15);' }}">
-          📍 Lokasi 2 - Ringroad Exclusive (Kaliurang KM 12)
+        <a href="{{ route('home') }}?location=Lokasi+2#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 2' ? 'background: #0284c7; color: #ffffff; box-shadow: 0 2px 8px rgba(2,132,199,0.25);' : 'background: #ffffff; color: #0284c7; border: 1px solid rgba(2,132,199,0.15);' }}">
+          ⚡ Cabang 2: Ringroad Exclusive (Kaliurang)
         </a>
       </div>
 
@@ -225,7 +225,7 @@
             $isAvail = $room->status === 'available';
             $isLoc2 = ($room->location ?? '') === 'Lokasi 2';
           @endphp
-          <div class="lr-card-featured">
+          <div class="lr-card-featured" style="border-top: 4px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }};">
             <div class="lr-card-thumb-wrap" style="position: relative;">
               <img src="{{ asset($mainImg) }}"
                    alt="Kamar #{{ $room->number }}"
@@ -233,9 +233,15 @@
                    onerror="this.src='{{ asset('assets/images/room_sample.jpg') }}'">
 
               <!-- Lokasi Badge -->
-              <span style="position: absolute; top: 12px; left: 12px; background: rgba(3, 35, 40, 0.85); backdrop-filter: blur(4px); color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; z-index: 2; border: 1px solid rgba(255,255,255,0.2);">
-                📍 {{ $isLoc2 ? 'Ringroad Exclusive' : 'Kampus Utama' }}
-              </span>
+              @if($isLoc2)
+                <span style="position: absolute; top: 12px; left: 12px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(6px); color: #7dd3fc; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; z-index: 2; border: 1.5px solid #0284c7; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                  ⚡ Cabang 2 - Ringroad Exclusive
+                </span>
+              @else
+                <span style="position: absolute; top: 12px; left: 12px; background: rgba(3, 35, 40, 0.9); backdrop-filter: blur(6px); color: #a7f3d0; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; z-index: 2; border: 1.5px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                  🌿 Cabang 1 - Kampus Utama
+                </span>
+              @endif
 
               <span class="lr-pill-avail" style="{{ $isAvail ? 'background: #10b981;' : 'background: #64748b;' }}">
                 {{ $isAvail ? 'Siap Huni' : 'Terisi' }}

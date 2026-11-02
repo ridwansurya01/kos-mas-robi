@@ -37,12 +37,23 @@
 
     <div class="tp-navbar-actions">
       {{-- Profil Pelanggan Button --}}
+      @php
+        $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
+        $userInitial = strtoupper(substr($user->name ?? 'P', 0, 1));
+      @endphp
       <button type="button" class="tp-btn-profile" id="btnOpenProfile" title="Buka Profil Saya">
-        <img src="{{ asset($user->avatar ?? 'assets/images/tenant_avatar.jpg') }}"
-             alt="{{ $user->name }}" class="tp-btn-profile-img" id="navAvatarImg">
+        @if($hasRealAvatar)
+          <img src="{{ asset($user->avatar) }}"
+               alt="{{ $user->name }}" class="tp-btn-profile-img" id="navAvatarImg">
+          <div class="tp-btn-profile-initial" id="navAvatarInitial" style="display:none;">{{ $userInitial }}</div>
+        @else
+          <img src=""
+               alt="{{ $user->name }}" class="tp-btn-profile-img" id="navAvatarImg" style="display:none;">
+          <div class="tp-btn-profile-initial" id="navAvatarInitial">{{ $userInitial }}</div>
+        @endif
         <div class="tp-btn-profile-info">
           <span class="tp-btn-profile-name">{{ Str::limit($user->name, 15) }}</span>
-          <span class="tp-btn-profile-room">Kamar #{{ $room->number ?? '102' }}</span>
+          <span class="tp-btn-profile-room">{{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2' : 'Cabang 1' }} • #{{ $room->number ?? '102' }}</span>
         </div>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="tp-btn-profile-chevron">
           <polyline points="6 9 12 15 18 9"></polyline>
@@ -169,7 +180,14 @@
                 <h3 class="tp-room-card-title">Kamar #{{ $r->number }}</h3>
                 <span class="tp-room-card-floor">Lt. {{ $r->floor }}</span>
               </div>
-              <div class="tp-room-card-type">{{ $r->type }}</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                <div class="tp-room-card-type">{{ $r->type }}</div>
+                @if(($r->location ?? 'Lokasi 1') === 'Lokasi 2')
+                  <span style="font-size: 0.68rem; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 2px 7px; border-radius: 6px; border: 1px solid #bae6fd;">⚡ Cabang 2</span>
+                @else
+                  <span style="font-size: 0.68rem; font-weight: 800; color: #0a5661; background: #f0fdfa; padding: 2px 7px; border-radius: 6px; border: 1px solid #ccfbf1;">🌿 Cabang 1</span>
+                @endif
+              </div>
 
               <div class="tp-room-card-facilities">
                 @foreach(array_slice($r->facilities ?? ['AC', 'WiFi', 'Kasur', 'Lemari', 'KM Dalam'], 0, 4) as $fac)
@@ -211,14 +229,30 @@
     <div class="tp-welcome-banner">
       <div class="tp-welcome-left">
         <div class="tp-welcome-avatar-wrap" id="btnOpenProfileBanner" style="cursor: pointer;" title="Klik untuk edit profil">
-          <img src="{{ asset($user->avatar ?? 'assets/images/tenant_avatar.jpg') }}"
-               alt="{{ $user->name }}" class="tp-welcome-avatar">
-          <span class="tp-welcome-edit-badge" title="Ubah profil">✎</span>
+          @if($hasRealAvatar)
+            <img src="{{ asset($user->avatar) }}"
+                 alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg">
+            <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial" style="display:none;">{{ $userInitial }}</div>
+          @else
+            <img src=""
+                 alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg" style="display:none;">
+            <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial">{{ $userInitial }}</div>
+          @endif
+          <span class="tp-welcome-edit-badge" title="Ubah profil">✏️</span>
         </div>
         <div>
           <div class="tp-welcome-greeting">{{ $greeting }} Selamat datang kembali 👋</div>
           <div class="tp-welcome-name">{{ $user->name }}</div>
-          <div class="tp-welcome-meta">
+          <div class="tp-welcome-meta" style="flex-wrap: wrap; gap: 8px; margin-top: 6px;">
+            @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
+              <span class="tp-chip" style="background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; font-weight: 800;">
+                ⚡ Cabang 2 - Ringroad Exclusive
+              </span>
+            @else
+              <span class="tp-chip" style="background: #f0fdfa; color: #0a5661; border: 1.5px solid #99f6e4; font-weight: 800;">
+                🌿 Cabang 1 - Kampus Utama
+              </span>
+            @endif
             <span class="tp-chip">🏠 Kamar #{{ $room->number ?? '102' }}</span>
             <span class="tp-chip">🏢 Lantai {{ $room->floor ?? '1' }}</span>
             <span class="tp-chip">❄️ {{ $room->type ?? 'Deluxe AC' }}</span>
@@ -961,13 +995,13 @@
   </div>
 </div>
 
-{{-- Modal 4A: Info WiFi Kos (Sesuai Permintaan: Hanya WiFi, Isi Aturan Dihapus) --}}
+{{-- Modal 4A: Info WiFi Kos (Multi-WiFi & Modem Sesuai Permintaan) --}}
 <div class="modal-overlay" id="modalWifi">
-  <div class="modal-box" style="max-width: 480px;">
+  <div class="modal-box" style="max-width: 520px;">
     <div class="modal-hdr">
       <div style="display: flex; align-items: center; gap: 10px;">
-        <div class="tp-icon-badge cyan" style="width: 38px; height: 38px;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+        <div class="tp-icon-badge cyan" style="width: 40px; height: 40px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
             <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
             <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
             <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
@@ -975,8 +1009,8 @@
           </svg>
         </div>
         <div>
-          <h3 class="modal-title">Info WiFi Kos</h3>
-          <p class="modal-subtitle">Koneksi internet fiber kecepatan tinggi untuk seluruh penghuni</p>
+          <h3 class="modal-title" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0;">Info Jaringan WiFi Kos</h3>
+          <p class="modal-subtitle" style="font-size: 0.76rem; color: #64748b; margin: 2px 0 0;">Daftar koneksi WiFi dan modem aktif untuk penghuni kost</p>
         </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalWifi" aria-label="Tutup Modal">
@@ -985,35 +1019,66 @@
         </svg>
       </button>
     </div>
-    <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-      <div class="tp-wifi-status-card">
-        <span class="tp-wifi-status-text">● Status Jaringan: Aktif & Stabil</span>
-        <span class="tp-badge green" style="font-weight: 800;">100 Mbps Dedicated</span>
+    <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
+      <div class="tp-wifi-status-card" style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 14px; border-radius: 12px;">
+        <span class="tp-wifi-status-text" style="color: #166534; font-weight: 700; font-size: 0.8rem;">● Status Jaringan: Aktif & Stabil</span>
+        <span class="tp-badge green" style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.74rem; padding: 3px 8px; border-radius: 6px;">Fiber Dedicated</span>
       </div>
 
-      <div class="tp-wifi-box">
-        <div class="tp-wifi-row">
-          <div class="tp-wifi-info">
-            <span class="tp-wifi-key">Nama Jaringan (SSID)</span>
-            <span class="tp-wifi-val" id="wifiSsidModal">KOS_MAS_ROBI_5G</span>
+      @php
+        $activeWifis = $setting->active_wifi_list ?? [];
+        if (empty($activeWifis)) {
+            $activeWifis = [
+                ['name' => 'KOS_MAS_ROBI_5G', 'modem' => 'Modem Fiber Utama (Lantai 1)', 'password' => 'kostnyaman2026'],
+                ['name' => 'KOS_MAS_ROBI_LANTAI_2', 'modem' => 'Modem Extender TP-Link (Lantai 2)', 'password' => 'kostnyaman2026'],
+            ];
+        }
+      @endphp
+
+      <div style="display: flex; flex-direction: column; gap: 12px;" id="portalWifiCardList">
+        @foreach($activeWifis as $idx => $wf)
+          <div style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: #ecfeff; border: 1px solid #a5f3fc; color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
+                  📶
+                </div>
+                <div>
+                  <div style="font-size: 0.68rem; font-weight: 800; color: #0a5661; text-transform: uppercase; letter-spacing: 0.5px;">WiFi #{{ $idx + 1 }}</div>
+                  <div style="font-size: 0.96rem; font-weight: 800; color: #0f172a; letter-spacing: -0.2px;">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
+                </div>
+              </div>
+              <button type="button" class="tp-btn-copy" onclick="copyText('{{ $wf['name'] ?? '' }}', this)" title="Salin Nama WiFi" style="background: #f8fafc; border: 1.5px solid #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                📋 Salin SSID
+              </button>
+            </div>
+
+            {{-- Info Modem --}}
+            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: {{ !empty($wf['password']) ? '8px' : '0' }};">
+              <span style="font-size: 0.82rem;">📡</span>
+              <div style="font-size: 0.76rem; color: #475569;">
+                <strong style="color: #1e293b;">Modem:</strong> {{ $wf['modem'] ?? 'Modem Utama Kos' }}
+              </div>
+            </div>
+
+            @if(!empty($wf['password']))
+              {{-- Info Password (Opsional jika ada) --}}
+              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px dashed #e2e8f0; font-size: 0.78rem;">
+                <div style="color: #64748b;">
+                  <span>Sandi: </span>
+                  <code style="font-family: monospace; font-size: 0.84rem; font-weight: 700; color: #0f172a; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ $wf['password'] }}</code>
+                </div>
+                <button type="button" onclick="copyText('{{ $wf['password'] }}', this)" style="background: transparent; border: none; color: #0a5661; font-weight: 700; font-size: 0.74rem; cursor: pointer; padding: 2px 6px; border-radius: 4px;">
+                  Salin Sandi
+                </button>
+              </div>
+            @endif
           </div>
-          <button type="button" class="tp-btn-copy" onclick="copyText('KOS_MAS_ROBI_5G', this)" title="Salin SSID">
-            📋 Salin
-          </button>
-        </div>
-        <div class="tp-wifi-row">
-          <div class="tp-wifi-info">
-            <span class="tp-wifi-key">Kata Sandi (Password)</span>
-            <span class="tp-wifi-val font-mono" id="wifiPassModal">kostnyaman2026</span>
-          </div>
-          <button type="button" class="tp-btn-copy" onclick="copyText('kostnyaman2026', this)" title="Salin Password">
-            📋 Salin
-          </button>
-        </div>
+        @endforeach
       </div>
 
-      <div style="font-size: 0.78rem; color: #64748b; line-height: 1.5; background: var(--tp-bg-surface); padding: 12px; border-radius: 10px; border: 1px solid var(--tp-border);">
-        💡 <strong>Tips Koneksi:</strong> Jika sinyal di kamar terasa lemah, Anda dapat menghubungkan ke repeater WiFi terdekat di koridor lantai masing-masing.
+      <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5; background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
+        💡 <strong>Tips Koneksi:</strong> Hubungkan perangkat Anda ke WiFi modem terdekat di lantai atau area Anda untuk mendapatkan sinyal terbaik dan terkuat.
       </div>
     </div>
     <div class="modal-ftr">
@@ -1134,7 +1199,7 @@
             @foreach($allRooms as $r)
               @if($r->id != ($room->id ?? 0))
                 <option value="{{ $r->id }}">
-                  Kamar #{{ $r->number }} (Lantai {{ $r->floor }}) — {{ $r->type }} — Rp {{ number_format($r->price, 0, ',', '.') }}/bln {{ $r->status === 'available' ? '【Tersedia/Kosong】' : '【' . ucfirst($r->status) . '】' }}
+                  [{{ ($r->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'Cabang 2 - Ringroad' : 'Cabang 1 - Kampus' }}] Kamar #{{ $r->number }} (Lt {{ $r->floor }}) — {{ $r->type }} — Rp {{ number_format($r->price, 0, ',', '.') }}/bln {{ $r->status === 'available' ? '【Tersedia/Kosong】' : '【' . ucfirst($r->status) . '】' }}
                 </option>
               @endif
             @endforeach
@@ -1214,8 +1279,15 @@
         {{-- Foto Profil Section --}}
         <div class="tp-profile-avatar-section">
           <div class="tp-avatar-wrapper">
-            <img src="{{ asset($user->avatar ?? 'assets/images/tenant_avatar.jpg') }}"
-                 alt="{{ $user->name }}" class="tp-profile-preview-avatar" id="avatarPreviewImg">
+            @if($hasRealAvatar)
+              <img src="{{ asset($user->avatar) }}"
+                   alt="{{ $user->name }}" class="tp-profile-preview-avatar" id="avatarPreviewImg">
+              <div class="tp-profile-preview-avatar tp-profile-preview-initial" id="avatarPreviewInitial" style="display:none;">{{ $userInitial }}</div>
+            @else
+              <img src=""
+                   alt="{{ $user->name }}" class="tp-profile-preview-avatar" id="avatarPreviewImg" style="display:none;">
+              <div class="tp-profile-preview-avatar tp-profile-preview-initial" id="avatarPreviewInitial">{{ $userInitial }}</div>
+            @endif
             <label for="avatarFileInput" class="tp-avatar-upload-badge" title="Unggah foto baru">
               📷
             </label>
@@ -1290,8 +1362,8 @@
           <div class="tp-profile-room-box tp-grid-col-2">
             <div class="tp-profile-room-icon">🏠</div>
             <div class="tp-profile-room-details">
-              <strong>Kamar Saat Ini: #{{ $room->number ?? '102' }} ({{ $room->type ?? 'Deluxe AC' }})</strong>
-              <p>Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
+              <strong>Kamar Saat Ini: #{{ $room->number ?? '102' }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? '⚡ Cabang 2 (Ringroad)' : '🌿 Cabang 1 (Kampus)' }}</strong>
+              <p>📍 {{ $tenantBranch['name'] ?? 'Kos Mas Robi' }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
             </div>
           </div>
 
@@ -1692,9 +1764,14 @@ document.addEventListener('click', function(e) {
         if (data.user) {
           if (data.user.avatar_url) {
             var url = data.user.avatar_url + '?v=' + Date.now();
-            document.getElementById('navAvatarImg')?.setAttribute('src', url);
-            document.querySelector('.tp-welcome-avatar')?.setAttribute('src', url);
-            document.getElementById('avatarPreviewImg')?.setAttribute('src', url);
+            ['navAvatarImg', 'welcomeAvatarImg', 'avatarPreviewImg'].forEach(function(id) {
+              var el = document.getElementById(id);
+              if (el) { el.src = url; el.style.display = 'block'; }
+            });
+            ['navAvatarInitial', 'welcomeAvatarInitial', 'avatarPreviewInitial'].forEach(function(id) {
+              var el = document.getElementById(id);
+              if (el) el.style.display = 'none';
+            });
           }
           if (data.user.name) {
             var shortName = data.user.name.length > 15 ? data.user.name.slice(0,15) + '\u2026' : data.user.name;
@@ -2526,7 +2603,12 @@ function previewSelectedAvatar(event) {
     var reader = new FileReader();
     reader.onload = function(e) {
       var preview = document.getElementById('avatarPreviewImg');
-      if (preview) preview.src = e.target.result;
+      var previewInit = document.getElementById('avatarPreviewInitial');
+      if (preview) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      }
+      if (previewInit) previewInit.style.display = 'none';
     };
     reader.readAsDataURL(file);
   }

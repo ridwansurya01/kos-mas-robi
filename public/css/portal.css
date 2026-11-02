@@ -230,6 +230,49 @@ img { max-width: 100%; display: block; }
   border: 2px solid var(--tp-blue-primary);
 }
 
+.tp-btn-profile-initial {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d9488, #0a5661);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.92rem;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.3);
+  flex-shrink: 0;
+  border: 2px solid #0d9488;
+}
+
+.tp-welcome-avatar-initial {
+  background: linear-gradient(135deg, #0d9488, #0a5661) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 800 !important;
+  font-size: 1.6rem !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35) !important;
+  border: 3px solid #ffffff !important;
+}
+
+.tp-profile-preview-initial {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0d9488, #0a5661);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 2rem;
+  box-shadow: 0 6px 18px rgba(13, 148, 136, 0.35);
+  border: 3px solid #0d9488;
+}
+
 .tp-btn-profile-info {
   display: flex;
   flex-direction: column;

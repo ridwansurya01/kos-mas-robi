@@ -114,7 +114,7 @@ class KosMasRobiSeeder extends Seeder
                         'role' => 'tenant',
                         'room_id' => $room->id,
                         'phone' => $r['phone'],
-                        'avatar' => 'assets/images/tenant_avatar.jpg',
+                        'avatar' => null,
                     ]
                 );
             }

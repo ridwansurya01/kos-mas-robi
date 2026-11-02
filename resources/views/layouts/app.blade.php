@@ -24,6 +24,6 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- JAVASCRIPT APPLICATION LOGIC -->
-  <script src="{{ asset('js/app.js') }}"></script>
+  <script src="{{ asset('js/app.js') }}?v={{ file_exists(public_path('js/app.js')) ? filemtime(public_path('js/app.js')) : time() }}"></script>
 </body>
 </html>

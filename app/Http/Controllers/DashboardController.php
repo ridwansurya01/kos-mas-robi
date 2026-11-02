@@ -50,6 +50,18 @@ class DashboardController extends Controller
         $roomsLoc1 = $rooms->filter(fn($r) => ($r->location ?? 'Lokasi 1') === 'Lokasi 1');
         $roomsLoc2 = $rooms->filter(fn($r) => ($r->location ?? '') === 'Lokasi 2');
 
+        $loc1Total = $roomsLoc1->count();
+        $loc1Occupied = $roomsLoc1->whereIn('status', ['occupied', 'due'])->count();
+        $loc1Available = $roomsLoc1->where('status', 'available')->count();
+        $loc1Due = $roomsLoc1->where('status', 'due')->count();
+        $loc1OccupancyRate = $loc1Total > 0 ? round(($loc1Occupied / $loc1Total) * 100, 1) : 0;
+
+        $loc2Total = $roomsLoc2->count();
+        $loc2Occupied = $roomsLoc2->whereIn('status', ['occupied', 'due'])->count();
+        $loc2Available = $roomsLoc2->where('status', 'available')->count();
+        $loc2Due = $roomsLoc2->where('status', 'due')->count();
+        $loc2OccupancyRate = $loc2Total > 0 ? round(($loc2Occupied / $loc2Total) * 100, 1) : 0;
+
         // Analisis Keuangan Berdasarkan Tahun (Mulai 2026 s/d Tak Terhingga)
         $selectedYear = (int)$request->input('year', 2026);
         if ($selectedYear < 2026) {
@@ -155,7 +167,17 @@ class DashboardController extends Controller
             'pendingTransfersCount',
             'branches',
             'roomsLoc1',
-            'roomsLoc2'
+            'roomsLoc2',
+            'loc1Total',
+            'loc1Occupied',
+            'loc1Available',
+            'loc1Due',
+            'loc1OccupancyRate',
+            'loc2Total',
+            'loc2Occupied',
+            'loc2Available',
+            'loc2Due',
+            'loc2OccupancyRate'
         ));
     }
 
@@ -619,6 +641,7 @@ class DashboardController extends Controller
             'bank_account' => 'nullable|string',
             'bank_holder' => 'nullable|string',
             'payment_methods' => 'nullable',
+            'wifi_list' => 'nullable',
         ]);
 
         if ($request->has('branches')) {
@@ -649,6 +672,14 @@ class DashboardController extends Controller
                 $pm = json_decode($pm, true);
             }
             $validated['payment_methods'] = $pm;
+        }
+
+        if ($request->has('wifi_list')) {
+            $wf = $request->input('wifi_list');
+            if (is_string($wf)) {
+                $wf = json_decode($wf, true);
+            }
+            $validated['wifi_list'] = $wf;
         }
 
         if ($request->has('location_highlights')) {

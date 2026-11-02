@@ -918,6 +918,10 @@
               <span style="font-size: 1.1rem;">⚙️</span>
               <span>Profil & Rekening</span>
             </button>
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+              <span style="font-size: 1.1rem;">📶</span>
+              <span>Jaringan WiFi</span>
+            </button>
           </div>
         </div>
 
@@ -1483,6 +1487,117 @@
           </div>
         </div>
 
+        <!-- =========================================================================
+             SUBTAB 4: KELOLA JARINGAN WIFI KOS & MODEM
+             ========================================================================= -->
+        <div class="settings-subtab-pane" id="subtab-wifi" style="display: none;">
+          <div class="settings-modern-card" style="max-width: 900px; margin: 0 auto;">
+            <div class="settings-card-header">
+              <div class="settings-card-title-group">
+                <div class="settings-card-icon-badge" style="background: rgba(14, 116, 130, 0.12); color: #0a5661;">📶</div>
+                <div>
+                  <h3 class="settings-card-title">Kelola Jaringan WiFi Kos (Nama WiFi & Modem)</h3>
+                  <div class="settings-card-subtitle">Tambahkan beberapa jenis jaringan WiFi dan modem. Tentukan berapa banyak WiFi yang muncul di portal pelanggan melalui toggle switch.</div>
+                </div>
+              </div>
+              <span style="font-size: 0.76rem; background: #e0f2fe; color: #0284c7; padding: 4px 12px; border-radius: 999px; font-weight: 800; border: 1.5px solid #bae6fd;">Multi-WiFi Support</span>
+            </div>
+
+            <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.82rem; color: #166534; line-height: 1.5;">
+              <strong>💡 Pengaturan WiFi untuk Pelanggan:</strong> Anda dapat menambahkan beberapa jenis WiFi (misal: WiFi Lantai 1, WiFi Lantai 2, WiFi Ruang Bersama). Aktifkan toggle <strong>"● Ditayangkan"</strong> untuk menentukan berapa dan mana saja WiFi yang dapat dilihat oleh anak kos di portal pelanggan mereka.
+            </div>
+
+            {{-- Daftar Jaringan WiFi Dinamis --}}
+            <div id="wifiNetworksList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+              @php
+                $allWifis = $setting->wifi_list ?? [];
+              @endphp
+              @foreach($allWifis as $idx => $wf)
+                <div class="wf-card-item" data-id="{{ $wf['id'] ?? 'wifi_'.$idx }}" style="background: var(--bg-surface); border: 1.5px solid {{ !empty($wf['is_active']) ? '#10b981' : 'var(--border-color)' }}; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 40px; height: 40px; border-radius: 12px; background: #ecfeff; border: 1px solid #a5f3fc; color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                        📶
+                      </div>
+                      <div>
+                        <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
+                        <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                          <span>📡 Modem:</span>
+                          <span class="wf-modem-text" style="color: var(--text-secondary); font-weight: 500;">{{ $wf['modem'] ?? 'Modem Utama' }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; background: {{ !empty($wf['is_active']) ? '#dcfce7' : '#f1f5f9' }}; color: {{ !empty($wf['is_active']) ? '#15803d' : '#64748b' }}; padding: 4px 10px; border-radius: 999px;">
+                        <input type="checkbox" class="wf-active-toggle" {{ !empty($wf['is_active']) ? 'checked' : '' }} onchange="toggleWfActive(this)">
+                        <span class="wf-toggle-label">{{ !empty($wf['is_active']) ? '● Ditayangkan' : '○ Disembunyikan' }}</span>
+                      </label>
+                      <button type="button" class="btn-secondary" onclick="deleteWfItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus WiFi">
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+
+                  @if(!empty($wf['password']))
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px;">
+                      <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
+                      <code style="font-family: monospace; font-weight: 700; color: var(--text-primary);" class="wf-pass-text">{{ $wf['password'] }}</code>
+                    </div>
+                  @endif
+
+                  <input type="hidden" class="wf-raw-data" value="{{ json_encode($wf) }}">
+                </div>
+              @endforeach
+            </div>
+
+            {{-- Tombol & Box Tambah WiFi Baru --}}
+            <div style="margin-bottom: 20px;">
+              <button type="button" id="btnToggleAddWf" onclick="toggleAddWifiForm()" class="btn-secondary" style="width: 100%; border-style: dashed; padding: 12px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>➕ Tambah Jaringan WiFi & Modem Baru</span>
+              </button>
+
+              <div id="addWifiFormBox" style="display: none; background: var(--bg-surface); border: 1.5px solid #0a5661; border-radius: 16px; padding: 18px; margin-top: 14px;">
+                <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px; display: flex; align-items: center; gap: 6px;">
+                  <span>📶</span> Tambah Jaringan WiFi Baru
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                  <div class="form-group">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Nama WiFi (SSID) *</label>
+                    <input type="text" id="newWfName" class="form-control" placeholder="Contoh: KOS_MAS_ROBI_LANTAI_1">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Modem / Lokasi Modem *</label>
+                    <input type="text" id="newWfModem" class="form-control" placeholder="Contoh: Modem ZTE F670L - Lantai 1">
+                  </div>
+                  <div class="form-group">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Kata Sandi (Opsional)</label>
+                    <input type="text" id="newWfPassword" class="form-control" placeholder="Contoh: kostnyaman2026">
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <label style="display: flex; align-items: center; gap: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; color: var(--text-primary);">
+                    <input type="checkbox" id="newWfIsActive" checked style="accent-color: #10b981; width: 16px; height: 16px;">
+                    <span>Langsung Tayangkan ke Portal Pelanggan</span>
+                  </label>
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-secondary" onclick="toggleAddWifiForm()" style="padding: 8px 16px; border-radius: 10px; font-weight: 700;">Batal</button>
+                    <button type="button" class="btn-primary" onclick="submitAddNewWifi()" style="padding: 8px 20px; border-radius: 10px; font-weight: 800;">Simpan WiFi</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {{-- Tombol Simpan Seluruh Perubahan WiFi --}}
+            <div style="display: flex; align-items: center; gap: 14px; margin-top: 16px;">
+              <button type="button" class="btn-primary" onclick="saveAllWifiNetworksToServer()" style="padding: 10px 24px; border-radius: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+                <span>💾 Simpan Perubahan Jaringan WiFi</span>
+              </button>
+              <span id="wfSaveStatus" style="font-size: 0.82rem; font-weight: 700;"></span>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div><!-- /content-body -->
@@ -1518,7 +1633,7 @@
   <!-- =========================================================================
        MODAL: DETAIL KAMAR (MODERN LUXURY TEAL)
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalRoomDetail">
+  <div class="modal-backdrop" id="modalRoomDetail" style="display: none;">
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1544,7 +1659,7 @@
   <!-- =========================================================================
        MODAL: FORM TAMBAH PENGHUNI (MODERN LUXURY TEAL)
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalAddTenant">
+  <div class="modal-backdrop" id="modalAddTenant" style="display: none;">
     <div class="modal-dialog" style="max-width: 600px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1612,7 +1727,7 @@
   <!-- =========================================================================
        MODAL: FORM TAMBAH / EDIT KAMAR — THEME TEAL & EMPTY BY DEFAULT
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalAddRoom">
+  <div class="modal-backdrop" id="modalAddRoom" style="display: none;">
     <div class="modal-dialog" style="max-width: 780px; width: 95vw;">
       <!-- Premium Modal Header (Deep Teal Ocean) -->
       <div class="modal-header" style="background: linear-gradient(135deg, #032328 0%, #063d45 40%, #0a5661 100%); border-radius: 20px 20px 0 0; padding: 20px 24px;">
@@ -1886,7 +2001,7 @@
   <!-- =========================================================================
        MODAL: FORM CATAT TRANSAKSI KEUANGAN (MODERN LUXURY TEAL)
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalTransaction">
+  <div class="modal-backdrop" id="modalTransaction" style="display: none;">
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -1952,7 +2067,7 @@
   <!-- =========================================================================
        MODAL: KUITANSI DIGITAL (MODERN LUXURY TEAL)
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalReceipt">
+  <div class="modal-backdrop" id="modalReceipt" style="display: none;">
     <div class="modal-dialog" style="max-width: 500px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -2022,7 +2137,7 @@
   <!-- =========================================================================
        MODAL: FORM BUAT TIKET KELUHAN (MODERN LUXURY TEAL)
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalRepairTicket">
+  <div class="modal-backdrop" id="modalRepairTicket" style="display: none;">
     <div class="modal-dialog" style="max-width: 580px;">
       <div class="modal-header">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -2070,7 +2185,7 @@
   <!-- =========================================================================
        MODAL: POP-UP KONFIRMASI LOGOUT ADMIN (MODERN ANIMATION)
        ========================================================================= -->
-  <div class="kmr-logout-overlay" id="modalAdminLogoutConfirm">
+  <div class="kmr-logout-overlay" id="modalAdminLogoutConfirm" style="display: none;">
     <div class="kmr-logout-card">
       <div class="kmr-logout-icon-wrap">
         <div class="kmr-logout-pulse-ring"></div>
@@ -2097,16 +2212,43 @@
     var formLogoutAdmin = document.getElementById('formLogoutAdmin');
     document.getElementById('btnTriggerLogoutAdmin')?.addEventListener('click', function(e) {
       e.preventDefault();
-      modalAdminLogout?.classList.add('open');
+      if (modalAdminLogout) {
+        modalAdminLogout.classList.add('open');
+        modalAdminLogout.style.display = 'flex';
+        modalAdminLogout.style.pointerEvents = 'auto';
+      }
     });
     document.getElementById('btnCancelAdminLogout')?.addEventListener('click', function() {
-      modalAdminLogout?.classList.remove('open');
+      if (modalAdminLogout) {
+        modalAdminLogout.classList.remove('open');
+        modalAdminLogout.style.display = 'none';
+        modalAdminLogout.style.pointerEvents = 'none';
+      }
     });
     document.getElementById('btnConfirmAdminLogout')?.addEventListener('click', function() {
       formLogoutAdmin?.submit();
     });
     modalAdminLogout?.addEventListener('click', function(e) {
-      if (e.target === modalAdminLogout) modalAdminLogout.classList.remove('open');
+      if (e.target === modalAdminLogout) {
+        modalAdminLogout.classList.remove('open');
+        modalAdminLogout.style.display = 'none';
+        modalAdminLogout.style.pointerEvents = 'none';
+      }
+    });
+
+    // Delegated dismissal for all modals in dashboard
+    document.addEventListener('click', function(e) {
+      var closeBtn = e.target.closest('[data-close-modal]');
+      if (closeBtn) {
+        var mId = closeBtn.getAttribute('data-close-modal');
+        var mEl = document.getElementById(mId);
+        if (mEl) {
+          mEl.classList.remove('open');
+          mEl.style.display = 'none';
+          mEl.style.pointerEvents = 'none';
+          document.body.style.overflow = '';
+        }
+      }
     });
 
     // Pindah Kamar Admin Action (Izinkan / Tolak)
@@ -2880,6 +3022,172 @@
       .catch(function(err) {
         if (statusEl) {
           statusEl.textContent = '✕ Gagal menyimpan';
+          statusEl.style.color = '#ef4444';
+        }
+      });
+    }
+
+    // =========================================================================
+    // POINT 5: PENGELOLAAN JARINGAN WIFI KOS & MODEM (MULTI-WIFI)
+    // =========================================================================
+    function toggleWfActive(checkbox) {
+      var card = checkbox.closest('.wf-card-item');
+      var label = card ? card.querySelector('.wf-toggle-label') : null;
+      if (checkbox.checked) {
+        if (card) card.style.borderColor = '#10b981';
+        if (label) {
+          label.textContent = '● Ditayangkan';
+          label.parentElement.style.background = '#dcfce7';
+          label.parentElement.style.color = '#15803d';
+        }
+      } else {
+        if (card) card.style.borderColor = 'var(--border-color)';
+        if (label) {
+          label.textContent = '○ Disembunyikan';
+          label.parentElement.style.background = '#f1f5f9';
+          label.parentElement.style.color = '#64748b';
+        }
+      }
+    }
+
+    function toggleAddWifiForm() {
+      var box = document.getElementById('addWifiFormBox');
+      if (!box) return;
+      if (box.style.display === 'none' || !box.style.display) {
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function submitAddNewWifi() {
+      var name = document.getElementById('newWfName')?.value.trim();
+      var modem = document.getElementById('newWfModem')?.value.trim();
+      var password = document.getElementById('newWfPassword')?.value.trim() || '';
+      var isActive = document.getElementById('newWfIsActive')?.checked ?? true;
+
+      if (!name) {
+        alert('Mohon isi Nama WiFi (SSID) terlebih dahulu!');
+        document.getElementById('newWfName')?.focus();
+        return;
+      }
+      if (!modem) {
+        alert('Mohon isi Modem / Lokasi Modem terlebih dahulu!');
+        document.getElementById('newWfModem')?.focus();
+        return;
+      }
+
+      var newId = 'wifi_' + Date.now();
+      var rawObj = {
+        id: newId,
+        name: name,
+        modem: modem,
+        password: password,
+        is_active: isActive
+      };
+
+      var card = document.createElement('div');
+      card.className = 'wf-card-item';
+      card.setAttribute('data-id', newId);
+      card.style.cssText = 'background: var(--bg-surface); border: 1.5px solid ' + (isActive ? '#10b981' : 'var(--border-color)') + '; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;';
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background: #ecfeff; border: 1px solid #a5f3fc; color: #0891b2; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+              📶
+            </div>
+            <div>
+              <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-primary);" class="wf-name-text">${name}</div>
+              <div style="font-size: 0.78rem; color: #0a5661; font-weight: 600; display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                <span>📡 Modem:</span>
+                <span class="wf-modem-text" style="color: var(--text-secondary); font-weight: 500;">${modem}</span>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; background: ${isActive ? '#dcfce7' : '#f1f5f9'}; color: ${isActive ? '#15803d' : '#64748b'}; padding: 4px 10px; border-radius: 999px;">
+              <input type="checkbox" class="wf-active-toggle" ${isActive ? 'checked' : ''} onchange="toggleWfActive(this)">
+              <span class="wf-toggle-label">${isActive ? '● Ditayangkan' : '○ Disembunyikan'}</span>
+            </label>
+            <button type="button" class="btn-secondary" onclick="deleteWfItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus WiFi">
+              ✕
+            </button>
+          </div>
+        </div>
+        ${password ? `
+          <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--text-muted); font-size: 0.72rem;">Sandi (Password):</span>
+            <code style="font-family: monospace; font-weight: 700; color: var(--text-primary);" class="wf-pass-text">${password}</code>
+          </div>
+        ` : ''}
+        <input type="hidden" class="wf-raw-data" value='${JSON.stringify(rawObj)}'>
+      `;
+
+      var list = document.getElementById('wifiNetworksList');
+      if (list) list.appendChild(card);
+
+      document.getElementById('newWfName').value = '';
+      document.getElementById('newWfModem').value = '';
+      document.getElementById('newWfPassword').value = '';
+      toggleAddWifiForm();
+
+      saveAllWifiNetworksToServer();
+    }
+
+    function deleteWfItem(btn) {
+      if (!confirm('Hapus jaringan WiFi ini?')) return;
+      var card = btn.closest('.wf-card-item');
+      if (card) {
+        card.remove();
+        saveAllWifiNetworksToServer();
+      }
+    }
+
+    function saveAllWifiNetworksToServer() {
+      var cards = document.querySelectorAll('#wifiNetworksList .wf-card-item');
+      var wifis = [];
+      var statusEl = document.getElementById('wfSaveStatus');
+
+      cards.forEach(function(card, index) {
+        var rawInput = card.querySelector('.wf-raw-data');
+        var obj = {};
+        if (rawInput && rawInput.value) {
+          try { obj = JSON.parse(rawInput.value); } catch(e) {}
+        }
+        var activeToggle = card.querySelector('.wf-active-toggle');
+        obj.is_active = activeToggle ? activeToggle.checked : false;
+        if (!obj.id) obj.id = card.getAttribute('data-id') || ('wifi_' + index);
+        wifis.push(obj);
+      });
+
+      if (statusEl) {
+        statusEl.textContent = '⏳ Menyimpan...';
+        statusEl.style.color = '#0a5661';
+      }
+
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+          wifi_list: wifis
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (statusEl) {
+          statusEl.textContent = '✓ Pengaturan WiFi berhasil disimpan!';
+          statusEl.style.color = '#10b981';
+          setTimeout(function() { statusEl.textContent = ''; }, 3000);
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) {
+          statusEl.textContent = '✕ Gagal menyimpan WiFi';
           statusEl.style.color = '#ef4444';
         }
       });

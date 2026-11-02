@@ -1087,25 +1087,40 @@ ul, ol {
 }
 
 /* --- MODAL DIALOGS --- */
-.modal-backdrop {
+.modal-backdrop,
+.kmr-logout-overlay {
   position: fixed;
   inset: 0;
   background: rgba(3, 35, 40, 0.68);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  display: flex;
+  display: none !important;
+  pointer-events: none !important;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: -9999 !important;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s ease;
   padding: 16px;
 }
 
-.modal-backdrop.open {
-  opacity: 1;
-  visibility: visible;
+.modal-backdrop:not(.open),
+.kmr-logout-overlay:not(.open) {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  z-index: -9999 !important;
+}
+
+.modal-backdrop.open,
+.kmr-logout-overlay.open {
+  display: flex !important;
+  pointer-events: auto !important;
+  z-index: 2000 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .modal-dialog {
@@ -2827,13 +2842,13 @@ body:has(.tp-page) {
   font-family: monospace;
 }
 
-/* ----------------------------------------------------------- MODALS */
-/* Modal backdrop */
-.modal-backdrop {
-  display: none;
+/* ----------------------------------------------------------- MODALS (PORTAL SCOPED) */
+.tp-modal-backdrop {
+  display: none !important;
+  pointer-events: none !important;
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: -1 !important;
   background: rgba(0,0,0,0.65);
   backdrop-filter: blur(6px);
   align-items: center;
@@ -2841,8 +2856,10 @@ body:has(.tp-page) {
   padding: 20px;
 }
 
-.modal-backdrop.open {
-  display: flex;
+.tp-modal-backdrop.open {
+  display: flex !important;
+  pointer-events: auto !important;
+  z-index: 1000 !important;
 }
 
 /* ------------------------------------------------ RESPONSIVE BREAKPOINTS */
@@ -3832,18 +3849,19 @@ body:has(.tp-page) {
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 99999;
-  display: none;
+  z-index: -1 !important;
+  display: none !important;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
   transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .kmr-logout-overlay.open {
   display: flex !important;
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
 }
 
 .kmr-logout-card {

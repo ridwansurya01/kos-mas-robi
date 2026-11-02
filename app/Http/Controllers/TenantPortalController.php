@@ -82,10 +82,24 @@ class TenantPortalController extends Controller
         $availableRoomsCount = $allRooms->where('status', 'available')->count();
         $occupiedRoomsCount = $allRooms->whereIn('status', ['occupied', 'due'])->count();
 
+        // Determine tenant's branch (Cabang 1 vs Cabang 2)
+        $tenantBranchKey = 'lokasi_1';
+        if ($room && ($room->location === 'Lokasi 2')) {
+            $tenantBranchKey = 'lokasi_2';
+        } elseif (($user->branch_preference ?? '') === 'Lokasi 2') {
+            $tenantBranchKey = 'lokasi_2';
+        }
+
+        $branches = $setting->branches ?? Setting::defaultBranches();
+        $tenantBranch = $branches[$tenantBranchKey] ?? ($branches['lokasi_1'] ?? null);
+
         return view('tenant.portal', compact(
             'user',
             'room',
             'tenant',
+            'tenantBranchKey',
+            'tenantBranch',
+            'branches',
             'allRooms',
             'totalRoomsCount',
             'availableRoomsCount',

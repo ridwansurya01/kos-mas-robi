@@ -25,6 +25,8 @@ class User extends Authenticatable
         'google_token',
         'google_avatar',
         'room_id',
+        'branch_preference',
+        'room_type_preference',
         'phone',
         'avatar',
         'birth_date',

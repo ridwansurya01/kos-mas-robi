@@ -12,6 +12,8 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Room;
+use App\Models\Setting;
+use App\Models\Tenant;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -389,8 +391,12 @@ class AuthController extends Controller
      */
     public function showRegister()
     {
-        $availableRooms = Room::where('status', 'available')->get();
-        return view('auth.register', compact('availableRooms'));
+        $setting = Setting::first() ?? new Setting();
+        $branches = $setting->branches ?? Setting::defaultBranches();
+        $availableRooms = Room::where('status', 'available')->orderBy('number')->get();
+        $allRooms = Room::orderBy('number')->get();
+
+        return view('auth.register', compact('availableRooms', 'allRooms', 'branches', 'setting'));
     }
 
     /**
@@ -399,25 +405,28 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'phone'    => 'required|string',
-            'avatar'   => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
-            'role'     => 'nullable|string|in:tenant,owner',
-            'room_id'  => 'nullable|exists:rooms,id',
+            'name'                 => 'required|string|max:255',
+            'email'                => 'required|string|email|max:255|unique:users',
+            'password'             => 'required|string|min:6|confirmed',
+            'phone'                => 'required|string',
+            'avatar'               => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'role'                 => 'nullable|string|in:tenant,owner',
+            'branch_preference'    => 'required|string|in:Lokasi 1,Lokasi 2',
+            'room_type_preference' => 'nullable|string',
+            'room_id'              => 'nullable|exists:rooms,id',
         ], [
-            'name.required'     => 'Nama lengkap wajib diisi.',
-            'email.required'    => 'Alamat email wajib diisi.',
-            'email.unique'      => 'Email ini sudah terdaftar. Silakan login atau gunakan email lain.',
-            'password.required' => 'Kata sandi wajib diisi.',
-            'password.min'      => 'Kata sandi minimal 6 karakter.',
-            'password.confirmed'=> 'Konfirmasi kata sandi tidak cocok.',
-            'phone.required'    => 'Nomor telepon/WhatsApp wajib diisi.',
-            'avatar.required'   => 'Foto profil diri WAJIB diunggah untuk mendaftar akun pelanggan.',
-            'avatar.image'      => 'File foto profil harus berupa file gambar yang valid.',
-            'avatar.mimes'      => 'Format foto profil harus berupa JPEG, PNG, JPG, atau WebP.',
-            'avatar.max'        => 'Ukuran foto profil maksimal 5MB.',
+            'name.required'                 => 'Nama lengkap wajib diisi.',
+            'email.required'                => 'Alamat email wajib diisi.',
+            'email.unique'                  => 'Email ini sudah terdaftar. Silakan login atau gunakan email lain.',
+            'password.required'             => 'Kata sandi wajib diisi.',
+            'password.min'                  => 'Kata sandi minimal 6 karakter.',
+            'password.confirmed'            => 'Konfirmasi kata sandi tidak cocok.',
+            'phone.required'                => 'Nomor telepon/WhatsApp wajib diisi.',
+            'branch_preference.required'    => 'Silakan pilih cabang kos yang diinginkan (Cabang 1 atau Cabang 2).',
+            'avatar.required'               => 'Foto profil diri WAJIB diunggah untuk mendaftar akun pelanggan.',
+            'avatar.image'                  => 'File foto profil harus berupa file gambar yang valid.',
+            'avatar.mimes'                  => 'Format foto profil harus berupa JPEG, PNG, JPG, atau WebP.',
+            'avatar.max'                    => 'Ukuran foto profil maksimal 5MB.',
         ]);
 
         $role = $request->input('role', 'tenant');
@@ -443,14 +452,35 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'name'     => $validated['name'],
-            'email'    => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role'     => $role,
-            'phone'    => $validated['phone'],
-            'room_id'  => ($role === 'tenant') ? ($validated['room_id'] ?? null) : null,
-            'avatar'   => $avatarPath,
+            'name'                 => $validated['name'],
+            'email'                => $validated['email'],
+            'password'             => Hash::make($validated['password']),
+            'role'                 => $role,
+            'phone'                => $validated['phone'],
+            'branch_preference'    => $validated['branch_preference'] ?? 'Lokasi 1',
+            'room_type_preference' => $validated['room_type_preference'] ?? null,
+            'room_id'              => ($role === 'tenant') ? ($validated['room_id'] ?? null) : null,
+            'avatar'               => $avatarPath,
         ]);
+
+        if ($role === 'tenant' && !empty($validated['room_id'])) {
+            $assignedRoom = Room::find($validated['room_id']);
+            if ($assignedRoom) {
+                $assignedRoom->status = 'occupied';
+                $assignedRoom->booked_by_name = $user->name;
+                $assignedRoom->save();
+
+                Tenant::create([
+                    'room_id'      => $assignedRoom->id,
+                    'name'         => $user->name,
+                    'phone'        => $user->phone,
+                    'start_date'   => now()->toDateString(),
+                    'due_day'      => 1,
+                    'monthly_rent' => $assignedRoom->price,
+                    'status'       => 'active',
+                ]);
+            }
+        }
 
         if ($role === 'tenant') {
             try {
