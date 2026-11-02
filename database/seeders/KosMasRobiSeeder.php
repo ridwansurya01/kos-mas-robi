@@ -29,6 +29,18 @@ class KosMasRobiSeeder extends Seeder
                 'avatar' => null,
             ]
         );
+
+        // Akun Admin Tambahan
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'owner',
+                'phone' => null,
+                'avatar' => null,
+            ]
+        );
         // 1. Settings
         Setting::updateOrCreate(
             ['id' => 1],
