@@ -444,17 +444,20 @@ class DashboardController extends Controller
     }
 
     /**
-     * Resolves user input into a guaranteed working embed URL for Google Maps.
-     * Priority: 1) iframe src  2) /maps/embed URL  3) GPS coords  4) q= URL  5) plain text  6) address fallback
-     * Shortlinks (goo.gl) are stored as-is WITHOUT attempting cURL resolve (no network in production sandbox).
+     * Resolves ANY Google Maps input (browser link, share link, iframe embed, or address)
+     * into a guaranteed working embed URL and navigation link.
+     * No manual coordinates needed from user.
      */
-    private function resolveGmapsEmbed(?string $raw, ?string $address): string
+    private function resolveGmapsEmbed(?string $raw, ?string $address): array
     {
         $raw = trim($raw ?? '');
         $addressFallback = trim($address ?: 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta');
 
         if (empty($raw)) {
-            return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            return [
+                'url' => 'https://maps.google.com/?q=' . urlencode($addressFallback),
+                'embed' => 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+            ];
         }
 
         // 1. If iframe code, extract src attribute
@@ -464,53 +467,93 @@ class DashboardController extends Controller
             }
         }
 
-        // 2. Already a valid embed URL — use as-is
-        if (str_contains($raw, 'google.com/maps/embed') ||
-            (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
-            return $raw;
+        $navUrl = $raw;
+
+        // 2. Already an official embed URL
+        if (str_contains($raw, 'google.com/maps/embed') || (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
+            return [
+                'url' => $navUrl,
+                'embed' => $raw
+            ];
         }
 
-        // 3. GPS coordinates — most reliable, support multiple formats:
-        //    -7.7825, 110.3671   |  @-7.7825,110.3671   |  lat:-7.7825,lng:110.3671
-        if (preg_match('/@?(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/', $raw, $coords)) {
+        // 3. Browser address bar URL or text containing @lat,lng coordinates
+        // Example: https://www.google.com/maps/place/Kos+Mas+Robi/@-7.782543,110.367123,17z/...
+        if (preg_match('/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $raw, $coords)) {
             $lat = (float) $coords[1];
             $lng = (float) $coords[2];
-            // Sanity check: valid lat/lng range
             if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
+                return [
+                    'url' => $navUrl,
+                    'embed' => 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed'
+                ];
             }
         }
 
-        // 4. maps.google.com/?q=... or similar with q param
-        if (str_contains($raw, 'maps.google.') && str_contains($raw, 'q=')) {
-            $parsedQuery = parse_url($raw, PHP_URL_QUERY);
-            if ($parsedQuery) {
-                parse_str($parsedQuery, $params);
-                if (!empty($params['q'])) {
-                    // If q value looks like coordinates, use them
-                    if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
-                        return 'https://maps.google.com/maps?ll=' . $coords[1] . ',' . $coords[2] . '&q=' . $coords[1] . ',' . $coords[2] . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
-                    }
-                    return 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-                }
-            }
-        }
-
-        // 5. Shortlinks (maps.app.goo.gl / goo.gl/maps) — store raw, let Google resolve on client side
-        //    We do NOT attempt cURL here (unreliable in sandbox/production without network).
-        //    Instead, fallback to address which is always reliable.
+        // 4. Shortlinks (maps.app.goo.gl or goo.gl/maps) -> resolve redirect via cURL
         if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
-            // Shortlink can't be embedded directly in iframe — use address fallback
-            return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            try {
+                $ch = curl_init($raw);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 4);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+                curl_exec($ch);
+                $effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+                curl_close($ch);
+
+                if ($effective && preg_match('/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $effective, $coords)) {
+                    $lat = (float) $coords[1];
+                    $lng = (float) $coords[2];
+                    return [
+                        'url' => $navUrl,
+                        'embed' => 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed'
+                    ];
+                }
+                if ($effective && preg_match('/place\/([^\/@]+)/', $effective, $pm)) {
+                    $place = str_replace('+', ' ', urldecode($pm[1]));
+                    return [
+                        'url' => $navUrl,
+                        'embed' => 'https://maps.google.com/maps?q=' . urlencode($place) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+                    ];
+                }
+            } catch (\Throwable $e) {}
         }
 
-        // 6. Plain text (place name / address entered by user)
+        // 5. Query param q=
+        if (str_contains($raw, 'q=')) {
+            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
+            parse_str($qs, $params);
+            if (!empty($params['q'])) {
+                if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
+                    $lat = (float) $coords[1];
+                    $lng = (float) $coords[2];
+                    return [
+                        'url' => $navUrl,
+                        'embed' => 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed'
+                    ];
+                }
+                return [
+                    'url' => $navUrl,
+                    'embed' => 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+                ];
+            }
+        }
+
+        // 6. Plain text or address entered by user
         if (!str_starts_with($raw, 'http')) {
-            return 'https://maps.google.com/maps?q=' . urlencode($raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            return [
+                'url' => 'https://maps.google.com/?q=' . urlencode($raw),
+                'embed' => 'https://maps.google.com/maps?q=' . urlencode($raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+            ];
         }
 
-        // 7. Last resort: use kos_address
-        return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        // 7. Fallback to address
+        return [
+            'url' => $navUrl,
+            'embed' => 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed'
+        ];
     }
 
     /**
@@ -548,9 +591,17 @@ class DashboardController extends Controller
             $validated['landing_content'] = $lc;
         }
 
-        // Normalize gmaps_embed so it NEVER shows a forbidden / broken icon
-        if (!empty($validated['gmaps_embed'])) {
-            $validated['gmaps_embed'] = $this->resolveGmapsEmbed($validated['gmaps_embed'], $validated['kos_address'] ?? null);
+        // Auto-resolve Google Maps link into synchronized URL & Embed
+        $mapInput = trim($validated['gmaps_url'] ?? $validated['gmaps_embed'] ?? '');
+        $kosAddr = $validated['kos_address'] ?? null;
+
+        if (!empty($mapInput)) {
+            $parsedMap = $this->resolveGmapsEmbed($mapInput, $kosAddr);
+            $validated['gmaps_embed'] = $parsedMap['embed'];
+            $validated['gmaps_url'] = $parsedMap['url'];
+        } elseif (!empty($kosAddr)) {
+            $validated['gmaps_url'] = 'https://maps.google.com/?q=' . urlencode($kosAddr);
+            $validated['gmaps_embed'] = 'https://maps.google.com/maps?q=' . urlencode($kosAddr) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
         }
 
         if (empty($validated['gmaps_url']) && !empty($validated['kos_address'])) {

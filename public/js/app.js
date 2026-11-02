@@ -1561,37 +1561,53 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     function updateGmapsPreview() {
       if (!gmapsPreviewIframe) return;
-      let embedVal = setGmapsEmbedInput?.value.trim() || '';
+      const inputVal = setGmapsUrlInput?.value.trim() || setGmapsEmbedInput?.value.trim() || '';
+      let embedVal = inputVal;
 
       if (embedVal.includes('<iframe')) {
         const match = embedVal.match(/src=["']([^"']+)["']/);
         if (match && match[1]) embedVal = match[1];
       }
 
-      const coordMatch = embedVal.match(/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+      // Check if browser URL contains @lat,lng
+      const coordMatch = embedVal.match(/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/);
       if (coordMatch) {
-        embedVal = 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        embedVal = 'https://maps.google.com/maps?ll=' + coordMatch[1] + ',' + coordMatch[2] + '&q=' + coordMatch[1] + ',' + coordMatch[2] + '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
+      } else if (embedVal.includes('q=')) {
+        try {
+          const urlObj = new URL(embedVal.startsWith('http') ? embedVal : 'https://' + embedVal);
+          const qParam = urlObj.searchParams.get('q');
+          if (qParam) {
+            embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(qParam) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+          }
+        } catch (e) {}
       } else if (!embedVal.includes('google.com/maps/embed') && !embedVal.includes('output=embed')) {
         const addr = setKosAddressInput?.value.trim() || 'Kos Mas Robi';
         embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
       }
 
-      if (embedVal) {
+      if (embedVal && gmapsPreviewIframe) {
         gmapsPreviewIframe.src = embedVal;
+      }
+
+      if (btnTestGmapsUrl) {
+        btnTestGmapsUrl.href = inputVal || '#';
       }
     }
 
-    setGmapsEmbedInput?.addEventListener('input', updateGmapsPreview);
-    setKosAddressInput?.addEventListener('change', () => {
-      if (!setGmapsEmbedInput?.value.trim()) {
-        updateGmapsPreview();
-      }
-    });
-
     setGmapsUrlInput?.addEventListener('input', () => {
-      if (btnTestGmapsUrl) {
-        const urlVal = setGmapsUrlInput.value.trim();
-        btnTestGmapsUrl.href = urlVal || '#';
+      if (setGmapsEmbedInput) setGmapsEmbedInput.value = setGmapsUrlInput.value;
+      updateGmapsPreview();
+    });
+    setGmapsUrlInput?.addEventListener('paste', () => {
+      setTimeout(() => {
+        if (setGmapsEmbedInput) setGmapsEmbedInput.value = setGmapsUrlInput.value;
+        updateGmapsPreview();
+      }, 50);
+    });
+    setKosAddressInput?.addEventListener('change', () => {
+      if (!setGmapsUrlInput?.value.trim()) {
+        updateGmapsPreview();
       }
     });
 

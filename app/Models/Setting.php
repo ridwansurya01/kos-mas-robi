@@ -33,69 +33,106 @@ class Setting extends Model
     ];
 
     /**
-     * Resolves and normalizes any user input for Google Maps into a guaranteed working Embed URL.
-     * Priority: 1) iframe src  2) /maps/embed URL  3) GPS coords  4) q= URL  5) plain text  6) address fallback
-     * Shortlinks (goo.gl) fallback to address — cURL not used (unreliable in sandbox/no-network env).
+     * Konversi link Google Maps apa pun menjadi URL embed yang berfungsi di iframe.
+     *
+     * Format input yang didukung (cukup tempel link dari browser):
+     *   ✅ https://www.google.com/maps/place/Nama/@-7.7825,110.3671,17z/...
+     *   ✅ https://maps.google.com/?q=-7.7825,110.3671
+     *   ✅ https://maps.google.com/maps?ll=-7.7825,110.3671&...
+     *   ✅ Kode <iframe> embed dari Google Maps > Bagikan > Sematkan peta
+     *   ✅ https://maps.google.com/maps/embed?pb=...  (langsung dari "Sematkan")
+     *   ⚠️  https://maps.app.goo.gl/... (shortlink) → fallback ke alamat kost
      */
     public function getFinalEmbedUrlAttribute(): string
     {
         $raw = trim($this->gmaps_embed ?? '');
         $addressFallback = trim($this->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta');
 
-        // 1. If wrapped in <iframe>, extract the src attribute
+        // Langkah 0: Jika input kode <iframe>, ekstrak nilai src
         if (str_contains($raw, '<iframe')) {
-            if (preg_match('/src=["\']([^"\']+)["\']/', $raw, $matches)) {
-                $raw = trim($matches[1]);
+            if (preg_match('/src=["\']([^"\']+)["\']/', $raw, $m)) {
+                $raw = trim($m[1]);
             }
         }
 
-        // 2. If it's already an embed URL
+        // Langkah 1: Sudah berupa URL embed resmi → pakai langsung
         if (str_contains($raw, 'google.com/maps/embed') ||
             (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
             return $raw;
         }
 
-        // 3. GPS coordinates — most reliable. Supports: -7.7825, 110.3671 | @-7.7825,110.3671
-        if (preg_match('/@?(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/', $raw, $coords)) {
-            $lat = (float) $coords[1];
-            $lng = (float) $coords[2];
+        // Langkah 2: Ekstrak koordinat @lat,lng dari URL Google Maps biasa
+        // Contoh: /maps/place/Nama/@-7.7825,110.3671,17z
+        if (preg_match('/@(-?\d{1,3}\.\d{4,}),(-?\d{1,3}\.\d{4,})/', $raw, $m)) {
+            $lat = (float) $m[1];
+            $lng = (float) $m[2];
             if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                // Use ll= (center) + q= (pin marker) + iwloc=B to prevent Google snapping to nearby place
                 return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
                     . '&q=' . $lat . ',' . $lng
-                    . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
+                    . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
             }
         }
 
-        // 4. maps.google.com/?q=... with q param
-        if (str_contains($raw, 'maps.google.') && str_contains($raw, 'q=')) {
-            $parsedQuery = parse_url($raw, PHP_URL_QUERY);
-            if ($parsedQuery) {
-                parse_str($parsedQuery, $params);
-                if (!empty($params['q'])) {
-                    if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
-                        $lat = (float) $coords[1];
-                        $lng = (float) $coords[2];
-                        return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
-                            . '&q=' . $lat . ',' . $lng
-                            . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
-                    }
-                    return 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        // Langkah 3: Ekstrak dari parameter q= (misal: ?q=-7.7825,110.3671)
+        if (str_contains($raw, 'q=')) {
+            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
+            parse_str($qs, $params);
+            $q = trim($params['q'] ?? '');
+            if ($q !== '') {
+                // Jika q berisi koordinat
+                if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', $q, $m)) {
+                    $lat = (float) $m[1];
+                    $lng = (float) $m[2];
+                    return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
+                        . '&q=' . $lat . ',' . $lng
+                        . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
                 }
+                // Jika q berisi nama tempat
+                return 'https://maps.google.com/maps?q=' . urlencode($q) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
             }
         }
 
-        // 5. Shortlinks — can't be embedded in iframe directly, fallback to address
+        // Langkah 4: Ekstrak dari parameter ll= (center koordinat)
+        if (str_contains($raw, 'll=')) {
+            $qs = parse_url($raw, PHP_URL_QUERY) ?? '';
+            parse_str($qs, $params);
+            $ll = trim($params['ll'] ?? '');
+            if (preg_match('/^(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)$/', $ll, $m)) {
+                $lat = (float) $m[1];
+                $lng = (float) $m[2];
+                return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
+                    . '&q=' . $lat . ',' . $lng
+                    . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
+            }
+        }
+
+        // Langkah 5: Shortlink goo.gl — coba resolve redirect
         if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
+            try {
+                $ch = curl_init($raw);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+                curl_exec($ch);
+                $effective = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+                curl_close($ch);
+
+                if ($effective && preg_match('/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/', $effective, $coords)) {
+                    $lat = (float) $coords[1];
+                    $lng = (float) $coords[2];
+                    return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
+                }
+                if ($effective && preg_match('/place\/([^\/@]+)/', $effective, $pm)) {
+                    $place = str_replace('+', ' ', urldecode($pm[1]));
+                    return 'https://maps.google.com/maps?q=' . urlencode($place) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                }
+            } catch (\Throwable $e) {}
             return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
         }
 
-        // 6. Plain text (place name entered by user)
-        if (!empty($raw) && !str_starts_with($raw, 'http')) {
-            return 'https://maps.google.com/maps?q=' . urlencode($raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-        }
-
-        // 7. Fallback: use kos_address — always accurate
+        // Langkah 6: Fallback — gunakan alamat kost
         return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
     }
 
