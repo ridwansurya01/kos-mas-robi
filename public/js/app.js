@@ -2053,6 +2053,68 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     updateDashboardStats();
   }
 
+  // --- INITIAL DATA SYNC (ZERO-LATENCY INSTANT RENDER) ---
+  function loadInitialAdminData() {
+    if (window.initialAdminData) {
+      const data = window.initialAdminData;
+      if (data.settings) appData.settings = Object.assign({}, appData.settings, data.settings);
+      if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+        appData.rooms = data.rooms.map(r => ({
+          id: String(r.id),
+          number: r.number,
+          floor: Number(r.floor),
+          type: r.type,
+          location: r.location || 'Lokasi 1',
+          price: Number(r.price),
+          status: r.status,
+          facilities: r.facilities || [],
+          image: r.image || '',
+          images: r.images || [],
+          images_list: r.images_list || [],
+          custom_interior_status: r.custom_interior_status || 'none',
+          custom_interior_budget: Number(r.custom_interior_budget || 0),
+          custom_interior_request: r.custom_interior_request || '',
+          custom_interior_admin_notes: r.custom_interior_admin_notes || '',
+          booked_by_name: r.booked_by_name || '',
+          tenant: r.active_tenant ? r.active_tenant.name : (r.tenant || null),
+          phone: r.active_tenant ? r.active_tenant.phone : (r.phone || ''),
+          startDate: r.active_tenant ? r.active_tenant.start_date : '',
+          dueDay: r.active_tenant ? r.active_tenant.due_day : (r.due_day || 1)
+        }));
+      }
+      if (Array.isArray(data.finances) && data.finances.length > 0) {
+        appData.finances = data.finances.map(f => ({
+          id: f.transaction_code,
+          dbId: f.id,
+          date: f.date,
+          paymentTime: f.formatted_payment_full || (f.date + ', ' + (f.formatted_payment_time || '12:00:00 WIB')),
+          timezone: f.timezone || 'WIB',
+          type: f.type,
+          category: f.category,
+          amount: Number(f.amount),
+          desc: f.description,
+          method: f.payment_method,
+          roomId: f.room_id ? String(f.room_id) : null,
+          proofImage: f.proof_image ? ('/' + f.proof_image.replace(/^\//, '')) : null
+        }));
+      }
+      if (Array.isArray(data.maintenance) && data.maintenance.length > 0) {
+        appData.maintenance = data.maintenance.map(m => ({
+          id: m.ticket_code,
+          dbId: m.id,
+          room: m.room ? m.room.number : (m.room_number || '-'),
+          tenant: m.reporter_name,
+          issue: m.issue,
+          desc: m.description,
+          status: m.status,
+          priority: m.priority,
+          date: m.report_date
+        }));
+      }
+      renderAllViews();
+    }
+  }
+
   // --- INITIALIZE APPLICATION ---
   async function init() {
     const safeRun = (fnName, fn) => {
@@ -2075,6 +2137,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     safeRun('initMaintenanceForm', initMaintenanceForm);
     safeRun('initSettings', initSettings);
     safeRun('initSearchListeners', initSearchListeners);
+    safeRun('loadInitialAdminData', loadInitialAdminData);
 
     try {
       await fetchServerData();
@@ -2098,8 +2161,21 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     checkoutTenant,
     recordPaymentForRoom,
     showReceiptModal,
-    updateRepairStatus
+    updateRepairStatus,
+    renderAllViews
   };
+
+  window.openRoomDetailModal = openRoomDetailModal;
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+  window.switchTab = switchTab;
+  window.editRoom = editRoom;
+  window.sendWhatsAppReminder = sendWhatsAppReminder;
+  window.assignNewTenantToRoom = assignNewTenantToRoom;
+  window.checkoutTenant = checkoutTenant;
+  window.recordPaymentForRoom = recordPaymentForRoom;
+  window.showReceiptModal = showReceiptModal;
+  window.updateRepairStatus = updateRepairStatus;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

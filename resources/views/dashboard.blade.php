@@ -4,6 +4,15 @@
 
 @section('content')
 
+  <script>
+    window.initialAdminData = {
+      settings: @json($setting),
+      rooms: @json($rooms),
+      finances: @json($allFinances ?? []),
+      maintenance: @json($allMaintenance ?? [])
+    };
+  </script>
+
   <!-- =========================================================================
        SIDEBAR (Desktop Fixed, Mobile Slide-out Drawer)
        ========================================================================= -->

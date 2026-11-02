@@ -35,30 +35,6 @@
     </div>
 
     <div class="tp-navbar-actions">
-      {{-- Profil Pelanggan Button --}}
-      @php
-        $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
-        $userInitial = strtoupper(substr($user->name ?? 'P', 0, 1));
-      @endphp
-      <button type="button" class="tp-btn-profile" id="btnOpenProfile" title="Buka Profil Saya">
-        @if($hasRealAvatar)
-          <img src="{{ asset($user->avatar) }}"
-               alt="{{ $user->name }}" class="tp-btn-profile-img" id="navAvatarImg">
-          <div class="tp-btn-profile-initial" id="navAvatarInitial" style="display:none;">{{ $userInitial }}</div>
-        @else
-          <img src=""
-               alt="{{ $user->name }}" class="tp-btn-profile-img" id="navAvatarImg" style="display:none;">
-          <div class="tp-btn-profile-initial" id="navAvatarInitial">{{ $userInitial }}</div>
-        @endif
-        <div class="tp-btn-profile-info">
-          <span class="tp-btn-profile-name">{{ Str::limit($user->name, 15) }}</span>
-          <span class="tp-btn-profile-room">{{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2' : 'Cabang 1' }} • #{{ $room->number ?? '102' }}</span>
-        </div>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="tp-btn-profile-chevron">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-
       {{-- Tombol Info WiFi Resmi (Gambar 3: Gantikan Logo Bell Menjadi Logo WiFi) --}}
       <button type="button" class="tp-icon-btn" id="btnWifiModal" title="Info WiFi Kos">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -263,7 +239,7 @@
                data-status="{{ $r->status }}"
                data-floor="floor-{{ $r->floor }}"
                data-location="{{ ($r->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'lokasi_2' : 'lokasi_1' }}"
-               onclick="{{ $isMyRoom ? "switchPortalTab('myroom')" : "openRoomCustomModal(" . htmlspecialchars(json_encode($r), ENT_QUOTES, 'UTF-8') . ")" }}">
+               onclick="{{ $isMyRoom ? "switchPortalTab('myroom')" : "handleRoomCardClick(" . $r->id . ")" }}">
             
             <div class="tp-room-card-thumb-wrap">
               <img src="{{ $rThumb }}" alt="Foto Kamar #{{ $r->number }}" class="tp-room-card-thumb" loading="lazy">
@@ -309,7 +285,7 @@
                     <span>→</span>
                   </button>
                 @else
-                  <button type="button" class="tp-room-card-action-btn" onclick="event.stopPropagation(); openRoomCustomModal({{ htmlspecialchars(json_encode($r), ENT_QUOTES, 'UTF-8') }})">
+                  <button type="button" class="tp-room-card-action-btn" onclick="event.stopPropagation(); handleRoomCardClick({{ $r->id }})">
                     <span>Lihat & Custom</span>
                     <span>→</span>
                   </button>
@@ -421,26 +397,6 @@
                 ● Sewa Aktif
               @endif
             </span>
-          </div>
-
-          {{-- Lokasi Cabang Tempat Tinggal Penghuni --}}
-          @php
-            $isB2 = ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2';
-            $branchName = $isB2 ? 'Kos Mas Robi 2 — Ringroad Exclusive' : 'Kos Mas Robi 1 — Kampus Utama';
-            $branchAddr = $isB2 ? 'Jl. Kaliurang KM 12, Sardonoharjo, Sleman' : 'Jl. Pandega Marta, Pogung, Sinduadi (3 Mnt UGM)';
-            $branchMaps = $isB2 ? 'https://maps.google.com/?q=Kos+Mas+Robi+Ringroad' : 'https://maps.google.com/?q=Kos+Mas+Robi+Kampus';
-          @endphp
-          <div class="tp-details-branch-strip">
-            <div class="tp-details-branch-left">
-              <span class="tp-details-branch-icon">{{ $isB2 ? '⚡' : '🌿' }}</span>
-              <div>
-                <div class="tp-details-branch-title">{{ $branchName }}</div>
-                <div class="tp-details-branch-addr">📍 {{ $branchAddr }}</div>
-              </div>
-            </div>
-            <a href="{{ $branchMaps }}" target="_blank" class="tp-details-branch-maps">
-              <span>Petunjuk Maps ↗</span>
-            </a>
           </div>
 
           {{-- Pricing & Due Date Box --}}
@@ -1524,6 +1480,17 @@
 /* ============================================================
    Kos Mas Robi — Portal JS (AJAX + Animations + Auto-slide)
    ============================================================ */
+
+window.catalogRoomsData = @json($allRooms);
+
+function handleRoomCardClick(roomId) {
+  if (!window.catalogRoomsData) return;
+  var room = window.catalogRoomsData.find(function(r) { return r.id == roomId; });
+  if (room) {
+    openRoomCustomModal(room);
+  }
+}
+window.handleRoomCardClick = handleRoomCardClick;
 
 // ─── Toast Notification ──────────────────────────────────────
 function showPortalToast(message, type) {

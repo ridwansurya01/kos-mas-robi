@@ -134,12 +134,17 @@ class DashboardController extends Controller
             ->get();
         $pendingTransfersCount = $roomTransfers->where('status', 'pending')->count();
 
+        $allFinances = Finance::orderBy('date', 'desc')->get();
+        $allMaintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
+
         // Data Penagihan Sewa (Tagihan Terpisah)
         $billingList = $rooms->filter(function($r) {
             return in_array($r->status, ['occupied', 'due']);
         })->values();
 
         return view('dashboard', compact(
+            'allFinances',
+            'allMaintenance',
             'deviceType',
             'setting',
             'rooms',
