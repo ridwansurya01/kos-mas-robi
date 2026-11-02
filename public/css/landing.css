@@ -139,11 +139,13 @@ body {
   border-radius: var(--radius-full);
 }
 
-.lr-nav-link:hover {
-  color: var(--teal-primary);
-  background: var(--bg-ice);
+.lr-nav-menu:hover .lr-nav-link.active:not(:hover) {
+  color: var(--text-muted);
+  background: transparent;
+  font-weight: 600;
 }
 
+.lr-nav-link:hover,
 .lr-nav-link.active {
   color: var(--teal-primary);
   background: var(--bg-ice);

@@ -641,5 +641,74 @@
     </div>
   </footer>
 
+  <script>
+    (function() {
+      var navLinks = Array.prototype.slice.call(document.querySelectorAll('.lr-nav-menu .lr-nav-link'));
+      var sectionIds = ['beranda', 'kamar', 'fasilitas', 'lokasi', 'tentang'];
+      var isClickScrolling = false;
+      var scrollTimer = null;
+
+      function setActiveNavByHash(hash) {
+        if (!hash) hash = '#beranda';
+        navLinks.forEach(function(link) {
+          var isMatch = link.getAttribute('href') === hash;
+          link.classList.toggle('active', isMatch);
+        });
+      }
+
+      // Click handler on navbar links & internal section links
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function() {
+          var targetHash = this.getAttribute('href');
+          if (targetHash && sectionIds.indexOf(targetHash.replace('#', '')) !== -1) {
+            isClickScrolling = true;
+            setActiveNavByHash(targetHash);
+            if (scrollTimer) clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(function() {
+              isClickScrolling = false;
+            }, 750);
+          }
+        });
+      });
+
+      // Scroll-spy to automatically move the active box as user scrolls through sections
+      function updateNavOnScroll() {
+        if (isClickScrolling) return;
+        var scrollPos = window.scrollY + 160;
+        var currentId = 'beranda';
+
+        for (var i = 0; i < sectionIds.length; i++) {
+          var el = document.getElementById(sectionIds[i]);
+          if (el && el.offsetTop <= scrollPos) {
+            currentId = sectionIds[i];
+          }
+        }
+
+        // If scrolled to the very bottom of page, highlight the last section
+        if ((window.innerHeight + window.scrollY) >= (document.body.offsetHeight - 40)) {
+          currentId = sectionIds[sectionIds.length - 1];
+        }
+
+        setActiveNavByHash('#' + currentId);
+      }
+
+      window.addEventListener('scroll', updateNavOnScroll, { passive: true });
+      window.addEventListener('hashchange', function() {
+        if (window.location.hash) {
+          setActiveNavByHash(window.location.hash);
+        }
+      });
+
+      // Initial state on page load
+      if (window.location.hash && sectionIds.indexOf(window.location.hash.replace('#', '')) !== -1) {
+        setActiveNavByHash(window.location.hash);
+      } else if (window.location.search && (window.location.search.indexOf('type=') !== -1 || window.location.search.indexOf('location=') !== -1 || window.location.search.indexOf('floor=') !== -1 || window.location.search.indexOf('status=') !== -1)) {
+        setActiveNavByHash('#kamar');
+      } else {
+        updateNavOnScroll();
+      }
+    })();
+  </script>
+
 </body>
 </html>
