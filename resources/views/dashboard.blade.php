@@ -1209,26 +1209,124 @@
                 <div class="settings-card-title-group">
                   <div class="settings-card-icon-badge teal">💳</div>
                   <div>
-                    <h3 class="settings-card-title">Rekening Pembayaran & Cadangan Data</h3>
-                    <div class="settings-card-subtitle">Tujuan transfer sewa resmi serta utilitas backup JSON</div>
+                    <h3 class="settings-card-title">Kelola Rekening & Metode Pembayaran Sewa</h3>
+                    <div class="settings-card-subtitle">Buat metode pembayaran apa saja (Bank, QRIS, dll) & pilih mana yang ditayangkan ke pelanggan</div>
                   </div>
                 </div>
               </div>
-              <form id="settingsBankForm" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
-                <div class="form-group">
-                  <label for="setBankName" style="font-weight: 700;">Nama Bank / QRIS</label>
-                  <input type="text" id="setBankName" class="form-control" value="{{ $setting->bank_name }}">
+
+              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; font-size: 0.82rem; color: #166534; line-height: 1.5;">
+                <strong>💡 Pengaturan Pembayaran Pelanggan:</strong> Anda dapat membuat metode pembayaran baru (Transfer Bank apa saja, QRIS, e-Wallet, atau Tunai) dan mengaktifkan centang <strong>"Tayangkan di Pelanggan"</strong> untuk menentukan metode mana yang muncul pada form pembayaran anak kos.
+              </div>
+
+              {{-- Daftar Metode Pembayaran Dinamis --}}
+              <div id="paymentMethodsList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                @php
+                  $allMethods = $setting->payment_methods ?? [];
+                @endphp
+                @foreach($allMethods as $i => $m)
+                  <div class="pm-card-item" data-index="{{ $i }}" data-id="{{ $m['id'] ?? 'pm_'.$i }}" style="background: var(--bg-surface); border: 1.5px solid {{ !empty($m['is_active']) ? '#10b981' : 'var(--border-color)' }}; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="font-size: 1.3rem;">
+                          @if(($m['type'] ?? '') === 'qris') 📱 @elseif(($m['type'] ?? '') === 'cash') 💵 @elseif(($m['type'] ?? '') === 'ewallet') 💳 @else 🏦 @endif
+                        </span>
+                        <div>
+                          <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);" class="pm-name-text">{{ $m['name'] }}</div>
+                          <div style="font-size: 0.76rem; color: var(--text-secondary);" class="pm-bank-text">{{ $m['bank_name'] ?? $m['name'] }}</div>
+                        </div>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; background: {{ !empty($m['is_active']) ? '#dcfce7' : '#f1f5f9' }}; color: {{ !empty($m['is_active']) ? '#15803d' : '#64748b' }}; padding: 4px 10px; border-radius: 999px;">
+                          <input type="checkbox" class="pm-active-toggle" {{ !empty($m['is_active']) ? 'checked' : '' }} onchange="togglePmActive(this)">
+                          <span class="pm-toggle-label">{{ !empty($m['is_active']) ? '● Ditayangkan' : '○ Disembunyikan' }}</span>
+                        </label>
+                        <button type="button" class="btn-secondary" onclick="deletePmItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus Metode">
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
+                      <div>
+                        <span style="color: var(--text-secondary); font-size: 0.7rem; display: block;">No. Rekening / NMID:</span>
+                        <strong class="pm-number-text" style="color: var(--text-primary); font-family: monospace; font-size: 0.85rem;">{{ $m['account_number'] ?? '-' }}</strong>
+                      </div>
+                      <div>
+                        <span style="color: var(--text-secondary); font-size: 0.7rem; display: block;">Atas Nama:</span>
+                        <strong class="pm-holder-text" style="color: var(--text-primary);">{{ $m['account_holder'] ?? '-' }}</strong>
+                      </div>
+                    </div>
+
+                    @if(!empty($m['instructions']))
+                      <div style="font-size: 0.74rem; color: var(--text-secondary); font-style: italic;" class="pm-inst-text">
+                        📝 {{ $m['instructions'] }}
+                      </div>
+                    @endif
+                    <input type="hidden" class="pm-raw-data" value="{{ json_encode($m) }}">
+                  </div>
+                @endforeach
+              </div>
+
+              {{-- Tombol Tambah & Form Tambah Metode Baru --}}
+              <div style="margin-bottom: 20px;">
+                <button type="button" id="btnToggleAddPm" onclick="toggleAddPmForm()" class="btn-secondary" style="width: 100%; border-style: dashed; padding: 12px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                  <span>➕ Tambah Rekening / Metode Pembayaran Baru (Bank / QRIS / dll)</span>
+                </button>
+
+                <div id="addPmFormBox" style="display: none; background: var(--bg-surface); border: 1.5px solid var(--primary); border-radius: 16px; padding: 18px; margin-top: 14px;">
+                  <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--text-primary); margin-bottom: 14px;">Tambah Metode Pembayaran Baru</h4>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 14px;">
+                    <div class="form-group">
+                      <label style="font-size: 0.78rem; font-weight: 700;">Tipe Pembayaran</label>
+                      <select id="newPmType" class="form-control" onchange="handleNewPmTypeChange(this.value)">
+                        <option value="bank">Transfer Bank (BCA, Mandiri, BRI, BNI, Jago, dll)</option>
+                        <option value="qris">QRIS All Payment / Barcode</option>
+                        <option value="ewallet">E-Wallet (GoPay, OVO, Dana, ShopeePay)</option>
+                        <option value="cash">Tunai (Cash ke Mas Robi)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label style="font-size: 0.78rem; font-weight: 700;">Nama Metode Tampilan *</label>
+                      <input type="text" id="newPmName" class="form-control" placeholder="Contoh: Transfer Bank Jago / QRIS Toko">
+                    </div>
+                    <div class="form-group">
+                      <label style="font-size: 0.78rem; font-weight: 700;">Nama Bank / Penyedia</label>
+                      <input type="text" id="newPmBank" class="form-control" placeholder="Contoh: Bank Jago / QRIS Resmi">
+                    </div>
+                    <div class="form-group">
+                      <label style="font-size: 0.78rem; font-weight: 700;">Nomor Rekening / NMID / No HP</label>
+                      <input type="text" id="newPmNumber" class="form-control" placeholder="Contoh: 1029384756 / 0812xxxx">
+                    </div>
+                    <div class="form-group">
+                      <label style="font-size: 0.78rem; font-weight: 700;">Atas Nama Pemilik</label>
+                      <input type="text" id="newPmHolder" class="form-control" placeholder="Contoh: Robi Suryanto" value="{{ $setting->owner_name ?? 'Robi Suryanto' }}">
+                    </div>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-size: 0.78rem; font-weight: 700;">Instruksi Pembayaran untuk Pelanggan (Opsional)</label>
+                    <input type="text" id="newPmInstructions" class="form-control" placeholder="Contoh: Scan QRIS via m-Banking atau transfer ke nomor di atas lalu unggah bukti transfer.">
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                      <input type="checkbox" id="newPmIsActive" checked>
+                      <span>Langsung Tayangkan ke Pelanggan</span>
+                    </label>
+                    <div style="display: flex; gap: 8px;">
+                      <button type="button" class="btn-secondary" onclick="toggleAddPmForm()" style="padding: 8px 16px; border-radius: 10px;">Batal</button>
+                      <button type="button" class="btn-primary" onclick="submitAddNewPaymentMethod()" style="padding: 8px 18px; border-radius: 10px; font-weight: 800;">Simpan Metode Baru</button>
+                    </div>
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label for="setBankAccount" style="font-weight: 700;">Nomor Rekening</label>
-                  <input type="text" id="setBankAccount" class="form-control" value="{{ $setting->bank_account }}">
-                </div>
-                <div class="form-group">
-                  <label for="setBankHolder" style="font-weight: 700;">Atas Nama Pemilik Rekening</label>
-                  <input type="text" id="setBankHolder" class="form-control" value="{{ $setting->bank_holder }}">
-                </div>
-                <button type="submit" class="btn-primary" style="align-self: flex-start; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Rekening</button>
-              </form>
+              </div>
+
+              {{-- Tombol Simpan Permanen Semua Perubahan Pembayaran --}}
+              <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 24px;">
+                <button type="button" id="btnSaveAllPaymentMethods" onclick="saveAllPaymentMethodsToServer()" class="btn-primary" style="padding: 11px 24px; border-radius: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+                  <span>💾 Simpan Perubahan Metode Pembayaran</span>
+                </button>
+                <span id="pmSaveStatus" style="font-size: 0.82rem; font-weight: 700;"></span>
+              </div>
 
               <hr style="border: none; border-top: 1px solid var(--border-color); margin: 20px 0;">
 
@@ -1469,35 +1567,59 @@
             </p>
 
             <!-- Foto 1 (Utama) -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;">
-              <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px;">1. Foto Kamar Tidur Utama *</span>
-              <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">1. Foto Kamar Tidur Utama *</span>
+                <span id="roomImgUploadStatus1" style="font-size: 0.7rem; color: #10b981; font-weight: 700;"></span>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
                 <img id="roomImgPreview1" src="/assets/images/rooms/room_1.jpg" alt="Slide 1"
-                     style="width: 65px; height: 46px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                <input type="text" id="roomImageInput1" class="form-control" value="assets/images/rooms/room_1.jpg" placeholder="assets/images/rooms/room_1.jpg"
-                       oninput="document.getElementById('roomImgPreview1').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
+                     style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.75rem; padding: 4px 6px;"
+                         onchange="uploadRoomSlideImage(this, 1)">
+                  <input type="text" id="roomImageInput1" class="form-control" value="assets/images/rooms/room_1.jpg"
+                         placeholder="Path foto atau hasil upload..." style="font-size: 0.75rem; padding: 4px 8px;"
+                         oninput="document.getElementById('roomImgPreview1').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
+                </div>
               </div>
             </div>
 
             <!-- Foto 2 -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px;">
-              <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px;">2. Foto Meja Kerja / Area Belajar & AC</span>
-              <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">2. Foto Meja Kerja / Area Belajar & AC</span>
+                <span id="roomImgUploadStatus2" style="font-size: 0.7rem; color: #10b981; font-weight: 700;"></span>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
                 <img id="roomImgPreview2" src="/assets/images/rooms/room_2.jpg" alt="Slide 2"
-                     style="width: 65px; height: 46px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                <input type="text" id="roomImageInput2" class="form-control" value="assets/images/rooms/room_2.jpg" placeholder="assets/images/rooms/room_2.jpg"
-                       oninput="document.getElementById('roomImgPreview2').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
+                     style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.75rem; padding: 4px 6px;"
+                         onchange="uploadRoomSlideImage(this, 2)">
+                  <input type="text" id="roomImageInput2" class="form-control" value="assets/images/rooms/room_2.jpg"
+                         placeholder="Path foto atau hasil upload..." style="font-size: 0.75rem; padding: 4px 8px;"
+                         oninput="document.getElementById('roomImgPreview2').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
+                </div>
               </div>
             </div>
 
             <!-- Foto 3 -->
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 10px;">
-              <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 4px;">3. Foto Kamar Mandi Dalam / Fasilitas Tambahan</span>
-              <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-secondary);">3. Foto Kamar Mandi Dalam / Fasilitas Tambahan</span>
+                <span id="roomImgUploadStatus3" style="font-size: 0.7rem; color: #10b981; font-weight: 700;"></span>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center;">
                 <img id="roomImgPreview3" src="/assets/images/rooms/room_3.jpg" alt="Slide 3"
-                     style="width: 65px; height: 46px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border-color); flex-shrink: 0;">
-                <input type="text" id="roomImageInput3" class="form-control" value="assets/images/rooms/room_3.jpg" placeholder="assets/images/rooms/room_3.jpg"
-                       oninput="document.getElementById('roomImgPreview3').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
+                     style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); flex-shrink: 0;">
+                <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+                  <input type="file" accept="image/*" class="form-control" style="font-size: 0.75rem; padding: 4px 6px;"
+                         onchange="uploadRoomSlideImage(this, 3)">
+                  <input type="text" id="roomImageInput3" class="form-control" value="assets/images/rooms/room_3.jpg"
+                         placeholder="Path foto atau hasil upload..." style="font-size: 0.75rem; padding: 4px 8px;"
+                         oninput="document.getElementById('roomImgPreview3').src = this.value.startsWith('http') || this.value.startsWith('/') ? this.value : '/' + this.value">
+                </div>
               </div>
             </div>
           </div>
@@ -2118,6 +2240,251 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    // =========================================================================
+    // POINT 1: UPLOAD FOTO SLIDE KAMAR OLEH ADMIN (3 FOTO SLIDE)
+    // =========================================================================
+    function uploadRoomSlideImage(fileInput, slideIndex) {
+      if (!fileInput.files || !fileInput.files[0]) return;
+      var file = fileInput.files[0];
+      var statusEl = document.getElementById('roomImgUploadStatus' + slideIndex);
+      var textInput = document.getElementById('roomImageInput' + slideIndex);
+      var previewImg = document.getElementById('roomImgPreview' + slideIndex);
+
+      if (statusEl) {
+        statusEl.textContent = '⏳ Mengunggah foto...';
+        statusEl.style.color = '#3b82f6';
+      }
+
+      var formData = new FormData();
+      formData.append('photo', file);
+
+      fetch('/api/rooms/upload-photo', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: formData
+      })
+      .then(function(res) {
+        if (!res.ok) throw new Error('Upload gagal');
+        return res.json();
+      })
+      .then(function(data) {
+        if (data.success && data.url) {
+          if (textInput) textInput.value = data.url;
+          if (previewImg) previewImg.src = data.url;
+          if (statusEl) {
+            statusEl.textContent = '✓ Foto terunggah';
+            statusEl.style.color = '#10b981';
+          }
+        } else {
+          throw new Error(data.message || 'Gagal');
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) {
+          statusEl.textContent = '✕ Gagal unggah';
+          statusEl.style.color = '#ef4444';
+        }
+        alert('Gagal mengunggah foto slide ' + slideIndex + ': ' + (err.message || 'Error'));
+      });
+    }
+
+    // =========================================================================
+    // POINT 4: PENGELOLAAN METODE & REKENING PEMBAYARAN DINAMIS
+    // =========================================================================
+    function togglePmActive(checkbox) {
+      var card = checkbox.closest('.pm-card-item');
+      var label = card ? card.querySelector('.pm-toggle-label') : null;
+      if (checkbox.checked) {
+        if (card) card.style.borderColor = '#10b981';
+        if (label) {
+          label.textContent = '● Ditayangkan';
+          label.parentElement.style.background = '#dcfce7';
+          label.parentElement.style.color = '#15803d';
+        }
+      } else {
+        if (card) card.style.borderColor = 'var(--border-color)';
+        if (label) {
+          label.textContent = '○ Disembunyikan';
+          label.parentElement.style.background = '#f1f5f9';
+          label.parentElement.style.color = '#64748b';
+        }
+      }
+    }
+
+    function toggleAddPmForm() {
+      var box = document.getElementById('addPmFormBox');
+      if (!box) return;
+      if (box.style.display === 'none' || !box.style.display) {
+        box.style.display = 'block';
+        box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function handleNewPmTypeChange(type) {
+      var nameInput = document.getElementById('newPmName');
+      var bankInput = document.getElementById('newPmBank');
+      var numInput = document.getElementById('newPmNumber');
+      if (type === 'qris') {
+        if (nameInput) nameInput.placeholder = 'Contoh: QRIS Toko Mas Robi / ShopeePay QR';
+        if (bankInput) bankInput.placeholder = 'Contoh: QRIS All Payment (NMID)';
+        if (numInput) numInput.placeholder = 'Contoh: ID1029384756 (NMID) atau Link Barcode';
+      } else if (type === 'ewallet') {
+        if (nameInput) nameInput.placeholder = 'Contoh: GoPay / OVO / Dana / ShopeePay';
+        if (bankInput) bankInput.placeholder = 'Contoh: Dana Bisnis / GoPay';
+        if (numInput) numInput.placeholder = 'Contoh: 081234567890';
+      } else if (type === 'cash') {
+        if (nameInput) nameInput.placeholder = 'Contoh: Tunai / Cash ke Pengelola';
+        if (bankInput) bankInput.placeholder = 'Contoh: Tunai Langsung';
+        if (numInput) numInput.placeholder = 'Contoh: Bayar langsung di Kantor Mas Robi';
+      } else {
+        if (nameInput) nameInput.placeholder = 'Contoh: Transfer Bank Jago / BCA / Mandiri';
+        if (bankInput) bankInput.placeholder = 'Contoh: Bank Jago / BCA / Mandiri';
+        if (numInput) numInput.placeholder = 'Contoh: 1029384756';
+      }
+    }
+
+    function submitAddNewPaymentMethod() {
+      var type = document.getElementById('newPmType')?.value || 'bank';
+      var name = document.getElementById('newPmName')?.value.trim();
+      var bank = document.getElementById('newPmBank')?.value.trim() || name;
+      var number = document.getElementById('newPmNumber')?.value.trim() || '-';
+      var holder = document.getElementById('newPmHolder')?.value.trim() || 'Robi Suryanto';
+      var instructions = document.getElementById('newPmInstructions')?.value.trim() || '';
+      var isActive = document.getElementById('newPmIsActive')?.checked ?? true;
+
+      if (!name) {
+        alert('Mohon isi Nama Metode Tampilan terlebih dahulu!');
+        return;
+      }
+
+      var icon = '🏦';
+      if (type === 'qris') icon = '📱';
+      else if (type === 'cash') icon = '💵';
+      else if (type === 'ewallet') icon = '💳';
+
+      var newId = 'pm_' + Date.now();
+      var card = document.createElement('div');
+      card.className = 'pm-card-item';
+      card.setAttribute('data-id', newId);
+      card.style.cssText = 'background: var(--bg-surface); border: 1.5px solid ' + (isActive ? '#10b981' : 'var(--border-color)') + '; border-radius: 14px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; transition: all 0.2s;';
+
+      var rawObj = {
+        id: newId,
+        type: type,
+        name: name,
+        bank_name: bank,
+        account_number: number,
+        account_holder: holder,
+        instructions: instructions,
+        is_active: isActive
+      };
+
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.3rem;">${icon}</span>
+            <div>
+              <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);" class="pm-name-text">${name}</div>
+              <div style="font-size: 0.76rem; color: var(--text-secondary);" class="pm-bank-text">${bank}</div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; background: ${isActive ? '#dcfce7' : '#f1f5f9'}; color: ${isActive ? '#15803d' : '#64748b'}; padding: 4px 10px; border-radius: 999px;">
+              <input type="checkbox" class="pm-active-toggle" ${isActive ? 'checked' : ''} onchange="togglePmActive(this)">
+              <span class="pm-toggle-label">${isActive ? '● Ditayangkan' : '○ Disembunyikan'}</span>
+            </label>
+            <button type="button" class="btn-secondary" onclick="deletePmItem(this)" style="padding: 4px 8px; border-radius: 8px; color: #ef4444; font-size: 0.75rem;" title="Hapus Metode">
+              ✕
+            </button>
+          </div>
+        </div>
+        <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem;">
+          <div>
+            <span style="color: var(--text-secondary); font-size: 0.7rem; display: block;">No. Rekening / NMID:</span>
+            <strong class="pm-number-text" style="color: var(--text-primary); font-family: monospace; font-size: 0.85rem;">${number}</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-secondary); font-size: 0.7rem; display: block;">Atas Nama:</span>
+            <strong class="pm-holder-text" style="color: var(--text-primary);">${holder}</strong>
+          </div>
+        </div>
+        ${instructions ? `<div style="font-size: 0.74rem; color: var(--text-secondary); font-style: italic;" class="pm-inst-text">📝 ${instructions}</div>` : ''}
+        <input type="hidden" class="pm-raw-data" value='${JSON.stringify(rawObj)}'>
+      `;
+
+      var list = document.getElementById('paymentMethodsList');
+      if (list) list.appendChild(card);
+
+      document.getElementById('newPmName').value = '';
+      document.getElementById('newPmBank').value = '';
+      document.getElementById('newPmNumber').value = '';
+      document.getElementById('newPmInstructions').value = '';
+      toggleAddPmForm();
+
+      saveAllPaymentMethodsToServer();
+    }
+
+    function deletePmItem(btn) {
+      if (!confirm('Hapus metode pembayaran ini?')) return;
+      var card = btn.closest('.pm-card-item');
+      if (card) {
+        card.remove();
+        saveAllPaymentMethodsToServer();
+      }
+    }
+
+    function saveAllPaymentMethodsToServer() {
+      var cards = document.querySelectorAll('#paymentMethodsList .pm-card-item');
+      var methods = [];
+      var statusEl = document.getElementById('pmSaveStatus');
+
+      cards.forEach(function(card, index) {
+        var rawInput = card.querySelector('.pm-raw-data');
+        var obj = {};
+        if (rawInput && rawInput.value) {
+          try { obj = JSON.parse(rawInput.value); } catch(e) {}
+        }
+        var activeToggle = card.querySelector('.pm-active-toggle');
+        obj.is_active = activeToggle ? activeToggle.checked : false;
+        if (!obj.id) obj.id = card.getAttribute('data-id') || ('pm_' + index);
+        methods.push(obj);
+      });
+
+      if (statusEl) {
+        statusEl.textContent = '⏳ Menyimpan...';
+        statusEl.style.color = '#3b82f6';
+      }
+
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+          payment_methods: methods
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (statusEl) {
+          statusEl.textContent = '✓ Tersimpan di database!';
+          statusEl.style.color = '#10b981';
+          setTimeout(function() { statusEl.textContent = ''; }, 3000);
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) {
+          statusEl.textContent = '✕ Gagal menyimpan';
+          statusEl.style.color = '#ef4444';
+        }
+      });
     }
 
   </script>

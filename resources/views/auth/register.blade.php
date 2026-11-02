@@ -403,11 +403,51 @@
     @endif
 
     {{-- Register Form --}}
-    <form action="{{ route('register.post') }}" method="POST" id="formRegister">
+    <form action="{{ route('register.post') }}" method="POST" id="formRegister" enctype="multipart/form-data">
       @csrf
 
       {{-- Role always tenant for public registration --}}
       <input type="hidden" name="role" id="regRole" value="tenant">
+
+      {{-- Foto Profil Pelanggan (WAJIB) --}}
+      <div class="auth-field-group" style="text-align: center; margin-bottom: 22px;">
+        <label class="auth-field-label" style="text-align: center; font-size: 0.88rem; font-weight: 800; color: #0f172a; margin-bottom: 10px;">
+          Foto Profil Diri (Wajib) *
+        </label>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+          <div style="position: relative; width: 92px; height: 92px; border-radius: 50%; border: 3px solid #0e7482; padding: 3px; background: #ffffff; box-shadow: 0 4px 14px rgba(14,116,130,0.22); cursor: pointer; transition: transform 0.2s;"
+               onclick="document.getElementById('regAvatar').click()"
+               title="Klik untuk memilih foto profil Anda">
+            <img id="avatarPreviewImg"
+                 src="{{ asset('assets/images/tenant_avatar.jpg') }}"
+                 alt="Preview Foto Profil"
+                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            <div style="position: absolute; bottom: 0; right: 0; background: #0e7482; color: #ffffff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2.5px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+
+          <input type="file"
+                 id="regAvatar"
+                 name="avatar"
+                 accept="image/jpeg,image/png,image/jpg,image/webp"
+                 required
+                 style="display: none;"
+                 onchange="previewRegisterAvatar(this)">
+
+          <button type="button"
+                  onclick="document.getElementById('regAvatar').click()"
+                  style="font-size: 0.8rem; font-weight: 700; color: #0e7482; background: #e0f2fe; border: 1px solid #bae6fd; padding: 6px 16px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Pilih Foto Profil Anda</span>
+          </button>
+          
+          <div id="avatarFileName" style="font-size: 0.74rem; color: #64748b; font-weight: 600;">
+            Wajib unggah foto diri (Maks. 5MB)
+          </div>
+        </div>
+      </div>
 
       {{-- Nama Lengkap --}}
       <div class="auth-field-group">
@@ -557,6 +597,22 @@
 </div>
 
 <script>
+  function previewRegisterAvatar(input) {
+    if (input.files && input.files[0]) {
+      var file = input.files[0];
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('avatarPreviewImg').src = e.target.result;
+        var info = document.getElementById('avatarFileName');
+        if (info) {
+          info.innerHTML = '✅ <strong>' + file.name + '</strong> (' + (file.size / 1024).toFixed(0) + ' KB)';
+          info.style.color = '#047857';
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
   function toggleRegPassword(inputId, btn) {
     const input = document.getElementById(inputId);
     if (input.type === 'password') {

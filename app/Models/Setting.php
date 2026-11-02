@@ -21,15 +21,18 @@ class Setting extends Model
         'bank_name',
         'bank_account',
         'bank_holder',
+        'payment_methods',
     ];
 
     protected $casts = [
         'location_highlights' => 'array',
         'landing_content' => 'array',
+        'payment_methods' => 'array',
     ];
 
     protected $appends = [
         'final_embed_url',
+        'active_payment_methods',
     ];
 
     /**
@@ -45,8 +48,8 @@ class Setting extends Model
      */
     public function getFinalEmbedUrlAttribute(): string
     {
-        $raw = trim($this->gmaps_embed ?? '');
-        $addressFallback = trim($this->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta');
+        $raw = trim($this->gmaps_embed ?: ($this->gmaps_url ?? ''));
+        $addressFallback = trim($this->kos_address ?? 'Universitas Jember, Jawa Timur');
 
         // Langkah 0: Jika input kode <iframe>, ekstrak nilai src
         if (str_contains($raw, '<iframe')) {
@@ -160,8 +163,8 @@ class Setting extends Model
     public function getLandingContentAttribute($value): array
     {
         $defaults = [
-            'hero_title' => "Find Your\nDream Home",
-            'hero_desc' => 'Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis di Sleman, DI Yogyakarta.',
+            'hero_title' => "Kos Impian\nOrang Jember",
+            'hero_desc' => 'Hunian kost modern, bersih, dan aman 24 jam dengan fasilitas AC dingin, kamar mandi pribadi, WiFi fiber 100 Mbps, serta akses lokasi strategis.',
             'hero_image' => 'assets/images/kos_exterior.jpg',
             'hero_btn_text' => 'Jelajahi Kamar',
             'hero_btn_link' => '#kamar',
@@ -208,5 +211,84 @@ class Setting extends Model
         }
 
         return $defaults;
+    }
+
+    /**
+     * Get payment methods with default fallback list.
+     */
+    public function getPaymentMethodsAttribute($value): array
+    {
+        $defaults = [
+            [
+                'id' => 'pm_bca',
+                'name' => 'Transfer Bank BCA',
+                'bank_name' => 'Bank Central Asia (BCA)',
+                'account_number' => '8830192831',
+                'account_holder' => 'Robi Suryanto',
+                'type' => 'bank',
+                'instructions' => 'Transfer ke rekening resmi BCA di atas dan lampirkan bukti transfer.',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'pm_mandiri',
+                'name' => 'Transfer Bank Mandiri',
+                'bank_name' => 'Bank Mandiri',
+                'account_number' => '1370019283100',
+                'account_holder' => 'Robi Suryanto',
+                'type' => 'bank',
+                'instructions' => 'Transfer ke rekening resmi Mandiri di atas dan lampirkan bukti transfer.',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'pm_bri',
+                'name' => 'Transfer Bank BRI',
+                'bank_name' => 'Bank Rakyat Indonesia (BRI)',
+                'account_number' => '012301092831502',
+                'account_holder' => 'Robi Suryanto',
+                'type' => 'bank',
+                'instructions' => 'Transfer ke rekening resmi BRI di atas dan lampirkan bukti transfer.',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'pm_qris',
+                'name' => 'Transfer QRIS All Payment',
+                'bank_name' => 'QRIS Resmi Kos Mas Robi',
+                'account_number' => 'NMID: ID102026192831',
+                'account_holder' => 'Kos Mas Robi / Robi Suryanto',
+                'type' => 'qris',
+                'instructions' => 'Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, Dana, ShopeePay), scan kode QRIS atau bayar via NMID di atas.',
+                'is_active' => true,
+            ],
+            [
+                'id' => 'pm_cash',
+                'name' => 'Tunai (Cash)',
+                'bank_name' => 'Tunai Langsung ke Mas Robi',
+                'account_number' => 'Bayar Langsung ke Pengelola',
+                'account_holder' => 'Mas Robi (Kamar Pengelola Lt. 1)',
+                'type' => 'cash',
+                'instructions' => 'Serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.',
+                'is_active' => true,
+            ],
+        ];
+
+        if (!empty($value)) {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+            if (is_array($decoded) && count($decoded) > 0) {
+                return $decoded;
+            }
+        }
+
+        return $defaults;
+    }
+
+    /**
+     * Get only active payment methods that should be displayed to tenants.
+     */
+    public function getActivePaymentMethodsAttribute(): array
+    {
+        $methods = $this->payment_methods;
+        return array_values(array_filter($methods, function ($m) {
+            return !empty($m['is_active']);
+        }));
     }
 }

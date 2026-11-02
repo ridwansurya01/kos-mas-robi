@@ -66,6 +66,11 @@ Route::middleware(['auth'])->group(function () {
             return app(DashboardController::class)->saveRoom($req);
         })->name('api.rooms.save');
 
+        Route::post('/rooms/upload-photo', function (\Illuminate\Http\Request $req) {
+            if (!Auth::user()->isOwner()) abort(403);
+            return app(DashboardController::class)->uploadRoomPhoto($req);
+        })->name('api.rooms.upload_photo');
+
         Route::post('/rooms/{id}/status', function (\Illuminate\Http\Request $req, $id) {
             if (!Auth::user()->isOwner()) abort(403);
             return app(DashboardController::class)->updateRoomStatus($req, $id);

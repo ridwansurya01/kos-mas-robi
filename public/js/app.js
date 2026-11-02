@@ -1561,7 +1561,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
     function updateGmapsPreview() {
       if (!gmapsPreviewIframe) return;
-      const inputVal = setGmapsUrlInput?.value.trim() || setGmapsEmbedInput?.value.trim() || '';
+      const inputVal = setGmapsUrlInput?.value.trim() || '';
+      if (!inputVal) return;
       let embedVal = inputVal;
 
       if (embedVal.includes('<iframe')) {
@@ -1569,21 +1570,56 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         if (match && match[1]) embedVal = match[1];
       }
 
-      // Check if browser URL contains @lat,lng
-      const coordMatch = embedVal.match(/@?(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/);
-      if (coordMatch) {
-        embedVal = 'https://maps.google.com/maps?ll=' + coordMatch[1] + ',' + coordMatch[2] + '&q=' + coordMatch[1] + ',' + coordMatch[2] + '&t=m&z=17&ie=UTF8&iwloc=B&output=embed';
-      } else if (embedVal.includes('q=')) {
+      // Prioritas 1: Nama tempat (/place/Nama+Tempat)
+      const placeMatch = embedVal.match(/place\/([^\/@?#]+)/);
+      if (placeMatch && placeMatch[1]) {
+        const placeName = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '));
+        if (placeName && placeName.toLowerCase() !== 'dropped pin') {
+          embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(placeName) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+          gmapsPreviewIframe.src = embedVal;
+          if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
+          return;
+        }
+      }
+
+      // Prioritas 2: Pin asli (!3d<lat>!4d<lng>)
+      const pinMatch = embedVal.match(/!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/);
+      if (pinMatch) {
+        embedVal = 'https://maps.google.com/maps?q=' + pinMatch[1] + ',' + pinMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        gmapsPreviewIframe.src = embedVal;
+        if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
+        return;
+      }
+
+      // Prioritas 3: Parameter q=
+      if (embedVal.includes('q=')) {
         try {
           const urlObj = new URL(embedVal.startsWith('http') ? embedVal : 'https://' + embedVal);
           const qParam = urlObj.searchParams.get('q');
           if (qParam) {
             embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(qParam) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            gmapsPreviewIframe.src = embedVal;
+            if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
+            return;
           }
         } catch (e) {}
-      } else if (!embedVal.includes('google.com/maps/embed') && !embedVal.includes('output=embed')) {
-        const addr = setKosAddressInput?.value.trim() || 'Kos Mas Robi';
+      }
+
+      // Prioritas 4: @lat,lng kamera hanya jika bukan shortlink
+      const coordMatch = embedVal.match(/@(-?\d{1,3}\.\d{4,}),\s*(-?\d{1,3}\.\d{4,})/);
+      if (coordMatch) {
+        embedVal = 'https://maps.google.com/maps?q=' + coordMatch[1] + ',' + coordMatch[2] + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        gmapsPreviewIframe.src = embedVal;
+        if (btnTestGmapsUrl) btnTestGmapsUrl.href = inputVal;
+        return;
+      }
+
+      // Jika shortlink, jangan generate koordinat samudra
+      if (embedVal.includes('maps.app.goo.gl') || embedVal.includes('goo.gl/maps')) {
+        const addr = setKosAddressInput?.value.trim() || 'Universitas Jember';
         embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(addr) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+      } else if (!embedVal.includes('google.com/maps/embed') && !embedVal.includes('output=embed')) {
+        embedVal = 'https://maps.google.com/maps?q=' + encodeURIComponent(embedVal) + '&t=&z=16&ie=UTF8&iwloc=&output=embed';
       }
 
       if (embedVal && gmapsPreviewIframe) {

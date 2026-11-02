@@ -403,8 +403,21 @@ class AuthController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'phone'    => 'required|string',
+            'avatar'   => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'role'     => 'nullable|string|in:tenant,owner',
             'room_id'  => 'nullable|exists:rooms,id',
+        ], [
+            'name.required'     => 'Nama lengkap wajib diisi.',
+            'email.required'    => 'Alamat email wajib diisi.',
+            'email.unique'      => 'Email ini sudah terdaftar. Silakan login atau gunakan email lain.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min'      => 'Kata sandi minimal 6 karakter.',
+            'password.confirmed'=> 'Konfirmasi kata sandi tidak cocok.',
+            'phone.required'    => 'Nomor telepon/WhatsApp wajib diisi.',
+            'avatar.required'   => 'Foto profil diri WAJIB diunggah untuk mendaftar akun pelanggan.',
+            'avatar.image'      => 'File foto profil harus berupa file gambar yang valid.',
+            'avatar.mimes'      => 'Format foto profil harus berupa JPEG, PNG, JPG, atau WebP.',
+            'avatar.max'        => 'Ukuran foto profil maksimal 5MB.',
         ]);
 
         $role = $request->input('role', 'tenant');
@@ -412,14 +425,31 @@ class AuthController extends Controller
             $role = 'tenant';
         }
 
+        // Upload and save mandatory avatar photo
+        $avatarPath = null;
+        if ($request->hasFile('avatar') && $request->file('avatar')->isValid()) {
+            $file = $request->file('avatar');
+            $filename = 'avatar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/avatars');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            $avatarPath = 'uploads/avatars/' . $filename;
+        }
+
+        if (!$avatarPath) {
+            return back()->withInput()->withErrors(['avatar' => 'Foto profil diri wajib diunggah untuk mendaftar akun pelanggan.']);
+        }
+
         $user = User::create([
-            'name'    => $validated['name'],
-            'email'   => $validated['email'],
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role'    => $role,
-            'phone'   => $validated['phone'],
-            'room_id' => ($role === 'tenant') ? ($validated['room_id'] ?? null) : null,
-            'avatar'  => $role === 'owner' ? 'assets/images/owner_avatar.jpg' : 'assets/images/tenant_avatar.jpg',
+            'role'     => $role,
+            'phone'    => $validated['phone'],
+            'room_id'  => ($role === 'tenant') ? ($validated['room_id'] ?? null) : null,
+            'avatar'   => $avatarPath,
         ]);
 
         if ($role === 'tenant') {

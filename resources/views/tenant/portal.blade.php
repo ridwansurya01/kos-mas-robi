@@ -638,12 +638,19 @@
             <span class="form-label-hint">Pilih rekening tujuan atau cara bayar</span>
           </label>
           <select id="payMethod" name="payment_method" class="form-control" required onchange="handlePaymentMethodChange(this.value)">
-            <option value="Transfer Mandiri">Transfer Bank Mandiri</option>
-            <option value="Transfer BCA">Transfer Bank BCA</option>
-            <option value="Transfer BNI">Transfer Bank BNI</option>
-            <option value="Transfer BRI">Transfer Bank BRI</option>
-            <option value="Transfer QRIS">Transfer QRIS (Instant All Payment / E-Wallet)</option>
-            <option value="Tunai (Cash)">Tunai (Cash ke Mas Robi)</option>
+            @php
+              $activeMethods = $setting->active_payment_methods ?? [];
+            @endphp
+            @forelse($activeMethods as $idx => $pm)
+              <option value="{{ $pm['name'] }}" {{ $idx === 0 ? 'selected' : '' }}>
+                {{ $pm['name'] }}
+              </option>
+            @empty
+              <option value="Transfer Mandiri">Transfer Bank Mandiri</option>
+              <option value="Transfer BCA">Transfer Bank BCA</option>
+              <option value="Transfer QRIS">Transfer QRIS (Instant All Payment / E-Wallet)</option>
+              <option value="Tunai (Cash)">Tunai (Cash ke Mas Robi)</option>
+            @endforelse
           </select>
         </div>
 
@@ -740,18 +747,17 @@
     <form action="{{ route('tenant.complaint.submit') }}" method="POST" id="formComplaint">
       @csrf
       <div class="modal-body">
-        <div class="form-group">
-          <label for="complaintPriority" class="form-label">Tingkat Urgensi Masalah *</label>
-          <select id="complaintPriority" name="priority" class="form-control">
-            <option value="Normal">Normal — kendala ringan (1-2 hari kerja)</option>
-            <option value="Mendesak">Mendesak — AC mati, air mati, token habis (Segera ditangani)</option>
-            <option value="Rendah">Rendah — saran atau pertanyaan umum</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="complaintIssue" class="form-label">Rincian Masalah / Fasilitas Rusak *</label>
-          <textarea id="complaintIssue" name="issue_description" class="form-control" rows="4"
-            placeholder="Jelaskan secara jelas kendala di kamar Anda (contoh: AC tidak dingin sejak kemarin malam, suara blower berisik)..." required></textarea>
+        <input type="hidden" name="priority" id="complaintPriority" value="Normal">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="complaintIssue" class="form-label" style="font-weight: 700; margin-bottom: 8px; font-size: 0.92rem;">
+            Tuliskan Keluhan / Kendala Fasilitas Kamar Anda *
+          </label>
+          <textarea id="complaintIssue" name="issue_description" class="form-control" rows="6"
+            placeholder="Tuliskan kendala Anda secara lengkap di sini (contoh: AC tidak dingin sejak kemarin malam, lampu kamar mandi padam, atau kran air bocor)..."
+            required style="resize: vertical; font-size: 0.92rem; border-radius: 12px;"></textarea>
+          <div style="font-size: 0.76rem; color: #64748b; margin-top: 6px;">
+            💡 Laporan Anda akan langsung diterima pengelola kos dan segera ditindaklanjuti.
+          </div>
         </div>
       </div>
       <div class="modal-ftr">
@@ -2151,66 +2157,72 @@ function openRoomCustomModal(room) {
   document.getElementById('modalRoomDetailCustom')?.classList.add('open');
 }
 
-// ─── Dynamic Payment Method Details (Mandiri, BCA, BNI, BRI, QRIS, Cash) ─
-var paymentMethodsData = {
-  'Transfer Mandiri': {
-    badge: 'Rekening Resmi Bank Mandiri',
-    bank: 'Bank Mandiri',
-    number: '1370019283100',
-    holder: 'Robi Suryanto',
-    isCash: false,
-    isQris: false,
-    instruction: ''
-  },
-  'Transfer BCA': {
-    badge: 'Rekening Resmi Bank BCA',
-    bank: 'Bank Central Asia (BCA)',
-    number: '8830192831',
-    holder: 'Robi Suryanto',
-    isCash: false,
-    isQris: false,
-    instruction: ''
-  },
-  'Transfer BNI': {
-    badge: 'Rekening Resmi Bank BNI',
-    bank: 'Bank Negara Indonesia (BNI)',
-    number: '0928318830',
-    holder: 'Robi Suryanto',
-    isCash: false,
-    isQris: false,
-    instruction: ''
-  },
-  'Transfer BRI': {
-    badge: 'Rekening Resmi Bank BRI',
-    bank: 'Bank Rakyat Indonesia (BRI)',
-    number: '012301092831502',
-    holder: 'Robi Suryanto',
-    isCash: false,
-    isQris: false,
-    instruction: ''
-  },
-  'Transfer QRIS': {
-    badge: 'QRIS Instant All Payment',
-    bank: 'QRIS Resmi Kos Mas Robi',
-    number: 'NMID: ID102026192831',
-    holder: 'Kos Mas Robi / Robi Suryanto',
-    isCash: false,
-    isQris: true,
-    instruction: '⚡ <strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking (BCA, Mandiri Livin, BRImo, BNI Mobile) atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia di meja resepsionis atau gunakan NMID di atas.'
-  },
-  'Tunai (Cash)': {
-    badge: 'Pembayaran Tunai (Cash)',
-    bank: 'Tunai Langsung ke Mas Robi',
-    number: 'Bayar Cash / Uang Tunai',
-    holder: 'Mas Robi (Kamar Pengelola Lt. 1)',
-    isCash: true,
-    isQris: false,
-    instruction: '💵 <strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1. Kuitansi resmi fisik dan digital akan langsung diserahkan.'
+// ─── Dynamic Payment Method Details (Dikelola Langsung Oleh Admin) ─
+@php
+  $activePms = $setting->active_payment_methods ?? [];
+  $pmMapped = [];
+  foreach ($activePms as $m) {
+    $pmMapped[$m['name']] = [
+      'badge' => $m['name'],
+      'bank' => $m['bank_name'] ?? $m['name'],
+      'number' => $m['account_number'] ?? '',
+      'holder' => $m['account_holder'] ?? ($setting->owner_name ?? 'Robi Suryanto'),
+      'isCash' => ($m['type'] ?? '') === 'cash',
+      'isQris' => ($m['type'] ?? '') === 'qris',
+      'instruction' => $m['instructions'] ?? '',
+    ];
   }
-};
+@endphp
+
+var paymentMethodsData = @json(!empty($pmMapped) ? $pmMapped : [
+  'Transfer Mandiri' => [
+    'badge' => 'Rekening Resmi Bank Mandiri',
+    'bank' => 'Bank Mandiri',
+    'number' => '1370019283100',
+    'holder' => 'Robi Suryanto',
+    'isCash' => false,
+    'isQris' => false,
+    'instruction' => ''
+  ],
+  'Transfer BCA' => [
+    'badge' => 'Rekening Resmi Bank BCA',
+    'bank' => 'Bank Central Asia (BCA)',
+    'number' => '8830192831',
+    'holder' => 'Robi Suryanto',
+    'isCash' => false,
+    'isQris' => false,
+    'instruction' => ''
+  ],
+  'Transfer QRIS' => [
+    'badge' => 'QRIS Instant All Payment',
+    'bank' => 'QRIS Resmi Kos Mas Robi',
+    'number' => 'NMID: ID102026192831',
+    'holder' => 'Kos Mas Robi / Robi Suryanto',
+    'isCash' => false,
+    'isQris' => true,
+    'instruction' => '⚡ <strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia atau gunakan NMID di atas.'
+  ],
+  'Tunai (Cash)' => [
+    'badge' => 'Pembayaran Tunai (Cash)',
+    'bank' => 'Tunai Langsung ke Mas Robi',
+    'number' => 'Bayar Cash / Uang Tunai',
+    'holder' => 'Mas Robi (Kamar Pengelola Lt. 1)',
+    'isCash' => true,
+    'isQris' => false,
+    'instruction' => '💵 <strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.'
+  ]
+]);
 
 function handlePaymentMethodChange(selectedMethod) {
-  var data = paymentMethodsData[selectedMethod] || paymentMethodsData['Transfer Mandiri'];
+  var data = paymentMethodsData[selectedMethod] || Object.values(paymentMethodsData)[0] || {
+    badge: 'Rekening Resmi',
+    bank: 'Bank Transfer',
+    number: '-',
+    holder: 'Pengelola',
+    isCash: false,
+    isQris: false,
+    instruction: ''
+  };
   var badgeEl = document.getElementById('payDestBadge');
   var bankNameEl = document.getElementById('payDestBankName');
   var numberTextEl = document.getElementById('bankNumberText');

@@ -98,7 +98,7 @@
     <div class="lr-container lr-hero-grid">
       <div class="lr-hero-left">
         <h1 class="lr-hero-title">
-          {!! nl2br(e($landing['hero_title'] ?? "Find Your\nDream Home")) !!}
+          {!! nl2br(e($landing['hero_title'] ?? "Kos Impian\nOrang Jember")) !!}
         </h1>
 
         <p class="lr-hero-desc">

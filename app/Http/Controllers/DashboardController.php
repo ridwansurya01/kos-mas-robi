@@ -201,6 +201,33 @@ class DashboardController extends Controller
     }
 
     /**
+     * Upload room photo for admin.
+     */
+    public function uploadRoomPhoto(Request $request): JsonResponse
+    {
+        $request->validate([
+            'photo' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $file = $request->file('photo');
+            $filename = 'room_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $destPath = public_path('uploads/rooms');
+            if (!file_exists($destPath)) {
+                mkdir($destPath, 0755, true);
+            }
+            $file->move($destPath, $filename);
+            return response()->json([
+                'success' => true,
+                'path' => 'uploads/rooms/' . $filename,
+                'full_url' => asset('uploads/rooms/' . $filename),
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Gagal mengunggah foto'], 400);
+    }
+
+    /**
      * Store or update a room.
      */
     public function saveRoom(Request $request): JsonResponse
@@ -584,7 +611,16 @@ class DashboardController extends Controller
             'bank_name' => 'nullable|string',
             'bank_account' => 'nullable|string',
             'bank_holder' => 'nullable|string',
+            'payment_methods' => 'nullable',
         ]);
+
+        if ($request->has('payment_methods')) {
+            $pm = $request->input('payment_methods');
+            if (is_string($pm)) {
+                $pm = json_decode($pm, true);
+            }
+            $validated['payment_methods'] = $pm;
+        }
 
         if ($request->has('location_highlights')) {
             $lh = $request->input('location_highlights');

@@ -261,8 +261,9 @@ body {
 }
 
 .lr-hero-left {
-  max-width: 560px;
+  max-width: 640px;
   z-index: 10;
+  padding-left: clamp(32px, 6.5vw, 88px);
 }
 
 .lr-hero-title {
