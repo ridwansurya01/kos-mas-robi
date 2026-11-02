@@ -1086,18 +1086,29 @@
                 <textarea id="setKosAddress" class="form-control" rows="2" placeholder="Contoh: Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta">{{ $setting->kos_address }}</textarea>
               </div>
 
+              {{-- PANDUAN CARA MENDAPATKAN KOORDINAT --}}
+              <div style="background: #f0fdf4; border: 1.5px solid #bbf7d0; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px; font-size: 0.82rem; color: #15803d; line-height: 1.6;">
+                <strong>📌 Cara mudah mendapatkan titik lokasi yang tepat:</strong><br>
+                1. Buka <a href="https://maps.google.com" target="_blank" style="color:#15803d; font-weight:700;">maps.google.com</a> → cari lokasi kost Anda<br>
+                2. Klik kanan tepat di titik lokasi → pilih <strong>"Koordinat di sini"</strong> → koordinat langsung tersalin (contoh: <code>-7.7825, 110.3671</code>)<br>
+                3. Tempel koordinat tersebut ke field <strong>Koordinat GPS</strong> di bawah<br>
+                4. Untuk Link Navigasi: klik titik → klik ikon bagikan → salin link pendek <code>maps.app.goo.gl/...</code>
+              </div>
+
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px;">
                 <div class="form-group">
-                  <label for="setGmapsUrl" style="font-weight: 700;">Link Buka Google Maps (Tombol Navigasi)</label>
+                  <label for="setGmapsUrl" style="font-weight: 700;">🔗 Link Navigasi Google Maps (Tombol "Buka di Maps")</label>
                   <input type="text" id="setGmapsUrl" class="form-control" placeholder="https://maps.app.goo.gl/... atau https://maps.google.com/?q=..." value="{{ $setting->gmaps_url }}">
                   <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">Link ini dibuka saat calon penghuni klik tombol "Buka di Google Maps".</div>
                 </div>
 
                 <div class="form-group">
-                  <label for="setGmapsEmbed" style="font-weight: 700;">Sematkan Peta (Iframe, Link Maps, atau Koordinat)</label>
-                  <input type="text" id="setGmapsEmbed" class="form-control" placeholder="Contoh: https://maps.app.goo.gl/... atau kode <iframe>..." value="{{ $setting->gmaps_embed }}">
-                  <div style="font-size: 0.74rem; color: #10b981; margin-top: 4px; font-weight: 700;">
-                    ✅ <em>Anti-Gagal:</em> Otomatis dikonversi aman tanpa pesan tanda larang / forbidden.
+                  <label for="setGmapsEmbed" style="font-weight: 700;">📍 Koordinat GPS Titik Lokasi (Paling Akurat & Anti-Rusak)</label>
+                  <input type="text" id="setGmapsEmbed" class="form-control"
+                         placeholder="Contoh: -7.7825, 110.3671  atau  @-7.7825,110.3671  atau kode &lt;iframe&gt; embed"
+                         value="{{ $setting->gmaps_embed }}">
+                  <div style="font-size: 0.74rem; color: #0e7490; margin-top: 4px; font-weight: 700;">
+                    ✅ Masukkan koordinat lat,lng — peta dijamin tepat sasaran, tidak meleset ke laut.
                   </div>
                 </div>
               </div>

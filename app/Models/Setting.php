@@ -34,11 +34,13 @@ class Setting extends Model
 
     /**
      * Resolves and normalizes any user input for Google Maps into a guaranteed working Embed URL.
-     * Prevents X-Frame-Options SAMEORIGIN / Forbidden errors.
+     * Priority: 1) iframe src  2) /maps/embed URL  3) GPS coords  4) q= URL  5) plain text  6) address fallback
+     * Shortlinks (goo.gl) fallback to address — cURL not used (unreliable in sandbox/no-network env).
      */
     public function getFinalEmbedUrlAttribute(): string
     {
         $raw = trim($this->gmaps_embed ?? '');
+        $addressFallback = trim($this->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta');
 
         // 1. If wrapped in <iframe>, extract the src attribute
         if (str_contains($raw, '<iframe')) {
@@ -48,35 +50,46 @@ class Setting extends Model
         }
 
         // 2. If it's already an embed URL
-        if (str_contains($raw, 'google.com/maps/embed') || (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
+        if (str_contains($raw, 'google.com/maps/embed') ||
+            (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
             return $raw;
         }
 
-        // 3. If it contains GPS coordinates like @-8.1639986,113.7311205 or -8.1639986, 113.7311205
-        if (preg_match('/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $raw, $coords)) {
-            return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        // 3. GPS coordinates — most reliable. Supports: -7.7825, 110.3671 | @-7.7825,110.3671
+        if (preg_match('/@?(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/', $raw, $coords)) {
+            $lat = (float) $coords[1];
+            $lng = (float) $coords[2];
+            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+            }
         }
 
-        // 4. If it's a maps.google.com/?q=...
+        // 4. maps.google.com/?q=... with q param
         if (str_contains($raw, 'maps.google.') && str_contains($raw, 'q=')) {
             $parsedQuery = parse_url($raw, PHP_URL_QUERY);
             if ($parsedQuery) {
                 parse_str($parsedQuery, $params);
                 if (!empty($params['q'])) {
+                    if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
+                        return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+                    }
                     return 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
                 }
             }
         }
 
-        // 5. If it's a shortlink maps.app.goo.gl or goo.gl/maps, or plain text:
-        // If it's non-empty and NOT a share link, use it as query; otherwise fallback to address
-        if (!empty($raw) && !str_contains($raw, 'maps.app.goo.gl') && !str_contains($raw, 'goo.gl/maps') && !str_starts_with($raw, 'http')) {
+        // 5. Shortlinks — can't be embedded in iframe directly, fallback to address
+        if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
+            return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        }
+
+        // 6. Plain text (place name entered by user)
+        if (!empty($raw) && !str_starts_with($raw, 'http')) {
             return 'https://maps.google.com/maps?q=' . urlencode($raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
         }
 
-        // 6. Reliable fallback: use kos_address
-        $address = trim($this->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta');
-        return 'https://maps.google.com/maps?q=' . urlencode($address) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        // 7. Fallback: use kos_address — always accurate
+        return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
     }
 
     /**

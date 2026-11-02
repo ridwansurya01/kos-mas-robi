@@ -445,57 +445,72 @@ class DashboardController extends Controller
 
     /**
      * Resolves user input into a guaranteed working embed URL for Google Maps.
+     * Priority: 1) iframe src  2) /maps/embed URL  3) GPS coords  4) q= URL  5) plain text  6) address fallback
+     * Shortlinks (goo.gl) are stored as-is WITHOUT attempting cURL resolve (no network in production sandbox).
      */
     private function resolveGmapsEmbed(?string $raw, ?string $address): string
     {
         $raw = trim($raw ?? '');
+        $addressFallback = trim($address ?: 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta');
+
         if (empty($raw)) {
-            return 'https://maps.google.com/maps?q=' . urlencode($address ?: 'Kos Mas Robi') . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+            return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
         }
 
-        // If iframe code, extract src
+        // 1. If iframe code, extract src attribute
         if (str_contains($raw, '<iframe')) {
             if (preg_match('/src=["\']([^"\']+)["\']/', $raw, $m)) {
                 $raw = trim($m[1]);
             }
         }
 
-        // Already valid embed URL
-        if (str_contains($raw, 'google.com/maps/embed') || (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
+        // 2. Already a valid embed URL — use as-is
+        if (str_contains($raw, 'google.com/maps/embed') ||
+            (str_contains($raw, 'maps.google.com') && str_contains($raw, 'output=embed'))) {
             return $raw;
         }
 
-        // Check if GPS coordinates present like @-8.1639986,113.7311205
-        if (preg_match('/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $raw, $coords)) {
-            return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-        }
-
-        // If shortlink maps.app.goo.gl or goo.gl/maps, try resolving via cURL
-        if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
-            try {
-                $ch = curl_init($raw);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_NOBODY, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-                curl_exec($ch);
-                $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
-                curl_close($ch);
-
-                if ($finalUrl && preg_match('/@?(-?\d+\.\d+),\s*(-?\d+\.\d+)/', $finalUrl, $coords)) {
-                    return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-                }
-                if ($finalUrl && preg_match('/place\/([^\/@]+)/', $finalUrl, $pm)) {
-                    $place = str_replace('+', ' ', urldecode($pm[1]));
-                    return 'https://maps.google.com/maps?q=' . urlencode($place) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
-                }
-            } catch (\Throwable $e) {
-                // Ignore network error and fallback gracefully
+        // 3. GPS coordinates — most reliable, support multiple formats:
+        //    -7.7825, 110.3671   |  @-7.7825,110.3671   |  lat:-7.7825,lng:110.3671
+        if (preg_match('/@?(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)/', $raw, $coords)) {
+            $lat = (float) $coords[1];
+            $lng = (float) $coords[2];
+            // Sanity check: valid lat/lng range
+            if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
+                return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
             }
         }
 
-        // Fallback to query embed using address or raw
-        return 'https://maps.google.com/maps?q=' . urlencode($address ?: $raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        // 4. maps.google.com/?q=... or similar with q param
+        if (str_contains($raw, 'maps.google.') && str_contains($raw, 'q=')) {
+            $parsedQuery = parse_url($raw, PHP_URL_QUERY);
+            if ($parsedQuery) {
+                parse_str($parsedQuery, $params);
+                if (!empty($params['q'])) {
+                    // If q value looks like coordinates, use them
+                    if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
+                        return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+                    }
+                    return 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+                }
+            }
+        }
+
+        // 5. Shortlinks (maps.app.goo.gl / goo.gl/maps) — store raw, let Google resolve on client side
+        //    We do NOT attempt cURL here (unreliable in sandbox/production without network).
+        //    Instead, fallback to address which is always reliable.
+        if (str_contains($raw, 'maps.app.goo.gl') || str_contains($raw, 'goo.gl/maps')) {
+            // Shortlink can't be embedded directly in iframe — use address fallback
+            return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        }
+
+        // 6. Plain text (place name / address entered by user)
+        if (!str_starts_with($raw, 'http')) {
+            return 'https://maps.google.com/maps?q=' . urlencode($raw) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
+        }
+
+        // 7. Last resort: use kos_address
+        return 'https://maps.google.com/maps?q=' . urlencode($addressFallback) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
     }
 
     /**
