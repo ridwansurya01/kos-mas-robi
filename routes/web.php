@@ -54,6 +54,13 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('admin.dashboard');
     });
 
+    Route::get('/admin/dashboard', function () {
+        if (!Auth::user()->isOwner()) {
+            return redirect()->route('tenant.portal');
+        }
+        return redirect()->route('admin.dashboard');
+    });
+
     // API routes — owner only
     Route::prefix('api')->group(function () {
         Route::get('/data', function (\Illuminate\Http\Request $req) {
