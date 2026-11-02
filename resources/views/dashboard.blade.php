@@ -168,9 +168,6 @@
     <!-- HEADER TOP BAR -->
     <header class="app-header modern-header">
       <div class="header-left">
-        <button type="button" class="mobile-menu-toggle" id="btnToggleMobileSidebar" aria-label="Buka Menu Navigasi">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        </button>
         <div class="page-title-box modern-title-box">
           <div class="header-breadcrumb">
             <span class="bc-home">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</span>
@@ -183,27 +180,14 @@
       </div>
 
       <div class="header-right modern-header-right">
-        <div class="header-search modern-search-box">
-          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="globalSearchInput" placeholder="Cari kamar, anak kos, tagihan..." aria-label="Cari data kos">
-          <kbd class="search-kbd">Ctrl K</kbd>
-        </div>
-
-
-
-        <!-- Logout Button (Memicu Pop-up Konfirmasi Modern) -->
+        <!-- Hanya Fitur Keluar / Logout di Bagian Header Admin -->
         <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline; margin:0;">
           @csrf
-          <button type="button" class="header-action-btn modern-logout-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          <button type="button" class="header-action-btn modern-logout-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout" style="width: auto; height: 40px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.84rem; background: #fef2f2; border: 1.5px solid #fecaca; color: #dc2626;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Keluar</span>
           </button>
         </form>
-
-        <!-- Quick Add Button -->
-        <button type="button" class="btn-primary-action modern-quick-add-btn" id="btnQuickAdd">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>Penghuni Baru</span>
-        </button>
       </div>
     </header>
 
@@ -1670,7 +1654,7 @@
   </main>
 
   <!-- =========================================================================
-       MOBILE BOTTOM NAVIGATION (Automatic Smartphone View)
+       MOBILE BOTTOM NAVIGATION (Khusus Device HP — Seluruh Fitur Admin di Bawah)
        ========================================================================= -->
   <nav class="mobile-bottom-nav" aria-label="Navigasi Bawah Mobile">
     <div class="bottom-nav-item active" data-tab="tab-dashboard" onclick="window.switchTab('tab-dashboard')">
@@ -1685,8 +1669,20 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       <span>Penghuni</span>
     </div>
+    <div class="bottom-nav-item" data-tab="tab-bills" onclick="window.switchTab('tab-bills')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Tagihan</span>
+    </div>
+    <div class="bottom-nav-item" data-tab="tab-transfers" onclick="window.switchTab('tab-transfers')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+      <span>Pindah</span>
+    </div>
+    <div class="bottom-nav-item" data-tab="tab-maintenance" onclick="window.switchTab('tab-maintenance')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      <span>Servis</span>
+    </div>
     <div class="bottom-nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       <span>Keuangan</span>
     </div>
     <div class="bottom-nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')">

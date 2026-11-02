@@ -190,7 +190,11 @@
     });
 
     bottomNavItems.forEach(item => {
-      item.classList.toggle('active', item.getAttribute('data-tab') === tabId);
+      const isAct = item.getAttribute('data-tab') === tabId;
+      item.classList.toggle('active', isAct);
+      if (isAct && typeof item.scrollIntoView === 'function') {
+        try { item.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) {}
+      }
     });
 
     if (navTitles[tabId]) {
