@@ -477,7 +477,7 @@ class DashboardController extends Controller
             $lng = (float) $coords[2];
             // Sanity check: valid lat/lng range
             if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+                return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng . '&q=' . $lat . ',' . $lng . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
             }
         }
 
@@ -489,7 +489,7 @@ class DashboardController extends Controller
                 if (!empty($params['q'])) {
                     // If q value looks like coordinates, use them
                     if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
-                        return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+                        return 'https://maps.google.com/maps?ll=' . $coords[1] . ',' . $coords[2] . '&q=' . $coords[1] . ',' . $coords[2] . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
                     }
                     return 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
                 }

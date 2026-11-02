@@ -60,7 +60,10 @@ class Setting extends Model
             $lat = (float) $coords[1];
             $lng = (float) $coords[2];
             if ($lat >= -90 && $lat <= 90 && $lng >= -180 && $lng <= 180) {
-                return 'https://maps.google.com/maps?q=' . $lat . ',' . $lng . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+                // Use ll= (center) + q= (pin marker) + iwloc=B to prevent Google snapping to nearby place
+                return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
+                    . '&q=' . $lat . ',' . $lng
+                    . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
             }
         }
 
@@ -71,7 +74,11 @@ class Setting extends Model
                 parse_str($parsedQuery, $params);
                 if (!empty($params['q'])) {
                     if (preg_match('/^(-?\d{1,3}\.\d+),\s*(-?\d{1,3}\.\d+)$/', trim($params['q']), $coords)) {
-                        return 'https://maps.google.com/maps?q=' . $coords[1] . ',' . $coords[2] . '&t=&z=17&ie=UTF8&iwloc=&output=embed';
+                        $lat = (float) $coords[1];
+                        $lng = (float) $coords[2];
+                        return 'https://maps.google.com/maps?ll=' . $lat . ',' . $lng
+                            . '&q=' . $lat . ',' . $lng
+                            . '&t=m&z=18&ie=UTF8&iwloc=B&output=embed';
                     }
                     return 'https://maps.google.com/maps?q=' . urlencode($params['q']) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
                 }
