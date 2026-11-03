@@ -2846,7 +2846,9 @@ textarea.form-control {
 }
 
 .tp-portal-tab-content.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 2.5vw, 26px);
   animation: tpModernTabIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -4204,4 +4206,484 @@ textarea.form-control {
 
 .tp-room-card-thumb-wrap {
   border-radius: 18px 18px 0 0 !important;
+}
+
+/* ==========================================================================
+   KAMARKU & DASHBOARD KOS ULTRA-MODERN LAYOUT REFINEMENTS (2026 REDESIGN)
+   ========================================================================== */
+
+/* 1. Section Spacing & Flex Container Fix */
+#sectionKamarku.active,
+#sectionDashboardCatalog.active {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: clamp(18px, 2.2vw, 24px) !important;
+}
+
+#sectionDashboardCatalog .tp-hero-landing-banner,
+#sectionDashboardCatalog .tp-branch-select-section,
+#sectionDashboardCatalog .tp-catalog-filters-bar,
+#sectionDashboardCatalog .tp-catalog-grid {
+  margin-bottom: 0 !important;
+}
+
+/* 2. Modern 2-Branch Selector Alignment & Styling */
+.tp-branch-subtitle-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0d9488;
+  margin-bottom: 4px;
+}
+
+.tp-branch-title-text {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.tp-branch-overall-pill {
+  background: #f0fdfa;
+  border: 1px solid #ccfbf1;
+  color: #0a5661;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.tp-branch-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tp-branch-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tp-branch-tag-pill.branch-1 {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.tp-branch-tag-pill.branch-2 {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
+.tp-branch-selected-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.tp-branch-card.active .tp-branch-selected-badge {
+  background: #0a5661;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(10, 86, 97, 0.25);
+}
+
+.tp-branch-stat.available {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.tp-branch-stat.occupied {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.tp-branch-stat.total {
+  background: #f0fdfa;
+  color: #0a5661;
+  border: 1px solid #ccfbf1;
+}
+
+.tp-stat-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  background: currentColor;
+}
+
+/* 3. Kamarku Welcome Banner Modern Chips & Actions */
+.tp-welcome-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 22px !important;
+  padding: 22px 26px !important;
+  box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.05) !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.tp-welcome-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, #0d9488 0%, #0a5661 100%);
+}
+
+.tp-chip.branch-chip-b1 {
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #047857 !important;
+}
+
+.tp-chip.branch-chip-b2 {
+  background: #f0f9ff !important;
+  border: 1px solid #bae6fd !important;
+  color: #0369a1 !important;
+}
+
+.tp-welcome-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+/* 4. Kamarku Gallery Bottom Caption & Controls */
+.tp-showcase-container {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 24px !important;
+  padding: 22px !important;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.06) !important;
+  gap: 24px !important;
+  align-items: stretch !important;
+}
+
+.tp-gallery-card {
+  min-height: 360px !important;
+  height: 100% !important;
+  border-radius: 18px !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.14) !important;
+}
+
+.tp-gallery-bottom-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9;
+  padding: 40px 18px 16px;
+  background: linear-gradient(to top, rgba(3, 22, 26, 0.88) 0%, rgba(3, 22, 26, 0.45) 55%, transparent 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.tp-gallery-bottom-gradient .tp-gallery-dots {
+  position: static !important;
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(8px);
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tp-gallery-room-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tp-gallery-caption-tag {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5eead4;
+}
+
+.tp-gallery-caption-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+/* 5. Kamarku Details Card & Facility SVG Pills */
+.tp-details-card {
+  padding: 4px 4px 2px !important;
+  justify-content: space-between !important;
+}
+
+.tp-facility-pills {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  margin-bottom: 18px !important;
+}
+
+.tp-facility-pill {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  padding: 9px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  transition: all 0.2s ease !important;
+}
+
+.tp-facility-pill:hover {
+  background: #f0fdfa !important;
+  border-color: #99f6e4 !important;
+  color: #0a5661 !important;
+}
+
+.tp-fac-svg-ico {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #e6fffa;
+  color: #0d9488;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 6. Kamarku Overview Bento Cards & Colored Metric Icon Circles */
+.tp-overview-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+
+.tp-bento-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 22px !important;
+  padding: 22px 24px !important;
+  box-shadow: 0 6px 20px -6px rgba(15, 23, 42, 0.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+.tp-bento-head {
+  padding-bottom: 14px !important;
+  margin-bottom: 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.tp-metric-box {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 16px 12px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 4px !important;
+  transition: all 0.22s ease !important;
+}
+
+.tp-metric-box:hover {
+  background: #ffffff !important;
+  border-color: #99f6e4 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 18px rgba(10, 86, 97, 0.07) !important;
+}
+
+.tp-metric-ico-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.tp-metric-ico-circle.teal {
+  background: #ccfbf1;
+  color: #0d9488;
+}
+
+.tp-metric-ico-circle.blue {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.tp-metric-ico-circle.emerald {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.tp-info-grid-2x2 {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+  flex: 1 !important;
+}
+
+.tp-info-tile {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  transition: all 0.2s ease !important;
+}
+
+.tp-info-tile:hover {
+  background: #ffffff !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* 7. Kamarku Symmetrical 4-Column Quick Access Grid */
+.tp-quick-section {
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 22px;
+  padding: 22px 24px;
+  box-shadow: 0 6px 20px -6px rgba(15, 23, 42, 0.04);
+}
+
+.tp-quick-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 16px !important;
+}
+
+.tp-quick-tile {
+  padding: 18px 20px !important;
+  min-height: 158px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+}
+
+.tp-quick-tile:hover {
+  background: #ffffff !important;
+  border-color: #0a5661 !important;
+}
+
+.tp-quick-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px dashed #e2e8f0;
+  width: 100%;
+}
+
+.tp-quick-cta-lbl {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #0a5661;
+  letter-spacing: 0.01em;
+}
+
+/* Responsive Breakpoints for Kamarku Redesign */
+@media (max-width: 1024px) {
+  .tp-overview-row {
+    grid-template-columns: 1fr !important;
+  }
+  .tp-quick-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .tp-welcome-banner {
+    padding: 18px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .tp-welcome-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .tp-welcome-actions .tp-btn-outline {
+    justify-content: center;
+    width: 100%;
+  }
+  .tp-showcase-container {
+    padding: 16px !important;
+    gap: 18px !important;
+  }
+  .tp-gallery-card {
+    min-height: 240px !important;
+    height: 240px !important;
+  }
+  .tp-facility-pills {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .tp-info-grid-2x2 {
+    grid-template-columns: 1fr !important;
+  }
+  .tp-quick-section {
+    padding: 16px !important;
+  }
+  .tp-quick-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .tp-quick-tile {
+    padding: 14px !important;
+    min-height: 136px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tp-facility-pills {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .tp-quick-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .tp-quick-tile {
+    min-height: auto !important;
+  }
 }

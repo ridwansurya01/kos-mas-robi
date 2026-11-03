@@ -306,285 +306,369 @@
     </div>
 
     {{-- =========================================================================
-         TAB 2: KAMARKU (MY ROOM — CURRENTLY RENTED ROOM VIEW)
+         TAB 2: KAMARKU (MY ROOM — MODERN BENTO HOSPITALITY LAYOUT)
          ========================================================================= --}}
     <div id="sectionKamarku" class="tp-portal-tab-content">
 
-    {{-- ------------------------------------------------ WELCOME BANNER ------------------------------------------------ --}}
-    <div class="tp-welcome-banner">
-      <div class="tp-welcome-left">
-        <div class="tp-welcome-avatar-wrap" id="btnOpenProfileBanner" style="cursor: pointer;" title="Klik untuk edit profil">
-          @if($hasRealAvatar)
-            <img src="{{ asset($user->avatar) }}"
-                 alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg">
-            <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial" style="display:none;">{{ $userInitial }}</div>
-          @else
-            <img src=""
-                 alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg" style="display:none;">
-            <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial">{{ $userInitial }}</div>
-          @endif
-          <span class="tp-welcome-edit-badge" title="Ubah profil"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
-        </div>
-        <div>
-          <div class="tp-welcome-greeting">{{ $greeting }} Selamat datang kembali </div>
-          <div class="tp-welcome-name">{{ $user->name }}</div>
-          <div class="tp-welcome-meta" style="flex-wrap: wrap; gap: 8px; margin-top: 6px;">
-            @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
-              <span class="tp-chip" style="background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; font-weight: 800;">
-                {{ $b2NamePortal }}
-              </span>
+      {{-- 1. MODERN RESIDENT WELCOME BANNER --}}
+      <div class="tp-welcome-banner">
+        <div class="tp-welcome-left">
+          <div class="tp-welcome-avatar-wrap" id="btnOpenProfileBanner" style="cursor: pointer;" title="Klik untuk edit profil">
+            @if($hasRealAvatar)
+              <img src="{{ asset($user->avatar) }}"
+                   alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg">
+              <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial" style="display:none;">{{ $userInitial }}</div>
             @else
-              <span class="tp-chip" style="background: #f0fdfa; color: #0a5661; border: 1.5px solid #99f6e4; font-weight: 800;">
-                {{ $b1NamePortal }}
-              </span>
+              <img src=""
+                   alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg" style="display:none;">
+              <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial">{{ $userInitial }}</div>
             @endif
-            <span class="tp-chip">Kamar #{{ $room->number ?? '102' }}</span>
-            <span class="tp-chip">Lantai {{ $room->floor ?? '1' }}</span>
-            <span class="tp-chip">{{ $room->type ?? 'Deluxe AC' }}</span>
-            <span class="tp-chip green">● Aktif Menghuni</span>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    {{-- ----------------------------------------------------- SHOWCASE SECTION (Desktop: Kiri Foto, Kanan Detail | Mobile: Atas Foto, Bawah Detail) ----------------------------------------------------- --}}
-    @php
-      $roomImages = $room->images_list ?? [
-        'assets/images/rooms/room_1.jpg',
-        'assets/images/rooms/room_2.jpg',
-        'assets/images/rooms/room_3.jpg',
-      ];
-    @endphp
-
-    <div class="tp-showcase-container" id="tpHeroCard">
-
-      {{-- KIRI di Desktop / ATAS di Mobile: GALLERY SLIDER --}}
-      <div class="tp-showcase-gallery">
-        {{-- Slider Track --}}
-        <div class="tp-gallery-slider" id="heroBgSlider">
-          @foreach($roomImages as $idx => $img)
-            <div class="tp-hero-bg-slide {{ $idx === 0 ? 'active' : '' }}"
-                 style="background-image: url('{{ asset($img) }}');"
-                 data-slide-index="{{ $idx }}"></div>
-          @endforeach
-        </div>
-
-        {{-- Top Badge: Status Foto --}}
-        <div class="tp-gallery-badge">
-          <span class="tp-pulse-dot"></span>
-          <span id="heroSlideBadgeText">Foto 1/3: Kamar #{{ $room->number ?? '102' }}</span>
-        </div>
-
-        {{-- Bottom Controls: Prev, Dots, Next --}}
-        <div class="tp-gallery-controls">
-          <button type="button" class="tp-gallery-nav-btn prev" id="btnSlidePrev" title="Foto Sebelumnya">&#8249;</button>
-          <div class="tp-gallery-dots" id="heroOverlayDots">
-            @foreach($roomImages as $idx => $img)
-              <button type="button" class="tp-overlay-dot {{ $idx === 0 ? 'active' : '' }}" data-dot-index="{{ $idx }}" title="Slide {{ $idx + 1 }}"></button>
-            @endforeach
-          </div>
-          <button type="button" class="tp-gallery-nav-btn next" id="btnSlideNext" title="Foto Selanjutnya">&#8250;</button>
-        </div>
-      </div>
-
-      {{-- KANAN di Desktop / BAWAH di Mobile: PENJELASAN & DETAIL TAGIHAN (Clean White Card Inspired by Reference) --}}
-      <div class="tp-showcase-details">
-        
-        <div class="tp-details-top">
-          <div class="tp-details-header">
-            <div>
-              <span class="tp-badge-category">Kamar Kost Anda</span>
-              <h2 class="tp-details-title">Kamar #{{ $room->number ?? '102' }} • {{ $room->type ?? 'Deluxe AC' }}</h2>
-            </div>
-            <span class="tp-status-pill {{ ($room->status ?? '') === 'due' ? 'due' : 'paid' }}">
-              @if(($room->status ?? '') === 'due')
-                Menunggu Bayar
-              @else
-                ● Sewa Aktif
-              @endif
+            <span class="tp-welcome-edit-badge" title="Ubah profil">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
             </span>
           </div>
+          <div class="tp-welcome-info">
+            <div class="tp-welcome-greeting">{{ $greeting }} Selamat datang di ruang hunian Anda</div>
+            <div class="tp-welcome-name">{{ $user->name }}</div>
+            <div class="tp-welcome-meta">
+              @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
+                <span class="tp-chip branch-chip-b2">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>{{ $b2NamePortal }}</span>
+                </span>
+              @else
+                <span class="tp-chip branch-chip-b1">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>{{ $b1NamePortal }}</span>
+                </span>
+              @endif
+              <span class="tp-chip">Kamar #{{ $room->number ?? '102' }}</span>
+              <span class="tp-chip">Lantai {{ $room->floor ?? '1' }}</span>
+              <span class="tp-chip">{{ $room->type ?? 'Deluxe AC' }}</span>
+              <span class="tp-chip green">● Aktif Menghuni</span>
+            </div>
+          </div>
+        </div>
 
-          {{-- Pricing & Due Date Box --}}
-          <div class="tp-price-banner">
-            <div class="tp-price-main">
-              <span class="tp-price-lbl">Tagihan Sewa Berikutnya</span>
-              <div class="tp-price-val">
-                Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}
-                <span class="tp-price-cycle">/bulan</span>
+        <div class="tp-welcome-actions">
+          <button type="button" class="tp-btn-profile-edit" onclick="document.getElementById('modalProfile')?.classList.add('open')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>Profil Saya</span>
+          </button>
+          <button type="button" class="tp-btn-profile-edit" onclick="document.getElementById('modalWifi')?.classList.add('open')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            <span>Info WiFi</span>
+          </button>
+        </div>
+      </div>
+
+      {{-- 2. SHOWCASE SECTION (Desktop: Left Gallery Slider, Right Room & Billing Card) --}}
+      @php
+        $roomImages = $room->images_list ?? [
+          'assets/images/rooms/room_1.jpg',
+          'assets/images/rooms/room_2.jpg',
+          'assets/images/rooms/room_3.jpg',
+        ];
+      @endphp
+
+      <div class="tp-showcase-container" id="tpHeroCard">
+
+        {{-- LEFT: INTERACTIVE GALLERY SLIDER --}}
+        <div class="tp-showcase-gallery">
+          <div class="tp-gallery-slider" id="heroBgSlider">
+            @foreach($roomImages as $idx => $img)
+              <div class="tp-hero-bg-slide {{ $idx === 0 ? 'active' : '' }}"
+                   style="background-image: url('{{ asset($img) }}');"
+                   data-slide-index="{{ $idx }}"></div>
+            @endforeach
+          </div>
+
+          {{-- Top Badge: Counter Foto --}}
+          <div class="tp-gallery-badge">
+            <span class="tp-pulse-dot"></span>
+            <span id="heroSlideBadgeText">Foto 1/{{ count($roomImages) }}: Kamar #{{ $room->number ?? '102' }}</span>
+          </div>
+
+          {{-- Bottom Overlay Info --}}
+          <div class="tp-gallery-bottom-gradient">
+            <div class="tp-gallery-room-caption">
+              <span class="tp-gallery-caption-tag">{{ $branchName }}</span>
+              <h3 class="tp-gallery-caption-title">Unit Kamar #{{ $room->number ?? '102' }} — Lantai {{ $room->floor ?? '1' }}</h3>
+            </div>
+            <div class="tp-gallery-controls">
+              <button type="button" class="tp-gallery-nav-btn prev" id="btnSlidePrev" title="Foto Sebelumnya">&#8249;</button>
+              <div class="tp-gallery-dots" id="heroOverlayDots">
+                @foreach($roomImages as $idx => $img)
+                  <button type="button" class="tp-overlay-dot {{ $idx === 0 ? 'active' : '' }}" data-dot-index="{{ $idx }}" title="Slide {{ $idx + 1 }}"></button>
+                @endforeach
+              </div>
+              <button type="button" class="tp-gallery-nav-btn next" id="btnSlideNext" title="Foto Selanjutnya">&#8250;</button>
+            </div>
+          </div>
+        </div>
+
+        {{-- RIGHT: ROOM DETAILS & BILLING SUMMARY CARD --}}
+        <div class="tp-showcase-details">
+          <div class="tp-details-top">
+            <div class="tp-details-header">
+              <div>
+                <span class="tp-badge-category">Hunian Aktif Anda</span>
+                <h2 class="tp-details-title">Kamar #{{ $room->number ?? '102' }} • {{ $room->type ?? 'Deluxe AC' }}</h2>
+              </div>
+              <span class="tp-status-pill {{ ($room->status ?? '') === 'due' ? 'due' : 'paid' }}">
+                @if(($room->status ?? '') === 'due')
+                  Menunggu Bayar
+                @else
+                  ● Sewa Aktif
+                @endif
+              </span>
+            </div>
+
+            {{-- Location Strip --}}
+            <div class="tp-details-branch-strip">
+              <div class="tp-details-branch-left">
+                <span class="tp-details-branch-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                <div style="min-width: 0;">
+                  <div class="tp-details-branch-title">{{ $branchName }}</div>
+                  <div class="tp-details-branch-addr">{{ $branchAddr }}</div>
+                </div>
+              </div>
+              <a href="{{ $branchMaps }}" target="_blank" class="tp-details-branch-maps">Buka Maps</a>
+            </div>
+
+            {{-- Pricing & Due Date Box --}}
+            <div class="tp-price-banner">
+              <div class="tp-price-main">
+                <span class="tp-price-lbl">Tagihan Sewa Bulanan</span>
+                <div class="tp-price-val">
+                  Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}
+                  <span class="tp-price-cycle">/bulan</span>
+                </div>
+              </div>
+              <div class="tp-due-badge">
+                <span class="tp-due-lbl">Jatuh Tempo Sewa</span>
+                <span class="tp-due-date">{{ $dueDate->translatedFormat('d F Y') }}</span>
               </div>
             </div>
-            <div class="tp-due-badge">
-              <span class="tp-due-lbl">Jatuh Tempo</span>
-              <span class="tp-due-date">{{ $dueDate->translatedFormat('d F Y') }}</span>
+
+            {{-- Description --}}
+            <div class="tp-desc-block">
+              <h4 class="tp-desc-heading">Spesifikasi & Kenyamanan Unit</h4>
+              <p class="tp-desc-body">
+                Unit kamar tipe {{ $room->type ?? 'Deluxe AC' }} di Lantai {{ $room->floor ?? '1' }} ({{ $branchName }}). Dilengkapi pendingin ruangan (AC), kamar mandi dalam pribadi, meja kerja ergonomis, lemari pakaian, serta koneksi internet WiFi cepat.
+              </p>
+            </div>
+
+            {{-- Facilities Quick Icons with Crisp SVGs --}}
+            <div class="tp-fac-quick-list">
+              <div class="tp-fac-pill">
+                <span class="tp-fac-svg-ico">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M2 4v16"/><path d="M2 8h18a2 2 0 0 1 2 2v10"/><path d="M2 17h20"/><path d="M6 8v9"/></svg>
+                </span>
+                <span class="tp-fac-text">Kasur Queen</span>
+              </div>
+              <div class="tp-fac-pill">
+                <span class="tp-fac-svg-ico">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M4 4l2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5L5 15"/><path d="M14 17v.01"/><path d="M10 16v.01"/><path d="M13 13v.01"/><path d="M16 10v.01"/><path d="M11 20v.01"/><path d="M17 14v.01"/><path d="M20 11v.01"/></svg>
+                </span>
+                <span class="tp-fac-text">KM Dalam</span>
+              </div>
+              <div class="tp-fac-pill">
+                <span class="tp-fac-svg-ico">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><rect x="2" y="4" width="20" height="8" rx="2"/><path d="M6 8h.01"/><path d="M10 8h8"/><path d="M6 16c1.5 2 3.5 2 5 0s3.5-2 5 0"/></svg>
+                </span>
+                <span class="tp-fac-text">AC Dingin</span>
+              </div>
+              <div class="tp-fac-pill">
+                <span class="tp-fac-svg-ico">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                </span>
+                <span class="tp-fac-text">WiFi Cepat</span>
+              </div>
             </div>
           </div>
 
-          {{-- Description --}}
-          <div class="tp-desc-block">
-            <h4 class="tp-desc-heading">Deskripsi Hunian</h4>
-            <p class="tp-desc-body">
-              Kamar tipe {{ $room->type ?? 'Deluxe AC' }} berlokasi di Lantai {{ $room->floor ?? '1' }}. Dilengkapi pendingin ruangan (AC), kamar mandi pribadi dalam, meja belajar/kerja, lemari, serta pencahayaan alami yang nyaman dan tenang.
-            </p>
-          </div>
-
-          {{-- Facilities Quick Icons (Matching Reference App) --}}
-          <div class="tp-fac-quick-list">
-            <div class="tp-fac-pill">
-              <span class="tp-fac-text">Kasur Queen</span>
-            </div>
-            <div class="tp-fac-pill">
-              <span class="tp-fac-text">KM Dalam</span>
-            </div>
-            <div class="tp-fac-pill">
-              <span class="tp-fac-text">AC Dingin</span>
-            </div>
-            <div class="tp-fac-pill">
-              <span class="tp-fac-text">WiFi 100M</span>
-            </div>
+          {{-- Action Buttons Row --}}
+          <div class="tp-details-actions">
+            <button type="button" class="tp-btn-secondary-action" onclick="document.getElementById('modalReceipts')?.classList.add('open')">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span>Kuitansi & Riwayat</span>
+            </button>
+            <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20penghuni%20Kamar%20%23{{ $room->number ?? '102' }}%20ingin%20konfirmasi%20sewa"
+               target="_blank" class="tp-btn-primary-action tp-btn-wa-green" style="text-decoration: none;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+              </svg>
+              <span>WhatsApp Admin</span>
+            </a>
           </div>
         </div>
 
-        {{-- Action Button WhatsApp Pengelola --}}
-        <div class="tp-details-actions">
-          <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20penghuni%20Kamar%20%23{{ $room->number ?? '102' }}%20ingin%20konfirmasi%20sewa"
-             target="_blank" class="tp-btn-primary-action tp-btn-wa-green" style="text-decoration: none; width: 100%; justify-content: center;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
-            </svg>
-            <span>Hubungi WhatsApp Admin</span>
-          </a>
-        </div>
+      </div>{{-- /tp-showcase-container --}}
 
-      </div>
+      {{-- 3. OVERVIEW METRICS & ROOM INFO BENTO ROW --}}
+      <div class="tp-overview-row">
 
-    </div>{{-- /tp-showcase-container --}}
-
-    {{-- ----------------------------------------------------- OVERVIEW METRICS & ROOM INFO (Flexible 2 Col on Desktop, 1 Col on Mobile) ----------------------------------------------------- --}}
-    <div class="tp-overview-row">
-
-      {{-- Metrics Card --}}
-      <div class="tp-metrics-card">
-        <div class="tp-card-row">
-          <span class="tp-card-label">Status Fasilitas Kamar</span>
-          <span class="tp-badge blue">Kamar #{{ $room->number ?? '102' }}</span>
-        </div>
-        <div class="tp-metrics-grid">
-          <div class="tp-metric-box">
-            <span class="tp-metric-val">22°C</span>
-            <span class="tp-metric-lbl">AC Dingin</span>
-            <span class="tp-metric-pill">Normal</span>
-          </div>
-          <div class="tp-metric-box">
-            <span class="tp-metric-val">100</span>
-            <span class="tp-metric-lbl">WiFi (Mbps)</span>
-            <span class="tp-metric-pill">Cepat</span>
-          </div>
-          <div class="tp-metric-box">
-            <span class="tp-metric-val">On</span>
-            <span class="tp-metric-lbl">Token Listrik</span>
-            <span class="tp-metric-pill">Aktif</span>
-          </div>
-        </div>
-      </div>
-
-      {{-- Room Info Card --}}
-      <div class="tp-roominfo-card">
-        <div class="tp-card-row">
-          <span class="tp-card-label">Info Hunian Kamu</span>
-          <span class="tp-badge green">● Menghuni</span>
-        </div>
-        <div class="tp-roominfo-grid">
-          <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        {{-- Left Card: Facility Metrics --}}
+        <div class="tp-metrics-card">
+          <div class="tp-card-row">
             <div>
-              <div class="tp-roominfo-val">Kamar #{{ $room->number ?? '102' }}</div>
-              <div class="tp-roominfo-key">Nomor Kamar</div>
+              <span class="tp-card-label">Status Fasilitas Kamar</span>
+              <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">Indikator performa fasilitas unit hunian Anda</div>
             </div>
+            <span class="tp-badge blue">Kamar #{{ $room->number ?? '102' }}</span>
           </div>
-          <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <div>
-              <div class="tp-roominfo-val">{{ $dueDate->format('d M Y') }}</div>
-              <div class="tp-roominfo-key">Jatuh Tempo</div>
+          <div class="tp-metrics-grid">
+            <div class="tp-metric-box">
+              <div class="tp-metric-ico-circle sky">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="4" width="20" height="8" rx="2"/><path d="M6 8h.01"/><path d="M10 8h8"/><path d="M6 16c1.5 2 3.5 2 5 0s3.5-2 5 0"/></svg>
+              </div>
+              <span class="tp-metric-val">22°C</span>
+              <span class="tp-metric-lbl">Suhu AC Kamar</span>
+              <span class="tp-metric-pill">Dingin Optimal</span>
             </div>
-          </div>
-          <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <div>
-              <div class="tp-roominfo-val">Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}</div>
-              <div class="tp-roominfo-key">Sewa / Bulan</div>
+            <div class="tp-metric-box">
+              <div class="tp-metric-ico-circle teal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+              </div>
+              <span class="tp-metric-val">{{ $isB2 ? '300' : '100' }} <small style="font-size:0.72rem;font-weight:700;">Mbps</small></span>
+              <span class="tp-metric-lbl">Jaringan WiFi</span>
+              <span class="tp-metric-pill">Stabil & Cepat</span>
             </div>
-          </div>
-          <div class="tp-roominfo-item">
-            <div class="tp-roominfo-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <div>
-              <div class="tp-roominfo-val green">Lunas</div>
-              <div class="tp-roominfo-key">Status Pembayaran</div>
+            <div class="tp-metric-box">
+              <div class="tp-metric-ico-circle emerald">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <span class="tp-metric-val">ON</span>
+              <span class="tp-metric-lbl">Listrik & Air</span>
+              <span class="tp-metric-pill">Aktif 24 Jam</span>
             </div>
           </div>
         </div>
-      </div>
 
-    </div>{{-- /tp-overview-row --}}
-
-    {{-- ------------------------------------------- QUICK ACCESS SECTION ------------------------------------------- --}}
-    <div class="tp-quick-section">
-      <div class="tp-section-hdr">
-        <h2 class="tp-section-ttl">Akses & Layanan Cepat</h2>
-        <span class="tp-section-sub">Semua layanan anak kos dalam satu klik</span>
-      </div>
-      <div class="tp-quick-grid">
-
-        <button type="button" class="tp-quick-tile" id="btnOpenComplaint">
-          <div class="tp-quick-ico purple">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-            </svg>
+        {{-- Right Card: Room Info Summary --}}
+        <div class="tp-roominfo-card">
+          <div class="tp-card-row">
+            <div>
+              <span class="tp-card-label">Informasi Detail Hunian</span>
+              <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">Ringkasan kontrak sewa & status pembayaran</div>
+            </div>
+            <span class="tp-badge green">● Terverifikasi</span>
           </div>
+          <div class="tp-roominfo-grid">
+            <div class="tp-roominfo-item">
+              <div class="tp-roominfo-ico">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              </div>
+              <div>
+                <div class="tp-roominfo-val">Kamar #{{ $room->number ?? '102' }} (Lt. {{ $room->floor ?? '1' }})</div>
+                <div class="tp-roominfo-key">Unit & Lantai Kamar</div>
+              </div>
+            </div>
+            <div class="tp-roominfo-item">
+              <div class="tp-roominfo-ico">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div>
+                <div class="tp-roominfo-val">{{ $dueDate->format('d M Y') }}</div>
+                <div class="tp-roominfo-key">Jatuh Tempo Berikutnya</div>
+              </div>
+            </div>
+            <div class="tp-roominfo-item">
+              <div class="tp-roominfo-ico">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+              <div>
+                <div class="tp-roominfo-val">Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}</div>
+                <div class="tp-roominfo-key">Tarif Sewa / Bulan</div>
+              </div>
+            </div>
+            <div class="tp-roominfo-item">
+              <div class="tp-roominfo-ico" style="background: #ecfdf5; color: #059669;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div>
+                <div class="tp-roominfo-val green">{{ ($room->status ?? '') === 'due' ? 'Menunggu Bayar' : 'Lunas & Aktif' }}</div>
+                <div class="tp-roominfo-key">Status Pembayaran</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>{{-- /tp-overview-row --}}
+
+      {{-- 4. SYMMETRICAL 4-COLUMN QUICK ACCESS BENTO GRID --}}
+      <div class="tp-quick-section">
+        <div class="tp-section-hdr">
           <div>
-            <div class="tp-quick-ttl">Lapor Keluhan</div>
-            <div class="tp-quick-desc">Laporkan kerusakan AC, kran air, lampu, atau fasilitas kamar</div>
+            <h2 class="tp-section-ttl">Akses & Layanan Cepat Penghuni</h2>
+            <span class="tp-section-sub">Kelola fasilitas kamar, administrasi kuitansi, dan permohonan layanan secara instan</span>
           </div>
-          <div class="tp-quick-footer"><span></span><span class="tp-quick-arrow">→</span></div>
-        </button>
+        </div>
+        <div class="tp-quick-grid">
 
-        <button type="button" class="tp-quick-tile" id="btnOpenReceipts">
-          <div class="tp-quick-ico amber">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </div>
-          <div>
-            <div class="tp-quick-ttl">Kuitansi Digital</div>
-            <div class="tp-quick-desc">Lihat riwayat bukti bayar & kuitansi sewa lunas</div>
-          </div>
-          <div class="tp-quick-footer"><span></span><span class="tp-quick-arrow">→</span></div>
-        </button>
+          <button type="button" class="tp-quick-tile" id="btnOpenComplaint">
+            <div class="tp-quick-ico purple">
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="tp-quick-ttl">Lapor Keluhan</div>
+              <div class="tp-quick-desc">Laporkan kendala AC, air, lampu, atau perbaikan fasilitas kamar</div>
+            </div>
+            <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Buat Laporan</span><span class="tp-quick-arrow">→</span></div>
+          </button>
 
-        {{-- Layanan Pengajuan Pindah Kamar (Sesuai Permintaan Revisi) --}}
-        <button type="button" class="tp-quick-tile" id="btnOpenRoomTransfer">
-          <div class="tp-quick-ico teal" style="background: #f0fdfa; color: #0d9488;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 3h5v5"/>
-              <path d="M4 20L21 3"/>
-              <path d="M21 16v5h-5"/>
-              <path d="M15 15l6 6"/>
-              <path d="M4 4l5 5"/>
-            </svg>
-          </div>
-          <div>
-            <div class="tp-quick-ttl">Pengajuan Pindah Kamar</div>
-            <div class="tp-quick-desc">Ajukan pindah unit/lantai kamar kos baru dengan mudah & cepat</div>
-          </div>
-          <div class="tp-quick-footer"><span></span><span class="tp-quick-arrow">→</span></div>
-        </button>
+          <button type="button" class="tp-quick-tile" id="btnOpenReceipts">
+            <div class="tp-quick-ico amber">
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+            </div>
+            <div>
+              <div class="tp-quick-ttl">Kuitansi Digital</div>
+              <div class="tp-quick-desc">Lihat riwayat pembayaran sewa & cetak bukti kuitansi resmi</div>
+            </div>
+            <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Lihat Kuitansi</span><span class="tp-quick-arrow">→</span></div>
+          </button>
 
+          <button type="button" class="tp-quick-tile" id="btnOpenRoomTransfer">
+            <div class="tp-quick-ico blue">
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                <path d="M16 3h5v5"/>
+                <path d="M4 20L21 3"/>
+                <path d="M21 16v5h-5"/>
+                <path d="M15 15l6 6"/>
+                <path d="M4 4l5 5"/>
+              </svg>
+            </div>
+            <div>
+              <div class="tp-quick-ttl">Pindah Kamar</div>
+              <div class="tp-quick-desc">Ajukan perpindahan unit kamar atau pindah lintas cabang kos</div>
+            </div>
+            <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Ajukan Pindah</span><span class="tp-quick-arrow">→</span></div>
+          </button>
+
+          <button type="button" class="tp-quick-tile" onclick="document.getElementById('modalRules')?.classList.add('open')">
+            <div class="tp-quick-ico green">
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="tp-quick-ttl">Tata Tertib Kos</div>
+              <div class="tp-quick-desc">Pedoman kenyamanan, keamanan, dan peraturan resmi penghuni</div>
+            </div>
+            <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Baca Aturan</span><span class="tp-quick-arrow">→</span></div>
+          </button>
+
+        </div>
       </div>
-    </div>
 
     </div> {{-- End #sectionKamarku --}}
 

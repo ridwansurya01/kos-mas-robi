@@ -655,13 +655,13 @@
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             @php
               $currYear = (int)($selectedYear ?? 2026);
-              if ($currYear < 2026) $currYear = 2026;
+              if ($currYear < 2020) $currYear = 2026;
               $maxYearOpt = max(2050, $currYear + 5);
-              $yearsList = range(2026, $maxYearOpt);
+              $yearsList = range(2024, $maxYearOpt);
             @endphp
-            <div class="finance-year-picker-wrap" id="finYearPickerWrap" onwheel="handleYearWheelScroll(event)" title="Gulir roda mouse untuk ganti tahun">
-              <span class="fyp-label">Periode:</span>
-              <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2026 ? 'disabled' : '' }}>
+            <div class="finance-year-picker-wrap" id="finYearPickerWrap" onwheel="handleYearWheelScroll(event)" title="Pilih atau gulir roda mouse untuk melihat laporan keuangan tahun berapa pun">
+              <span class="fyp-label">Tahun Laporan:</span>
+              <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2020 ? 'disabled' : '' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
               <select id="selectFinanceYear" class="fyp-select" onchange="changeFinanceYear(this.value); updateYearNavButtons();">
@@ -669,13 +669,13 @@
                   <option value="{{ $yr }}" {{ $currYear == $yr ? 'selected' : '' }}>Tahun {{ $yr }}</option>
                 @endforeach
               </select>
-              <button type="button" class="fyp-scroll-btn" id="btnNextYear" onclick="scrollFinanceYear(1)" title="Tahun Berikutnya (Tak Terhingga)">
+              <button type="button" class="fyp-scroll-btn" id="btnNextYear" onclick="scrollFinanceYear(1)" title="Tahun Berikutnya">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
-            <button type="button" class="btn-secondary" onclick="exportFinancesCSV()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Export Buku Kas</span>
+            <button type="button" class="btn-secondary" onclick="openFinancePdfModal()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0f2e33 0%,#0a5661 100%);color:#ffffff;border:1px solid #0d9488;font-weight:700;padding:10px 18px;border-radius:12px;box-shadow:0 6px 16px rgba(10,86,97,0.22);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+              <span>File PDF Laporan Keuangan</span>
             </button>
             <button type="button" class="btn-primary-action" id="btnRecordTransaction">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -702,9 +702,9 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" id="finKpiIncomeVal" style="color:#10b981;">Rp {{ number_format($yearlyIncome ?? ($monthlyIncome * 12), 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiIncomeVal" style="color:#10b981;">Rp {{ number_format($yearlyIncome ?? 0, 0, ',', '.') }}</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-up">▲ 100% Terverifikasi</span>
+              <span class="stat-trend-up">▲ Terverifikasi Sistem</span>
               <span id="finKpiBranchBadge">Gabungan 2 Cabang</span>
             </div>
           </div>
@@ -716,7 +716,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" id="finKpiExpenseVal" style="color:#f87171;">Rp {{ number_format($yearlyExpense ?? (($totalExpense ?: 3500000) * 12), 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiExpenseVal" style="color:#f87171;">Rp {{ number_format($yearlyExpense ?? 0, 0, ',', '.') }}</div>
             <div class="stat-card-meta">
               <span>Listrik, WiFi, Servis AC, Opex</span>
             </div>
@@ -729,9 +729,9 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" id="finKpiNetVal" style="color:#0d9488;">Rp {{ number_format($yearlyNet ?? (($netCashflow ?: 14700000) * 12), 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiNetVal" style="color:#0d9488;">Rp {{ number_format($yearlyNet ?? 0, 0, ',', '.') }}</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-up">Margin Bersih Sehat</span>
+              <span class="stat-trend-up">Arus Kas Bersih</span>
             </div>
           </div>
 
@@ -742,7 +742,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               </div>
             </div>
-            <div class="stat-card-value" id="finKpiAvgVal">Rp {{ number_format(($yearlyNet ?? 176400000) / 12, 0, ',', '.') }}</div>
+            <div class="stat-card-value" id="finKpiAvgVal">Rp {{ number_format(round(($yearlyNet ?? 0) / 12), 0, ',', '.') }}</div>
             <div class="stat-card-meta">
               <span class="stat-badge-info">Tahun <span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span></span>
               <span id="finKpiUnitCountLabel">16 Unit Kamar</span>
@@ -793,9 +793,9 @@
             <canvas id="revenueCurveCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
             <div id="curveTooltip" style="position: absolute; display: none; pointer-events: none; background: rgba(15, 23, 42, 0.95); color: #ffffff; padding: 8px 12px; border-radius: 10px; font-size: 0.76rem; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); z-index: 10;">
               <div id="ttPeriod" style="color: #94a3b8; font-size: 0.7rem; margin-bottom: 2px;">Oktober 2026</div>
-              <div id="ttIncome" style="color: #34d399;">Pemasukan: Rp 18.200.000</div>
-              <div id="ttExpense" style="color: #f87171;">Pengeluaran: Rp 3.500.000</div>
-              <div id="ttNet" style="color: #2dd4bf; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 4px; padding-top: 3px;">Net: Rp 14.700.000</div>
+              <div id="ttIncome" style="color: #34d399;">Pemasukan: Rp 0</div>
+              <div id="ttExpense" style="color: #f87171;">Pengeluaran: Rp 0</div>
+              <div id="ttNet" style="color: #2dd4bf; border-top: 1px dashed rgba(255,255,255,0.2); margin-top: 4px; padding-top: 3px;">Net: Rp 0</div>
             </div>
           </div>
 
@@ -804,8 +804,8 @@
             <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-primary);">
               <span id="finInsightText"><strong>Insight Keuangan 2 Cabang:</strong> Kos 1 menyumbang stabilitas arus kas mahasiswa, sedangkan Kos 2 memberikan margin sewa eksklusif tertinggi.</span>
             </div>
-            <div style="font-size: 0.78rem; font-weight: 700; color: #0a5661;">
-              Status Kas: Surplus Finansial 
+            <div id="finStatusCashLabel" style="font-size: 0.78rem; font-weight: 700; color: #0a5661;">
+              Status Kas: Surplus Finansial
             </div>
           </div>
         </div>
@@ -2293,6 +2293,57 @@
   </div>
 
   <!-- =========================================================================
+       MODAL: LAPORAN KEUANGAN PDF MODERN & EKSEKUTIF (PREVIEW & CETAK/SIMPAN PDF)
+       ========================================================================= -->
+  <div class="modal-overlay" id="modalFinancePdfPreview" style="display: none; z-index: 9998;">
+    <div class="modal-container" style="max-width: 940px; width: 95%; max-height: 92vh; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.14); box-shadow: 0 28px 65px rgba(0,0,0,0.45);">
+      <!-- Toolbar Header PDF -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: linear-gradient(135deg, #071f24 0%, #0a3d46 60%, #0d5c68 100%); border-bottom: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(45, 212, 191, 0.16); border: 1px solid rgba(45, 212, 191, 0.35); display: flex; align-items: center; justify-content: center; color: #2dd4bf;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #ffffff;" id="pdfModalTitleText">Dokumen PDF Laporan Keuangan</h3>
+              <span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.68rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; letter-spacing: 0.04em;">A4 EXECUTIVE PDF</span>
+            </div>
+            <p style="margin: 2px 0 0 0; font-size: 0.76rem; color: rgba(255,255,255,0.72);" id="pdfModalSubtitleText">Pratinjau resmi dokumen laporan keuangan siap unduh & cetak</p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Download / Cetak PDF</span>
+          </button>
+          <button type="button" class="modal-close-btn" data-close-modal="modalFinancePdfPreview" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Canvas Area A4 Document Sheet -->
+      <div style="padding: 24px; overflow-y: auto; background: #1e293b; flex: 1; display: flex; justify-content: center;">
+        <div id="financePdfA4Sheet" style="width: 100%; max-width: 820px; background: #ffffff; color: #0f172a; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); overflow: hidden; font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;">
+          <!-- Injected dynamically by openFinancePdfModal() -->
+        </div>
+      </div>
+
+      <!-- Footer PDF Modal -->
+      <div style="padding: 14px 24px; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 0.76rem; color: #94a3b8;">Format Dokumen: Standar A4 Portrait • Otomatis menyesuaikan Tahun & Cabang Kos yang dipilih</span>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn-secondary" data-close-modal="modalFinancePdfPreview" style="background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15);">Tutup Pratinjau</button>
+          <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0d9488 0%, #0a5661 100%); color: #ffffff; border: 1px solid #14b8a6; padding: 9px 20px; border-radius: 11px; font-size: 0.82rem; font-weight: 800; cursor: pointer;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span>Simpan sebagai PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
        MODAL: POP-UP KONFIRMASI LOGOUT ADMIN (MODERN ANIMATION)
        ========================================================================= -->
   <div class="kmr-logout-overlay" id="modalAdminLogoutConfirm" style="display: none;">
@@ -2443,9 +2494,9 @@
     // KURVA PERTUMBUHAN PENDAPATAN & ARUS KAS (CANVAS SPLINE CURVE INTERACTIVE)
     // =========================================================================
     var chartMonths = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
-    var chartIncomeFull = {!! json_encode($chartIncome ?? [15650000,16300000,16950000,17600000,18250000,18900000,19550000,20200000,20850000,21500000,19500000,19500000]) !!};
-    var chartExpenseFull = {!! json_encode($chartExpense ?? [3350000,3500000,3650000,3800000,3950000,4100000,4250000,4400000,4550000,4700000,3800000,3800000]) !!};
-    var chartNetFull = {!! json_encode($chartNet ?? [12300000,12800000,13300000,13800000,14300000,14800000,15300000,15800000,16300000,16800000,15700000,15700000]) !!};
+    window.chartIncomeFull = {!! json_encode($chartIncome ?? array_fill(0, 12, 0)) !!};
+    window.chartExpenseFull = {!! json_encode($chartExpense ?? array_fill(0, 12, 0)) !!};
+    window.chartNetFull = {!! json_encode($chartNet ?? array_fill(0, 12, 0)) !!};
 
     var currentCurvePeriod = "1y";
 
@@ -2459,21 +2510,17 @@
     function scrollFinanceYear(delta) {
       var select = document.getElementById('selectFinanceYear');
       if (!select) return;
-      var currentYear = parseInt(select.value) || 2026;
+      var currentYear = parseInt(select.value, 10) || 2026;
       var targetYear = currentYear + delta;
-      if (targetYear < 2026) {
-        targetYear = 2026;
-        if (typeof showToast === 'function') {
-          showToast('Batas awal tahun dimulai dari 2026', 'warning');
-        }
+      if (targetYear < 2020) {
+        targetYear = 2020;
         updateYearNavButtons();
         return;
       }
 
-      // Pastikan targetYear ada dalam opsi select; jika belum ada, tambahkan dinamis (Tak Terhingga)
       var optionExists = false;
       for (var i = 0; i < select.options.length; i++) {
-        if (parseInt(select.options[i].value) === targetYear) {
+        if (parseInt(select.options[i].value, 10) === targetYear) {
           optionExists = true;
           break;
         }
@@ -2495,49 +2542,64 @@
       var select = document.getElementById('selectFinanceYear');
       var btnPrev = document.getElementById('btnPrevYear');
       if (select && btnPrev) {
-        var currentYear = parseInt(select.value) || 2026;
-        btnPrev.disabled = (currentYear <= 2026);
+        var currentYear = parseInt(select.value, 10) || 2026;
+        btnPrev.disabled = (currentYear <= 2020);
       }
     }
     window.updateYearNavButtons = updateYearNavButtons;
 
     async function changeFinanceYear(year) {
+      var yr = parseInt(year, 10) || 2026;
+      var select = document.getElementById('selectFinanceYear');
+      if (select && parseInt(select.value, 10) !== yr) {
+        select.value = yr;
+      }
+
+      document.querySelectorAll('.fin-selected-year-badge').forEach(function(el) {
+        el.textContent = yr;
+      });
+      var curveYearEl = document.getElementById('curveYearLabel');
+      if (curveYearEl) curveYearEl.textContent = '(Tahun ' + yr + ')';
+
+      // Sinkronkan tabel transaksi, 4 KPI, dan kurva secara instan dari data lokal
+      if (window.kosApp && typeof window.kosApp.renderFinancesTable === 'function') {
+        var searchVal = document.getElementById('financeSearchInput')?.value || '';
+        var activeTypeBtn = document.querySelector('#financeTypeFilter .filter-pill.active');
+        var activeType = activeTypeBtn ? (activeTypeBtn.getAttribute('data-ftype') || 'all') : 'all';
+        var activeLocBtn = document.querySelector('#financeLocationFilters .filter-pill.active');
+        var activeLoc = activeLocBtn ? (activeLocBtn.getAttribute('data-floc') || 'all') : 'all';
+        window.kosApp.renderFinancesTable(searchVal, activeType, activeLoc);
+      }
+
       try {
-        var res = await fetch('/finances/stats?year=' + encodeURIComponent(year));
+        var activeLocEl = document.querySelector('#financeLocationFilters .filter-pill.active');
+        var locParam = activeLocEl ? (activeLocEl.getAttribute('data-floc') || 'all') : 'all';
+        var res = await fetch('/api/finances/stats?year=' + encodeURIComponent(yr) + '&location=' + encodeURIComponent(locParam));
         var data = await res.json();
-        if (data.success) {
+        if (data && data.success) {
           if (document.getElementById('finKpiIncomeVal')) {
-            document.getElementById('finKpiIncomeVal').textContent = 'Rp ' + Number(data.income).toLocaleString('id-ID');
+            document.getElementById('finKpiIncomeVal').textContent = 'Rp ' + Number(data.income || 0).toLocaleString('id-ID');
           }
           if (document.getElementById('finKpiExpenseVal')) {
-            document.getElementById('finKpiExpenseVal').textContent = 'Rp ' + Number(data.expense).toLocaleString('id-ID');
+            document.getElementById('finKpiExpenseVal').textContent = 'Rp ' + Number(data.expense || 0).toLocaleString('id-ID');
           }
           if (document.getElementById('finKpiNetVal')) {
-            document.getElementById('finKpiNetVal').textContent = 'Rp ' + Number(data.net).toLocaleString('id-ID');
+            document.getElementById('finKpiNetVal').textContent = 'Rp ' + Number(data.net || 0).toLocaleString('id-ID');
           }
           if (document.getElementById('finKpiAvgVal')) {
-            document.getElementById('finKpiAvgVal').textContent = 'Rp ' + Number(data.avgMonthly).toLocaleString('id-ID');
+            document.getElementById('finKpiAvgVal').textContent = 'Rp ' + Number(data.avgMonthly || 0).toLocaleString('id-ID');
           }
 
-          document.querySelectorAll('.fin-selected-year-badge').forEach(function(el) {
-            el.textContent = year;
-          });
-          var curveYearEl = document.getElementById('curveYearLabel');
-          if (curveYearEl) curveYearEl.textContent = '(Tahun ' + year + ')';
-
-          chartIncomeFull = data.chartIncome;
-          chartExpenseFull = data.chartExpense;
-          chartNetFull = data.chartNet;
+          window.chartIncomeFull = Array.isArray(data.chartIncome) ? data.chartIncome : new Array(12).fill(0);
+          window.chartExpenseFull = Array.isArray(data.chartExpense) ? data.chartExpense : new Array(12).fill(0);
+          window.chartNetFull = Array.isArray(data.chartNet) ? data.chartNet : new Array(12).fill(0);
           drawRevenueCurve();
-
-          if (typeof showToast === 'function') {
-            showToast('Laporan keuangan tahun ' + year + ' berhasil dimuat!', 'info');
-          }
         }
       } catch (err) {
         console.error('Error changing finance year:', err);
       }
     }
+    window.changeFinanceYear = changeFinanceYear;
 
     function drawRevenueCurve() {
       var canvas = document.getElementById("revenueCurveCanvas");
@@ -2554,27 +2616,49 @@
       canvas.height = height * dpr;
       ctx.scale(dpr, dpr);
 
+      var incArr = Array.isArray(window.chartIncomeFull) ? window.chartIncomeFull : new Array(12).fill(0);
+      var expArr = Array.isArray(window.chartExpenseFull) ? window.chartExpenseFull : new Array(12).fill(0);
+      var netArr = Array.isArray(window.chartNetFull) ? window.chartNetFull : new Array(12).fill(0);
+
+      var isYearEmpty = incArr.every(function(v) { return Number(v) === 0; }) && expArr.every(function(v) { return Number(v) === 0; });
+
       var labels, income, expense, net;
       if (currentCurvePeriod === "30d") {
         labels = ["Mg 1", "Mg 2", "Mg 3", "Mg 4"];
-        income = [4850000, 5200000, 4900000, 6550000];
-        expense = [900000, 850000, 1200000, 750000];
-        net = [3950000, 4350000, 3700000, 5800000];
+        if (isYearEmpty) {
+          income = [0, 0, 0, 0];
+          expense = [0, 0, 0, 0];
+          net = [0, 0, 0, 0];
+        } else {
+          // Ambil bulan terakhir yang memiliki transaksi pada tahun terpilih
+          var activeIdx = 9;
+          for (var m = 11; m >= 0; m--) {
+            if (incArr[m] > 0 || expArr[m] > 0) {
+              activeIdx = m;
+              break;
+            }
+          }
+          var mI = incArr[activeIdx] || 0;
+          var mE = expArr[activeIdx] || 0;
+          income = [Math.round(mI * 0.25), Math.round(mI * 0.25), Math.round(mI * 0.25), mI - Math.round(mI * 0.25) * 3];
+          expense = [Math.round(mE * 0.25), Math.round(mE * 0.25), Math.round(mE * 0.25), mE - Math.round(mE * 0.25) * 3];
+          net = income.map(function(val, idx) { return val - expense[idx]; });
+        }
       } else if (currentCurvePeriod === "6m") {
-        labels = chartMonths.slice(4, 10);
-        income = chartIncomeFull.slice(4, 10);
-        expense = chartExpenseFull.slice(4, 10);
-        net = chartNetFull.slice(4, 10);
+        labels = chartMonths.slice(6, 12);
+        income = incArr.slice(6, 12);
+        expense = expArr.slice(6, 12);
+        net = netArr.slice(6, 12);
       } else {
         labels = chartMonths;
-        income = chartIncomeFull;
-        expense = chartExpenseFull;
-        net = chartNetFull;
+        income = incArr;
+        expense = expArr;
+        net = netArr;
       }
 
       ctx.clearRect(0, 0, width, height);
 
-      var padLeft = 60;
+      var padLeft = 64;
       var padRight = 24;
       var padTop = 24;
       var padBottom = 34;
@@ -2582,8 +2666,10 @@
       var plotW = width - padLeft - padRight;
       var plotH = height - padTop - padBottom;
 
-      var maxVal = Math.max(...income, ...expense, ...net, 1000000);
-      maxVal = Math.ceil((maxVal * 1.15) / 5000000) * 5000000;
+      var rawMax = Math.max.apply(null, income.concat(expense, net, [0]));
+      var isAllZero = (rawMax === 0);
+      var maxVal = isAllZero ? 10000000 : Math.ceil((rawMax * 1.15) / 1000000) * 1000000;
+      if (maxVal <= 0) maxVal = 10000000;
 
       var isDark = document.documentElement.getAttribute("data-theme") === "dark";
       var gridColor = isDark ? "rgba(255, 255, 255, 0.07)" : "rgba(0, 0, 0, 0.06)";
@@ -2600,14 +2686,14 @@
         var yVal = (maxVal / ySteps) * i;
         var yPos = padTop + plotH - (i / ySteps) * plotH;
 
-        ctx.strokeStyle = gridColor;
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = i === 0 ? "rgba(13, 148, 136, 0.3)" : gridColor;
+        ctx.lineWidth = i === 0 ? 1.5 : 1;
         ctx.beginPath();
         ctx.moveTo(padLeft, yPos);
         ctx.lineTo(width - padRight, yPos);
         ctx.stroke();
 
-        var labelText = yVal >= 1000000 ? (yVal / 1000000).toFixed(0) + " Jt" : (yVal / 1000).toFixed(0) + " Rb";
+        var labelText = yVal === 0 ? "Rp 0" : (yVal >= 1000000 ? (yVal / 1000000).toFixed(yVal % 1000000 === 0 ? 0 : 1) + " Jt" : (yVal / 1000).toFixed(0) + " Rb");
         ctx.fillText(labelText, padLeft - 10, yPos);
       }
 
@@ -2618,10 +2704,13 @@
 
       for (var j = 0; j < n; j++) {
         var px = padLeft + j * stepX;
-        var yInc = padTop + plotH - (income[j] / maxVal) * plotH;
-        var yExp = padTop + plotH - (expense[j] / maxVal) * plotH;
-        var yNet = padTop + plotH - (net[j] / maxVal) * plotH;
-        points.push({ x: px, inc: yInc, exp: yExp, net: yNet, label: labels[j], rawInc: income[j], rawExp: expense[j], rawNet: net[j] });
+        var incVal = Math.max(0, Number(income[j] || 0));
+        var expVal = Math.max(0, Number(expense[j] || 0));
+        var netVal = Math.max(0, Number(net[j] || 0));
+        var yInc = padTop + plotH - (incVal / maxVal) * plotH;
+        var yExp = padTop + plotH - (expVal / maxVal) * plotH;
+        var yNet = padTop + plotH - (netVal / maxVal) * plotH;
+        points.push({ x: px, inc: yInc, exp: yExp, net: yNet, label: labels[j], rawInc: Number(income[j] || 0), rawExp: Number(expense[j] || 0), rawNet: Number(net[j] || 0) });
 
         // Draw X Axis label
         ctx.textAlign = "center";
@@ -2637,7 +2726,7 @@
         if (pts.length < 2) return;
         ctx.save();
 
-        if (fill) {
+        if (fill && !isAllZero) {
           var grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
           grad.addColorStop(0, gradStart);
           grad.addColorStop(1, gradEnd);
@@ -2694,7 +2783,34 @@
       drawSpline(points, "inc", "#10b981", "rgba(16, 185, 129, 0.25)", "rgba(16, 185, 129, 0.0)", true);
       drawSpline(points, "net", "#0d9488", "rgba(13, 148, 136, 0.18)", "rgba(13, 148, 136, 0.0)", false);
       drawSpline(points, "exp", "#ef4444", "rgba(239, 68, 68, 0.15)", "rgba(239, 68, 68, 0.0)", false);
+
+      // Jika tahun yang dipilih belum pernah diisi (semua 0), tampilkan indikator bahwa kurva berada di titik 0
+      if (isAllZero) {
+        var selYr = document.getElementById('selectFinanceYear')?.value || 'Ini';
+        var zeroMsg = "Kurva di Titik 0 — Belum Ada Data Keuangan Tahun " + selYr + " (Rp 0)";
+        ctx.save();
+        ctx.font = "700 12px Outfit, sans-serif";
+        var textW = ctx.measureText(zeroMsg).width;
+        var boxW = textW + 28;
+        var boxH = 30;
+        var boxX = padLeft + (plotW - boxW) / 2;
+        var boxY = padTop + plotH - 46;
+        ctx.fillStyle = "rgba(15, 23, 42, 0.86)";
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(boxX, boxY, boxW, boxH, 999);
+        } else {
+          ctx.rect(boxX, boxY, boxW, boxH);
+        }
+        ctx.fill();
+        ctx.fillStyle = "#5eead4";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(zeroMsg, padLeft + plotW / 2, boxY + boxH / 2);
+        ctx.restore();
+      }
     }
+    window.drawRevenueCurve = drawRevenueCurve;
 
     function switchRevenueCurve(period, btn) {
       currentCurvePeriod = period;
@@ -2848,34 +2964,256 @@
       window.print();
     }
 
-    function exportFinancesCSV() {
-      var csv = "No Bukti,Tanggal,Keterangan,Kategori,Tipe,Nominal,Metode\n";
-      var rows = document.querySelectorAll("#financesTableBody tr");
-      rows.forEach(function(r) {
-        var cols = r.querySelectorAll("td");
-        if (cols.length >= 6) {
-          var line = [
-            cols[0].textContent.trim(),
-            cols[1].textContent.trim(),
-            "\"" + cols[2].textContent.trim().replace(/"/g, '""') + "\"",
-            cols[3].textContent.trim(),
-            cols[4].textContent.includes("-") ? "Pengeluaran" : "Pemasukan",
-            "\"" + cols[4].textContent.trim() + "\"",
-            cols[5].textContent.trim()
-          ].join(",");
-          csv += line + "\n";
-        }
-      });
-
-      var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      var url = URL.createObjectURL(blob);
-      var link = document.createElement("a");
-      link.setAttribute("href", url);
-      link.setAttribute("download", "buku_kas_kos_mas_robi_" + new Date().toISOString().slice(0,10) + ".csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    function formatRpPdf(val) {
+      return "Rp " + Number(val || 0).toLocaleString("id-ID");
     }
+
+    function buildFinancePdfHtml() {
+      var payload = (window.kosApp && typeof window.kosApp.getFinanceReportPayload === "function")
+        ? window.kosApp.getFinanceReportPayload()
+        : {
+            year: parseInt(document.getElementById("selectFinanceYear")?.value || 2026, 10),
+            locationFilter: "all",
+            branchLabel: "Gabungan 2 Cabang",
+            branch1Name: "{{ $branch1Name }}",
+            branch2Name: "{{ $branch2Name }}",
+            kosName: "{{ $setting->kos_name ?? 'Kos Mas Robi' }}",
+            ownerName: "{{ $setting->owner_name ?? 'Mas Robi' }}",
+            kosAddress: "{{ $setting->kos_address ?? 'Sleman, DI Yogyakarta' }}",
+            b1Inc: 0, b1Exp: 0, b1Net: 0,
+            b2Inc: 0, b2Exp: 0, b2Net: 0,
+            totalInc: 0, totalExp: 0, totalNet: 0, avgMonthly: 0,
+            mInc: new Array(12).fill(0),
+            mExp: new Array(12).fill(0),
+            mNet: new Array(12).fill(0),
+            transactions: []
+          };
+
+      var fullMonths = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+      var maxMonthVal = Math.max.apply(null, payload.mInc.concat(payload.mExp, [1]));
+      var hasTransactions = payload.transactions && payload.transactions.length > 0;
+      var printedDate = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+      var docCode = "FIN-PDF/" + payload.year + "/" + (payload.locationFilter === "all" ? "ALL" : (payload.locationFilter === "Lokasi 2" ? "B2" : "B1"));
+
+      var monthlyRowsHtml = "";
+      for (var m = 0; m < 12; m++) {
+        var inc = payload.mInc[m] || 0;
+        var exp = payload.mExp[m] || 0;
+        var net = payload.mNet[m] || 0;
+        var barPct = maxMonthVal > 0 ? Math.min(100, Math.round((inc / maxMonthVal) * 100)) : 0;
+        monthlyRowsHtml +=
+          '<tr style="border-bottom:1px solid #f1f5f9;">' +
+            '<td style="padding:7px 10px;font-weight:700;color:#1e293b;font-size:0.76rem;">' + fullMonths[m] + ' ' + payload.year + '</td>' +
+            '<td style="padding:7px 10px;width:130px;">' +
+              '<div style="width:100%;height:7px;background:#f1f5f9;border-radius:999px;overflow:hidden;">' +
+                '<div style="width:' + barPct + '%;height:100%;background:linear-gradient(90deg,#0d9488,#10b981);border-radius:999px;"></div>' +
+              '</div>' +
+            '</td>' +
+            '<td style="padding:7px 10px;text-align:right;font-weight:700;color:' + (inc > 0 ? '#059669' : '#94a3b8') + ';font-size:0.76rem;">' + formatRpPdf(inc) + '</td>' +
+            '<td style="padding:7px 10px;text-align:right;font-weight:700;color:' + (exp > 0 ? '#dc2626' : '#94a3b8') + ';font-size:0.76rem;">' + formatRpPdf(exp) + '</td>' +
+            '<td style="padding:7px 10px;text-align:right;font-weight:800;color:' + (net > 0 ? '#0a5661' : (net < 0 ? '#dc2626' : '#94a3b8')) + ';font-size:0.76rem;">' + formatRpPdf(net) + '</td>' +
+          '</tr>';
+      }
+
+      var trxRowsHtml = "";
+      if (!hasTransactions) {
+        trxRowsHtml =
+          '<tr>' +
+            '<td colspan="6" style="padding:26px 16px;text-align:center;background:#f8fafc;color:#64748b;font-size:0.8rem;font-weight:700;border-bottom:1px solid #e2e8f0;">' +
+              'DATA NIHIL (Rp 0) — Belum ada transaksi keuangan yang dicatat oleh Admin pada Tahun ' + payload.year + '.' +
+            '</td>' +
+          '</tr>';
+      } else {
+        payload.transactions.forEach(function(t) {
+          var isInc = t.type === "income";
+          trxRowsHtml +=
+            '<tr style="border-bottom:1px solid #f1f5f9;">' +
+              '<td style="padding:8px 10px;font-family:monospace;font-weight:700;font-size:0.74rem;color:#0f172a;">' + (t.id || '-') + '</td>' +
+              '<td style="padding:8px 10px;font-size:0.75rem;color:#475569;">' + (t.date || '-') + '</td>' +
+              '<td style="padding:8px 10px;font-size:0.74rem;font-weight:700;color:#0a5661;">' + (t.branchName || '-') + '</td>' +
+              '<td style="padding:8px 10px;font-size:0.75rem;font-weight:600;color:#1e293b;">' + (t.desc || '-') + '</td>' +
+              '<td style="padding:8px 10px;font-size:0.73rem;color:#64748b;">' + (t.category || '-') + ' • ' + (t.method || '-') + '</td>' +
+              '<td style="padding:8px 10px;text-align:right;font-weight:800;font-size:0.76rem;color:' + (isInc ? '#059669' : '#dc2626') + ';">' + (isInc ? '+ ' : '- ') + formatRpPdf(t.amount) + '</td>' +
+            '</tr>';
+        });
+      }
+
+      return (
+        '<div class="pdf-executive-sheet">' +
+          /* Executive Header */
+          '<div style="background:linear-gradient(135deg,#071f24 0%,#0a3d46 55%,#0a5661 100%);color:#ffffff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;border-bottom:4px solid #14b8a6;">' +
+            '<div style="max-width:440px;">' +
+              '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.16);border:1px solid rgba(45,212,191,0.38);padding:4px 12px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:0.06em;color:#5eead4;margin-bottom:10px;">LAPORAN KEUANGAN RESMI & BUKU KAS TAHUNAN</div>' +
+              '<h1 style="margin:0;font-size:1.5rem;font-weight:900;letter-spacing:-0.02em;color:#ffffff;">' + payload.kosName + '</h1>' +
+              '<p style="margin:5px 0 0 0;font-size:0.78rem;color:rgba(255,255,255,0.78);line-height:1.45;">' + payload.kosAddress + '</p>' +
+            '</div>' +
+            '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:14px;padding:12px 18px;text-align:right;min-width:210px;">' +
+              '<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.08em;color:#99f6e4;font-weight:800;">PERIODE TAHUN ANGGARAN</div>' +
+              '<div style="font-size:1.35rem;font-weight:900;color:#ffffff;margin:2px 0;">TAHUN ' + payload.year + '</div>' +
+              '<div style="font-size:0.72rem;color:rgba(255,255,255,0.82);font-weight:600;">No. Dokumen: ' + docCode + '</div>' +
+              '<div style="font-size:0.7rem;color:rgba(255,255,255,0.68);margin-top:2px;">Dicetak: ' + printedDate + '</div>' +
+            '</div>' +
+          '</div>' +
+
+          /* Body Content */
+          '<div style="padding:26px 32px;display:flex;flex-direction:column;gap:22px;">' +
+            /* Meta Scope Bar */
+            '<div style="display:flex;justify-content:space-between;align-items:center;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:10px 16px;flex-wrap:wrap;gap:8px;">' +
+              '<div style="font-size:0.78rem;color:#0f172a;"><strong>Cakupan Laporan:</strong> ' + payload.branchLabel + '</div>' +
+              '<div style="font-size:0.76rem;font-weight:800;color:' + (hasTransactions ? '#059669' : '#64748b') + ';">Status Data: ' + (hasTransactions ? (payload.transactions.length + ' Transaksi Terverifikasi') : 'Data Kosong / Rp 0') + '</div>' +
+            '</div>' +
+
+            /* 4 KPI Executive Cards */
+            '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
+              '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #10b981;border-radius:12px;padding:14px;">' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">TOTAL PEMASUKAN (' + payload.year + ')</div>' +
+                '<div style="font-size:1.1rem;font-weight:900;color:#059669;margin-top:6px;">' + formatRpPdf(payload.totalInc) + '</div>' +
+                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Pendapatan Sewa Kamar</div>' +
+              '</div>' +
+              '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #ef4444;border-radius:12px;padding:14px;">' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">BEBAN OPERASIONAL (' + payload.year + ')</div>' +
+                '<div style="font-size:1.1rem;font-weight:900;color:#dc2626;margin-top:6px;">' + formatRpPdf(payload.totalExp) + '</div>' +
+                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Listrik, WiFi & Perawatan</div>' +
+              '</div>' +
+              '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #0d9488;border-radius:12px;padding:14px;">' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">LABA BERSIH (' + payload.year + ')</div>' +
+                '<div style="font-size:1.1rem;font-weight:900;color:#0a5661;margin-top:6px;">' + formatRpPdf(payload.totalNet) + '</div>' +
+                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Net Cashflow Tahunan</div>' +
+              '</div>' +
+              '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #0284c7;border-radius:12px;padding:14px;">' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">RATA-RATA BERSIH / BLN</div>' +
+                '<div style="font-size:1.1rem;font-weight:900;color:#0284c7;margin-top:6px;">' + formatRpPdf(payload.avgMonthly) + '</div>' +
+                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Estimasi Rata-rata Bulanan</div>' +
+              '</div>' +
+            '</div>' +
+
+            /* Komparasi Neraca 2 Cabang Kos */
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+              '<div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:14px 16px;">' +
+                '<div style="font-size:0.7rem;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:0.04em;">NERACA CABANG 1 — ' + payload.branch1Name + '</div>' +
+                '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:0.76rem;">' +
+                  '<span>Pemasukan: <strong style="color:#059669;">' + formatRpPdf(payload.b1Inc) + '</strong></span>' +
+                  '<span>Opex: <strong style="color:#dc2626;">' + formatRpPdf(payload.b1Exp) + '</strong></span>' +
+                  '<span>Surplus: <strong style="color:#0f172a;">' + formatRpPdf(payload.b1Net) + '</strong></span>' +
+                '</div>' +
+              '</div>' +
+              '<div style="background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:14px 16px;">' +
+                '<div style="font-size:0.7rem;font-weight:800;color:#0a5661;text-transform:uppercase;letter-spacing:0.04em;">NERACA CABANG 2 — ' + payload.branch2Name + '</div>' +
+                '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:0.76rem;">' +
+                  '<span>Pemasukan: <strong style="color:#059669;">' + formatRpPdf(payload.b2Inc) + '</strong></span>' +
+                  '<span>Opex: <strong style="color:#dc2626;">' + formatRpPdf(payload.b2Exp) + '</strong></span>' +
+                  '<span>Surplus: <strong style="color:#0f172a;">' + formatRpPdf(payload.b2Net) + '</strong></span>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+
+            /* Rekapitulasi Arus Kas 12 Bulan */
+            '<div>' +
+              '<div style="font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">I. Rekapitulasi Arus Kas Bulanan (Januari – Desember ' + payload.year + ')</div>' +
+              '<div style="border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;">' +
+                '<table style="width:100%;border-collapse:collapse;">' +
+                  '<thead>' +
+                    '<tr style="background:#0f172a;color:#ffffff;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;">' +
+                      '<th style="padding:8px 10px;text-align:left;">Bulan</th>' +
+                      '<th style="padding:8px 10px;text-align:left;">Indikator Visual</th>' +
+                      '<th style="padding:8px 10px;text-align:right;">Pemasukan</th>' +
+                      '<th style="padding:8px 10px;text-align:right;">Pengeluaran</th>' +
+                      '<th style="padding:8px 10px;text-align:right;">Laba Bersih</th>' +
+                    '</tr>' +
+                  '</thead>' +
+                  '<tbody>' + monthlyRowsHtml + '</tbody>' +
+                '</table>' +
+              '</div>' +
+            '</div>' +
+
+            /* Rincian Buku Kas & Transaksi */
+            '<div>' +
+              '<div style="font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">II. Rincian Buku Kas & Transaksi Resmi (Tahun ' + payload.year + ')</div>' +
+              '<div style="border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;">' +
+                '<table style="width:100%;border-collapse:collapse;">' +
+                  '<thead>' +
+                    '<tr style="background:#f1f5f9;color:#334155;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1.5px solid #cbd5e1;">' +
+                      '<th style="padding:8px 10px;text-align:left;">No. Bukti</th>' +
+                      '<th style="padding:8px 10px;text-align:left;">Tanggal</th>' +
+                      '<th style="padding:8px 10px;text-align:left;">Cabang Kos</th>' +
+                      '<th style="padding:8px 10px;text-align:left;">Keterangan Transaksi</th>' +
+                      '<th style="padding:8px 10px;text-align:left;">Kategori & Metode</th>' +
+                      '<th style="padding:8px 10px;text-align:right;">Nominal</th>' +
+                    '</tr>' +
+                  '</thead>' +
+                  '<tbody>' + trxRowsHtml + '</tbody>' +
+                '</table>' +
+              '</div>' +
+            '</div>' +
+
+            /* Footer Signature & Verification Stamp */
+            '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;padding-top:16px;border-top:2px dashed #cbd5e1;flex-wrap:wrap;gap:16px;">' +
+              '<div style="max-width:420px;">' +
+                '<div style="display:inline-block;background:#ecfdf5;border:1.5px solid #6ee7b7;color:#065f46;font-size:0.7rem;font-weight:800;padding:4px 12px;border-radius:8px;letter-spacing:0.04em;">DOKUMEN KEUANGAN TERVERIFIKASI SISTEM</div>' +
+                '<p style="margin:6px 0 0 0;font-size:0.72rem;color:#64748b;line-height:1.45;">Laporan keuangan ini dihasilkan secara otomatis oleh Sistem Manajemen ' + payload.kosName + ' berdasarkan pencatatan kas riil pada periode Tahun ' + payload.year + '.</p>' +
+              '</div>' +
+              '<div style="text-align:center;min-width:190px;">' +
+                '<div style="font-size:0.74rem;color:#475569;margin-bottom:44px;">Mengetahui, Pengelola Kos</div>' +
+                '<div style="font-size:0.88rem;font-weight:900;color:#0f172a;border-bottom:1.5px solid #0f172a;padding-bottom:3px;">' + payload.ownerName + '</div>' +
+                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Owner & Pengelola Utama</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    function openFinancePdfModal() {
+      var sheet = document.getElementById("financePdfA4Sheet");
+      var modal = document.getElementById("modalFinancePdfPreview");
+      var yr = document.getElementById("selectFinanceYear")?.value || 2026;
+      if (sheet) {
+        sheet.innerHTML = buildFinancePdfHtml();
+      }
+      var titleEl = document.getElementById("pdfModalTitleText");
+      if (titleEl) {
+        titleEl.textContent = "Dokumen PDF Laporan Keuangan — Tahun " + yr;
+      }
+      if (modal) {
+        modal.classList.add("open");
+        modal.style.display = "flex";
+        modal.style.pointerEvents = "auto";
+      }
+    }
+    window.openFinancePdfModal = openFinancePdfModal;
+
+    function downloadFinancePdfDocument() {
+      var yr = document.getElementById("selectFinanceYear")?.value || 2026;
+      var htmlContent = buildFinancePdfHtml();
+      var printWin = window.open("", "_blank", "width=960,height=800");
+      if (!printWin) {
+        window.print();
+        return;
+      }
+      var docTitle = "Laporan_Keuangan_Kos_Mas_Robi_Tahun_" + yr;
+      printWin.document.open();
+      printWin.document.write(
+        '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>' + docTitle + '</title>' +
+        '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' +
+        '<style>' +
+          '*, *::before, *::after { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }' +
+          'body { margin: 0; padding: 20px; background: #f1f5f9; font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; }' +
+          '.pdf-executive-sheet { max-width: 840px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }' +
+          '@page { size: A4 portrait; margin: 10mm; }' +
+          '@media print { body { background: #ffffff; padding: 0; } .pdf-executive-sheet { max-width: 100%; box-shadow: none; border-radius: 0; } }' +
+        '</style></head><body>' +
+        htmlContent +
+        '<script>window.onload = function() { setTimeout(function() { window.print(); }, 250); };<\/script>' +
+        '</body></html>'
+      );
+      printWin.document.close();
+    }
+    window.downloadFinancePdfDocument = downloadFinancePdfDocument;
+
+    function exportFinancesCSV() {
+      openFinancePdfModal();
+    }
+    window.exportFinancesCSV = exportFinancesCSV;
 
     // =========================================================================
     // UPLOAD FOTO KAMAR OLEH ADMIN (4 FOTO — TEAL THEME & EMPTY BY DEFAULT)

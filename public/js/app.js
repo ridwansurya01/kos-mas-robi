@@ -647,7 +647,16 @@
     }
   }
 
-  // --- TAB: KEUANGAN (2 KOS) ---
+  function parseFinanceYearMonth(dateStr) {
+    if (!dateStr) return { year: 2026, month: 1 };
+    const m = String(dateStr).match(/^(\d{4})-(\d{2})/);
+    if (m) return { year: parseInt(m[1], 10), month: parseInt(m[2], 10) };
+    const d = new Date(dateStr);
+    if (!isNaN(d.getTime())) return { year: d.getFullYear(), month: d.getMonth() + 1 };
+    return { year: 2026, month: 1 };
+  }
+
+  // --- TAB: KEUANGAN (2 KOS & FILTER TAHUN OTOMATIS) ---
   function renderFinancesTable(search = '', filterType = 'all', locationFilter = activeFinanceLocationFilter) {
     activeFinanceLocationFilter = locationFilter;
     const tbody = document.getElementById('financesTableBody');
@@ -657,9 +666,15 @@
     tbody.innerHTML = '';
     mobileList.innerHTML = '';
 
-    // Hitung Neraca Kas Kos 1 vs Kos 2 secara real-time
+    const selectYearEl = document.getElementById('selectFinanceYear');
+    const selectedYear = parseInt(selectYearEl?.value || 2026, 10) || 2026;
+
+    // Filter transaksi khusus untuk tahun yang dipilih
+    const yearFinances = appData.finances.filter(f => parseFinanceYearMonth(f.date).year === selectedYear);
+
+    // Hitung Neraca Kas Kos 1 vs Kos 2 pada tahun terpilih secara real-time
     let b1Inc = 0, b1Exp = 0, b2Inc = 0, b2Exp = 0;
-    appData.finances.forEach(f => {
+    yearFinances.forEach(f => {
       const fLoc = resolveFinanceLocation(f);
       const amt = Number(f.amount || 0);
       if (fLoc === 'Lokasi 2') {
@@ -685,7 +700,43 @@
     if (elB2Exp) elB2Exp.textContent = formatRupiah(b2Exp);
     if (elB2Net) elB2Net.textContent = formatRupiah(b2Inc - b2Exp);
 
-    // Update 4 KPI Cards sesuai filter cabang jika sedang difilter per Kos
+    // Hitung data bulanan (Jan-Des) untuk tahun & cabang terpilih
+    const scopedYearFinances = yearFinances.filter(f => {
+      const fLoc = resolveFinanceLocation(f);
+      return locationFilter === 'all' || fLoc === locationFilter;
+    });
+
+    const mInc = new Array(12).fill(0);
+    const mExp = new Array(12).fill(0);
+    const mNet = new Array(12).fill(0);
+
+    scopedYearFinances.forEach(f => {
+      const ym = parseFinanceYearMonth(f.date);
+      const idx = Math.max(0, Math.min(11, (ym.month || 1) - 1));
+      const amt = Number(f.amount || 0);
+      if (f.type === 'income') mInc[idx] += amt;
+      else mExp[idx] += amt;
+    });
+    for (let i = 0; i < 12; i++) {
+      mNet[i] = mInc[i] - mExp[i];
+    }
+
+    // Sinkronkan kurva pendapatan dengan data riil tahun terpilih (jika kosong maka titik kurva = 0)
+    window.chartIncomeFull = mInc;
+    window.chartExpenseFull = mExp;
+    window.chartNetFull = mNet;
+    if (typeof window.drawRevenueCurve === 'function') {
+      window.drawRevenueCurve();
+    }
+
+    // Update badge tahun di seluruh KPI & judul kurva
+    document.querySelectorAll('.fin-selected-year-badge').forEach(el => {
+      el.textContent = selectedYear;
+    });
+    const curveYearEl = document.getElementById('curveYearLabel');
+    if (curveYearEl) curveYearEl.textContent = `(Tahun ${selectedYear})`;
+
+    // Update 4 KPI Cards sesuai tahun & filter cabang (0 jika belum pernah diisi)
     const kpiIncEl = document.getElementById('finKpiIncomeVal');
     const kpiExpEl = document.getElementById('finKpiExpenseVal');
     const kpiNetEl = document.getElementById('finKpiNetVal');
@@ -693,39 +744,57 @@
     const kpiBadgeEl = document.getElementById('finKpiBranchBadge');
     const kpiUnitEl = document.getElementById('finKpiUnitCountLabel');
     const finInsightEl = document.getElementById('finInsightText');
+    const finStatusCashEl = document.getElementById('finStatusCashLabel');
+
+    const hasScopedData = scopedYearFinances.length > 0;
 
     if (locationFilter === 'Lokasi 1' || locationFilter === 'Lokasi 2') {
       const isB2 = locationFilter === 'Lokasi 2';
-      const branchIncYear = (isB2 ? b2Inc : b1Inc) * 12;
-      const branchExpYear = (isB2 ? b2Exp : b1Exp) * 12;
+      const branchIncYear = hasScopedData ? (isB2 ? b2Inc : b1Inc) : 0;
+      const branchExpYear = hasScopedData ? (isB2 ? b2Exp : b1Exp) : 0;
       const branchNetYear = branchIncYear - branchExpYear;
       if (kpiIncEl) kpiIncEl.textContent = formatRupiah(branchIncYear);
       if (kpiExpEl) kpiExpEl.textContent = formatRupiah(branchExpYear);
       if (kpiNetEl) kpiNetEl.textContent = formatRupiah(branchNetYear);
-      if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(branchNetYear / 12));
+      if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(hasScopedData ? Math.round(branchNetYear / 12) : 0);
       if (kpiBadgeEl) kpiBadgeEl.textContent = isB2 ? 'Khusus ' + getBranchName('Lokasi 2') : 'Khusus ' + getBranchName('Lokasi 1');
       if (kpiUnitEl) kpiUnitEl.textContent = isB2 ? '8 Unit Kamar (#201–#208)' : '8 Unit Kamar (#101–#108)';
       if (finInsightEl) {
-        finInsightEl.innerHTML = isB2
-          ? `<strong>Insight Kas ${getBranchName('Lokasi 2')}:</strong> Pendapatan didominasi unit Royal Suite & Executive dengan fasilitas Smart Door Lock & Co-Working Space.`
-          : `<strong>Insight Kas ${getBranchName('Lokasi 1')}:</strong> Tingkat hunian mahasiswa UGM/UNY sangat stabil dengan rasio beban operasional yang efisien.`;
+        if (!hasScopedData) {
+          finInsightEl.innerHTML = `<strong>Status Data Tahun ${selectedYear}:</strong> Belum ada transaksi keuangan yang dicatat oleh Admin pada tahun ${selectedYear} untuk ${getBranchName(locationFilter)} (Data Rp 0).`;
+        } else {
+          finInsightEl.innerHTML = isB2
+            ? `<strong>Insight Kas ${getBranchName('Lokasi 2')} (${selectedYear}):</strong> Total ${scopedYearFinances.length} transaksi tercatat dengan surplus bersih ${formatRupiah(branchNetYear)}.`
+            : `<strong>Insight Kas ${getBranchName('Lokasi 1')} (${selectedYear}):</strong> Total ${scopedYearFinances.length} transaksi tercatat dengan surplus bersih ${formatRupiah(branchNetYear)}.`;
+        }
+      }
+      if (finStatusCashEl) {
+        finStatusCashEl.textContent = !hasScopedData ? 'Status Kas: Data Kosong (Rp 0)' : (branchNetYear >= 0 ? 'Status Kas: Surplus Finansial' : 'Status Kas: Defisit Operasional');
       }
     } else {
-      const totIncYear = (b1Inc + b2Inc) * 12;
-      const totExpYear = (b1Exp + b2Exp) * 12;
+      const totIncYear = hasScopedData ? (b1Inc + b2Inc) : 0;
+      const totExpYear = hasScopedData ? (b1Exp + b2Exp) : 0;
       const totNetYear = totIncYear - totExpYear;
-      if (totIncYear > 0) {
-        if (kpiIncEl) kpiIncEl.textContent = formatRupiah(totIncYear);
-        if (kpiExpEl) kpiExpEl.textContent = formatRupiah(totExpYear);
-        if (kpiNetEl) kpiNetEl.textContent = formatRupiah(totNetYear);
-        if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(Math.round(totNetYear / 12));
-      }
+      if (kpiIncEl) kpiIncEl.textContent = formatRupiah(totIncYear);
+      if (kpiExpEl) kpiExpEl.textContent = formatRupiah(totExpYear);
+      if (kpiNetEl) kpiNetEl.textContent = formatRupiah(totNetYear);
+      if (kpiAvgEl) kpiAvgEl.textContent = formatRupiah(hasScopedData ? Math.round(totNetYear / 12) : 0);
       if (kpiBadgeEl) kpiBadgeEl.textContent = 'Gabungan 2 Cabang';
       if (kpiUnitEl) kpiUnitEl.textContent = `16 Unit Kamar (${getBranchName('Lokasi 1')} & ${getBranchName('Lokasi 2')})`;
+      if (finInsightEl) {
+        if (!hasScopedData) {
+          finInsightEl.innerHTML = `<strong>Status Data Tahun ${selectedYear}:</strong> Belum ada transaksi keuangan yang dicatat oleh Admin pada tahun ${selectedYear} (Seluruh indikator & kurva berada di titik Rp 0).`;
+        } else {
+          finInsightEl.innerHTML = `<strong>Insight Keuangan 2 Cabang (${selectedYear}):</strong> Tercatat ${scopedYearFinances.length} transaksi resmi dengan pemasukan ${formatRupiah(totIncYear)} dan laba bersih ${formatRupiah(totNetYear)}.`;
+        }
+      }
+      if (finStatusCashEl) {
+        finStatusCashEl.textContent = !hasScopedData ? 'Status Kas: Data Kosong (Rp 0)' : (totNetYear >= 0 ? 'Status Kas: Surplus Finansial' : 'Status Kas: Defisit Operasional');
+      }
     }
 
     const q = search.toLowerCase();
-    const filtered = appData.finances.filter(f => {
+    const filtered = yearFinances.filter(f => {
       const fLoc = resolveFinanceLocation(f);
       const matchLoc = (locationFilter === 'all' || fLoc === locationFilter);
       const matchSearch = !q ||
@@ -798,9 +867,91 @@
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada data transaksi pada filter cabang ini</td></tr>';
-      mobileList.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Tidak ada data transaksi pada filter cabang ini</div>';
+      const emptyMsg = yearFinances.length === 0
+        ? `Belum ada data transaksi yang diisi oleh Admin pada Tahun ${selectedYear} (Data = Rp 0).`
+        : `Tidak ada data transaksi yang sesuai dengan filter pada Tahun ${selectedYear}.`;
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px 20px;color:var(--text-muted);font-weight:600;">${emptyMsg}</td></tr>`;
+      mobileList.innerHTML = `<div style="text-align:center;color:var(--text-muted);padding:24px 16px;font-weight:600;">${emptyMsg}</div>`;
     }
+  }
+
+  function getFinanceReportPayload() {
+    const selectYearEl = document.getElementById('selectFinanceYear');
+    const selectedYear = parseInt(selectYearEl?.value || 2026, 10) || 2026;
+    const locFilter = activeFinanceLocationFilter || 'all';
+    const yearFinances = appData.finances.filter(f => parseFinanceYearMonth(f.date).year === selectedYear);
+
+    let b1Inc = 0, b1Exp = 0, b2Inc = 0, b2Exp = 0;
+    yearFinances.forEach(f => {
+      const fLoc = resolveFinanceLocation(f);
+      const amt = Number(f.amount || 0);
+      if (fLoc === 'Lokasi 2') {
+        if (f.type === 'income') b2Inc += amt;
+        else b2Exp += amt;
+      } else {
+        if (f.type === 'income') b1Inc += amt;
+        else b1Exp += amt;
+      }
+    });
+
+    const scoped = yearFinances.filter(f => {
+      const fLoc = resolveFinanceLocation(f);
+      return locFilter === 'all' || fLoc === locFilter;
+    });
+
+    const mInc = new Array(12).fill(0);
+    const mExp = new Array(12).fill(0);
+    const mNet = new Array(12).fill(0);
+    let totalInc = 0, totalExp = 0;
+
+    scoped.forEach(f => {
+      const ym = parseFinanceYearMonth(f.date);
+      const idx = Math.max(0, Math.min(11, (ym.month || 1) - 1));
+      const amt = Number(f.amount || 0);
+      if (f.type === 'income') {
+        mInc[idx] += amt;
+        totalInc += amt;
+      } else {
+        mExp[idx] += amt;
+        totalExp += amt;
+      }
+    });
+    for (let i = 0; i < 12; i++) {
+      mNet[i] = mInc[i] - mExp[i];
+    }
+
+    const totalNet = totalInc - totalExp;
+    const avgMonthly = scoped.length > 0 ? Math.round(totalNet / 12) : 0;
+
+    return {
+      year: selectedYear,
+      locationFilter: locFilter,
+      branchLabel: locFilter === 'Lokasi 1'
+        ? getBranchName('Lokasi 1')
+        : (locFilter === 'Lokasi 2' ? getBranchName('Lokasi 2') : `Gabungan 2 Cabang (${getBranchName('Lokasi 1')} & ${getBranchName('Lokasi 2')})`),
+      branch1Name: getBranchName('Lokasi 1'),
+      branch2Name: getBranchName('Lokasi 2'),
+      kosName: appData.settings?.kos_name || 'Kos Mas Robi',
+      ownerName: appData.settings?.owner_name || 'Mas Robi',
+      kosAddress: appData.settings?.kos_address || 'Sleman, DI Yogyakarta',
+      b1Inc,
+      b1Exp,
+      b1Net: b1Inc - b1Exp,
+      b2Inc,
+      b2Exp,
+      b2Net: b2Inc - b2Exp,
+      totalInc,
+      totalExp,
+      totalNet,
+      avgMonthly,
+      mInc,
+      mExp,
+      mNet,
+      transactions: scoped.map(f => Object.assign({}, f, {
+        resolvedLocation: resolveFinanceLocation(f),
+        branchName: getBranchName(resolveFinanceLocation(f))
+      }))
+    };
   }
 
   // --- TAB: KELUHAN & SERVIS (2 KOS) ---
@@ -1665,6 +1816,17 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
         if (res.ok) {
           const data = await res.json();
+          const txYear = parseFinanceYearMonth(date).year;
+          const selectYearEl = document.getElementById('selectFinanceYear');
+          if (selectYearEl && txYear) {
+            if (![...selectYearEl.options].some(o => parseInt(o.value, 10) === txYear)) {
+              const opt = document.createElement('option');
+              opt.value = txYear;
+              opt.textContent = 'Tahun ' + txYear;
+              selectYearEl.appendChild(opt);
+            }
+            selectYearEl.value = txYear;
+          }
           showToast(`Transaksi ${formatRupiah(amount)} berhasil disimpan di Laravel!`, 'success');
           await fetchServerData();
           closeModal('modalTransaction');
@@ -2467,7 +2629,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     recordPaymentForRoom,
     showReceiptModal,
     updateRepairStatus,
-    renderAllViews
+    renderAllViews,
+    renderFinancesTable,
+    getFinanceReportPayload,
+    getAppData: () => appData
   };
 
   window.openRoomDetailModal = openRoomDetailModal;

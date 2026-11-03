@@ -64,29 +64,19 @@ class DashboardController extends Controller
         $loc2Due = $roomsLoc2->where('status', 'due')->count();
         $loc2OccupancyRate = $loc2Total > 0 ? round(($loc2Occupied / $loc2Total) * 100, 1) : 0;
 
-        // Analisis Keuangan Berdasarkan Tahun (Mulai 2026 s/d Tak Terhingga)
+        // Analisis Keuangan Berdasarkan Tahun Otomatis
         $selectedYear = (int)$request->input('year', 2026);
-        if ($selectedYear < 2026) {
+        if ($selectedYear < 2020) {
             $selectedYear = 2026;
         }
         $maxYear = max(2045, $selectedYear + 5);
-        $availableYears = range(2026, $maxYear);
+        $availableYears = range(2024, $maxYear);
 
-        $allYearFinances = Finance::whereYear('date', $selectedYear)->get();
+        $allYearFinances = Finance::with('room')->whereYear('date', $selectedYear)->get();
         $hasDbRecords = $allYearFinances->count() > 0;
 
-        $yearlyIncome = $allYearFinances->where('type', 'income')->sum('amount');
-        $yearlyExpense = $allYearFinances->where('type', 'expense')->sum('amount');
-
-        if (!$hasDbRecords) {
-            if ($selectedYear === 2027) {
-                $yearlyIncome = 238000000;
-                $yearlyExpense = 46000000;
-            } else {
-                $yearlyIncome = 0;
-                $yearlyExpense = 0;
-            }
-        }
+        $yearlyIncome = $hasDbRecords ? (int)$allYearFinances->where('type', 'income')->sum('amount') : 0;
+        $yearlyExpense = $hasDbRecords ? (int)$allYearFinances->where('type', 'expense')->sum('amount') : 0;
         $yearlyNet = $yearlyIncome - $yearlyExpense;
 
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
@@ -95,38 +85,22 @@ class DashboardController extends Controller
         $chartNet = [];
 
         for ($m = 1; $m <= 12; $m++) {
-            $inc = $allYearFinances->where('type', 'income')
-                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
-                ->sum('amount');
-            $exp = $allYearFinances->where('type', 'expense')
-                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
-                ->sum('amount');
-
-            if ($selectedYear === 2026) {
-                if ($m < 10 && $inc == 0) {
-                    $inc = 15000000 + ($m * 650000);
-                    $exp = 3200000 + ($m * 150000);
-                } elseif ($m > 10 && $inc == 0) {
-                    $inc = 19500000;
-                    $exp = 3800000;
-                } elseif ($inc == 0 && $m == 10) {
-                    $inc = $monthlyIncome ?: 18200000;
-                    $exp = $totalExpense ?: 3500000;
-                }
-            } elseif ($selectedYear === 2025 && $inc == 0) {
-                $inc = 14500000 + ($m * 420000);
-                $exp = 3100000 + ($m * 80000);
-            } elseif ($selectedYear === 2024 && $inc == 0) {
-                $inc = 12000000 + ($m * 300000);
-                $exp = 2600000 + ($m * 60000);
-            } elseif ($selectedYear === 2027 && $inc == 0) {
-                $inc = 18500000 + ($m * 300000);
-                $exp = 3600000 + ($m * 60000);
+            if (!$hasDbRecords) {
+                $chartIncome[] = 0;
+                $chartExpense[] = 0;
+                $chartNet[] = 0;
+                continue;
             }
+            $inc = (int)$allYearFinances->where('type', 'income')
+                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
+                ->sum('amount');
+            $exp = (int)$allYearFinances->where('type', 'expense')
+                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
+                ->sum('amount');
 
-            $chartIncome[] = (int)$inc;
-            $chartExpense[] = (int)$exp;
-            $chartNet[] = (int)($inc - $exp);
+            $chartIncome[] = $inc;
+            $chartExpense[] = $exp;
+            $chartNet[] = $inc - $exp;
         }
 
         $activeTickets = MaintenanceTicket::where('status', '!=', 'done')->count();
@@ -1079,24 +1053,30 @@ class DashboardController extends Controller
     public function getFinanceStats(Request $request): JsonResponse
     {
         $year = (int)$request->input('year', 2026);
-        if ($year < 2026) {
+        if ($year < 2000) {
             $year = 2026;
         }
-        $finances = Finance::whereYear('date', $year)->orderBy('date', 'desc')->get();
-        $hasDb = $finances->count() > 0;
+        $location = $request->input('location', 'all');
 
-        $income = $finances->where('type', 'income')->sum('amount');
-        $expense = $finances->where('type', 'expense')->sum('amount');
-
-        if (!$hasDb) {
-            if ($year === 2027) {
-                $income = 238000000;
-                $expense = 46000000;
-            } else {
-                $income = 0;
-                $expense = 0;
-            }
+        $finances = Finance::with('room')->whereYear('date', $year)->orderBy('date', 'desc')->get();
+        if (!empty($location) && $location !== 'all') {
+            $finances = $finances->filter(function ($f) use ($location) {
+                $rLoc = $f->room?->location ?? '';
+                if (!$rLoc) {
+                    $desc = strtolower(($f->description ?? '') . ' ' . ($f->category ?? '') . ' ' . ($f->transaction_code ?? ''));
+                    if (str_contains($desc, 'cabang 2') || str_contains($desc, 'lokasi 2') || str_contains($desc, 'ringroad') || str_contains($desc, 'kmr2') || preg_match('/#20[1-8]\b/', $desc)) {
+                        $rLoc = 'Lokasi 2';
+                    } else {
+                        $rLoc = 'Lokasi 1';
+                    }
+                }
+                return $rLoc === $location;
+            })->values();
         }
+
+        $hasDb = $finances->count() > 0;
+        $income = $hasDb ? (int)$finances->where('type', 'income')->sum('amount') : 0;
+        $expense = $hasDb ? (int)$finances->where('type', 'expense')->sum('amount') : 0;
         $net = $income - $expense;
 
         $chartIncome = [];
@@ -1104,47 +1084,33 @@ class DashboardController extends Controller
         $chartNet = [];
 
         for ($m = 1; $m <= 12; $m++) {
-            $inc = $finances->where('type', 'income')
-                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
-                ->sum('amount');
-            $exp = $finances->where('type', 'expense')
-                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
-                ->sum('amount');
-
-            if ($year === 2026) {
-                if ($m < 10 && $inc == 0) {
-                    $inc = 15000000 + ($m * 650000);
-                    $exp = 3200000 + ($m * 150000);
-                } elseif ($m > 10 && $inc == 0) {
-                    $inc = 19500000;
-                    $exp = 3800000;
-                } elseif ($inc == 0 && $m == 10) {
-                    $inc = $income ?: 18200000;
-                    $exp = $expense ?: 3500000;
-                }
-            } elseif ($year === 2025 && $inc == 0) {
-                $inc = 14500000 + ($m * 420000);
-                $exp = 3100000 + ($m * 80000);
-            } elseif ($year === 2024 && $inc == 0) {
-                $inc = 12000000 + ($m * 300000);
-                $exp = 2600000 + ($m * 60000);
-            } elseif ($year === 2027 && $inc == 0) {
-                $inc = 18500000 + ($m * 300000);
-                $exp = 3600000 + ($m * 60000);
+            if (!$hasDb) {
+                $chartIncome[] = 0;
+                $chartExpense[] = 0;
+                $chartNet[] = 0;
+                continue;
             }
+            $inc = (int)$finances->where('type', 'income')
+                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
+                ->sum('amount');
+            $exp = (int)$finances->where('type', 'expense')
+                ->filter(fn($f) => \Carbon\Carbon::parse($f->date)->month === $m)
+                ->sum('amount');
 
-            $chartIncome[] = (int)$inc;
-            $chartExpense[] = (int)$exp;
-            $chartNet[] = (int)($inc - $exp);
+            $chartIncome[] = $inc;
+            $chartExpense[] = $exp;
+            $chartNet[] = $inc - $exp;
         }
 
         return response()->json([
             'success' => true,
             'year' => $year,
+            'hasData' => $hasDb,
+            'count' => $finances->count(),
             'income' => $income,
             'expense' => $expense,
             'net' => $net,
-            'avgMonthly' => round(($income - $expense) / 12),
+            'avgMonthly' => $hasDb ? (int)round(($income - $expense) / 12) : 0,
             'chartMonths' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
             'chartIncome' => $chartIncome,
             'chartExpense' => $chartExpense,

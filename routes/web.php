@@ -61,6 +61,11 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('admin.dashboard');
     });
 
+    Route::get('/finances/stats', function (\Illuminate\Http\Request $req) {
+        if (!Auth::user()->isOwner()) abort(403);
+        return app(DashboardController::class)->getFinanceStats($req);
+    })->name('finances.stats.direct');
+
     // API routes — owner only
     Route::prefix('api')->group(function () {
         Route::get('/data', function (\Illuminate\Http\Request $req) {
