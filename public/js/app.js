@@ -2324,9 +2324,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             owner_phone: ownerPhone
           })
         });
-        showToast('Informasi profil kos & pengelola berhasil disimpan!', 'success');
+        showToast('Informasi akun pengelola & properti berhasil disimpan!', 'success');
         if (document.getElementById('bannerPropertyName')) document.getElementById('bannerPropertyName').textContent = kosName;
         if (document.getElementById('profileOwnerName')) document.getElementById('profileOwnerName').textContent = ownerName;
+        if (document.getElementById('akunModalOwnerName')) document.getElementById('akunModalOwnerName').textContent = ownerName || 'Mas Robi';
+        const initials = (ownerName || 'Mas Robi').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('') || 'MR';
+        document.querySelectorAll('.host-avatar, .mobile-account-avatar, #akunModalAvatar').forEach(el => { el.textContent = initials; });
+        document.querySelectorAll('.brand-title').forEach(el => { el.textContent = ownerName ? 'Kos ' + ownerName : 'Kos Mas Robi'; });
+        if (typeof window.closeModal === 'function') window.closeModal('modalAkunPengelola');
       } catch (err) {
         showToast('Gagal menyimpan profil', 'warning');
       }

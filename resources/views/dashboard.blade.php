@@ -41,7 +41,10 @@
         if (pageSubtitle) pageSubtitle.textContent = navTitles[tabId].sub;
         if (breadcrumbCurrent) breadcrumbCurrent.textContent = navTitles[tabId].title;
         if (headerActiveTitle) headerActiveTitle.textContent = navTitles[tabId].title;
+        var mobileActiveTitle = document.getElementById('mobileActiveTitle');
+        if (mobileActiveTitle) mobileActiveTitle.textContent = navTitles[tabId].title;
       }
+      if (typeof window.updateSettingsSubChip === 'function') window.updateSettingsSubChip(tabId);
       if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
         setTimeout(window.drawRevenueCurve, 80);
       }
@@ -49,6 +52,33 @@
       if (sb) sb.classList.remove('open');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+
+    // Menampilkan nama sub-fitur aktif di dalam Pengaturan Kos (judul mobile & desktop)
+    window.updateSettingsSubChip = function(tabId) {
+      var chip = document.getElementById('mobileActiveSubChip');
+      var headerSub = document.getElementById('headerActiveSubChip');
+      var activeTab = tabId;
+      if (!activeTab) {
+        var activePane = document.querySelector('.tab-pane.active');
+        activeTab = activePane ? activePane.id : '';
+      }
+      var label = '';
+      if (activeTab === 'tab-settings') {
+        var activeBtn = document.querySelector('#settingsSubTabNav .btn-settings-subtab.active span');
+        label = activeBtn ? activeBtn.textContent.trim() : '';
+      }
+      [chip, headerSub].forEach(function(el) {
+        if (!el) return;
+        el.textContent = label;
+        el.style.display = label ? 'inline-flex' : 'none';
+      });
+    };
+
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('#settingsSubTabNav .btn-settings-subtab')) {
+        setTimeout(function() { window.updateSettingsSubChip('tab-settings'); }, 0);
+      }
+    });
 
     window.openModal = function(modalId) {
       var modal = document.getElementById(modalId);
@@ -75,6 +105,8 @@
     $allBranchesGlobal = $setting->branches ?? [];
     $branch1Name = $allBranchesGlobal['lokasi_1']['name'] ?? 'Kos Mas Robi 1 - Kampus Utama';
     $branch2Name = $allBranchesGlobal['lokasi_2']['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive';
+    $ownerInitials = collect(preg_split('/\s+/', trim($setting->owner_name ?? 'Mas Robi')))
+      ->filter()->take(2)->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('') ?: 'MR';
   @endphp
 
   <!-- =========================================================================
@@ -153,9 +185,9 @@
 
     <div class="sidebar-footer">
       <div class="sidebar-user-label">Akun Pengelola</div>
-      <div class="host-profile modern-host-card">
+      <div class="host-profile modern-host-card host-profile-clickable" role="button" tabindex="0" onclick="window.openModal('modalAkunPengelola')" title="Buka Akun Pengelola">
         <div class="host-avatar-wrap">
-          <div class="host-avatar">MR</div>
+          <div class="host-avatar">{{ $ownerInitials }}</div>
           <span class="host-online-pulse" title="Online Aktif"></span>
         </div>
         <div class="host-info">
@@ -165,6 +197,9 @@
           </div>
           <div class="host-role">Pengelola Properti Kos</div>
         </div>
+        <span class="host-profile-chevron" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
       </div>
     </div>
   </aside>
@@ -178,6 +213,7 @@
     <header class="app-header modern-header">
       <div class="header-left">
         <h1 class="header-active-page-title" id="headerActiveTitle">Dashboard</h1>
+        <span class="header-sub-chip" id="headerActiveSubChip" style="display: none;"></span>
         <div class="mobile-header-brand">
           <div class="brand-icon-box modern-brand-box">
             <div class="brand-icon-glow"></div>
@@ -197,6 +233,9 @@
       </div>
 
       <div class="header-right modern-header-right">
+        <button type="button" class="mobile-account-btn" onclick="window.openModal('modalAkunPengelola')" title="Akun Pengelola" aria-label="Akun Pengelola">
+          <span class="mobile-account-avatar">{{ $ownerInitials }}</span>
+        </button>
         <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline; margin:0;">
           @csrf
           <button type="button" class="header-action-btn modern-logout-btn" id="btnTriggerLogoutAdmin" title="Keluar / Logout">
@@ -206,6 +245,15 @@
         </form>
       </div>
     </header>
+
+    <!-- MOBILE ACTIVE FEATURE TITLE BAR (Khusus HP — sama seperti judul fitur di komputer) -->
+    <div class="mobile-page-titlebar" id="mobilePageTitlebar">
+      <div class="mpt-label">Anda sedang berada di</div>
+      <div class="mpt-row">
+        <h1 class="mpt-title" id="mobileActiveTitle">Dashboard</h1>
+        <span class="mpt-sub-chip" id="mobileActiveSubChip" style="display: none;"></span>
+      </div>
+    </div>
 
     <!-- =======================================================================
          CONTENT BODY & TABS
@@ -1048,16 +1096,16 @@
       </div>
       <div class="tab-pane" id="tab-settings">
         <!-- ====== SUPER PREMIUM SETTINGS HEADER ====== -->
-        <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 24px 30px; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35);">
+        <div class="settings-hero-banner" style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 24px 30px; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35);">
           <!-- Decorative blobs -->
           <div style="position:absolute; top:-40px; right:-40px; width:200px; height:200px; background:rgba(255,255,255,0.05); border-radius:50%; pointer-events:none;"></div>
           <div style="position:absolute; bottom:-60px; left:60px; width:150px; height:150px; background:rgba(20, 184, 166, 0.1); border-radius:50%; pointer-events:none;"></div>
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; position: relative; z-index: 1;">
             <div style="display: flex; align-items: center; gap: 16px;">
-              <div style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; backdrop-filter: blur(4px);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
+              <div class="settings-hero-icon" style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #ffffff; flex-shrink: 0; backdrop-filter: blur(4px);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
               <div>
-                <h2 style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
-                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & jaringan WiFi kost</p>
+                <h2 class="settings-hero-title" style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
+                <p class="settings-hero-desc" style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & jaringan WiFi kost</p>
               </div>
             </div>
           </div>
@@ -1067,13 +1115,13 @@
         <div style="margin-bottom: 26px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px;">
           <div class="settings-segmented-nav" id="settingsSubTabNav" style="display: flex; gap: 4px; background: transparent; padding: 0; border-radius: 0;">
             <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span>Tampilan & Foto</span>
+              <span>Landing Page</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Titik Lokasi</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span>Profil Kos</span>
+              <span>Tata Tertib</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Jaringan WiFi</span>
@@ -1468,49 +1516,11 @@
         </div>
 
         <!-- =========================================================================
-             SUBTAB 3: PROFIL KOS & MANAJEMEN DATA
+             SUBTAB 3: TATA TERTIB & PERATURAN KOS
+             (Informasi Properti & Pengelola dipindahkan ke modal Akun Pengelola)
              ========================================================================= -->
         <div class="settings-subtab-pane" id="subtab-profile" style="display: none;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
-
-            <!-- Profile Card -->
-            <div class="settings-modern-card" style="margin-bottom: 0;">
-              <div class="settings-card-header">
-                <div class="settings-card-title-group">
-                  <div class="settings-card-icon-badge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                  <div>
-                    <h3 class="settings-card-title">Informasi Properti & Pengelola</h3>
-                    <div class="settings-card-subtitle">Nama kos, nama pengelola, dan kontak WhatsApp resmi</div>
-                  </div>
-                </div>
-              </div>
-              <form id="settingsGeneralProfileForm" style="display: flex; flex-direction: column; gap: 16px;">
-                <div class="form-group">
-                  <label for="setKosName" style="font-weight: 700;">Nama Resmi Properti Kos</label>
-                  <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}">
-                </div>
-                <div class="form-group">
-                  <label for="setOwnerName" style="font-weight: 700;">Nama Pemilik / Pengelola Utama</label>
-                  <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}">
-                </div>
-                <div class="form-group">
-                  <label for="setOwnerPhone" style="font-weight: 700;">No. WhatsApp Pengelola (Format 62...)</label>
-                  <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}">
-                </div>
-                <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 6px; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Profil Kos</button>
-              </form>
-
-              <hr style="border: none; border-top: 1px solid var(--border-color); margin: 22px 0;">
-
-              <div>
-                <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data & Cadangan</h4>
-                <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                  <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">Unduh Cadangan JSON</button>
-                  <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">Reset Data Sampel</button>
-                </div>
-              </div>
-            </div>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 24px; max-width: 960px; margin: 0 auto;">
 
             <!-- Tata Tertib & Peraturan Kos Card -->
             <div class="settings-modern-card" style="margin-bottom: 0;">
@@ -1739,6 +1749,63 @@
       <span>Pengaturan</span>
     </div>
   </nav>
+
+  <!-- =========================================================================
+       MODAL: AKUN PENGELOLA (INFORMASI PROPERTI & PENGELOLA + MANAJEMEN DATA)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modalAkunPengelola" style="display: none;">
+    <div class="modal-dialog" style="max-width: 560px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%);">
+        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+          <div class="akun-modal-avatar" id="akunModalAvatar">{{ $ownerInitials }}</div>
+          <div style="min-width: 0;">
+            <div style="font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55);">Akun Pengelola</div>
+            <h3 id="akunModalOwnerName" style="color: #fff; margin: 2px 0 0; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $setting->owner_name ?? 'Mas Robi' }}</h3>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal="modalAkunPengelola" aria-label="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="padding: 22px;">
+        <div class="settings-card-header" style="margin-bottom: 18px;">
+          <div class="settings-card-title-group">
+            <div class="settings-card-icon-badge" style="color: #ffffff;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            <div>
+              <h3 class="settings-card-title">Informasi Properti & Pengelola</h3>
+              <div class="settings-card-subtitle">Nama kos, nama pengelola, dan kontak WhatsApp resmi</div>
+            </div>
+          </div>
+        </div>
+        <form id="settingsGeneralProfileForm" style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="form-group">
+            <label for="setKosName" style="font-weight: 700;">Nama Resmi Properti Kos</label>
+            <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}">
+          </div>
+          <div class="form-group">
+            <label for="setOwnerName" style="font-weight: 700;">Nama Pemilik / Pengelola Utama</label>
+            <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}">
+          </div>
+          <div class="form-group">
+            <label for="setOwnerPhone" style="font-weight: 700;">No. WhatsApp Pengelola (Format 62...)</label>
+            <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}">
+          </div>
+          <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 6px; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Akun Pengelola</button>
+        </form>
+
+        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 22px 0;">
+
+        <div>
+          <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data & Cadangan</h4>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">Unduh Cadangan JSON</button>
+            <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">Reset Data Sampel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- =========================================================================
        MODAL: DETAIL KAMAR (MODERN LUXURY TEAL)
