@@ -43,8 +43,9 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $request->session()->forget('url.intended');
 
-            if (Auth::user()->isOwner()) {
-                return redirect()->route('admin.dashboard')->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '! Masuk sebagai Admin.');
+            if (Auth::user()->isStaffOrOwner()) {
+                $roleLabel = Auth::user()->isOwner() ? 'Owner' : 'Admin';
+                return redirect()->route('admin.dashboard')->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '! Masuk sebagai ' . $roleLabel . '.');
             }
 
             return redirect()->route('tenant.portal')->with('success', 'Selamat datang kembali, ' . Auth::user()->name . '! Masuk sebagai Pelanggan.');
@@ -370,6 +371,9 @@ class AuthController extends Controller
     {
         if ($role === 'owner') {
             $user = User::where('role', 'owner')->first();
+        } elseif ($role === 'admin') {
+            $user = User::where('role', 'admin')->first()
+                 ?? User::where('email', 'admin@gmail.com')->first();
         } elseif ($role === 'sarah') {
             $user = User::where('email', 'sarah@gmail.com')->first();
         } else {
@@ -380,7 +384,7 @@ class AuthController extends Controller
         if ($user) {
             Auth::login($user);
             request()->session()->regenerate();
-            return $user->isOwner() ? redirect()->route('admin.dashboard') : redirect()->route('tenant.portal');
+            return $user->isStaffOrOwner() ? redirect()->route('admin.dashboard') : redirect()->route('tenant.portal');
         }
 
         return redirect()->route('login');

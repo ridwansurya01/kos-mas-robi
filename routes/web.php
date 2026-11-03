@@ -37,114 +37,120 @@ Route::get('/quick-login/{role?}', [AuthController::class, 'quickLogin'])->name(
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // =========================================================================
-// 1. OWNER / PENGELOLA DASHBOARD ROUTES — Owner only
+// 1. OWNER & ADMIN DASHBOARD ROUTES
 // =========================================================================
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin', function (\Illuminate\Http\Request $request) {
-        if (!Auth::user()->isOwner()) {
+        if (!Auth::user()->isStaffOrOwner()) {
             return redirect()->route('tenant.portal');
         }
         return app(DashboardController::class)->index($request);
     })->name('admin.dashboard');
 
     Route::get('/dashboard', function () {
-        if (!Auth::user()->isOwner()) {
+        if (!Auth::user()->isStaffOrOwner()) {
             return redirect()->route('tenant.portal');
         }
         return redirect()->route('admin.dashboard');
     });
 
     Route::get('/admin/dashboard', function () {
-        if (!Auth::user()->isOwner()) {
+        if (!Auth::user()->isStaffOrOwner()) {
             return redirect()->route('tenant.portal');
         }
         return redirect()->route('admin.dashboard');
     });
 
+    // Laporan Keuangan Stats: Khusus Role Owner
     Route::get('/finances/stats', function (\Illuminate\Http\Request $req) {
-        if (!Auth::user()->isOwner()) abort(403);
+        if (!Auth::user()->isOwner()) {
+            abort(403, 'Akses Laporan Keuangan khusus Role Owner.');
+        }
         return app(DashboardController::class)->getFinanceStats($req);
     })->name('finances.stats.direct');
 
-    // API routes — owner only
+    // API routes — Owner & Admin
     Route::prefix('api')->group(function () {
         Route::get('/data', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->getJsonData($req);
         })->name('api.data');
 
         Route::post('/rooms', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->saveRoom($req);
         })->name('api.rooms.save');
 
         Route::post('/rooms/upload-photo', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->uploadRoomPhoto($req);
         })->name('api.rooms.upload_photo');
 
         Route::post('/rooms/{id}/status', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->updateRoomStatus($req, $id);
         })->name('api.rooms.status');
 
         Route::post('/rooms/{id}/custom-interior', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->updateCustomInterior($req, $id);
         })->name('api.rooms.custom_interior');
 
         Route::post('/tenants', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->saveTenant($req);
         })->name('api.tenants.save');
 
         Route::post('/tenants/{id}/checkout', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->checkoutTenant($req, $id);
         })->name('api.tenants.checkout');
 
         Route::post('/finances', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->saveFinance($req);
         })->name('api.finances.save');
 
         Route::post('/finances/{id}/send-receipt', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->sendReceiptToTenant($req, $id);
         })->name('api.finances.send-receipt');
 
+        // Laporan Keuangan: Khusus Role Owner
         Route::get('/finances/stats', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isOwner()) {
+                abort(403, 'Akses Laporan Keuangan khusus Role Owner.');
+            }
             return app(DashboardController::class)->getFinanceStats($req);
         })->name('api.finances.stats');
 
         Route::post('/maintenance', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->saveMaintenance($req);
         })->name('api.maintenance.save');
 
         Route::post('/maintenance/{id}/status', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->updateMaintenanceStatus($req, $id);
         })->name('api.maintenance.status');
 
         Route::post('/settings', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->saveSettings($req);
         })->name('api.settings.save');
 
         Route::post('/settings/landing', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->saveLandingPage($req);
         })->name('api.settings.landing');
 
         Route::get('/export', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->exportData($req);
         })->name('api.export');
 
         Route::post('/reset', function (\Illuminate\Http\Request $req) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isOwner()) abort(403, 'Reset data hanya dapat dilakukan oleh Owner.');
             return app(DashboardController::class)->resetData($req);
         })->name('api.reset');
 
@@ -154,7 +160,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Room Transfers Approval API
         Route::post('/room-transfers/{id}/status', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isOwner()) abort(403);
+            if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->updateRoomTransferStatus($req, $id);
         })->name('api.room_transfers.status');
     });

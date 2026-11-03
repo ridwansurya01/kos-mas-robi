@@ -30,13 +30,13 @@ class KosMasRobiSeeder extends Seeder
             ]
         );
 
-        // Akun Admin Tambahan
+        // Akun Admin Operasional (Akses Semua Fitur kecuali Laporan Keuangan)
         User::updateOrCreate(
             ['email' => 'admin@gmail.com'],
             [
-                'name' => 'Admin',
+                'name' => 'Admin Operasional',
                 'password' => Hash::make('admin123'),
-                'role' => 'owner',
+                'role' => 'admin',
                 'phone' => null,
                 'avatar' => null,
             ]

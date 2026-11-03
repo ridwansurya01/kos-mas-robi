@@ -12,7 +12,11 @@
       maintenance: @json($allMaintenance ?? [])
     };
 
+    window.isOwnerUser = {{ Auth::user()->isOwner() ? 'true' : 'false' }};
     window.switchTab = function(tabId) {
+      if (tabId === 'tab-finances' && !window.isOwnerUser) {
+        tabId = 'tab-dashboard';
+      }
       var navTitles = {
         'tab-dashboard': { title: 'Dashboard', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
         'tab-rooms': { title: 'Daftar Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
@@ -125,7 +129,7 @@
         <h2 class="brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
         <div class="brand-subtitle-wrap">
           <span class="brand-status-dot"></span>
-          <span class="brand-badge modern-badge">Smart Kost Pro</span>
+          <span class="brand-badge modern-badge">{{ Auth::user()->isOwner() ? 'Manajemen Owner' : 'Manajemen Admin' }}</span>
         </div>
       </div>
     </div>
@@ -170,12 +174,14 @@
         <span class="nav-badge-count" id="badgePendingRepairs">{{ $activeTickets }}</span>
       </div>
 
-      <div class="nav-section-title" style="margin-top: 14px;">Manajemen Admin</div>
+      <div class="nav-section-title" style="margin-top: 14px;">{{ Auth::user()->isOwner() ? 'Manajemen Owner' : 'Manajemen Admin' }}</div>
 
+      @if(Auth::user()->isOwner())
       <div class="nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')" role="button" tabindex="0">
         <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
         <span>Laporan Keuangan</span>
       </div>
+      @endif
 
       <div class="nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')" role="button" tabindex="0">
         <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
@@ -184,18 +190,18 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="sidebar-user-label">Akun Pengelola</div>
-      <div class="host-profile modern-host-card host-profile-clickable" role="button" tabindex="0" onclick="window.openModal('modalAkunPengelola')" title="Buka Akun Pengelola">
+      <div class="sidebar-user-label">Akun {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}</div>
+      <div class="host-profile modern-host-card host-profile-clickable" role="button" tabindex="0" onclick="window.openModal('modalAkunPengelola')" title="Buka Akun {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}">
         <div class="host-avatar-wrap">
           <div class="host-avatar">{{ $ownerInitials }}</div>
           <span class="host-online-pulse" title="Online Aktif"></span>
         </div>
         <div class="host-info">
           <div class="host-name-row">
-            <span class="host-name" id="profileOwnerName">{{ $setting->owner_name ?? 'Mas Robi' }}</span>
-            <span class="host-badge-admin">Owner</span>
+            <span class="host-name" id="profileOwnerName">{{ Auth::user()->name }}</span>
+            <span class="host-badge-admin">{{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}</span>
           </div>
-          <div class="host-role">Pengelola Properti Kos</div>
+          <div class="host-role">{{ Auth::user()->isOwner() ? 'Pengelola Properti Kos' : 'Staf Admin Operasional' }}</div>
         </div>
         <span class="host-profile-chevron" aria-hidden="true">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -226,14 +232,14 @@
             <h2 class="brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
             <div class="brand-subtitle-wrap">
               <span class="brand-status-dot"></span>
-              <span class="brand-badge modern-badge">Smart Kost Pro</span>
+              <span class="brand-badge modern-badge">{{ Auth::user()->isOwner() ? 'Manajemen Owner' : 'Manajemen Admin' }}</span>
             </div>
           </div>
         </div>
       </div>
 
       <div class="header-right modern-header-right">
-        <button type="button" class="mobile-account-btn" onclick="window.openModal('modalAkunPengelola')" title="Akun Pengelola" aria-label="Akun Pengelola">
+        <button type="button" class="mobile-account-btn" onclick="window.openModal('modalAkunPengelola')" title="Akun {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}" aria-label="Akun {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}">
           <span class="mobile-account-avatar">{{ $ownerInitials }}</span>
         </button>
         <form action="{{ route('logout') }}" method="POST" id="formLogoutAdmin" style="display:inline; margin:0;">
@@ -294,6 +300,7 @@
             </div>
           </div>
 
+          @if(Auth::user()->isOwner())
           <div class="stat-card">
             <div class="stat-card-header">
               <span class="stat-card-title">Pemasukan Bulan Ini</span>
@@ -303,10 +310,25 @@
             </div>
             <div class="stat-card-value" id="statMonthlyIncome">Rp {{ number_format($monthlyIncome, 0, ',', '.') }}</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-up">▲ Terverifikasi</span>
+              <span class="stat-trend-up">● Terverifikasi Owner</span>
               <span>Buku Kas Aktif</span>
             </div>
           </div>
+          @else
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Total Penghuni Aktif</span>
+              <div class="stat-icon emerald">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value">{{ $occupiedRooms }} Penghuni</div>
+            <div class="stat-card-meta">
+              <span class="stat-trend-up">● Terdata Aktif</span>
+              <span>Penghuni Unit Kamar</span>
+            </div>
+          </div>
+          @endif
 
           <div class="stat-card">
             <div class="stat-card-header">
@@ -532,7 +554,7 @@
             </div>
             <div class="stat-card-value" id="billKpiPaidVal" style="color:#10b981;">{{ $occupiedRooms - $dueRooms }} Kamar</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-up">● Terverifikasi Admin</span>
+              <span class="stat-trend-up">● Terverifikasi {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}</span>
               <span><span data-branch-name="lokasi_1">{{ $branch1Name }}</span>: {{ $b1PaidCount }} • <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>: {{ $b2PaidCount }}</span>
             </div>
           </div>
@@ -700,6 +722,7 @@
         </div>
       </div>
 
+      @if(Auth::user()->isOwner())
       <!-- =====================================================================
            PANE 4: TAB LAPORAN KEUANGAN & KURVA ARUS KAS (DENGAN PERBEDAAN 2 KOS)
            ===================================================================== -->
@@ -900,6 +923,7 @@
           </div>
         </div>
       </div>
+      @endif
 
       <!-- =====================================================================
            PANE 5: TAB KELUHAN & PERAWATAN (DENGAN PERBEDAAN 2 KOS MODERN)
@@ -1745,10 +1769,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       <span>Servis</span>
     </div>
+    @if(Auth::user()->isOwner())
     <div class="bottom-nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       <span>Keuangan</span>
     </div>
+    @endif
     <div class="bottom-nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Pengaturan</span>
@@ -1764,8 +1790,8 @@
         <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
           <div class="akun-modal-avatar" id="akunModalAvatar">{{ $ownerInitials }}</div>
           <div style="min-width: 0;">
-            <div style="font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55);">Akun Pengelola</div>
-            <h3 id="akunModalOwnerName" style="color: #fff; margin: 2px 0 0; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $setting->owner_name ?? 'Mas Robi' }}</h3>
+            <div style="font-size: 0.66rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55);">Akun {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}</div>
+            <h3 id="akunModalOwnerName" style="color: #fff; margin: 2px 0 0; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ Auth::user()->name }}</h3>
           </div>
         </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalAkunPengelola" aria-label="Tutup">
@@ -2135,7 +2161,7 @@
                 <div style="width: 28px; height: 28px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
                 <span style="font-weight: 800; font-size: 0.92rem; color: #04272c;">Custom Interior & Anggaran</span>
               </div>
-              <span style="font-size: 0.68rem; background: #063d45; color: #fff; padding: 3px 9px; border-radius: 999px; font-weight: 700;">Admin Only</span>
+              <span style="font-size: 0.68rem; background: #063d45; color: #fff; padding: 3px 9px; border-radius: 999px; font-weight: 700;">{{ Auth::user()->isOwner() ? 'Owner Only' : 'Admin Only' }}</span>
             </div>
             <div class="form-row" style="gap: 14px;">
               <div class="form-group" style="margin-bottom: 0;">
@@ -2159,7 +2185,7 @@
               <textarea id="roomCustomInteriorRequestInput" class="form-control" rows="2" placeholder="Catatan permintaan dari pelanggan..." style="border-color: #99f6e4; border-radius: 10px;"></textarea>
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-              <label for="roomCustomInteriorNotesInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Catatan Admin untuk Pelanggan</label>
+              <label for="roomCustomInteriorNotesInput" style="font-size: 0.76rem; font-weight: 700; color: #0f766e;">Catatan {{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }} untuk Pelanggan</label>
               <input type="text" id="roomCustomInteriorNotesInput" class="form-control" placeholder="Contoh: Ambalan kayu jati siap dipasang tgl 5 Nov." style="border-color: #99f6e4; border-radius: 10px;">
             </div>
           </div>
@@ -2530,7 +2556,7 @@
         </div>
       </div>
       <h3 class="kmr-logout-title">Yakin Ingin Keluar?</h3>
-      <p class="kmr-logout-subtitle">Sesi Anda sebagai Pengelola di <strong>{{ $setting->kos_name }}</strong> akan diakhiri. Anda perlu login kembali untuk mengakses panel admin.</p>
+      <p class="kmr-logout-subtitle">Sesi Anda sebagai <strong>{{ Auth::user()->isOwner() ? 'Owner' : 'Admin' }}</strong> di <strong>{{ $setting->kos_name }}</strong> akan diakhiri. Anda perlu login kembali untuk mengakses panel {{ Auth::user()->isOwner() ? 'owner' : 'admin' }}.</p>
       <div class="kmr-logout-actions">
         <button type="button" class="kmr-logout-btn-cancel" id="btnCancelAdminLogout">Batal</button>
         <button type="button" class="kmr-logout-btn-confirm" id="btnConfirmAdminLogout">Ya, Keluar</button>
@@ -3268,7 +3294,7 @@
         trxRowsHtml =
           '<tr>' +
             '<td colspan="6" style="padding:26px 16px;text-align:center;background:#f8fafc;color:#64748b;font-size:0.8rem;font-weight:700;border-bottom:1px solid #e2e8f0;">' +
-              'DATA NIHIL (Rp 0) — Belum ada transaksi keuangan yang dicatat oleh Admin pada Tahun ' + payload.year + '.' +
+              'DATA NIHIL (Rp 0) — Belum ada transaksi keuangan yang dicatat pada Tahun ' + payload.year + '.' +
             '</td>' +
           '</tr>';
       } else {
