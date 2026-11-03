@@ -158,52 +158,6 @@
     color: #1e293b;
   }
 
-  /* Quick Demo Helper Box */
-  .auth-demo-box {
-    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-    border: 1px solid #ccfbf1;
-    border-radius: 18px;
-    padding: 13px 15px;
-    margin-bottom: 20px;
-    animation: fadeIn 0.4s ease;
-  }
-  .auth-demo-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 8px;
-  }
-  .auth-demo-pill {
-    padding: 9px 12px;
-    border-radius: 12px;
-    border: 1px solid transparent;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s ease;
-    font-family: inherit;
-  }
-  .auth-demo-pill.admin-pill {
-    background: #0a5661;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(10, 86, 97, 0.25);
-  }
-  .auth-demo-pill.admin-pill:hover {
-    background: #08434c;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(10, 86, 97, 0.35);
-  }
-  .auth-demo-pill.tenant-pill {
-    background: #ffffff;
-    color: #0e7482;
-    border-color: #99f6e4;
-    box-shadow: 0 2px 8px rgba(14, 116, 130, 0.08);
-  }
-  .auth-demo-pill.tenant-pill:hover {
-    border-color: #0e7482;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(14, 116, 130, 0.16);
-  }
-
   /* Modern Animated Input Groups */
   .auth-field-group {
     position: relative;
@@ -458,7 +412,7 @@
                  id="loginEmail" 
                  name="email" 
                  class="auth-input-control" 
-                 placeholder="admin@gmail.com atau dimas@gmail.com" 
+                 placeholder="Masukkan alamat email Anda" 
                  value="{{ old('email') }}" 
                  required 
                  autofocus>
@@ -531,22 +485,6 @@
         </svg>
         <span>Masuk dengan Akun Google</span>
       </a>
-
-      {{-- Fast Demo Switcher --}}
-      <div style="margin-top: 18px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 14px; text-align: center;">
-        <div style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Akses Cepat 1-Klik Akun Demo</div>
-        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-          <a href="{{ route('quick-login', 'owner') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #032328; color: #ffffff; border-radius: 10px; font-size: 0.75rem; font-weight: 700; text-decoration: none;">
-            Masuk Demo Owner
-          </a>
-          <a href="{{ route('quick-login', 'admin') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #0a5661; color: #ffffff; border-radius: 10px; font-size: 0.75rem; font-weight: 700; text-decoration: none;">
-            Masuk Demo Admin
-          </a>
-          <a href="{{ route('quick-login', 'dimas') }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: #ffffff; border: 1px solid #99f6e4; color: #0a5661; border-radius: 10px; font-size: 0.75rem; font-weight: 700; text-decoration: none;">
-            Masuk Demo Pelanggan
-          </a>
-        </div>
-      </div>
     </form>
 
     {{-- Switch to Register --}}
