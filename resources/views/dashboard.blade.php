@@ -122,7 +122,7 @@
         </svg>
       </div>
       <div class="brand-details">
-        <h2 class="brand-title">{{ $setting->owner_name ? 'Kos ' . $setting->owner_name : 'Kos Mas Robi' }}</h2>
+        <h2 class="brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
         <div class="brand-subtitle-wrap">
           <span class="brand-status-dot"></span>
           <span class="brand-badge modern-badge">Smart Kost Pro</span>
@@ -223,7 +223,7 @@
             </svg>
           </div>
           <div class="brand-details">
-            <h2 class="brand-title">{{ $setting->owner_name ? 'Kos ' . $setting->owner_name : 'Kos Mas Robi' }}</h2>
+            <h2 class="brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
             <div class="brand-subtitle-wrap">
               <span class="brand-status-dot"></span>
               <span class="brand-badge modern-badge">Smart Kost Pro</span>

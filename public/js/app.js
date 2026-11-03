@@ -2330,7 +2330,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         if (document.getElementById('akunModalOwnerName')) document.getElementById('akunModalOwnerName').textContent = ownerName || 'Mas Robi';
         const initials = (ownerName || 'Mas Robi').split(/\s+/).filter(Boolean).slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('') || 'MR';
         document.querySelectorAll('.host-avatar, .mobile-account-avatar, #akunModalAvatar').forEach(el => { el.textContent = initials; });
-        document.querySelectorAll('.brand-title').forEach(el => { el.textContent = ownerName ? 'Kos ' + ownerName : 'Kos Mas Robi'; });
+        document.querySelectorAll('.brand-title').forEach(el => { el.textContent = kosName || 'Kos Mas Robi'; });
         if (typeof window.closeModal === 'function') window.closeModal('modalAkunPengelola');
       } catch (err) {
         showToast('Gagal menyimpan profil', 'warning');
