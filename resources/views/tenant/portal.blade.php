@@ -330,23 +330,6 @@
           <div class="tp-welcome-info">
             <div class="tp-welcome-greeting">{{ $greeting }} Selamat datang di ruang hunian Anda</div>
             <div class="tp-welcome-name">{{ $user->name }}</div>
-            <div class="tp-welcome-meta">
-              @if(($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2')
-                <span class="tp-chip branch-chip-b2">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>{{ $b2NamePortal }}</span>
-                </span>
-              @else
-                <span class="tp-chip branch-chip-b1">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>{{ $b1NamePortal }}</span>
-                </span>
-              @endif
-              <span class="tp-chip">Kamar #{{ $room->number ?? '102' }}</span>
-              <span class="tp-chip">Lantai {{ $room->floor ?? '1' }}</span>
-              <span class="tp-chip">{{ $room->type ?? 'Deluxe AC' }}</span>
-              <span class="tp-chip green">● Aktif Menghuni</span>
-            </div>
           </div>
         </div>
       </div>
@@ -831,13 +814,23 @@
   </div>
 </div>
 
-{{-- Modal 3: Kuitansi Digital & Riwayat Pembayaran (Sesuai Permintaan: Riwayat masuk ke Pop-up ini) --}}
+{{-- Modal 3: Kuitansi Digital & Riwayat Pembayaran --}}
 <div class="modal-overlay" id="modalReceipts">
-  <div class="modal-box wide">
-    <div class="modal-hdr">
-      <div>
-        <h3 class="modal-title">Riwayat Pembayaran & Kuitansi Digital</h3>
-        <p class="modal-subtitle">Bukti resmi transaksi pembayaran sewa Kamar #{{ $room->number ?? '102' }}</p>
+  <div class="modal-box wide tp-receipts-modal-box">
+    <div class="modal-hdr tp-modal-hdr-modern">
+      <div class="tp-hdr-left">
+        <div class="tp-hdr-badge-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="modal-title">Kuitansi Pembayaran & Riwayat</h3>
+          <p class="modal-subtitle">Bukti resmi transaksi sewa Kamar #{{ $room->number ?? '102' }} yang telah divalidasi sistem</p>
+        </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalReceipts" aria-label="Tutup Modal">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -845,110 +838,130 @@
         </svg>
       </button>
     </div>
-    <div class="modal-body">
-      
-      {{-- Tabel Riwayat Pembayaran Lengkap --}}
-      <div class="tp-table-wrap" style="margin-bottom: 20px;">
-        <table class="tp-table">
-          <thead>
-            <tr>
-              <th>Keterangan</th>
-              <th>Tanggal & Jam (Daerah)</th>
-              <th>Metode</th>
-              <th>Jumlah</th>
-              <th>Status & Kuitansi</th>
-            </tr>
-          </thead>
-          <tbody id="paymentsTableBody">
-            @forelse($recentPayments as $p)
-            <tr>
-              <td class="tp-cell-desc">
-                <div class="tp-desc-main">{{ $p->description }}</div>
-                <div class="tp-desc-sub">
-                  <span>{{ $p->transaction_code ?? 'TRX' }}</span>
-                  @if(!empty($p->proof_image))
-                    <a href="{{ asset($p->proof_image) }}" target="_blank" style="color:#2563eb;font-weight:700;text-decoration:none;margin-left:6px;">Foto Bukti</a>
-                  @endif
-                </div>
-              </td>
-              <td class="tp-cell-muted">
-                <div>{{ $p->date->format('d M Y') }}</div>
-                <div style="font-size: 0.74rem; color: #2563eb; font-weight: 700; margin-top: 3px;">
-                  {{ $p->formatted_payment_time }}
-                </div>
-              </td>
-              <td>
-                <span class="tp-method-pill">{{ $p->payment_method }}</span>
-              </td>
-              <td class="tp-cell-amount">Rp {{ number_format($p->amount, 0, ',', '.') }}</td>
-              <td>
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                  <span class="tp-pill paid">LUNAS</span>
-                  <button type="button" class="tp-btn-receipt-small" onclick="viewDetailedReceipt('{{ $p->transaction_code }}', '{{ $p->date->format('d M Y') }}', '{{ $p->formatted_payment_time }}', '{{ $user->name }}', '{{ $room->number ?? '102' }}', '{{ addslashes($p->description) }}', '{{ $p->payment_method }}', '{{ number_format($p->amount, 0, ',', '.') }}', '{{ $p->proof_image ? asset($p->proof_image) : '' }}')">
-                    Kuitansi
-                  </button>
-                </div>
-              </td>
-            </tr>
-            @empty
-            <tr>
-              <td colspan="5" class="tp-table-empty">
-                <div class="tp-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-                <div class="tp-empty-title">Belum ada riwayat pembayaran tercatat</div>
-                <div class="tp-empty-desc">Pembayaran yang telah dikonfirmasi akan muncul otomatis di sini.</div>
-              </td>
-            </tr>
-            @endforelse
-          </tbody>
-        </table>
-      </div>
 
-      {{-- List Kuitansi Digital --}}
-      <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--tp-text-primary); margin-bottom: 12px;">Daftar Kuitansi Digital</h4>
-      @forelse($recentPayments as $p)
-        <div class="tp-receipt-item">
-          <div class="tp-receipt-left">
-            <div class="tp-receipt-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-            <div>
-              <div class="tp-receipt-desc">{{ $p->description }}</div>
-              <div class="tp-receipt-meta">
-                <span>{{ $p->date->format('d M Y') }}</span>
-                <span>•</span>
-                <span style="color:#2563eb; font-weight:700;">{{ $p->formatted_payment_time }}</span>
-                <span>•</span>
-                <span>{{ $p->payment_method }}</span>
-                <span>•</span>
-                <span>Kamar #{{ $room->number ?? '102' }}</span>
+    <div class="modal-body tp-receipts-modal-body">
+      @if($recentPayments->isNotEmpty())
+        {{-- Summary Banner Bar --}}
+        <div class="tp-receipt-summary-bar">
+          <div class="tp-rec-summary-item">
+            <span class="tp-rec-sum-lbl">Total Kuitansi Terbit</span>
+            <span class="tp-rec-sum-val">{{ $recentPayments->count() }} Pembayaran</span>
+          </div>
+          <div class="tp-rec-summary-item right">
+            <span class="tp-rec-sum-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Terverifikasi & Sah
+            </span>
+          </div>
+        </div>
+
+        {{-- Desktop Table View (Hidden on mobile) --}}
+        <div class="tp-receipts-desktop-table-wrap">
+          <table class="tp-table">
+            <thead>
+              <tr>
+                <th>Kode & Keterangan</th>
+                <th>Waktu Transaksi</th>
+                <th>Metode</th>
+                <th>Nominal</th>
+                <th>Status & Kuitansi</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach($recentPayments as $p)
+                <tr>
+                  <td class="tp-cell-desc">
+                    <div class="tp-desc-main">{{ $p->description }}</div>
+                    <div class="tp-desc-sub">
+                      <span class="tp-badge-code">{{ $p->transaction_code ?? 'TRX' }}</span>
+                      @if(!empty($p->proof_image))
+                        <a href="{{ asset($p->proof_image) }}" target="_blank" class="tp-proof-link">Foto Bukti</a>
+                      @endif
+                    </div>
+                  </td>
+                  <td class="tp-cell-muted">
+                    <div style="font-weight: 700; color: #0f172a;">{{ $p->date->format('d M Y') }}</div>
+                    <div class="tp-time-tz">{{ $p->formatted_payment_time }}</div>
+                  </td>
+                  <td>
+                    <span class="tp-method-pill">{{ $p->payment_method }}</span>
+                  </td>
+                  <td class="tp-cell-amount">Rp {{ number_format($p->amount, 0, ',', '.') }}</td>
+                  <td>
+                    <div class="tp-cell-action-group">
+                      <span class="tp-pill paid">LUNAS</span>
+                      <button type="button" class="tp-btn-receipt-small"
+                              onclick="viewDetailedReceipt('{{ $p->transaction_code }}', '{{ $p->date->format('d M Y') }}', '{{ $p->formatted_payment_time }}', '{{ addslashes($user->name) }}', '{{ $room->number ?? '102' }}', '{{ addslashes($p->description) }}', '{{ $p->payment_method }}', '{{ number_format($p->amount, 0, ',', '.') }}', '{{ $p->proof_image ? asset($p->proof_image) : '' }}')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span>Kuitansi</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+
+        {{-- Mobile Cards View (Visible on mobile HP, Hidden on desktop) --}}
+        <div class="tp-receipts-mobile-cards">
+          @foreach($recentPayments as $p)
+            <div class="tp-rec-mobile-card">
+              <div class="tp-rec-mc-top">
+                <span class="tp-badge-code">{{ $p->transaction_code ?? 'TRX' }}</span>
+                <span class="tp-pill paid">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  LUNAS
+                </span>
+              </div>
+              <div class="tp-rec-mc-amount-row">
+                <div class="tp-rec-mc-amount">Rp {{ number_format($p->amount, 0, ',', '.') }}</div>
+                <span class="tp-method-pill">{{ $p->payment_method }}</span>
+              </div>
+              <div class="tp-rec-mc-desc">{{ $p->description }}</div>
+              <div class="tp-rec-mc-meta">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>{{ $p->date->format('d M Y') }} • {{ $p->formatted_payment_time }}</span>
+              </div>
+              <div class="tp-rec-mc-actions">
+                <button type="button" class="tp-rec-mc-btn-primary"
+                        onclick="viewDetailedReceipt('{{ $p->transaction_code }}', '{{ $p->date->format('d M Y') }}', '{{ $p->formatted_payment_time }}', '{{ addslashes($user->name) }}', '{{ $room->number ?? '102' }}', '{{ addslashes($p->description) }}', '{{ $p->payment_method }}', '{{ number_format($p->amount, 0, ',', '.') }}', '{{ $p->proof_image ? asset($p->proof_image) : '' }}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                  <span>Buka Kuitansi Resmi</span>
+                </button>
                 @if(!empty($p->proof_image))
-                  <span>•</span>
-                  <a href="{{ asset($p->proof_image) }}" target="_blank" style="color: #2563eb; font-weight: 700; text-decoration: none;">Foto Bukti</a>
+                  <a href="{{ asset($p->proof_image) }}" target="_blank" class="tp-rec-mc-btn-proof">
+                    Foto Bukti
+                  </a>
                 @endif
               </div>
             </div>
-          </div>
-          <div class="tp-receipt-right">
-            <div class="tp-receipt-amount">+ Rp {{ number_format($p->amount, 0, ',', '.') }}</div>
-            <div style="display: flex; gap: 6px; align-items: center; justify-content: flex-end; margin-top: 4px;">
-              <span class="tp-pill paid">LUNAS</span>
-              <button type="button" class="tp-btn-receipt-small" onclick="viewDetailedReceipt('{{ $p->transaction_code }}', '{{ $p->date->format('d M Y') }}', '{{ $p->formatted_payment_time }}', '{{ $user->name }}', '{{ $room->number ?? '102' }}', '{{ addslashes($p->description) }}', '{{ $p->payment_method }}', '{{ number_format($p->amount, 0, ',', '.') }}', '{{ $p->proof_image ? asset($p->proof_image) : '' }}')">
-                Buka Kuitansi
-              </button>
-            </div>
-          </div>
+          @endforeach
         </div>
-      @empty
-        <div class="tp-receipt-empty">
-          <div class="tp-empty-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
-          <div class="tp-empty-title">Belum ada kuitansi pembayaran</div>
-          <div class="tp-empty-desc">Saat Anda melakukan pembayaran sewa dan dikonfirmasi, kuitansi digital akan otomatis tersimpan di sini.</div>
-        </div>
-      @endforelse
 
+      @else
+        {{-- Sleek Modern Empty State --}}
+        <div class="tp-receipt-empty-clean">
+          <div class="tp-rec-empty-icon-wrap">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <h4 class="tp-rec-empty-heading">Belum Ada Kuitansi Resmi yang Dikirimkan</h4>
+          <p class="tp-rec-empty-paragraph">
+            Pengelola kos belum menerbitkan atau mengirimkan kuitansi pembayaran untuk kamar Anda. Kuitansi resmi dan riwayat pembayaran akan otomatis muncul di sini setelah divalidasi dan dikirimkan oleh Admin Kos Mas Robi.
+          </p>
+        </div>
+      @endif
     </div>
-    <div class="modal-ftr">
+
+    <div class="modal-ftr tp-receipts-modal-ftr">
       <button type="button" class="btn-secondary" data-close-modal="modalReceipts">Tutup</button>
-      <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20ingin%20konfirmasi%20pembayaran%20sewa%20kamar%20%23{{ $room->number ?? '102' }}"
-         target="_blank" class="btn-primary tp-btn-wa-green" style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+      <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20ingin%20konfirmasi%20kuitansi%20pembayaran%20sewa%20kamar%20%23{{ $room->number ?? '102' }}"
+         target="_blank" class="btn-primary tp-btn-wa-green" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
         <span>Konfirmasi via WhatsApp Admin</span>
       </a>
@@ -956,13 +969,22 @@
   </div>
 </div>
 
-{{-- Modal 3B: Kuitansi Digital Pop-up Resmi (Lengkap Jam & Zona Waktu Indonesia WIB / WITA / WIT) --}}
+{{-- Modal 3B: Kuitansi Digital Pop-up Resmi --}}
 <div class="modal-overlay" id="modalDigitalReceiptDetail">
-  <div class="modal-box" style="max-width: 480px;">
-    <div class="modal-hdr">
-      <div>
-        <h3 class="modal-title">Kuitansi Pembayaran Digital</h3>
-        <p class="modal-subtitle">Bukti Resmi & Terverifikasi Sistem</p>
+  <div class="modal-box tp-receipt-detail-modal-box">
+    <div class="modal-hdr tp-modal-hdr-modern">
+      <div class="tp-hdr-left">
+        <div class="tp-hdr-badge-icon emerald">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <polyline points="9 15 11 17 15 13"/>
+          </svg>
+        </div>
+        <div>
+          <h3 class="modal-title">Kuitansi Pembayaran Digital</h3>
+          <p class="modal-subtitle">Bukti Resmi & Terverifikasi Sistem</p>
+        </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalDigitalReceiptDetail" aria-label="Tutup Modal">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -970,57 +992,80 @@
         </svg>
       </button>
     </div>
-    <div class="modal-body receipt-detail-body" style="padding: 18px;">
-      <div class="receipt-paper-card" style="border-radius: 16px; padding: 20px;">
-        <div style="text-align: center; border-bottom: 2px dashed rgba(148, 163, 184, 0.4); padding-bottom: 14px; margin-bottom: 14px;">
-          <h4 style="font-size: 1.15rem; font-weight: 800; margin: 0;" class="receipt-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h4>
-          <p style="font-size: 0.75rem; margin: 4px 0 0 0;" class="receipt-sub">Kuitansi Resmi Pembayaran Sewa Kost</p>
-          <div style="margin-top: 8px; display: inline-block; font-size: 0.78rem; font-weight: 800; padding: 4px 12px; border-radius: 999px;" class="receipt-code-pill" id="dtlRecCode">TRX-000</div>
+
+    <div class="modal-body tp-receipt-slip-body" id="printableReceiptArea">
+      <div class="tp-receipt-slip-card">
+        {{-- Slip Top Header --}}
+        <div class="tp-slip-hdr">
+          <div class="tp-slip-brand">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</div>
+          <div class="tp-slip-subbrand">KUITANSI ELEKTRONIK RESMI PEMBAYARAN SEWA KOST</div>
+          <div class="tp-slip-code-pill" id="dtlRecCode">TRX-000</div>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.84rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="receipt-label">Waktu Pengiriman:</span>
-            <span style="font-weight: 800; padding: 2px 8px; border-radius: 6px;" class="receipt-time-pill" id="dtlRecTime">29 Okt 2026, 12:45:10 WIB</span>
+        {{-- Verification Ribbon --}}
+        <div class="tp-slip-verified-ribbon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>TERVERIFIKASI SAH SISTEM PENGELOLA</span>
+        </div>
+
+        {{-- Slip Key-Value Details --}}
+        <div class="tp-slip-details-list">
+          <div class="tp-slip-row">
+            <span class="tp-slip-lbl">Waktu Terbit:</span>
+            <span class="tp-slip-val highlight" id="dtlRecTime">03 Nov 2026, 10:00:00 WIB</span>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span class="receipt-label">Nama Penghuni:</span>
-            <span style="font-weight: 700;" class="receipt-val" id="dtlRecTenant">{{ $user->name }}</span>
+          <div class="tp-slip-row">
+            <span class="tp-slip-lbl">Nama Penghuni:</span>
+            <span class="tp-slip-val" id="dtlRecTenant">{{ $user->name }}</span>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span class="receipt-label">Unit Kamar:</span>
-            <span style="font-weight: 700;" class="receipt-val" id="dtlRecRoom">Kamar #{{ $room->number ?? '102' }}</span>
+          <div class="tp-slip-row">
+            <span class="tp-slip-lbl">Unit Kamar:</span>
+            <span class="tp-slip-val bold" id="dtlRecRoom">Kamar #{{ $room->number ?? '102' }}</span>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span class="receipt-label">Metode Bayar:</span>
-            <span style="font-weight: 700;" class="receipt-val" id="dtlRecMethod">Transfer Bank</span>
+          <div class="tp-slip-row">
+            <span class="tp-slip-lbl">Metode Bayar:</span>
+            <span class="tp-slip-val" id="dtlRecMethod">Transfer Bank</span>
           </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span class="receipt-label">Keterangan:</span>
-            <span style="max-width: 240px; text-align: right;" class="receipt-desc-val" id="dtlRecDesc">-</span>
+          <div class="tp-slip-row tp-slip-row-desc">
+            <span class="tp-slip-lbl">Keterangan:</span>
+            <span class="tp-slip-val" id="dtlRecDesc">-</span>
           </div>
-          <div style="border-top: 1.5px dashed rgba(148, 163, 184, 0.4); margin-top: 6px; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 800; font-size: 0.92rem;" class="receipt-total-lbl">TOTAL DITERIMA:</span>
-            <span style="font-size: 1.15rem; font-weight: 800;" class="receipt-total-amount" id="dtlRecAmount">Rp 1.500.000</span>
+        </div>
+
+        {{-- Highlighted Total Box --}}
+        <div class="tp-slip-total-box">
+          <div class="tp-slip-total-lbl">TOTAL PEMBAYARAN DITERIMA</div>
+          <div class="tp-slip-total-val" id="dtlRecAmount">Rp 1.500.000</div>
+          <div class="tp-slip-status-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            STATUS: LUNAS & SAH
           </div>
         </div>
 
         <!-- Lampiran Foto Bukti -->
-        <div id="dtlRecProofBox" style="display: none; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(148, 163, 184, 0.3); text-align: center;">
-          <div style="font-size: 0.72rem; font-weight: 800; margin-bottom: 6px;" class="receipt-label">LAMPIRAN FOTO BUKTI / NOTA TRANSAKSI:</div>
-          <img id="dtlRecProofImg" src="" alt="Bukti Transfer" style="max-height: 180px; max-width: 100%; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.4); object-fit: contain;">
+        <div id="dtlRecProofBox" class="tp-slip-proof-section" style="display: none;">
+          <div class="tp-slip-proof-lbl">LAMPIRAN FOTO BUKTI / NOTA TRANSAKSI:</div>
+          <a id="dtlRecProofLink" href="" target="_blank">
+            <img id="dtlRecProofImg" src="" alt="Bukti Transfer" class="tp-slip-proof-img">
+          </a>
         </div>
 
-        <div style="margin-top: 16px; text-align: center; border-top: 2px dashed rgba(148, 163, 184, 0.4); padding-top: 10px;">
-          <span class="tp-pill paid" style="font-size: 0.78rem; padding: 4px 14px;">● STATUS: LUNAS & SAH</span>
-          <p style="font-size: 0.68rem; margin: 8px 0 0 0;" class="receipt-sub">Diterbitkan otomatis secara digital oleh Sistem {{ $setting->kos_name ?? 'Kos Mas Robi' }}</p>
+        {{-- Slip Footer --}}
+        <div class="tp-slip-footer">
+          <p>Kuitansi elektronik ini merupakan bukti pembayaran resmi yang sah dari Sistem Manajemen {{ $setting->kos_name ?? 'Kos Mas Robi' }}. Disimpan secara digital dan dapat dicetak sewaktu-waktu.</p>
         </div>
       </div>
     </div>
-    <div class="modal-ftr">
+
+    <div class="modal-ftr tp-receipt-slip-ftr">
       <button type="button" class="btn-secondary" data-close-modal="modalDigitalReceiptDetail">Tutup</button>
-      <button type="button" class="btn-primary" onclick="window.print()">
-        Cetak / Simpan PDF
+      <button type="button" class="btn-primary tp-btn-print" onclick="window.print()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+          <polyline points="6 9 6 2 18 2 18 9"/>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+          <rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        <span>Cetak / Simpan PDF</span>
       </button>
     </div>
   </div>
@@ -2793,9 +2838,11 @@ function viewDetailedReceipt(code, date, timeWithTz, tenantName, roomNumber, des
 
   var proofBox = document.getElementById('dtlRecProofBox');
   var proofImg = document.getElementById('dtlRecProofImg');
+  var proofLink = document.getElementById('dtlRecProofLink');
   if (proofUrl && proofBox && proofImg) {
     proofBox.style.display = 'block';
     proofImg.src = proofUrl;
+    if (proofLink) proofLink.href = proofUrl;
   } else if (proofBox) {
     proofBox.style.display = 'none';
   }

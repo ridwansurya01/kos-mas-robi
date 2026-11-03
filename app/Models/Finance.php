@@ -22,11 +22,15 @@ class Finance extends Model
         'timezone',
         'cash_date',
         'proof_image',
+        'is_sent_to_tenant',
+        'sent_at',
     ];
 
     protected $casts = [
         'date' => 'date',
         'cash_date' => 'date',
+        'sent_at' => 'datetime',
+        'is_sent_to_tenant' => 'boolean',
         'amount' => 'decimal:2',
     ];
 

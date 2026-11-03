@@ -108,6 +108,11 @@ Route::middleware(['auth'])->group(function () {
             return app(DashboardController::class)->saveFinance($req);
         })->name('api.finances.save');
 
+        Route::post('/finances/{id}/send-receipt', function (\Illuminate\Http\Request $req, $id) {
+            if (!Auth::user()->isOwner()) abort(403);
+            return app(DashboardController::class)->sendReceiptToTenant($req, $id);
+        })->name('api.finances.send-receipt');
+
         Route::get('/finances/stats', function (\Illuminate\Http\Request $req) {
             if (!Auth::user()->isOwner()) abort(403);
             return app(DashboardController::class)->getFinanceStats($req);

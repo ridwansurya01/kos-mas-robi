@@ -486,8 +486,12 @@
            ===================================================================== -->
       <div class="tab-pane" id="tab-bills">
         <div class="section-header" style="justify-content: flex-end;">
-          <div style="display: flex; gap: 10px;">
-            <button type="button" class="btn-primary-action" onclick="exportBillingReport()">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="btn-primary-action" onclick="openManualPaymentReceiptModal()" style="background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              <span>+ Input Pembayaran & Terbitkan Kuitansi</span>
+            </button>
+            <button type="button" class="btn-primary-action" onclick="exportBillingReport()" style="background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color);">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Export Rekap Tagihan</span>
             </button>
@@ -673,8 +677,9 @@
                       <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" target="_blank" class="btn-secondary" style="background:#059669;color:#ffffff;border:none;padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Kirim Pesan WhatsApp Penagihan">
                         WA Tagihan
                       </a>
-                      <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;" onclick="quickMarkPaid('{{ $r->number }}', '{{ $t->name }}', {{ (int)$r->price }})">
-                        Input Lunas Manual
+                      <button type="button" class="btn-secondary" style="background:#0a5661;color:#ffffff;border:none;padding:5px 11px;font-size:0.76rem;font-weight:800;border-radius:8px;display:inline-flex;align-items:center;gap:4px;" onclick="openManualPaymentReceiptModal('{{ $r->id }}', '{{ $r->number }}', '{{ addslashes($t->name) }}', {{ (int)$r->price }}, '{{ $rLoc }}')" title="Catat pembayaran & terbitkan kuitansi digital resmi">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span>Input & Kirim Kuitansi</span>
                       </button>
                     @else
                       <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;" onclick="document.getElementById('btnAddNewTenant')?.click()">
@@ -2242,6 +2247,105 @@
   </div>
 
   <!-- =========================================================================
+       MODAL: INPUT PEMBAYARAN MANUAL & TERBITKAN KUITANSI KE PELANGGAN
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modalManualPaymentReceipt" style="display: none;">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ffffff;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div>
+            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Input Pembayaran & Terbitkan Kuitansi</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Catat pembayaran sewa kos dan langsung kirimkan kuitansi resmi ke Pelanggan</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal="modalManualPaymentReceipt" aria-label="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <form id="formManualPaymentReceipt" onsubmit="submitManualPaymentReceipt(event)">
+        <div class="modal-body" style="padding: 22px; gap: 14px; max-height: calc(88vh - 120px); overflow-y: auto;">
+          <div class="form-group">
+            <label for="payRecRoomId" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Pilih Unit Kamar & Penghuni *</label>
+            <select id="payRecRoomId" class="form-control" required style="border-radius: 12px; font-weight: 700;" onchange="onManualPayRoomChanged(this)">
+              <option value="">-- Pilih Kamar Penghuni --</option>
+              @foreach($rooms as $r)
+                @php $t = $r->activeTenant; @endphp
+                <option value="{{ $r->id }}" data-price="{{ (int)$r->price }}" data-tenant="{{ $t ? $t->name : 'Unit Kosong' }}" data-room="{{ $r->number }}">
+                  Kamar #{{ $r->number }} ({{ $r->type }}) — {{ $t ? $t->name : '(Unit Kosong)' }} [Rp {{ number_format($r->price, 0, ',', '.') }}/bln]
+                </option>
+              @endforeach
+            </select>
+          </div>
+
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="payRecDate" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Tanggal Pembayaran *</label>
+              <input type="date" id="payRecDate" class="form-control" value="{{ date('Y-m-d') }}" required style="border-radius: 12px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="payRecTimezone" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Zona Waktu</label>
+              <select id="payRecTimezone" class="form-control" style="border-radius: 12px; font-weight: 700;">
+                <option value="WIB" selected>WIB (Waktu Indonesia Barat)</option>
+                <option value="WITA">WITA (Waktu Indonesia Tengah)</option>
+                <option value="WIT">WIT (Waktu Indonesia Timur)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row" style="gap: 12px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="payRecAmount" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nominal Pembayaran (Rp) *</label>
+              <input type="number" id="payRecAmount" class="form-control" placeholder="Contoh: 1500000" required style="border-radius: 12px; font-weight: 800; font-size: 1rem; color: #0a5661;">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="payRecMethod" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Metode Pembayaran *</label>
+              <select id="payRecMethod" class="form-control" required style="border-radius: 12px; font-weight: 700;">
+                <option value="Transfer BCA">Transfer Bank BCA</option>
+                <option value="Transfer Mandiri">Transfer Bank Mandiri</option>
+                <option value="Transfer BRI">Transfer Bank BRI</option>
+                <option value="Transfer BNI">Transfer Bank BNI</option>
+                <option value="QRIS / E-Wallet">QRIS / E-Wallet</option>
+                <option value="Tunai (Cash)">Tunai / Cash Langsung ke Pengelola</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="payRecDesc" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Keterangan / Keperluan Kuitansi *</label>
+            <input type="text" id="payRecDesc" class="form-control" placeholder="Contoh: Pembayaran Sewa Kamar #102 Periode November 2026" required style="border-radius: 12px;">
+          </div>
+
+          <div class="form-group">
+            <label for="payRecProofFile" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Lampiran Foto Bukti / Nota Transaksi (Opsional)</label>
+            <input type="file" id="payRecProofFile" class="form-control" accept="image/*" style="border-radius: 12px; padding: 8px;">
+          </div>
+
+          <div style="background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 14px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 10px;">
+            <input type="checkbox" id="payRecSendToTenant" checked style="accent-color: #0a5661; width: 18px; height: 18px; margin-top: 2px;">
+            <div>
+              <label for="payRecSendToTenant" style="font-weight: 800; font-size: 0.86rem; color: #0a5661; cursor: pointer;">
+                Langsung Kirim Kuitansi Resmi ke Portal Pelanggan
+              </label>
+              <div style="font-size: 0.74rem; color: #0f766e; margin-top: 2px;">
+                Saat dicentang, kuitansi digital akan langsung tampil dan dapat dibuka/dicetak oleh anak kos di akun portal pelanggannya.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="padding: 14px 22px;">
+          <button type="button" class="btn-secondary" data-close-modal="modalManualPaymentReceipt">Batal</button>
+          <button type="submit" class="btn-primary" id="btnSubmitPayRec" style="padding: 11px 26px; border-radius: 12px; font-weight: 800; background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%);">
+            Simpan & Kirim Kuitansi ke Pelanggan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
        MODAL: KUITANSI DIGITAL (MODERN LUXURY TEAL)
        ========================================================================= -->
   <div class="modal-backdrop" id="modalReceipt" style="display: none;">
@@ -2999,6 +3103,83 @@
       applyBillingFilters();
     }
     window.filterBillingLocation = filterBillingLocation;
+
+    window.openManualPaymentReceiptModal = function(roomId, roomNumber, tenantName, price, location) {
+      if (roomId) {
+        var select = document.getElementById('payRecRoomId');
+        if (select) select.value = roomId;
+        var amt = document.getElementById('payRecAmount');
+        if (amt && price) amt.value = price;
+        var desc = document.getElementById('payRecDesc');
+        var nowMonth = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date());
+        if (desc) desc.value = 'Pembayaran Sewa Kamar #' + (roomNumber || '') + (tenantName && tenantName !== '-' ? ' (' + tenantName + ')' : '') + ' Periode ' + nowMonth;
+      }
+      window.openModal('modalManualPaymentReceipt');
+    };
+
+    window.onManualPayRoomChanged = function(sel) {
+      var opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) return;
+      var price = opt.getAttribute('data-price');
+      var tenant = opt.getAttribute('data-tenant');
+      var room = opt.getAttribute('data-room');
+      if (price) {
+        var amt = document.getElementById('payRecAmount');
+        if (amt) amt.value = price;
+      }
+      var desc = document.getElementById('payRecDesc');
+      var nowMonth = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date());
+      if (desc) desc.value = 'Pembayaran Sewa Kamar #' + (room || '') + (tenant && tenant !== '(Unit Kosong)' ? ' (' + tenant + ')' : '') + ' Periode ' + nowMonth;
+    };
+
+    window.submitManualPaymentReceipt = function(e) {
+      e.preventDefault();
+      var btn = document.getElementById('btnSubmitPayRec');
+      var prevTxt = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = 'Menyimpan & Mengirim...';
+
+      var fd = new FormData();
+      fd.append('type', 'income');
+      fd.append('category', 'Sewa Kamar');
+      fd.append('room_id', document.getElementById('payRecRoomId').value);
+      fd.append('date', document.getElementById('payRecDate').value);
+      fd.append('timezone', document.getElementById('payRecTimezone').value);
+      fd.append('amount', document.getElementById('payRecAmount').value);
+      fd.append('payment_method', document.getElementById('payRecMethod').value);
+      fd.append('description', document.getElementById('payRecDesc').value);
+      fd.append('send_to_tenant', document.getElementById('payRecSendToTenant').checked ? '1' : '0');
+
+      var fileInput = document.getElementById('payRecProofFile');
+      if (fileInput && fileInput.files[0]) {
+        fd.append('proof_image', fileInput.files[0]);
+      }
+
+      fetch('/api/finances', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: fd
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.innerHTML = prevTxt;
+        if (data.success) {
+          alert(data.message || 'Pembayaran berhasil dicatat & kuitansi resmi langsung dikirim ke pelanggan!');
+          window.closeModal('modalManualPaymentReceipt');
+          window.location.reload();
+        } else {
+          alert(data.message || 'Gagal memproses pembayaran.');
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.innerHTML = prevTxt;
+        alert('Terjadi kesalahan saat memproses pembayaran.');
+      });
+    };
 
     function quickMarkPaid(roomNumber, tenantName, price) {
       if (!confirm("Konfirmasi bahwa tagihan Kamar #" + roomNumber + " (" + tenantName + ") sebesar Rp " + price.toLocaleString("id-ID") + " telah lunas diterima?")) return;

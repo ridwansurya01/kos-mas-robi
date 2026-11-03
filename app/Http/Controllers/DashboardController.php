@@ -589,32 +589,94 @@ class DashboardController extends Controller
      */
     public function saveFinance(Request $request): JsonResponse
     {
+        $roomId = $request->input('room_id');
+        if (!$roomId && $request->filled('room_number')) {
+            $rFound = Room::where('number', $request->input('room_number'))->first();
+            if ($rFound) {
+                $roomId = $rFound->id;
+            }
+        }
+
         $validated = $request->validate([
             'type' => 'required|in:income,expense',
             'date' => 'required|date',
-            'room_id' => 'nullable|exists:rooms,id',
             'description' => 'required|string',
             'amount' => 'required|numeric',
             'payment_method' => 'required|string',
+            'timezone' => 'nullable|string|in:WIB,WITA,WIT',
         ]);
 
+        $proofImagePath = null;
+        if ($request->hasFile('proof_image')) {
+            $file = $request->file('proof_image');
+            $proofDir = public_path('assets/images/proofs');
+            if (!file_exists($proofDir)) {
+                mkdir($proofDir, 0755, true);
+            }
+            $filename = 'proof_' . time() . '_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
+            $file->move($proofDir, $filename);
+            $proofImagePath = 'assets/images/proofs/' . $filename;
+        }
+
+        $sendToTenant = filter_var($request->input('send_to_tenant', true), FILTER_VALIDATE_BOOLEAN);
         $code = 'TRX-' . rand(100, 999);
         $category = $validated['type'] === 'income' ? 'Sewa Kamar' : 'Operasional Kos';
 
-        $finance = Finance::create(array_merge($validated, [
+        $finance = Finance::create([
             'transaction_code' => $code,
+            'room_id' => $roomId,
+            'date' => $validated['date'],
+            'type' => $validated['type'],
             'category' => $category,
-        ]));
+            'amount' => $validated['amount'],
+            'description' => $validated['description'],
+            'payment_method' => $validated['payment_method'],
+            'timezone' => $validated['timezone'] ?? 'WIB',
+            'proof_image' => $proofImagePath,
+            'is_sent_to_tenant' => ($validated['type'] === 'income' && $sendToTenant),
+            'sent_at' => ($validated['type'] === 'income' && $sendToTenant) ? now() : null,
+        ]);
 
-        if (!empty($validated['room_id']) && $validated['type'] === 'income') {
-            $room = Room::find($validated['room_id']);
+        if (!empty($roomId) && $validated['type'] === 'income') {
+            $room = Room::find($roomId);
             if ($room && $room->status === 'due') {
                 $room->status = 'occupied';
                 $room->save();
             }
         }
 
-        return response()->json(['success' => true, 'finance' => $finance]);
+        return response()->json([
+            'success' => true,
+            'message' => $finance->is_sent_to_tenant
+                ? 'Pembayaran berhasil dicatat dan kuitansi digital langsung dikirim ke pelanggan!'
+                : 'Transaksi berhasil dicatat ke Buku Kas!',
+            'finance' => $finance,
+        ]);
+    }
+
+    /**
+     * Send receipt directly to tenant.
+     */
+    public function sendReceiptToTenant(Request $request, $id): JsonResponse
+    {
+        $finance = Finance::findOrFail($id);
+        $finance->is_sent_to_tenant = true;
+        $finance->sent_at = now();
+        $finance->save();
+
+        if ($finance->room_id && $finance->type === 'income') {
+            $room = Room::find($finance->room_id);
+            if ($room && $room->status === 'due') {
+                $room->status = 'occupied';
+                $room->save();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kuitansi pembayaran digital berhasil dikirim langsung ke Portal Pelanggan!',
+            'finance' => $finance,
+        ]);
     }
 
     /**

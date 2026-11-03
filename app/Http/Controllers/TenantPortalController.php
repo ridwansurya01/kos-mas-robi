@@ -49,9 +49,10 @@ class TenantPortalController extends Controller
             $dueDate->addMonth();
         }
 
-        // Check recent payment for this room
+        // Check recent payment receipts for this room that have been verified and sent by Admin
         $recentPayments = Finance::where('room_id', $room?->id)
             ->where('type', 'income')
+            ->where('is_sent_to_tenant', true)
             ->orderBy('date', 'desc')
             ->get();
 
