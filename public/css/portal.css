@@ -4396,10 +4396,10 @@ textarea.form-control {
   right: 0;
   z-index: 9;
   padding: 40px 18px 16px;
-  background: linear-gradient(to top, rgba(3, 22, 26, 0.88) 0%, rgba(3, 22, 26, 0.45) 55%, transparent 100%);
+  background: linear-gradient(to top, rgba(3, 22, 26, 0.75) 0%, rgba(3, 22, 26, 0.35) 55%, transparent 100%);
   display: flex;
   align-items: flex-end;
-  justify-content: space-between;
+  justify-content: center !important;
   gap: 12px;
   pointer-events: none;
 }
@@ -4685,5 +4685,126 @@ textarea.form-control {
   }
   .tp-quick-tile {
     min-height: auto !important;
+  }
+}
+
+
+/* ==========================================================================
+   EQUAL SIZING FOR KUITANSI & RIWAYAT AND WHATSAPP ADMIN BUTTONS
+   ========================================================================== */
+.tp-details-actions {
+  display: flex !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin-top: 8px !important;
+  align-items: stretch !important;
+}
+
+.tp-btn-secondary-action,
+.tp-btn-receipt-action {
+  background: linear-gradient(135deg, #032328 0%, #063d45 50%, #0a5661 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 6px 20px rgba(3, 35, 40, 0.25) !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  padding: 14px 22px !important;
+  min-height: 52px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  text-decoration: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tp-btn-secondary-action:hover,
+.tp-btn-receipt-action:hover {
+  background: linear-gradient(135deg, #063d45 0%, #0a5661 100%) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 10px 26px rgba(3, 35, 40, 0.35) !important;
+}
+
+.tp-btn-primary-action.tp-btn-wa-green,
+.tp-btn-wa-green {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35) !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+  padding: 14px 22px !important;
+  min-height: 52px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  text-decoration: none !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.tp-btn-primary-action.tp-btn-wa-green:hover,
+.tp-btn-wa-green:hover {
+  background: linear-gradient(135deg, #22c55e 0%, #0e7467 100%) !important;
+  transform: translateY(-2px) scale(1.01) !important;
+  box-shadow: 0 10px 26px rgba(37, 211, 102, 0.45) !important;
+}
+
+@media (max-width: 768px) {
+  .tp-details-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  .tp-btn-secondary-action,
+  .tp-btn-receipt-action,
+  .tp-btn-primary-action.tp-btn-wa-green,
+  .tp-btn-wa-green {
+    flex: 1 1 0 !important;
+    width: 50% !important;
+    min-height: 50px !important;
+    padding: 13px 12px !important;
+    font-size: 0.84rem !important;
+    font-weight: 800 !important;
+    border-radius: 999px !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tp-details-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    width: 100% !important;
+  }
+  .tp-btn-secondary-action,
+  .tp-btn-receipt-action,
+  .tp-btn-primary-action.tp-btn-wa-green,
+  .tp-btn-wa-green {
+    width: 100% !important;
+    flex: none !important;
+    min-height: 52px !important;
+    padding: 14px 18px !important;
+    font-size: 0.9rem !important;
+    font-weight: 800 !important;
+    border-radius: 999px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    justify-content: center !important;
   }
 }

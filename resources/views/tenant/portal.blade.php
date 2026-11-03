@@ -349,17 +349,6 @@
             </div>
           </div>
         </div>
-
-        <div class="tp-welcome-actions">
-          <button type="button" class="tp-btn-profile-edit" onclick="document.getElementById('modalProfile')?.classList.add('open')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>Profil Saya</span>
-          </button>
-          <button type="button" class="tp-btn-profile-edit" onclick="document.getElementById('modalWifi')?.classList.add('open')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-            <span>Info WiFi</span>
-          </button>
-        </div>
       </div>
 
       {{-- 2. SHOWCASE SECTION (Desktop: Left Gallery Slider, Right Room & Billing Card) --}}
@@ -391,10 +380,6 @@
 
           {{-- Bottom Overlay Info --}}
           <div class="tp-gallery-bottom-gradient">
-            <div class="tp-gallery-room-caption">
-              <span class="tp-gallery-caption-tag">{{ $branchName }}</span>
-              <h3 class="tp-gallery-caption-title">Unit Kamar #{{ $room->number ?? '102' }} — Lantai {{ $room->floor ?? '1' }}</h3>
-            </div>
             <div class="tp-gallery-controls">
               <button type="button" class="tp-gallery-nav-btn prev" id="btnSlidePrev" title="Foto Sebelumnya">&#8249;</button>
               <div class="tp-gallery-dots" id="heroOverlayDots">
@@ -492,7 +477,7 @@
 
           {{-- Action Buttons Row --}}
           <div class="tp-details-actions">
-            <button type="button" class="tp-btn-secondary-action" onclick="document.getElementById('modalReceipts')?.classList.add('open')">
+            <button type="button" class="tp-btn-secondary-action tp-btn-receipt-action" onclick="document.getElementById('modalReceipts')?.classList.add('open')">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               <span>Kuitansi & Riwayat</span>
             </button>
