@@ -4,7 +4,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <meta name="description" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
+  <meta name="keywords" content="kos eksklusif, sewa kost jogja, kos mas robi, kos sleman yogyakarta, sewa kamar kos modern, kos mahasiswa ugm, kos full furnished, kost ac kamar mandi dalam">
+  <meta name="author" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }}">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="theme-color" content="#0a5661">
+  <link rel="canonical" href="{{ url()->current() }}">
+
+  <!-- Open Graph Meta Tags (Facebook, WhatsApp, LinkedIn preview) -->
+  <meta property="og:locale" content="id_ID">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern Sleman Yogyakarta">
+  <meta property="og:description" content="Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
+  <meta property="og:url" content="{{ url()->current() }}">
+  <meta property="og:site_name" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }}">
+  <meta property="og:image" content="{{ asset('assets/images/kos_exterior.jpg') }}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }}">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern">
+  <meta name="twitter:description" content="Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
+  <meta name="twitter:image" content="{{ asset('assets/images/kos_exterior.jpg') }}">
+
+  <!-- Google Schema.org JSON-LD Structured Data for Top Search Engine Ranking -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    "name": "{{ $setting->kos_name ?? 'Kos Mas Robi' }}",
+    "description": "Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.",
+    "url": "{{ url('/') }}",
+    "image": "{{ asset('assets/images/kos_exterior.jpg') }}",
+    "telephone": "+{{ preg_replace('/[^0-9]/', '', $setting->owner_phone ?? '6281234567890') }}",
+    "priceRange": "Rp 900.000 - Rp 2.500.000",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "{{ $setting->kos_address ?? 'Sleman, DI Yogyakarta' }}",
+      "addressLocality": "Sleman",
+      "addressRegion": "DI Yogyakarta",
+      "postalCode": "55281",
+      "addressCountry": "ID"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -7.765,
+      "longitude": 110.375
+    },
+    "amenityFeature": [
+      {
+        "@type": "LocationFeatureSpecification",
+        "name": "WiFi High Speed 100 Mbps",
+        "value": true
+      },
+      {
+        "@type": "LocationFeatureSpecification",
+        "name": "Kamar Mandi Dalam & Water Heater",
+        "value": true
+      },
+      {
+        "@type": "LocationFeatureSpecification",
+        "name": "Air Conditioner (AC)",
+        "value": true
+      },
+      {
+        "@type": "LocationFeatureSpecification",
+        "name": "Security CCTV 24 Jam & Smart Key",
+        "value": true
+      }
+    ]
+  }
+  </script>
+
   <title>{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern</title>
 
   <!-- Favicon -->

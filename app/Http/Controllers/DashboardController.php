@@ -429,6 +429,7 @@ class DashboardController extends Controller
             'status' => 'required|in:available,occupied,due,repair',
             'image' => 'nullable|string',
             'images' => 'nullable|array',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
             'custom_interior_request' => 'nullable|string',
             'custom_interior_budget' => 'nullable|numeric|min:0',
             'custom_interior_status' => 'nullable|string|in:none,pending,approved,in_progress,completed,rejected',
@@ -604,6 +605,7 @@ class DashboardController extends Controller
             'amount' => 'required|numeric',
             'payment_method' => 'required|string',
             'timezone' => 'nullable|string|in:WIB,WITA,WIT',
+            'proof_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
 
         $proofImagePath = null;
@@ -965,6 +967,14 @@ class DashboardController extends Controller
      */
     public function saveLandingPage(Request $request): JsonResponse
     {
+        $request->validate([
+            'hero_image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'gallery_file_0' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'gallery_file_1' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'gallery_file_2' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'gallery_file_3' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
         $setting = Setting::first() ?? new Setting();
         $landing = $setting->landing_content ?? [];
 

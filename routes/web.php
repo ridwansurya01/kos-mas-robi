@@ -11,13 +11,44 @@ use App\Http\Controllers\EmailReminderController;
 // Public Landing Page inspired by modern property reference
 Route::get('/', [LandingPageController::class, 'index'])->name('home');
 
+// Dynamic Sitemap XML for Google Search Engine Bot
+Route::get('/sitemap.xml', function () {
+    $baseUrl = url('/');
+    $now = now()->toAtomString();
+
+    $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+    $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+    $xml .= '  <url>' . "\n";
+    $xml .= '    <loc>' . htmlspecialchars($baseUrl, ENT_XML1, 'UTF-8') . '</loc>' . "\n";
+    $xml .= '    <lastmod>' . $now . '</lastmod>' . "\n";
+    $xml .= '    <changefreq>daily</changefreq>' . "\n";
+    $xml .= '    <priority>1.0</priority>' . "\n";
+    $xml .= '  </url>' . "\n";
+    $xml .= '  <url>' . "\n";
+    $xml .= '    <loc>' . htmlspecialchars($baseUrl . '/login', ENT_XML1, 'UTF-8') . '</loc>' . "\n";
+    $xml .= '    <lastmod>' . $now . '</lastmod>' . "\n";
+    $xml .= '    <changefreq>monthly</changefreq>' . "\n";
+    $xml .= '    <priority>0.6</priority>' . "\n";
+    $xml .= '  </url>' . "\n";
+    $xml .= '  <url>' . "\n";
+    $xml .= '    <loc>' . htmlspecialchars($baseUrl . '/register', ENT_XML1, 'UTF-8') . '</loc>' . "\n";
+    $xml .= '    <lastmod>' . $now . '</lastmod>' . "\n";
+    $xml .= '    <changefreq>monthly</changefreq>' . "\n";
+    $xml .= '    <priority>0.6</priority>' . "\n";
+    $xml .= '  </url>' . "\n";
+    $xml .= '</urlset>';
+
+    return response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
+})->name('sitemap');
+
 // =========================================================================
 // AUTHENTICATION ROUTES (accessible by all, controller handles auth state)
+// Rate limiting applied to prevent brute-force attacks and abuse
 // =========================================================================
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.post');
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1')->name('register.post');
 
 // ─── Google OAuth ───
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
@@ -25,12 +56,12 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 
 // ─── Forgot / Reset Password ───
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-Route::post('/forgot-password/send-otp', [AuthController::class, 'sendForgotOtp'])->name('password.send_otp');
-Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyForgotOtp'])->name('password.verify_otp');
-Route::post('/forgot-password/update', [AuthController::class, 'resetPasswordWithOtp'])->name('password.update_otp');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->middleware('throttle:3,1')->name('password.email');
+Route::post('/forgot-password/send-otp', [AuthController::class, 'sendForgotOtp'])->middleware('throttle:3,1')->name('password.send_otp');
+Route::post('/forgot-password/verify-otp', [AuthController::class, 'verifyForgotOtp'])->middleware('throttle:6,1')->name('password.verify_otp');
+Route::post('/forgot-password/update', [AuthController::class, 'resetPasswordWithOtp'])->middleware('throttle:5,1')->name('password.update_otp');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetPassword'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1')->name('password.update');
 
 // Quick demo switcher (dev-only convenience, requires existing auth)
 Route::get('/quick-login/{role?}', [AuthController::class, 'quickLogin'])->name('quick-login');
@@ -174,10 +205,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/portal/payment', [TenantPortalController::class, 'submitPayment'])->name('tenant.payment.submit');
     Route::post('/portal/complaint', [TenantPortalController::class, 'submitComplaint'])->name('tenant.complaint.submit');
     Route::post('/portal/profile', [TenantPortalController::class, 'updateProfile'])->name('tenant.profile.update');
-    Route::post('/portal/profile/send-otp', [TenantPortalController::class, 'sendPasswordOtp'])->name('tenant.profile.send_otp');
-    Route::post('/portal/profile/verify-otp', [TenantPortalController::class, 'verifyPasswordOtp'])->name('tenant.profile.verify_otp');
-    Route::post('/portal/profile/update-password', [TenantPortalController::class, 'updatePasswordWithOtp'])->name('tenant.profile.update_password');
-    Route::post('/portal/profile/send-new-password', [TenantPortalController::class, 'sendNewPasswordToGmail'])->name('tenant.profile.send_new_password');
+    Route::post('/portal/profile/send-otp', [TenantPortalController::class, 'sendPasswordOtp'])->middleware('throttle:3,1')->name('tenant.profile.send_otp');
+    Route::post('/portal/profile/verify-otp', [TenantPortalController::class, 'verifyPasswordOtp'])->middleware('throttle:6,1')->name('tenant.profile.verify_otp');
+    Route::post('/portal/profile/update-password', [TenantPortalController::class, 'updatePasswordWithOtp'])->middleware('throttle:5,1')->name('tenant.profile.update_password');
+    Route::post('/portal/profile/send-new-password', [TenantPortalController::class, 'sendNewPasswordToGmail'])->middleware('throttle:3,1')->name('tenant.profile.send_new_password');
     Route::post('/portal/room/{id}/custom-interior', [TenantPortalController::class, 'requestCustomInterior'])->name('tenant.room.custom_interior');
     Route::post('/portal/room-transfer', [TenantPortalController::class, 'submitRoomTransfer'])->name('tenant.room.transfer');
 });
