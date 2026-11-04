@@ -356,17 +356,31 @@
             <h2>Denah & Status Kamar Kos</h2>
           </div>
           <div class="filter-pills" id="dashboardFilters">
-            <button type="button" class="filter-pill active" data-filter="all">Semua Kamar</button>
-            <button type="button" class="filter-pill" data-filter="occupied">Terisi</button>
-            <button type="button" class="filter-pill" data-filter="available">Kosong</button>
-            <button type="button" class="filter-pill" data-filter="due">Jatuh Tempo</button>
-            <button type="button" class="filter-pill" data-filter="repair">Perbaikan</button>
+            <button type="button" class="filter-pill active" data-filter="all" onclick="filterDashboardStatus('all', this)">Semua Kamar</button>
+            <button type="button" class="filter-pill" data-filter="occupied" onclick="filterDashboardStatus('occupied', this)">Terisi</button>
+            <button type="button" class="filter-pill" data-filter="available" onclick="filterDashboardStatus('available', this)">Kosong</button>
+            <button type="button" class="filter-pill" data-filter="due" onclick="filterDashboardStatus('due', this)">Jatuh Tempo</button>
+            <button type="button" class="filter-pill" data-filter="repair" onclick="filterDashboardStatus('repair', this)">Perbaikan</button>
+          </div>
+        </div>
+
+        <!-- 2 TITIK CABANG & LANTAI SWITCHER TOOLBAR (TAB DASHBOARD) -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+          <div class="filter-pills" id="dashboardLocationFilters">
+            <button type="button" class="filter-pill active" data-dloc="all" onclick="filterDashboardLocation('all', this)">Semua Cabang ({{ $totalRooms }})</button>
+            <button type="button" class="filter-pill" data-dloc="Lokasi 1" onclick="filterDashboardLocation('Lokasi 1', this)"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $roomsLoc1->count() }})</button>
+            <button type="button" class="filter-pill" data-dloc="Lokasi 2" onclick="filterDashboardLocation('Lokasi 2', this)"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $roomsLoc2->count() }})</button>
+          </div>
+          <div class="filter-pills" id="dashboardFloorFilters">
+            <button type="button" class="filter-pill active" data-dfloor="all" onclick="filterDashboardFloor('all', this)">Semua Lantai</button>
+            <button type="button" class="filter-pill" data-dfloor="1" onclick="filterDashboardFloor('1', this)">Lantai 1</button>
+            <button type="button" class="filter-pill" data-dfloor="2" onclick="filterDashboardFloor('2', this)">Lantai 2</button>
           </div>
         </div>
 
         <!-- Floor 1 -->
-        <div class="floor-section">
-          <div class="floor-badge">Lantai 1 (Lantai Bawah)</div>
+        <div class="floor-section" id="dashboardFloor1Section">
+          <div class="floor-badge" onclick="filterDashboardFloor('1')" style="cursor: pointer; user-select: none;" title="Klik untuk fokus Lantai 1">Lantai 1 (Lantai Bawah)</div>
           <div class="rooms-grid" id="floor1Grid">
             @foreach($rooms->filter(fn($r) => (int)$r->floor === 1) as $rCard)
               @php
@@ -378,7 +392,7 @@
                 if (str_starts_with($cleanPhone, '0')) $cleanPhone = '62' . substr($cleanPhone, 1);
                 $facs = is_array($rCard->facilities) ? array_slice($rCard->facilities, 0, 3) : [];
               @endphp
-              <div class="room-card" data-room-id="{{ $rCard->number }}" data-status="{{ $rCard->status }}" style="border-top: 3px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }}; cursor: pointer;" onclick="window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
+              <div class="room-card" data-room-id="{{ $rCard->number }}" data-status="{{ $rCard->status }}" data-floor="{{ $rCard->floor }}" data-location="{{ $rCard->location ?? 'Lokasi 1' }}" style="border-top: 3px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }}; cursor: pointer;" onclick="window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
                 <div class="room-card-top">
                   <div class="room-number-wrap">
                     <span class="room-number">#{{ $rCard->number }}</span>
@@ -440,8 +454,8 @@
         </div>
 
         <!-- Floor 2 -->
-        <div class="floor-section">
-          <div class="floor-badge">Lantai 2 (Lantai Atas)</div>
+        <div class="floor-section" id="dashboardFloor2Section">
+          <div class="floor-badge" onclick="filterDashboardFloor('2')" style="cursor: pointer; user-select: none;" title="Klik untuk fokus Lantai 2">Lantai 2 (Lantai Atas)</div>
           <div class="rooms-grid" id="floor2Grid">
             @foreach($rooms->filter(fn($r) => (int)$r->floor === 2) as $rCard)
               @php
@@ -453,7 +467,7 @@
                 if (str_starts_with($cleanPhone, '0')) $cleanPhone = '62' . substr($cleanPhone, 1);
                 $facs = is_array($rCard->facilities) ? array_slice($rCard->facilities, 0, 3) : [];
               @endphp
-              <div class="room-card" data-room-id="{{ $rCard->number }}" data-status="{{ $rCard->status }}" style="border-top: 3px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }}; cursor: pointer;" onclick="window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
+              <div class="room-card" data-room-id="{{ $rCard->number }}" data-status="{{ $rCard->status }}" data-floor="{{ $rCard->floor }}" data-location="{{ $rCard->location ?? 'Lokasi 1' }}" style="border-top: 3px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }}; cursor: pointer;" onclick="window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
                 <div class="room-card-top">
                   <div class="room-number-wrap">
                     <span class="room-number">#{{ $rCard->number }}</span>
@@ -534,21 +548,21 @@
                 <input type="text" id="roomSearchInput" placeholder="Cari nomor kamar, tipe, atau penghuni...">
               </div>
               <div class="filter-pills" id="roomTabFilters">
-                <button type="button" class="filter-pill active" data-floor="all">Semua Lantai</button>
-                <button type="button" class="filter-pill" data-floor="1">Lantai 1</button>
-                <button type="button" class="filter-pill" data-floor="2">Lantai 2</button>
+                <button type="button" class="filter-pill active" data-floor="all" onclick="filterRoomMasterFloor('all', this)">Semua Lantai</button>
+                <button type="button" class="filter-pill" data-floor="1" onclick="filterRoomMasterFloor('1', this)">Lantai 1</button>
+                <button type="button" class="filter-pill" data-floor="2" onclick="filterRoomMasterFloor('2', this)">Lantai 2</button>
               </div>
             </div>
 
             <!-- 2 TITIK LOKASI TABS FILTER -->
             <div class="location-switcher-bar" id="roomLocationFilters" style="display: flex; gap: 8px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 6px; border-radius: 14px;">
-              <button type="button" class="loc-filter-btn active" data-location="all" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: none; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
+              <button type="button" class="loc-filter-btn active" data-location="all" onclick="filterRoomMasterLocation('all', this)" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: none; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
                 Semua Cabang ({{ $totalRooms }})
               </button>
-              <button type="button" class="loc-filter-btn" data-location="Lokasi 1" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(10,86,97,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661;">
+              <button type="button" class="loc-filter-btn" data-location="Lokasi 1" onclick="filterRoomMasterLocation('Lokasi 1', this)" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(10,86,97,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0a5661;">
                 <span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $roomsLoc1->count() }})
               </button>
-              <button type="button" class="loc-filter-btn" data-location="Lokasi 2" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(13,148,136,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0d9488;">
+              <button type="button" class="loc-filter-btn" data-location="Lokasi 2" onclick="filterRoomMasterLocation('Lokasi 2', this)" style="display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; border: 1px solid rgba(13,148,136,0.15); font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: #ffffff; color: #0d9488;">
                 <span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $roomsLoc2->count() }})
               </button>
             </div>
@@ -691,9 +705,9 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (DATA PENGHUNI) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="tenantLocationFilters">
-            <button type="button" class="filter-pill active" data-tloc="all">Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
-            <button type="button" class="filter-pill" data-tloc="Lokasi 1"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1TenantsCount }})</button>
-            <button type="button" class="filter-pill" data-tloc="Lokasi 2"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2TenantsCount }})</button>
+            <button type="button" class="filter-pill active" data-tloc="all" onclick="filterTenantLocation('all', this)">Semua Cabang ({{ $b1TenantsCount + $b2TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 1" onclick="filterTenantLocation('Lokasi 1', this)"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span> ({{ $b1TenantsCount }})</button>
+            <button type="button" class="filter-pill" data-tloc="Lokasi 2" onclick="filterTenantLocation('Lokasi 2', this)"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span> ({{ $b2TenantsCount }})</button>
           </div>
         </div>
 
@@ -701,12 +715,12 @@
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="tenantSearchInput" placeholder="Cari nama, kamar, cabang, atau nomor WhatsApp...">
+              <input type="text" id="tenantSearchInput" placeholder="Cari nama, kamar, cabang, atau nomor WhatsApp..." oninput="filterTenantTable()">
             </div>
             <div class="filter-pills" id="tenantStatusFilter">
-              <button type="button" class="filter-pill active" data-tstatus="all">Semua</button>
-              <button type="button" class="filter-pill" data-tstatus="active">Aktif Menghuni</button>
-              <button type="button" class="filter-pill" data-tstatus="due">Jatuh Tempo</button>
+              <button type="button" class="filter-pill active" data-tstatus="all" onclick="filterTenantStatus('all', this)">Semua</button>
+              <button type="button" class="filter-pill" data-tstatus="active" onclick="filterTenantStatus('active', this)">Aktif Menghuni</button>
+              <button type="button" class="filter-pill" data-tstatus="due" onclick="filterTenantStatus('due', this)">Jatuh Tempo</button>
             </div>
           </div>
 
@@ -1205,15 +1219,15 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (LAPORAN KEUANGAN) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="financeLocationFilters">
-            <button type="button" class="filter-pill active" data-floc="all">Gabungan 2 Kos</button>
-            <button type="button" class="filter-pill" data-floc="Lokasi 1">Buku Kas <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
-            <button type="button" class="filter-pill" data-floc="Lokasi 2">Buku Kas <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
+            <button type="button" class="filter-pill active" data-floc="all" onclick="filterFinanceBranch('all', this)">Gabungan 2 Kos</button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 1" onclick="filterFinanceBranch('Lokasi 1', this)">Buku Kas <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" data-floc="Lokasi 2" onclick="filterFinanceBranch('Lokasi 2', this)">Buku Kas <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
           </div>
         </div>
 
         <!-- 4 KPI Cards Keuangan Kompleks (Dinamis Berdasarkan Filter Tahun & Cabang) -->
         <div class="stats-grid financial-kpi-grid" style="padding: 0; margin-bottom: 24px;">
-          <div class="stat-card">
+          <div class="stat-card" onclick="filterFinanceType('income')" style="cursor: pointer;" title="Klik untuk filter transaksi Pemasukan">
             <div class="stat-card-header">
               <span class="stat-card-title">Total Pemasukan (<span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span>)</span>
               <div class="stat-icon emerald">
@@ -1227,7 +1241,7 @@
             </div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card" onclick="filterFinanceType('expense')" style="cursor: pointer;" title="Klik untuk filter transaksi Biaya Pengeluaran">
             <div class="stat-card-header">
               <span class="stat-card-title">Biaya Operasional (<span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span>)</span>
               <div class="stat-icon amber">
@@ -1240,7 +1254,7 @@
             </div>
           </div>
 
-          <div class="stat-card">
+          <div class="stat-card" onclick="filterFinanceType('all')" style="cursor: pointer;" title="Klik untuk tampilkan Semua Transaksi / Laba Bersih">
             <div class="stat-card-header">
               <span class="stat-card-title">Laba Bersih (<span class="fin-selected-year-badge">{{ $selectedYear ?? 2026 }}</span>)</span>
               <div class="stat-icon blue">
@@ -1335,9 +1349,9 @@
               <input type="text" id="financeSearchInput" placeholder="Cari nomor bukti, cabang kos, keterangan, kategori kas...">
             </div>
             <div class="filter-pills" id="financeTypeFilter">
-              <button type="button" class="filter-pill active" data-ftype="all">Semua Transaksi</button>
-              <button type="button" class="filter-pill" data-ftype="income">Pemasukan (Sewa)</button>
-              <button type="button" class="filter-pill" data-ftype="expense">Pengeluaran Kos</button>
+              <button type="button" class="filter-pill active" data-ftype="all" onclick="filterFinanceType('all', this)">Semua Transaksi</button>
+              <button type="button" class="filter-pill" data-ftype="income" onclick="filterFinanceType('income', this)">Pemasukan (Sewa)</button>
+              <button type="button" class="filter-pill" data-ftype="expense" onclick="filterFinanceType('expense', this)">Pengeluaran Kos</button>
             </div>
           </div>
 
@@ -1493,9 +1507,9 @@
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (KELUHAN & SERVIS) -->
         <div style="margin-bottom: 18px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
           <div class="filter-pills" id="maintenanceLocationFilters">
-            <button type="button" class="filter-pill active" data-mloc="all">Semua Cabang</button>
-            <button type="button" class="filter-pill" data-mloc="Lokasi 1">Servis <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
-            <button type="button" class="filter-pill" data-mloc="Lokasi 2">Servis <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
+            <button type="button" class="filter-pill active" data-mloc="all" onclick="filterMaintenanceLocation('all', this)">Semua Cabang</button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 1" onclick="filterMaintenanceLocation('Lokasi 1', this)">Servis <span data-branch-name="lokasi_1">{{ $branch1Name }}</span></button>
+            <button type="button" class="filter-pill" data-mloc="Lokasi 2" onclick="filterMaintenanceLocation('Lokasi 2', this)">Servis <span data-branch-name="lokasi_2">{{ $branch2Name }}</span></button>
           </div>
         </div>
 
@@ -1503,36 +1517,125 @@
           <div class="table-toolbar">
             <div class="table-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input type="text" id="maintenanceSearchInput" placeholder="Cari tiket, keluhan, cabang, atau nomor kamar...">
+              <input type="text" id="maintenanceSearchInput" placeholder="Cari tiket, keluhan, cabang, atau nomor kamar..." oninput="filterMaintenanceTable()">
             </div>
             <div class="filter-pills" id="repairStatusFilter">
-              <button type="button" class="filter-pill active" data-rstatus="all">Semua</button>
-              <button type="button" class="filter-pill" data-rstatus="pending">Menunggu</button>
-              <button type="button" class="filter-pill" data-rstatus="progress">Dalam Proses</button>
-              <button type="button" class="filter-pill" data-rstatus="done">Selesai</button>
+              <button type="button" class="filter-pill active" data-rstatus="all" onclick="filterMaintenanceStatus('all', this)">Semua</button>
+              <button type="button" class="filter-pill" data-rstatus="pending" onclick="filterMaintenanceStatus('pending', this)">Menunggu</button>
+              <button type="button" class="filter-pill" data-rstatus="progress" onclick="filterMaintenanceStatus('progress', this)">Dalam Proses</button>
+              <button type="button" class="filter-pill" data-rstatus="done" onclick="filterMaintenanceStatus('done', this)">Selesai</button>
             </div>
           </div>
 
-          <table class="custom-table" id="maintenanceTable">
-            <thead>
-              <tr>
-                <th>Tiket #</th>
-                <th>Kamar & Pelapor</th>
-                <th>Lokasi Cabang & PIC</th>
-                <th>Deskripsi Keluhan</th>
-                <th>Tgl Lapor</th>
-                <th>Prioritas</th>
-                <th>Status</th>
-                <th>Update Status</th>
-              </tr>
-            </thead>
-            <tbody id="maintenanceTableBody">
-              <!-- Dynamically populated -->
-            </tbody>
-          </table>
+          <div class="table-responsive">
+            <table class="custom-table" id="maintenanceTable">
+              <thead>
+                <tr>
+                  <th>Tiket #</th>
+                  <th>Kamar & Pelapor</th>
+                  <th>Lokasi Cabang & PIC</th>
+                  <th>Deskripsi Keluhan</th>
+                  <th>Tgl Lapor</th>
+                  <th>Prioritas</th>
+                  <th>Status</th>
+                  <th>Update Status</th>
+                </tr>
+              </thead>
+              <tbody id="maintenanceTableBody">
+                @forelse($allMaintenance ?? [] as $mItem)
+                  @php
+                    $mLoc = $mItem->room ? ($mItem->room->location ?? 'Lokasi 1') : 'Lokasi 1';
+                    $isLoc2 = $mLoc === 'Lokasi 2';
+                    $rNum = $mItem->room ? $mItem->room->number : '-';
+                    $tRep = $mItem->reporter_name ?: 'Penghuni';
+                    $tDesc = $mItem->issue_description ?: '-';
+                    $tDate = $mItem->report_date ? \Carbon\Carbon::parse($mItem->report_date)->format('d/m/Y') : '-';
+                  @endphp
+                  <tr class="maintenance-row" data-status="{{ $mItem->status }}" data-location="{{ $mLoc }}" data-search="{{ strtolower(($mItem->ticket_code ?? '') . ' ' . $rNum . ' ' . $tRep . ' ' . $tDesc . ' ' . $mLoc) }}">
+                    <td style="font-family: monospace; font-size: 0.85rem; font-weight: 700;">#{{ $mItem->ticket_code ?? ('T-' . $mItem->id) }}</td>
+                    <td>
+                      <strong>Kamar #{{ $rNum }}</strong>
+                      <div style="font-size: 0.75rem; color: var(--text-secondary);">Pelapor: {{ $tRep }}</div>
+                    </td>
+                    <td>
+                      @if($isLoc2)
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">
+                          <span data-branch-name="lokasi_2">{{ $branch2Name }}</span>
+                        </span>
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">PIC: Mas Dani (Smart System)</div>
+                      @else
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">
+                          <span data-branch-name="lokasi_1">{{ $branch1Name }}</span>
+                        </span>
+                        <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">PIC: Pak Budi (Utilitas)</div>
+                      @endif
+                    </td>
+                    <td style="max-width: 300px; line-height: 1.45;">{{ $tDesc }}</td>
+                    <td>{{ $tDate }}</td>
+                    <td>
+                      @if(in_array(strtolower($mItem->priority ?? ''), ['urgent', 'high', 'tinggi', 'mendesak']))
+                        <span class="feature-pill" style="color: #ef4444; font-weight: 700; background: #fee2e2;">{{ $mItem->priority }}</span>
+                      @else
+                        <span class="feature-pill" style="font-weight: 700;">{{ $mItem->priority ?: 'Normal' }}</span>
+                      @endif
+                    </td>
+                    <td>
+                      @if($mItem->status === 'done')
+                        <span class="status-badge occupied">Selesai</span>
+                      @elseif($mItem->status === 'progress')
+                        <span class="status-badge due">Dalam Proses</span>
+                      @else
+                        <span class="status-badge repair">Menunggu</span>
+                      @endif
+                    </td>
+                    <td>
+                      <select class="form-control" style="padding: 4px 8px; font-size: 0.78rem;" onchange="window.kosApp ? window.kosApp.updateRepairStatus('{{ $mItem->id }}', this.value) : null">
+                        <option value="pending" {{ $mItem->status === 'pending' ? 'selected' : '' }}>Menunggu</option>
+                        <option value="progress" {{ $mItem->status === 'progress' ? 'selected' : '' }}>Dalam Proses</option>
+                        <option value="done" {{ $mItem->status === 'done' ? 'selected' : '' }}>Selesai</option>
+                      </select>
+                    </td>
+                  </tr>
+                @empty
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada tiket keluhan saat ini</td>
+                  </tr>
+                @endforelse
+              </tbody>
+            </table>
+          </div>
 
           <div class="mobile-card-list" id="maintenanceMobileCardList">
-            <!-- Dynamically populated -->
+            @foreach($allMaintenance ?? [] as $mItem)
+              @php
+                $mLoc = $mItem->room ? ($mItem->room->location ?? 'Lokasi 1') : 'Lokasi 1';
+                $isLoc2 = $mLoc === 'Lokasi 2';
+                $rNum = $mItem->room ? $mItem->room->number : '-';
+                $tRep = $mItem->reporter_name ?: 'Penghuni';
+                $tDesc = $mItem->issue_description ?: '-';
+              @endphp
+              <div class="mobile-data-card" data-status="{{ $mItem->status }}" data-location="{{ $mLoc }}" data-search="{{ strtolower(($mItem->ticket_code ?? '') . ' ' . $rNum . ' ' . $tRep . ' ' . $tDesc . ' ' . $mLoc) }}">
+                <div class="mobile-data-header">
+                  <span class="mobile-data-title">Kamar #{{ $rNum }} ({{ $isLoc2 ? $branch2Name : $branch1Name }})</span>
+                  @if($mItem->status === 'done')
+                    <span class="status-badge occupied">Selesai</span>
+                  @elseif($mItem->status === 'progress')
+                    <span class="status-badge due">Dalam Proses</span>
+                  @else
+                    <span class="status-badge repair">Menunggu</span>
+                  @endif
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.45;">{{ $tDesc }}</div>
+                <div class="mobile-data-row" style="margin-top: 6px;">
+                  <span>Pelapor:</span>
+                  <span>{{ $tRep }}</span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>Cabang &amp; Teknisi:</span>
+                  <span>{{ $isLoc2 ? ($branch2Name . ' • Mas Dani') : ($branch1Name . ' • Pak Budi') }}</span>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
@@ -1696,19 +1799,19 @@
         <!-- ====== PREMIUM SUB-TAB NAV ====== -->
         <div style="margin-bottom: 26px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px;">
           <div class="settings-segmented-nav" id="settingsSubTabNav" style="display: flex; gap: 4px; background: transparent; padding: 0; border-radius: 0;">
-            <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+            <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing" onclick="switchSettingsSubtab('subtab-landing', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Landing Page</span>
             </button>
-            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location" onclick="switchSettingsSubtab('subtab-location', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Titik Lokasi</span>
             </button>
-            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-profile" onclick="switchSettingsSubtab('subtab-profile', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Tata Tertib</span>
             </button>
-            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" onclick="switchSettingsSubtab('subtab-wifi', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Jaringan WiFi</span>
             </button>
-            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-survey" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-survey" onclick="switchSettingsSubtab('subtab-survey', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Formulir Calon Penghuni</span>
             </button>
           </div>
@@ -3446,6 +3549,285 @@
       applyTransferFilters();
     }
     window.filterTransferLocation = filterTransferLocation;
+    window.filterTransferStatus = filterTransferStatus;
+    window.filterTransferTable = filterTransferTable;
+
+    // --- DASHBOARD FILTERS (DENAH KAMAR, LANTAI 1 & 2, KOS UNEJ & UNMUH) ---
+    var currentDashStatus = 'all';
+    var currentDashFloor = 'all';
+    var currentDashLocation = 'all';
+
+    function applyDashboardFilters() {
+      var cards = document.querySelectorAll('#tab-dashboard .room-card');
+      var f1Sec = document.getElementById('dashboardFloor1Section');
+      var f2Sec = document.getElementById('dashboardFloor2Section');
+
+      if (f1Sec) {
+        f1Sec.style.display = (currentDashFloor === 'all' || currentDashFloor === '1') ? '' : 'none';
+      }
+      if (f2Sec) {
+        f2Sec.style.display = (currentDashFloor === 'all' || currentDashFloor === '2') ? '' : 'none';
+      }
+
+      cards.forEach(function(card) {
+        var cStatus = card.getAttribute('data-status') || '';
+        var cLoc = card.getAttribute('data-location') || 'Lokasi 1';
+        var cFloor = String(card.getAttribute('data-floor') || '1');
+
+        var matchStatus = (currentDashStatus === 'all' || cStatus === currentDashStatus);
+        var matchLoc = (currentDashLocation === 'all' || cLoc === currentDashLocation);
+        var matchFloor = (currentDashFloor === 'all' || cFloor === currentDashFloor);
+
+        card.style.display = (matchStatus && matchLoc && matchFloor) ? '' : 'none';
+      });
+    }
+
+    function filterDashboardStatus(status, btn) {
+      currentDashStatus = status;
+      document.querySelectorAll('#dashboardFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyDashboardFilters();
+    }
+    window.filterDashboardStatus = filterDashboardStatus;
+
+    function filterDashboardFloor(floor, btn) {
+      currentDashFloor = String(floor);
+      document.querySelectorAll('#dashboardFloorFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#dashboardFloorFilters .filter-pill[data-dfloor="' + floor + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+      applyDashboardFilters();
+    }
+    window.filterDashboardFloor = filterDashboardFloor;
+
+    function filterDashboardLocation(loc, btn) {
+      currentDashLocation = loc;
+      document.querySelectorAll('#dashboardLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyDashboardFilters();
+    }
+    window.filterDashboardLocation = filterDashboardLocation;
+
+    // --- DAFTAR KAMAR MASTER FILTERS (LANTAI 1 & 2, KOS UNEJ & UNMUH) ---
+    var currentRoomFloor = 'all';
+    var currentRoomLocation = 'all';
+
+    function applyRoomMasterFilters() {
+      var inputEl = document.getElementById('roomSearchInput');
+      var q = inputEl ? inputEl.value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#roomsMasterTableBody .room-master-row');
+      var cards = document.querySelectorAll('#roomsMobileCardList .mobile-data-card');
+
+      [rows, cards].forEach(function(list) {
+        list.forEach(function(el) {
+          var s = el.getAttribute('data-search') || '';
+          var fl = String(el.getAttribute('data-floor') || '1');
+          var loc = el.getAttribute('data-location') || 'Lokasi 1';
+
+          var matchSearch = !q || s.includes(q);
+          var matchFloor = (currentRoomFloor === 'all' || fl === currentRoomFloor);
+          var matchLoc = (currentRoomLocation === 'all' || loc === currentRoomLocation);
+
+          el.style.display = (matchSearch && matchFloor && matchLoc) ? '' : 'none';
+        });
+      });
+    }
+
+    function filterRoomMasterFloor(floor, btn) {
+      currentRoomFloor = String(floor);
+      document.querySelectorAll('#roomTabFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyRoomMasterFilters();
+    }
+    window.filterRoomMasterFloor = filterRoomMasterFloor;
+
+    function filterRoomMasterLocation(loc, btn) {
+      currentRoomLocation = loc;
+      document.querySelectorAll('#roomLocationFilters .loc-filter-btn').forEach(function(p) {
+        p.classList.remove('active');
+        p.style.background = '#ffffff';
+        p.style.color = p.getAttribute('data-location') === 'Lokasi 2' ? '#0d9488' : '#0a5661';
+        p.style.boxShadow = 'none';
+      });
+      if (btn) {
+        btn.classList.add('active');
+        btn.style.background = '#0a5661';
+        btn.style.color = '#ffffff';
+        btn.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+      }
+      applyRoomMasterFilters();
+    }
+    window.filterRoomMasterLocation = filterRoomMasterLocation;
+
+    // --- DATA PENGHUNI FILTERS (AKTIF MENGHUNI, JATUH TEMPO, 2 CABANG) ---
+    var currentTenantLoc = 'all';
+    var currentTenantStatus = 'all';
+
+    function applyTenantFilters() {
+      var inputEl = document.getElementById('tenantSearchInput');
+      var q = inputEl ? inputEl.value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#tenantsTableBody .tenant-row');
+      var cards = document.querySelectorAll('#tenantsMobileCardList .mobile-data-card');
+
+      [rows, cards].forEach(function(list) {
+        list.forEach(function(el) {
+          var s = el.getAttribute('data-search') || '';
+          var loc = el.getAttribute('data-location') || 'Lokasi 1';
+          var status = el.getAttribute('data-status') || 'active';
+
+          var matchSearch = !q || s.includes(q);
+          var matchLoc = (currentTenantLoc === 'all' || loc === currentTenantLoc);
+          var matchStatus = (currentTenantStatus === 'all' || status === currentTenantStatus);
+
+          el.style.display = (matchSearch && matchLoc && matchStatus) ? '' : 'none';
+        });
+      });
+    }
+
+    function filterTenantLocation(loc, btn) {
+      currentTenantLoc = loc;
+      document.querySelectorAll('#tenantLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyTenantFilters();
+    }
+    window.filterTenantLocation = filterTenantLocation;
+
+    function filterTenantStatus(status, btn) {
+      currentTenantStatus = status;
+      document.querySelectorAll('#tenantStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyTenantFilters();
+    }
+    window.filterTenantStatus = filterTenantStatus;
+
+    function filterTenantTable() {
+      applyTenantFilters();
+    }
+    window.filterTenantTable = filterTenantTable;
+
+    // --- KELUHAN & SERVIS FILTERS (MENUNGGU, PROSES, SELESAI, 2 CABANG) ---
+    var currentMaintLoc = 'all';
+    var currentMaintStatus = 'all';
+
+    function applyMaintenanceFilters() {
+      var inputEl = document.getElementById('maintenanceSearchInput');
+      var q = inputEl ? inputEl.value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#maintenanceTableBody .maintenance-row');
+      var cards = document.querySelectorAll('#maintenanceMobileCardList .mobile-data-card');
+
+      [rows, cards].forEach(function(list) {
+        list.forEach(function(el) {
+          var s = el.getAttribute('data-search') || '';
+          var loc = el.getAttribute('data-location') || 'Lokasi 1';
+          var status = el.getAttribute('data-status') || '';
+
+          var matchSearch = !q || s.includes(q);
+          var matchLoc = (currentMaintLoc === 'all' || loc === currentMaintLoc);
+          var matchStatus = (currentMaintStatus === 'all' || status === currentMaintStatus);
+
+          el.style.display = (matchSearch && matchLoc && matchStatus) ? '' : 'none';
+        });
+      });
+    }
+
+    function filterMaintenanceLocation(loc, btn) {
+      currentMaintLoc = loc;
+      document.querySelectorAll('#maintenanceLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyMaintenanceFilters();
+    }
+    window.filterMaintenanceLocation = filterMaintenanceLocation;
+
+    function filterMaintenanceStatus(status, btn) {
+      currentMaintStatus = status;
+      document.querySelectorAll('#repairStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      applyMaintenanceFilters();
+    }
+    window.filterMaintenanceStatus = filterMaintenanceStatus;
+
+    function filterMaintenanceTable() {
+      applyMaintenanceFilters();
+    }
+    window.filterMaintenanceTable = filterMaintenanceTable;
+
+    // --- PUSAT PENGATURAN SUB-TABS NAVIGATION ---
+    function switchSettingsSubtab(subtabId, btn) {
+      var subTabBtns = document.querySelectorAll('#settingsSubTabNav .btn-settings-subtab');
+      var subTabPanes = document.querySelectorAll('.settings-subtab-pane');
+
+      subTabBtns.forEach(function(b) {
+        b.classList.remove('active');
+        b.style.background = '';
+        b.style.color = '';
+      });
+
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#settingsSubTabNav .btn-settings-subtab[data-subtab="' + subtabId + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+
+      subTabPanes.forEach(function(pane) {
+        if (pane.id === subtabId) {
+          pane.classList.add('active');
+          pane.style.display = 'block';
+        } else {
+          pane.classList.remove('active');
+          pane.style.display = 'none';
+        }
+      });
+
+      if (typeof window.updateSettingsSubChip === 'function') {
+        window.updateSettingsSubChip('tab-settings');
+      }
+    }
+    window.switchSettingsSubtab = switchSettingsSubtab;
+
+    // --- LAPORAN KEUANGAN & BUKU KAS FILTERS ---
+    var currentFinLoc = 'all';
+    var currentFinType = 'all';
+
+    function filterFinanceBranch(loc, btn) {
+      currentFinLoc = loc;
+      document.querySelectorAll('#financeLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#financeLocationFilters .filter-pill[data-floc="' + loc + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+
+      if (typeof window.renderFinancesTable === 'function') {
+        var searchEl = document.getElementById('financeSearchInput');
+        window.renderFinancesTable(searchEl ? searchEl.value : '', currentFinType, currentFinLoc);
+      }
+    }
+    window.filterFinanceBranch = filterFinanceBranch;
+
+    function filterFinanceType(type, btn) {
+      currentFinType = type;
+      document.querySelectorAll('#financeTypeFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#financeTypeFilter .filter-pill[data-ftype="' + type + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+
+      if (typeof window.renderFinancesTable === 'function') {
+        var searchEl = document.getElementById('financeSearchInput');
+        window.renderFinancesTable(searchEl ? searchEl.value : '', currentFinType, currentFinLoc);
+      }
+    }
+    window.filterFinanceType = filterFinanceType;
 
     // =========================================================================
     // KURVA PERTUMBUHAN PENDAPATAN & ARUS KAS (CANVAS SPLINE CURVE INTERACTIVE)
@@ -3949,6 +4331,8 @@
       applyBillingFilters();
     }
     window.filterBillingLocation = filterBillingLocation;
+    window.filterBillingStatus = filterBillingStatus;
+    window.filterBillingTable = filterBillingTable;
 
     window.openManualPaymentReceiptModal = function(roomId, roomNumber, tenantName, price, location, paidSoFar, remainingBill, fullPrice) {
       var select = document.getElementById('payRecRoomId');

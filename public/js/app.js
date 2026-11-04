@@ -2843,6 +2843,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   window.recordPaymentForRoom = recordPaymentForRoom;
   window.showReceiptModal = showReceiptModal;
   window.updateRepairStatus = updateRepairStatus;
+  window.renderFinancesTable = renderFinancesTable;
+  window.renderMaintenanceTable = renderMaintenanceTable;
+  window.renderRoomsMasterTable = renderRoomsMasterTable;
+  window.renderTenantsTable = renderTenantsTable;
 
   if (document.getElementById('appSidebar') || document.readyState !== 'loading') {
     init();
