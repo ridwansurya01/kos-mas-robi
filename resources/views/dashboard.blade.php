@@ -368,7 +368,74 @@
         <div class="floor-section">
           <div class="floor-badge">Lantai 1 (Lantai Bawah)</div>
           <div class="rooms-grid" id="floor1Grid">
-            <!-- Dynamically populated by JS & Laravel API -->
+            @foreach($rooms->filter(fn($r) => (int)$r->floor === 1) as $rCard)
+              @php
+                $isLoc2 = ($rCard->location ?? '') === 'Lokasi 2';
+                $tName = $rCard->activeTenant ? $rCard->activeTenant->name : ($rCard->tenant ?: ($rCard->booked_by_name ?: ($rCard->status === 'occupied' || $rCard->status === 'due' ? ('Penghuni #' . $rCard->number) : null)));
+                $tPhone = $rCard->activeTenant ? ($rCard->activeTenant->phone ?? '') : ($rCard->phone ?? '');
+                $tDue = $rCard->activeTenant ? ($rCard->activeTenant->due_day ?? 1) : ($rCard->due_day ?? 1);
+                $cleanPhone = preg_replace('/[^0-9]/', '', $tPhone);
+                if (str_starts_with($cleanPhone, '0')) $cleanPhone = '62' . substr($cleanPhone, 1);
+                $facs = is_array($rCard->facilities) ? array_slice($rCard->facilities, 0, 3) : [];
+              @endphp
+              <div class="room-card" data-room-id="{{ $rCard->number }}" data-status="{{ $rCard->status }}" style="border-top: 3px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }}; cursor: pointer;" onclick="window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
+                <div class="room-card-top">
+                  <div class="room-number-wrap">
+                    <span class="room-number">#{{ $rCard->number }}</span>
+                    @if($isLoc2)
+                      <span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
+                    @else
+                      <span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
+                    @endif
+                    <span class="room-type-tag">{{ $rCard->type }}</span>
+                  </div>
+                  @if($rCard->status === 'occupied')
+                    <span class="status-badge occupied">● Terisi</span>
+                  @elseif($rCard->status === 'available')
+                    <span class="status-badge available">● Kosong</span>
+                  @elseif($rCard->status === 'due')
+                    <span class="status-badge due">Jatuh Tempo</span>
+                  @elseif($rCard->status === 'repair')
+                    <span class="status-badge repair">Servis</span>
+                  @else
+                    <span class="status-badge">{{ $rCard->status }}</span>
+                  @endif
+                </div>
+                <div class="room-details">
+                  <div class="room-tenant-name">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{{ $tName ?: 'Belum berpenghuni' }}</span>
+                  </div>
+                  <div class="room-due-info">
+                    @if($rCard->status === 'occupied' || $rCard->status === 'due')
+                      Jatuh tempo: Tanggal <strong>{{ $tDue }}</strong> setiap bulan
+                    @elseif($rCard->status === 'repair')
+                      Sedang tahap perawatan fasilitas
+                    @else
+                      Kamar bersih &amp; siap langsung huni
+                    @endif
+                  </div>
+                  <div class="room-features">
+                    @foreach($facs as $fac)
+                      <span class="feature-pill">{{ $fac }}</span>
+                    @endforeach
+                  </div>
+                </div>
+                <div class="room-card-bottom">
+                  <div class="room-price">Rp {{ number_format($rCard->price, 0, ',', '.') }} <span>/bln</span></div>
+                  <div class="room-actions">
+                    @if($cleanPhone)
+                      <button type="button" class="btn-icon-sm whatsapp" title="Kirim Pesan WhatsApp" data-wa-room="{{ $rCard->number }}" onclick="event.stopPropagation(); window.kosApp.sendWhatsAppReminder('{{ $rCard->number }}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                      </button>
+                    @endif
+                    <button type="button" class="btn-icon-sm" title="Lihat Detail Kamar" data-detail-room="{{ $rCard->number }}" onclick="event.stopPropagation(); window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
 
@@ -376,7 +443,74 @@
         <div class="floor-section">
           <div class="floor-badge">Lantai 2 (Lantai Atas)</div>
           <div class="rooms-grid" id="floor2Grid">
-            <!-- Dynamically populated by JS & Laravel API -->
+            @foreach($rooms->filter(fn($r) => (int)$r->floor === 2) as $rCard)
+              @php
+                $isLoc2 = ($rCard->location ?? '') === 'Lokasi 2';
+                $tName = $rCard->activeTenant ? $rCard->activeTenant->name : ($rCard->tenant ?: ($rCard->booked_by_name ?: ($rCard->status === 'occupied' || $rCard->status === 'due' ? ('Penghuni #' . $rCard->number) : null)));
+                $tPhone = $rCard->activeTenant ? ($rCard->activeTenant->phone ?? '') : ($rCard->phone ?? '');
+                $tDue = $rCard->activeTenant ? ($rCard->activeTenant->due_day ?? 1) : ($rCard->due_day ?? 1);
+                $cleanPhone = preg_replace('/[^0-9]/', '', $tPhone);
+                if (str_starts_with($cleanPhone, '0')) $cleanPhone = '62' . substr($cleanPhone, 1);
+                $facs = is_array($rCard->facilities) ? array_slice($rCard->facilities, 0, 3) : [];
+              @endphp
+              <div class="room-card" data-room-id="{{ $rCard->number }}" data-status="{{ $rCard->status }}" style="border-top: 3px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }}; cursor: pointer;" onclick="window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
+                <div class="room-card-top">
+                  <div class="room-number-wrap">
+                    <span class="room-number">#{{ $rCard->number }}</span>
+                    @if($isLoc2)
+                      <span style="font-size:0.68rem;font-weight:800;color:#0284c7;background:#e0f2fe;padding:2px 7px;border-radius:6px;border:1px solid #bae6fd;display:inline-flex;align-items:center;gap:3px;"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
+                    @else
+                      <span style="font-size:0.68rem;font-weight:800;color:#0a5661;background:#f0fdfa;padding:2px 7px;border-radius:6px;border:1px solid #ccfbf1;display:inline-flex;align-items:center;gap:3px;"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
+                    @endif
+                    <span class="room-type-tag">{{ $rCard->type }}</span>
+                  </div>
+                  @if($rCard->status === 'occupied')
+                    <span class="status-badge occupied">● Terisi</span>
+                  @elseif($rCard->status === 'available')
+                    <span class="status-badge available">● Kosong</span>
+                  @elseif($rCard->status === 'due')
+                    <span class="status-badge due">Jatuh Tempo</span>
+                  @elseif($rCard->status === 'repair')
+                    <span class="status-badge repair">Servis</span>
+                  @else
+                    <span class="status-badge">{{ $rCard->status }}</span>
+                  @endif
+                </div>
+                <div class="room-details">
+                  <div class="room-tenant-name">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{{ $tName ?: 'Belum berpenghuni' }}</span>
+                  </div>
+                  <div class="room-due-info">
+                    @if($rCard->status === 'occupied' || $rCard->status === 'due')
+                      Jatuh tempo: Tanggal <strong>{{ $tDue }}</strong> setiap bulan
+                    @elseif($rCard->status === 'repair')
+                      Sedang tahap perawatan fasilitas
+                    @else
+                      Kamar bersih &amp; siap langsung huni
+                    @endif
+                  </div>
+                  <div class="room-features">
+                    @foreach($facs as $fac)
+                      <span class="feature-pill">{{ $fac }}</span>
+                    @endforeach
+                  </div>
+                </div>
+                <div class="room-card-bottom">
+                  <div class="room-price">Rp {{ number_format($rCard->price, 0, ',', '.') }} <span>/bln</span></div>
+                  <div class="room-actions">
+                    @if($cleanPhone)
+                      <button type="button" class="btn-icon-sm whatsapp" title="Kirim Pesan WhatsApp" data-wa-room="{{ $rCard->number }}" onclick="event.stopPropagation(); window.kosApp.sendWhatsAppReminder('{{ $rCard->number }}')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                      </button>
+                    @endif
+                    <button type="button" class="btn-icon-sm" title="Lihat Detail Kamar" data-detail-room="{{ $rCard->number }}" onclick="event.stopPropagation(); window.kosApp.openRoomDetailModal('{{ $rCard->number }}')">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
@@ -435,13 +569,103 @@
               </tr>
             </thead>
             <tbody id="roomsMasterTableBody">
-              <!-- Dynamically populated -->
+              @forelse($rooms as $room)
+                @php
+                  $isLoc2 = ($room->location ?? '') === 'Lokasi 2';
+                  $tName = $room->activeTenant ? $room->activeTenant->name : ($room->tenant ?: ($room->booked_by_name ?: ($room->status === 'occupied' || $room->status === 'due' ? ('Penghuni #' . $room->number) : null)));
+                  $facs = is_array($room->facilities) ? implode(', ', $room->facilities) : '';
+                @endphp
+                <tr class="room-master-row" data-number="{{ strtolower($room->number) }}" data-floor="{{ $room->floor }}" data-location="{{ $room->location ?? 'Lokasi 1' }}" data-search="{{ strtolower($room->number . ' ' . $room->type . ' ' . ($room->location ?? '') . ' ' . ($tName ?? '')) }}">
+                  <td style="font-weight:800;font-size:1rem;color:#0a5661;">#{{ $room->number }}</td>
+                  <td>
+                    @if($isLoc2)
+                      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
+                    @else
+                      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
+                    @endif
+                  </td>
+                  <td>
+                    <div style="font-weight:700;color:#1e293b;">{{ $room->type }}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px;">{{ $facs }}</div>
+                  </td>
+                  <td>Lantai {{ $room->floor }}</td>
+                  <td style="font-weight:800;color:#0a5661;">Rp {{ number_format($room->price, 0, ',', '.') }}</td>
+                  <td>
+                    @if($room->status === 'occupied')
+                      <span class="status-badge occupied">● Terisi</span>
+                    @elseif($room->status === 'available')
+                      <span class="status-badge available">● Kosong</span>
+                    @elseif($room->status === 'due')
+                      <span class="status-badge due">Jatuh Tempo</span>
+                    @elseif($room->status === 'repair')
+                      <span class="status-badge repair">Servis</span>
+                    @else
+                      <span class="status-badge">{{ $room->status }}</span>
+                    @endif
+                  </td>
+                  <td>{!! $tName ? ('<strong>' . e($tName) . '</strong>') : '<span style="color:var(--text-muted)">-</span>' !!}</td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:0.78rem;font-weight:700;border-radius:8px;" onclick="window.kosApp.editRoom('{{ $room->number }}')">Edit</button>
+                      <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:0.78rem;font-weight:700;border-radius:8px;" onclick="window.kosApp.openRoomDetailModal('{{ $room->number }}')">Detail</button>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ditemukan kamar yang sesuai</td></tr>
+              @endforelse
             </tbody>
           </table>
 
           <!-- Mobile Card View -->
           <div class="mobile-card-list" id="roomsMobileCardList">
-            <!-- Dynamically populated -->
+            @foreach($rooms as $room)
+              @php
+                $isLoc2 = ($room->location ?? '') === 'Lokasi 2';
+                $tName = $room->activeTenant ? $room->activeTenant->name : ($room->tenant ?: ($room->booked_by_name ?: ($room->status === 'occupied' || $room->status === 'due' ? ('Penghuni #' . $room->number) : null)));
+              @endphp
+              <div class="mobile-data-card" data-floor="{{ $room->floor }}" data-location="{{ $room->location ?? 'Lokasi 1' }}" data-search="{{ strtolower($room->number . ' ' . $room->type . ' ' . ($room->location ?? '') . ' ' . ($tName ?? '')) }}">
+                <div class="mobile-data-header">
+                  <div>
+                    <span class="mobile-data-title">Kamar #{{ $room->number }} ({{ $room->type }})</span>
+                    <div style="margin-top:3px;">
+                      @if($isLoc2)
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;"><span data-branch-name="lokasi_2">{{ $branch2Name }}</span></span>
+                      @else
+                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;"><span data-branch-name="lokasi_1">{{ $branch1Name }}</span></span>
+                      @endif
+                    </div>
+                  </div>
+                  @if($room->status === 'occupied')
+                    <span class="status-badge occupied">● Terisi</span>
+                  @elseif($room->status === 'available')
+                    <span class="status-badge available">● Kosong</span>
+                  @elseif($room->status === 'due')
+                    <span class="status-badge due">Jatuh Tempo</span>
+                  @elseif($room->status === 'repair')
+                    <span class="status-badge repair">Servis</span>
+                  @else
+                    <span class="status-badge">{{ $room->status }}</span>
+                  @endif
+                </div>
+                <div class="mobile-data-row">
+                  <span>Lantai:</span>
+                  <span>Lantai {{ $room->floor }}</span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>Tarif Sewa:</span>
+                  <span style="color:#0a5661;font-weight:700;">Rp {{ number_format($room->price, 0, ',', '.') }} /bln</span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>Penghuni:</span>
+                  <span>{{ $tName ?: 'Kosong' }}</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:6px;border-radius:8px;" onclick="window.kosApp.editRoom('{{ $room->number }}')">Edit Kamar</button>
+                  <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:6px;border-radius:8px;" onclick="window.kosApp.openRoomDetailModal('{{ $room->number }}')">Lihat Detail</button>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
@@ -515,6 +739,8 @@
                   $isLoc2 = ($roomItem->location ?? '') === 'Lokasi 2';
                 @endphp
                 <tr class="tenant-row" data-location="{{ $roomItem->location ?? 'Lokasi 1' }}" data-status="{{ $isDue ? 'due' : 'active' }}" data-search="{{ strtolower($tName . ' ' . $roomItem->number . ' ' . ($roomItem->location ?? '') . ' ' . $tPhone . ' ' . ($roomItem->type ?? '')) }}">
+                  <td>
+                    <div style="font-weight:700;">{{ $tName }}</div>
                     <div style="font-size:0.75rem;color:var(--text-muted);">{{ $roomItem->type ?? '-' }}</div>
                   </td>
                   <td>
@@ -568,6 +794,8 @@
                 $isLoc2 = ($roomItem->location ?? '') === 'Lokasi 2';
               @endphp
               <div class="mobile-data-card" data-location="{{ $roomItem->location ?? 'Lokasi 1' }}" data-status="{{ $isDue ? 'due' : 'active' }}" data-search="{{ strtolower($tName . ' ' . $roomItem->number . ' ' . ($roomItem->location ?? '') . ' ' . $tPhone . ' ' . ($roomItem->type ?? '')) }}">
+                <div class="mobile-data-header">
+                  <span class="mobile-data-title">{{ $tName }}</span>
                   @if($isDue)
                     <span class="status-badge due">Jatuh Tempo</span>
                   @else
@@ -889,9 +1117,6 @@
                       <button type="button" class="btn-secondary" style="background:{{ $isPartialInstallment ? '#d97706' : '#0a5661' }};color:#ffffff;border:none;padding:5px 11px;font-size:0.76rem;font-weight:800;border-radius:8px;display:inline-flex;align-items:center;gap:4px;" onclick="openManualPaymentReceiptModal('{{ $r->id }}', '{{ $r->number }}', '{{ addslashes($t->name) }}', {{ (int)($isPartialInstallment ? $remainingBill : $rRentPrice) }}, '{{ $rLoc }}', {{ (int)$paidThisMonth }}, {{ (int)$remainingBill }}, {{ (int)$rRentPrice }})" title="Catat pembayaran & terbitkan kuitansi digital resmi">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         <span>{{ $isPartialInstallment ? 'Pelunasan Cicilan' : 'Input & Kirim Kuitansi' }}</span>
-                      </button>
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span>Input & Kirim Kuitansi</span>
                       </button>
                     @else
                       <button type="button" class="btn-secondary" style="padding:5px 10px;font-size:0.76rem;" onclick="document.getElementById('btnAddNewTenant')?.click()">

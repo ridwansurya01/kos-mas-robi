@@ -64,7 +64,7 @@
         appData.rooms = (json.rooms || []).map(r => ({
           id: String(r.id),
           number: r.number,
-          floor: r.floor,
+          floor: Number(r.floor) || 1,
           type: r.type,
           location: r.location || 'Lokasi 1',
           price: Number(r.price),
@@ -172,6 +172,7 @@
     'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
     'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
     'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
+    'tab-admins': { title: 'Akun Admin', sub: 'Pantau siapa saja yang memiliki akses Admin operasional dan kelola akun staf' },
     'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan tampilan landing page, titik lokasi, profil properti, dan jaringan WiFi' }
   };
 
@@ -214,7 +215,9 @@
   }
 
   function initNavigation() {
-    window.switchTab = switchTab;
+    if (!window.switchTab) {
+      window.switchTab = switchTab;
+    }
 
     document.addEventListener('click', (e) => {
       const tabTarget = e.target.closest('[data-tab]');
@@ -257,6 +260,7 @@
       const card = document.createElement('div');
       card.className = 'room-card';
       card.setAttribute('data-room-id', room.number);
+      card.setAttribute('data-status', room.status);
 
       const featuresHtml = (room.facilities || []).slice(0, 3).map(f => `<span class="feature-pill">${f}</span>`).join('');
 
@@ -314,7 +318,7 @@
         openRoomDetailModal(room.number);
       });
 
-      if (room.floor === 1) {
+      if (Number(room.floor) === 1) {
         f1Grid.appendChild(card);
       } else {
         f2Grid.appendChild(card);
