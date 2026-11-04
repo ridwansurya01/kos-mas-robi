@@ -30,12 +30,6 @@ Route::get('/sitemap.xml', function () {
     $xml .= '    <changefreq>monthly</changefreq>' . "\n";
     $xml .= '    <priority>0.6</priority>' . "\n";
     $xml .= '  </url>' . "\n";
-    $xml .= '  <url>' . "\n";
-    $xml .= '    <loc>' . htmlspecialchars($baseUrl . '/register', ENT_XML1, 'UTF-8') . '</loc>' . "\n";
-    $xml .= '    <lastmod>' . $now . '</lastmod>' . "\n";
-    $xml .= '    <changefreq>monthly</changefreq>' . "\n";
-    $xml .= '    <priority>0.6</priority>' . "\n";
-    $xml .= '  </url>' . "\n";
     $xml .= '</urlset>';
 
     return response($xml, 200, ['Content-Type' => 'application/xml; charset=utf-8']);
@@ -44,11 +38,18 @@ Route::get('/sitemap.xml', function () {
 // =========================================================================
 // AUTHENTICATION ROUTES (accessible by all, controller handles auth state)
 // Rate limiting applied to prevent brute-force attacks and abuse
+// Pendaftaran akun penghuni baru dikelola langsung oleh Admin & Owner
 // =========================================================================
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.post');
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:6,1')->name('register.post');
+
+// Public registration is disabled; accounts are created by Admin/Owner during tenant intake
+Route::get('/register', function () {
+    return redirect()->route('login')->with('info', 'Pendaftaran akun baru dilakukan langsung oleh Admin / Pengelola kos saat penempatan kamar.');
+})->name('register');
+Route::post('/register', function () {
+    return redirect()->route('login')->with('info', 'Pendaftaran akun baru dilakukan langsung oleh Admin / Pengelola kos saat penempatan kamar.');
+})->name('register.post');
 
 // ─── Google OAuth ───
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');

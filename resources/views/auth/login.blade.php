@@ -487,11 +487,28 @@
       </a>
     </form>
 
-    {{-- Switch to Register --}}
-    <div style="text-align: center; margin-top: 24px; padding-top: 18px; border-top: 1px solid #f1f5f9; font-size: 0.86rem; color: #64748b;">
-      Belum memiliki akun? 
-      <a href="{{ route('register') }}" style="color: #0a5661; font-weight: 700; text-decoration: none; margin-left: 4px; border-bottom: 1.5px solid rgba(10, 86, 97, 0.3); transition: all 0.2s;">
-        Daftar Akun Baru &rarr;
+    @php
+      $setting = \App\Models\Setting::first();
+      $rawPhone = $setting->owner_phone ?? '6281234567890';
+      $cleanPhone = preg_replace('/[^0-9]/', '', $rawPhone);
+      if (str_starts_with($cleanPhone, '0')) {
+          $cleanPhone = '62' . substr($cleanPhone, 1);
+      }
+      $waLoginHelp = urlencode("Halo Admin " . ($setting->kos_name ?? 'Kos Mas Robi') . ", saya penghuni baru dan ingin dibuatkan akun login portal anak kos.");
+    @endphp
+
+    {{-- Informasi Pembuatan Akun Penghuni via Pengelola --}}
+    <div style="margin-top: 22px; padding: 14px 16px; background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 16px; text-align: center;">
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.82rem; font-weight: 700; color: #0a5661; margin-bottom: 4px;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Belum Memiliki Akun Penghuni?</span>
+      </div>
+      <p style="font-size: 0.78rem; color: #64748b; margin: 0 0 10px; line-height: 1.45;">
+        Pembuatan akun baru hanya dapat dilakukan oleh Admin / Pengelola kos saat penempatan kamar. Hubungi Admin untuk aktivasi akun Anda.
+      </p>
+      <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waLoginHelp }}" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #059669; color: #ffffff; padding: 8px 18px; border-radius: 9999px; font-size: 0.78rem; font-weight: 700; text-decoration: none; transition: all 0.2s; box-shadow: 0 2px 8px rgba(5,150,105,0.25);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.19 8.19 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.06-1.1l-.29-.17-3.02.79.81-2.94-.19-.3a8.21 8.21 0 0 1-1.26-4.52c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.72 4.31 3.81.6.26 1.07.42 1.44.54.61.19 1.16.17 1.6.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
+        <span>Hubungi Admin untuk Pembuatan Akun</span>
       </a>
     </div>
 

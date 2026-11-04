@@ -1622,6 +1622,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('tenantStartDate').value = today;
 
+    const pwdField = document.getElementById('tenantPassword');
+    if (pwdField && !pwdField.value) {
+      pwdField.value = 'kost' + Math.floor(1000 + Math.random() * 9000);
+    }
+
     openModal('modalAddTenant');
   }
 
@@ -1637,6 +1642,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       e.preventDefault();
       const name = document.getElementById('tenantFullName').value.trim();
       const phone = document.getElementById('tenantPhone').value.trim();
+      const email = document.getElementById('tenantEmail')?.value.trim() || '';
+      const password = document.getElementById('tenantPassword')?.value.trim() || '';
       const idCard = document.getElementById('tenantIdNumber').value.trim();
       const roomId = document.getElementById('tenantSelectRoom').value;
       const startDate = document.getElementById('tenantStartDate').value;
@@ -1653,6 +1660,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           },
           body: JSON.stringify({
             name,
+            email,
+            password,
             phone,
             id_card: idCard,
             room_id: roomId,
@@ -1663,15 +1672,27 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           })
         });
 
-        if (res.ok) {
-          showToast(`Penghuni ${name} berhasil didaftarkan di sistem Laravel!`, 'success');
+        const resData = await res.json();
+
+        if (res.ok && resData.success) {
+          showToast(`Penghuni ${name} dan akun login berhasil didaftarkan!`, 'success');
           await fetchServerData();
           closeModal('modalAddTenant');
           form.reset();
+
+          if (resData.user && resData.user.wa_creds_url) {
+            const sendWa = confirm(`Akun penghuni ${name} berhasil dibuat!\n\nEmail Login: ${resData.user.email}\nPassword: ${resData.user.plain_password}\n\nKirim informasi akun ini ke WhatsApp penghuni sekarang?`);
+            if (sendWa) {
+              window.open(resData.user.wa_creds_url, '_blank');
+            }
+          }
           return;
+        } else {
+          alert(resData.message || 'Gagal mendaftarkan penghuni. Pastikan email dan data sudah sesuai.');
         }
       } catch (err) {
         console.error(err);
+        alert('Terjadi kesalahan koneksi saat mendaftarkan penghuni.');
       }
 
       // Local fallback

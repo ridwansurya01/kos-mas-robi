@@ -10,6 +10,8 @@ use App\Models\Finance;
 use App\Models\MaintenanceTicket;
 use App\Models\Setting;
 use App\Models\RoomTransfer;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
 
 class DashboardController extends Controller
@@ -532,13 +534,15 @@ class DashboardController extends Controller
     }
 
     /**
-     * Store new tenant and assign to room.
+     * Store new tenant, assign to room, and create login account.
      */
     public function saveTenant(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string',
+            'email' => 'required|email|max:255',
             'phone' => 'required|string',
+            'password' => 'nullable|string|min:6',
             'id_card' => 'nullable|string',
             'room_id' => 'required|exists:rooms,id',
             'start_date' => 'required|date',
@@ -547,12 +551,49 @@ class DashboardController extends Controller
             'emergency_contact' => 'nullable|string',
         ]);
 
-        $tenant = Tenant::create(array_merge($validated, ['status' => 'active']));
+        $tenantData = [
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'id_card' => $validated['id_card'] ?? null,
+            'room_id' => $validated['room_id'],
+            'start_date' => $validated['start_date'],
+            'due_day' => $validated['due_day'],
+            'rent_amount' => $validated['rent_amount'],
+            'emergency_contact' => $validated['emergency_contact'] ?? null,
+            'status' => 'active',
+        ];
+
+        $tenant = Tenant::create($tenantData);
 
         $room = Room::find($validated['room_id']);
         if ($room) {
             $room->status = 'occupied';
             $room->save();
+        }
+
+        // Create or update User login account for this tenant
+        $plainPassword = !empty($validated['password']) ? trim($validated['password']) : ('kost' . rand(1000, 9999));
+        $user = User::where('email', $validated['email'])->first();
+
+        if ($user) {
+            $user->name = $validated['name'];
+            $user->phone = $validated['phone'];
+            $user->room_id = $validated['room_id'];
+            $user->role = 'tenant';
+            if (!empty($validated['password'])) {
+                $user->password = Hash::make($plainPassword);
+            }
+            $user->save();
+        } else {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'password' => Hash::make($plainPassword),
+                'role' => 'tenant',
+                'room_id' => $validated['room_id'],
+                'branch_preference' => $room?->location ?? 'Lokasi 1',
+            ]);
         }
 
         // Record initial rent payment
@@ -567,7 +608,29 @@ class DashboardController extends Controller
             'payment_method' => 'Transfer BCA',
         ]);
 
-        return response()->json(['success' => true, 'tenant' => $tenant]);
+        // Build WhatsApp credentials text
+        $setting = Setting::first();
+        $cleanPhone = preg_replace('/[^0-9]/', '', $validated['phone']);
+        if (str_starts_with($cleanPhone, '0')) {
+            $cleanPhone = '62' . substr($cleanPhone, 1);
+        }
+        $loginUrl = route('login');
+        $waCredsText = "Halo {$validated['name']}, akun portal anak kos Anda di " . ($setting->kos_name ?? 'Kos Mas Robi') . " telah berhasil dibuat oleh pengelola.\n\nBerikut rincian akun Anda:\n• Kamar: #{$room->number}\n• Email Login: {$validated['email']}\n• Password: {$plainPassword}\n• Link Login: {$loginUrl}\n\nSilakan login ke portal anak kos untuk melihat tagihan, konfirmasi pembayaran sewa, dan informasi fasilitas kos.";
+        $waCredsUrl = "https://wa.me/{$cleanPhone}?text=" . urlencode($waCredsText);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Penghuni baru dan akun login berhasil didaftarkan!',
+            'tenant' => $tenant,
+            'user' => [
+                'id' => $user->id,
+                'email' => $user->email,
+                'name' => $user->name,
+                'plain_password' => $plainPassword,
+                'wa_creds_url' => $waCredsUrl,
+                'wa_creds_text' => $waCredsText,
+            ]
+        ]);
     }
 
     /**

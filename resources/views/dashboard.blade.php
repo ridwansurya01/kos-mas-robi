@@ -446,7 +446,7 @@
         <div class="section-header" style="justify-content: flex-end;">
           <button type="button" class="btn-primary-action" id="btnAddNewTenant">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span>Daftarkan Anak Kos</span>
+            <span>Daftarkan Penghuni & Buat Akun</span>
           </button>
         </div>
 
@@ -1936,8 +1936,8 @@
         <div style="display: flex; align-items: center; gap: 12px;">
           <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
           <div>
-            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Daftarkan Penghuni Baru</h3>
-            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Registrasi data anak kos, tanggal masuk & penempatan kamar</p>
+            <h3 style="color: #fff; margin: 0; font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;">Daftarkan Penghuni & Buat Akun Baru</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Registrasi data anak kos, buat akun login portal, dan penempatan kamar</p>
           </div>
         </div>
         <button type="button" class="modal-close-btn" data-close-modal="modalAddTenant">
@@ -1950,6 +1950,37 @@
             <label for="tenantFullName" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nama Lengkap Anak Kos *</label>
             <input type="text" id="tenantFullName" class="form-control" placeholder="Contoh: Muhammad Dimas Satria" required style="border-radius: 12px;">
           </div>
+
+          <!-- SECTION AKUN LOGIN PORTAL PENGHUNI -->
+          <div style="background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%); border: 1.5px solid #99f6e4; border-radius: 16px; padding: 16px; margin: 4px 0 6px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div style="width: 26px; height: 26px; background: #0a5661; color: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <span style="font-weight: 800; font-size: 0.88rem; color: #04272c;">Akun Login Portal Anak Kos</span>
+              </div>
+              <span style="font-size: 0.7rem; color: #0f766e; background: #ccfbf1; padding: 2px 8px; border-radius: 6px; font-weight: 700;">Akses Penghuni</span>
+            </div>
+
+            <div class="form-row" style="gap: 12px;">
+              <div class="form-group" style="margin-bottom: 0;">
+                <label for="tenantEmail" style="font-weight: 700; font-size: 0.8rem; color: #0f766e;">Email Akun (Gmail) *</label>
+                <input type="email" id="tenantEmail" class="form-control" placeholder="contoh: dimas@gmail.com" required style="border-radius: 10px; border-color: #99f6e4; background: #fff;">
+              </div>
+              <div class="form-group" style="margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label for="tenantPassword" style="font-weight: 700; font-size: 0.8rem; color: #0f766e; margin-bottom: 0;">Kata Sandi *</label>
+                  <button type="button" onclick="generateTenantRandomPassword()" style="background: none; border: none; color: #0a5661; font-size: 0.72rem; font-weight: 700; cursor: pointer; text-decoration: underline;">Buat Acak</button>
+                </div>
+                <input type="text" id="tenantPassword" class="form-control" placeholder="Minimal 6 karakter..." required style="border-radius: 10px; border-color: #99f6e4; background: #fff; font-family: monospace;">
+              </div>
+            </div>
+            <div style="font-size: 0.72rem; color: #0f766e; margin-top: 8px; line-height: 1.4;">
+              Informasi email dan kata sandi ini otomatis dapat langsung dikirimkan ke nomor WhatsApp anak kos setelah disimpan.
+            </div>
+          </div>
+
           <div class="form-row" style="gap: 12px;">
             <div class="form-group" style="margin-bottom: 0;">
               <label for="tenantPhone" style="font-weight: 700; font-size: 0.82rem; color: #334155;">No. WhatsApp *</label>
@@ -1989,7 +2020,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-close-modal="modalAddTenant">Batal</button>
-          <button type="submit" class="btn-primary" style="padding: 10px 24px; border-radius: 12px; font-weight: 800;">Simpan Penghuni</button>
+          <button type="submit" class="btn-primary" style="padding: 10px 24px; border-radius: 12px; font-weight: 800;">Simpan & Buat Akun Penghuni</button>
         </div>
       </form>
     </div>
@@ -4227,6 +4258,13 @@
           statusEl.style.color = '#ef4444';
         }
       });
+    };
+
+    window.generateTenantRandomPassword = function() {
+      var pwdInput = document.getElementById('tenantPassword');
+      if (pwdInput) {
+        pwdInput.value = 'kost' + Math.floor(1000 + Math.random() * 9000);
+      }
     };
 
   </script>

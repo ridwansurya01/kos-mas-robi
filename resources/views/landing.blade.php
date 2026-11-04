@@ -150,17 +150,21 @@
           <span>Jadwal Survey</span>
         </button>
         @auth
-          @if(Auth::user()->isOwner())
-            <a href="{{ route('admin.dashboard') }}" class="lr-btn-ghost-white">Login</a>
+          @if(Auth::user()->isOwner() || Auth::user()->isAdmin())
+            <a href="{{ route('admin.dashboard') }}" class="lr-btn-pill-teal">
+              <span>Dashboard Admin</span>
+            </a>
           @else
-            <a href="{{ route('tenant.portal') }}" class="lr-btn-ghost-white">Login</a>
+            <a href="{{ route('tenant.portal') }}" class="lr-btn-pill-teal">
+              <span>Portal Anak Kos</span>
+            </a>
           @endif
         @else
-          <a href="{{ route('login') }}" class="lr-btn-ghost-white">Login</a>
+          <a href="{{ route('login') }}" class="lr-btn-pill-teal">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+            <span>Login Penghuni</span>
+          </a>
         @endauth
-        <a href="{{ route('register') }}" class="lr-btn-pill-teal">
-          <span>Register</span>
-        </a>
       </div>
     </div>
   </nav>
