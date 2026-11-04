@@ -2773,7 +2773,7 @@ function validatePaymentSubmission(event) {
   if (isCash) {
     var cashDate = document.getElementById('payCashDate').value;
     if (!cashDate) {
-      alert('Mohon tentukan Tanggal Bayar Tunai (Cash) Anda.');
+      window.showModernAlert('Mohon tentukan Tanggal Bayar Tunai (Cash) Anda.', 'error', 'Perhatian');
       document.getElementById('payCashDate').focus();
       if (event) event.preventDefault();
       return false;
@@ -2784,14 +2784,14 @@ function validatePaymentSubmission(event) {
   // Transfer / QRIS: Wajib nota & lolos screening
   var fileInput = document.getElementById('payProofFile');
   if (!fileInput.files || fileInput.files.length === 0) {
-    alert('Foto bukti / nota pembayaran WAJIB diunggah untuk metode transfer atau QRIS!\n\nSilakan lampirkan struk ATM atau screenshot m-Banking Anda.');
+    window.showModernAlert('Foto bukti / nota pembayaran WAJIB diunggah untuk metode transfer atau QRIS!\n\nSilakan lampirkan struk ATM atau screenshot m-Banking Anda.', 'error', 'Bukti Transfer Diperlukan');
     fileInput.focus();
     if (event) event.preventDefault();
     return false;
   }
 
   if (!isProofValidForTransfer) {
-    alert('File yang diunggah belum lolos screening nota pembayaran!\n\nPastikan foto yang diunggah adalah nota transfer atau screenshot m-banking yang sah dan jelas.');
+    window.showModernAlert('File yang diunggah belum lolos screening nota pembayaran!\n\nPastikan foto yang diunggah adalah nota transfer atau screenshot m-banking yang sah dan jelas.', 'error', 'Screening Nota');
     if (event) event.preventDefault();
     return false;
   }

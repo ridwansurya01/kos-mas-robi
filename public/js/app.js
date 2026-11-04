@@ -540,10 +540,67 @@
     activeTenantLocationFilter = locationFilter;
     const tbody = document.getElementById('tenantsTableBody');
     const mobileList = document.getElementById('tenantsMobileCardList');
-    if (!tbody || !mobileList) return;
+    if (!tbody) return;
 
+    const q = (search || '').toLowerCase().trim();
+    const domRows = tbody.querySelectorAll('.tenant-row');
+    const domCards = mobileList ? mobileList.querySelectorAll('.mobile-data-card') : [];
+
+    // Prioritize instant DOM filtering if server rendered rows are present (Zero-loss & Zero-latency)
+    if (domRows.length > 0) {
+      let visibleCount = 0;
+      domRows.forEach(row => {
+        const loc = row.getAttribute('data-location') || 'Lokasi 1';
+        const status = row.getAttribute('data-status') || 'active';
+        const searchData = (row.getAttribute('data-search') || row.innerText || '').toLowerCase();
+
+        const matchLoc = (locationFilter === 'all' || loc === locationFilter);
+        let matchStatus = true;
+        if (statusFilter === 'active') matchStatus = (status === 'occupied' || status === 'active');
+        if (statusFilter === 'due') matchStatus = (status === 'due');
+        const matchSearch = (!q || searchData.includes(q));
+
+        if (matchLoc && matchStatus && matchSearch) {
+          row.style.display = '';
+          visibleCount++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      if (domCards.length > 0) {
+        domCards.forEach(card => {
+          const loc = card.getAttribute('data-location') || 'Lokasi 1';
+          const status = card.getAttribute('data-status') || 'active';
+          const searchData = (card.getAttribute('data-search') || card.innerText || '').toLowerCase();
+
+          const matchLoc = (locationFilter === 'all' || loc === locationFilter);
+          let matchStatus = true;
+          if (statusFilter === 'active') matchStatus = (status === 'occupied' || status === 'active');
+          if (statusFilter === 'due') matchStatus = (status === 'due');
+          const matchSearch = (!q || searchData.includes(q));
+
+          card.style.display = (matchLoc && matchStatus && matchSearch) ? '' : 'none';
+        });
+      }
+
+      let emptyRow = document.getElementById('emptyFilteredTenantsRow');
+      if (visibleCount === 0) {
+        if (!emptyRow) {
+          emptyRow = document.createElement('tr');
+          emptyRow.id = 'emptyFilteredTenantsRow';
+          emptyRow.innerHTML = '<td colspan="8" style="text-align:center;padding:26px 16px;color:var(--text-muted);font-weight:600;">Tidak ada data penghuni yang cocok dengan filter atau pencarian</td>';
+          tbody.appendChild(emptyRow);
+        }
+        emptyRow.style.display = '';
+      } else if (emptyRow) {
+        emptyRow.style.display = 'none';
+      }
+      return;
+    }
+
+    if (mobileList) mobileList.innerHTML = '';
     tbody.innerHTML = '';
-    mobileList.innerHTML = '';
 
     const tenants = (appData.rooms || []).map(r => {
       let tName = '';
@@ -1776,11 +1833,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           }
           return;
         } else {
-          alert(resData.message || 'Gagal mendaftarkan penghuni. Pastikan email dan data sudah sesuai.');
+          window.showModernAlert(resData.message || 'Gagal mendaftarkan penghuni. Pastikan email dan data sudah sesuai.', 'error', 'Pendaftaran Gagal');
         }
       } catch (err) {
         console.error(err);
-        alert('Terjadi kesalahan koneksi saat mendaftarkan penghuni.');
+        window.showModernAlert('Terjadi kesalahan koneksi saat mendaftarkan penghuni.', 'error', 'Gangguan Koneksi');
       }
 
       // Local fallback

@@ -514,9 +514,7 @@
                   $isDue = $roomItem->status === 'due';
                   $isLoc2 = ($roomItem->location ?? '') === 'Lokasi 2';
                 @endphp
-                <tr>
-                  <td>
-                    <div style="font-weight:700;">{{ $tName }}</div>
+                <tr class="tenant-row" data-location="{{ $roomItem->location ?? 'Lokasi 1' }}" data-status="{{ $isDue ? 'due' : 'active' }}" data-search="{{ strtolower($tName . ' ' . $roomItem->number . ' ' . ($roomItem->location ?? '') . ' ' . $tPhone . ' ' . ($roomItem->type ?? '')) }}">
                     <div style="font-size:0.75rem;color:var(--text-muted);">{{ $roomItem->type ?? '-' }}</div>
                   </td>
                   <td>
@@ -569,9 +567,7 @@
                 $isDue = $roomItem->status === 'due';
                 $isLoc2 = ($roomItem->location ?? '') === 'Lokasi 2';
               @endphp
-              <div class="mobile-data-card">
-                <div class="mobile-data-header">
-                  <span class="mobile-data-title">{{ $tName }}</span>
+              <div class="mobile-data-card" data-location="{{ $roomItem->location ?? 'Lokasi 1' }}" data-status="{{ $isDue ? 'due' : 'active' }}" data-search="{{ strtolower($tName . ' ' . $roomItem->number . ' ' . ($roomItem->location ?? '') . ' ' . $tPhone . ' ' . ($roomItem->type ?? '')) }}">
                   @if($isDue)
                     <span class="status-badge due">Jatuh Tempo</span>
                   @else
@@ -627,6 +623,10 @@
         </div>
 
         @php
+          $nowMonthNum = now()->month;
+          $nowYearNum = now()->year;
+          $nowMonthName = now()->translatedFormat('F Y');
+
           $b1RoomsList = $rooms->where('location', 'Lokasi 1');
           $b2RoomsList = $rooms->where('location', 'Lokasi 2');
           $b1PaidCount = $b1RoomsList->where('status', 'occupied')->count();
@@ -638,6 +638,25 @@
           $b2DueCount = $b2RoomsList->where('status', 'due')->count();
           $b2MonthlyPot = $b2RoomsList->whereIn('status', ['occupied', 'due'])->sum('price');
           $b2DueNominal = $b2RoomsList->where('status', 'due')->sum('price');
+
+          // Kalkulasi pelacak cicilan aktif bulan berjalan
+          $activeInstallmentRoomsCount = 0;
+          $totalRemainingInstallment = 0;
+          foreach ($rooms as $chkR) {
+              if ($chkR->status === 'available') continue;
+              $chkIncomes = ($allFinances ?? collect())->filter(function($f) use ($chkR, $nowMonthNum, $nowYearNum) {
+                  if ($f->type !== 'income' || $f->room_id != $chkR->id) return false;
+                  $dt = \Carbon\Carbon::parse($f->date);
+                  return $dt->month === $nowMonthNum && $dt->year === $nowYearNum;
+              });
+              $chkPaid = (float) $chkIncomes->sum('amount');
+              $chkPrice = (float) $chkR->price;
+              $chkRem = max(0, $chkPrice - $chkPaid);
+              if ($chkPaid > 0 && $chkRem > 0) {
+                  $activeInstallmentRoomsCount++;
+                  $totalRemainingInstallment += $chkRem;
+              }
+          }
         @endphp
 
         <!-- SWITCHER FILTER 2 TITIK LOKASI KOS (TAGIHAN SEWA) -->
@@ -649,7 +668,7 @@
           </div>
         </div>
 
-        <!-- 3 KPI Cards Tagihan -->
+        <!-- KPI Cards Tagihan & Monitoring Cicilan -->
         <div class="stats-grid billing-stats-grid" style="padding: 0; margin-bottom: 22px;">
           <div class="stat-card">
             <div class="stat-card-header">
@@ -667,7 +686,7 @@
 
           <div class="stat-card">
             <div class="stat-card-header">
-              <span class="stat-card-title">Tagihan Jatuh Tempo / Belum Lunas</span>
+              <span class="stat-card-title">Tagihan Jatuh Tempo</span>
               <div class="stat-icon amber">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
@@ -676,6 +695,20 @@
             <div class="stat-card-meta">
               <span id="billKpiDueNom" style="color:#d97706;font-weight:700;">Rp {{ number_format($dueAmount, 0, ',', '.') }}</span>
               <span>perlu pengingat tagihan</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Cicilan Aktif Bulan Ini</span>
+              <div class="stat-icon teal" style="background: rgba(245, 158, 11, 0.12); color: #d97706; border-color: rgba(245, 158, 11, 0.3);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="billKpiPartialVal" style="color:#d97706;">{{ $activeInstallmentRoomsCount }} Kamar</div>
+            <div class="stat-card-meta">
+              <span style="color:#b45309;font-weight:700;">Sisa: Rp {{ number_format($totalRemainingInstallment, 0, ',', '.') }}</span>
+              <span>terpantau dicicil sebagian</span>
             </div>
           </div>
 
@@ -702,7 +735,8 @@
             </div>
             <div class="filter-pills" id="billingStatusFilter">
               <button type="button" class="filter-pill active" onclick="filterBillingStatus('all', this)">Semua Unit ({{ $totalRooms }})</button>
-              <button type="button" class="filter-pill" onclick="filterBillingStatus('due', this)" style="color:#d97706;">Jatuh Tempo ({{ $dueRooms }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('partial', this)" style="color:#d97706;font-weight:800;">Cicilan Aktif ({{ $activeInstallmentRoomsCount }})</button>
+              <button type="button" class="filter-pill" onclick="filterBillingStatus('due', this)" style="color:#ef4444;">Jatuh Tempo ({{ $dueRooms }})</button>
               <button type="button" class="filter-pill" onclick="filterBillingStatus('paid', this)" style="color:#059669;">Lunas ({{ $occupiedRooms - $dueRooms }})</button>
               <button type="button" class="filter-pill" onclick="filterBillingStatus('available', this)">Kosong ({{ $availableRooms }})</button>
             </div>
@@ -725,17 +759,52 @@
               @forelse($rooms as $r)
               @php
                 $t = $r->activeTenant;
+                $rRentPrice = (float) $r->price;
+
+                // Hitung total cicilan masuk pada bulan berjalan untuk unit kamar ini
+                $rIncomeThisMonth = ($allFinances ?? collect())->filter(function($f) use ($r, $nowMonthNum, $nowYearNum) {
+                    if ($f->type !== 'income' || $f->room_id != $r->id) return false;
+                    $dt = \Carbon\Carbon::parse($f->date);
+                    return $dt->month === $nowMonthNum && $dt->year === $nowYearNum;
+                });
+                $paidThisMonth = (float) $rIncomeThisMonth->sum('amount');
+                $remainingBill = max(0, $rRentPrice - $paidThisMonth);
+                $isPartialInstallment = ($paidThisMonth > 0 && $remainingBill > 0);
+                $percentPaid = $rRentPrice > 0 ? min(100, round(($paidThisMonth / $rRentPrice) * 100)) : 0;
+
                 $isDue = $r->status === 'due';
                 $isOccupied = $r->status === 'occupied';
                 $isAvailable = $r->status === 'available';
-                $statusType = $isDue ? 'due' : ($isOccupied ? 'paid' : 'available');
+
+                if ($isAvailable) {
+                    $statusType = 'available';
+                } elseif ($isPartialInstallment) {
+                    $statusType = 'partial';
+                } elseif ($paidThisMonth >= $rRentPrice || ($isOccupied && !$isDue)) {
+                    $statusType = 'paid';
+                } else {
+                    $statusType = 'due';
+                }
+
                 $tenantName = $t ? $t->name : '-';
                 $tenantPhone = $t ? $t->phone : '';
                 $dueDay = $t ? $t->due_day : 5;
                 $rLoc = $r->location ?? (intval($r->number) >= 200 ? 'Lokasi 2' : 'Lokasi 1');
                 $isLoc2 = $rLoc === 'Lokasi 2';
+                $branchLabel = $isLoc2 ? ($branch2Name ?? 'Kos Mas Robi 2') : ($branch1Name ?? 'Kos Mas Robi 1');
+                $bankName = $setting->bank_name ?? 'BCA';
+                $bankAccount = $setting->bank_account ?? '8830192831';
+                $bankHolder = $setting->bank_holder ?? 'Robi Suryanto';
+
+                // Teks pesan WhatsApp otomatis (Deteksi status cicilan aktif vs tagihan baru)
+                if ($isPartialInstallment) {
+                    $waRawMsg = "Halo Kak {$tenantName}, kami dari Pengelola {$branchLabel} menginfokan update sewa Kamar #{$r->number} periode {$nowMonthName}.\n\nDari total tagihan sewa sebesar Rp " . number_format($rRentPrice, 0, ',', '.') . ", pembayaran cicilan yang sudah tercatat masuk adalah *Rp " . number_format($paidThisMonth, 0, ',', '.') . " ({$percentPaid}%)*.\n\nSisa tagihan yang perlu dilunasi adalah sebesar *Rp " . number_format($remainingBill, 0, ',', '.') . "*.\n\nPembayaran sisa dapat ditransfer ke rekening resmi kami:\n- Bank: {$bankName}\n- No. Rekening: {$bankAccount}\n- Atas Nama: {$bankHolder}\n\nSetelah melakukan transfer, mohon kirimkan bukti transfer melalui WhatsApp ini agar kuitansi pelunasan dapat segera kami terbitkan. Terima kasih banyak Kak!";
+                } else {
+                    $waRawMsg = "Halo Kak {$tenantName}, kami dari Pengelola {$branchLabel} ingin menginformasikan terkait tagihan sewa Kamar #{$r->number} periode {$nowMonthName} sebesar Rp " . number_format($rRentPrice, 0, ',', '.') . ".\n\nPembayaran dapat ditransfer ke rekening:\n- Bank: {$bankName}\n- No. Rekening: {$bankAccount}\n- Atas Nama: {$bankHolder}\n\nTerima kasih banyak Kak!";
+                }
+                $waText = rawurlencode($waRawMsg);
               @endphp
-              <tr data-status="{{ $statusType }}" data-location="{{ $rLoc }}" data-price="{{ (int)$r->price }}" data-search="{{ strtolower($r->number . ' ' . $rLoc . ' ' . $r->type . ' ' . $tenantName . ' ' . ($isDue ? 'jatuh tempo belum lunas' : ($isOccupied ? 'lunas' : 'kosong'))) }}">
+              <tr data-status="{{ $statusType }}" data-location="{{ $rLoc }}" data-price="{{ (int)$rRentPrice }}" data-rem="{{ (int)$remainingBill }}" data-paid="{{ (int)$paidThisMonth }}" data-search="{{ strtolower($r->number . ' ' . $rLoc . ' ' . $r->type . ' ' . $tenantName . ' ' . ($isPartialInstallment ? 'cicilan aktif sebagian' : ($statusType === 'paid' ? 'lunas' : ($isDue ? 'jatuh tempo belum lunas' : 'kosong')))) }}">
                 <td>
                   <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">Kamar #{{ $r->number }}</div>
                   <div style="font-size: 0.74rem; color: var(--text-secondary);">Lt. {{ $r->floor }} • {{ $r->type }}</div>
@@ -762,7 +831,7 @@
                   @endif
                 </td>
                 <td style="font-weight: 800; color: #0a5661;">
-                  Rp {{ number_format($r->price, 0, ',', '.') }}
+                  Rp {{ number_format($rRentPrice, 0, ',', '.') }}
                 </td>
                 <td>
                   @if($t)
@@ -777,13 +846,27 @@
                   @endif
                 </td>
                 <td>
-                  @if($isDue)
-                    <span class="status-badge due" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
-                      Belum Lunas (Jatuh Tempo)
-                    </span>
-                  @elseif($isOccupied)
+                  @if($isPartialInstallment)
+                    <div style="display: flex; flex-direction: column; gap: 3px; min-width: 170px;">
+                      <span style="display: inline-flex; align-items: center; gap: 5px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 0.72rem; width: fit-content;">
+                        <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #d97706;"></span>
+                        <span>Cicilan Aktif ({{ $percentPaid }}%)</span>
+                      </span>
+                      <div style="font-size: 0.72rem; color: #475569;">
+                        <span>Masuk: <strong style="color: #059669;">Rp {{ number_format($paidThisMonth, 0, ',', '.') }}</strong></span> &bull; 
+                        <span>Sisa: <strong style="color: #dc2626;">Rp {{ number_format($remainingBill, 0, ',', '.') }}</strong></span>
+                      </div>
+                      <div style="width: 100%; height: 5px; background: #e2e8f0; border-radius: 999px; overflow: hidden; margin-top: 2px;">
+                        <div style="width: {{ $percentPaid }}%; height: 100%; background: linear-gradient(90deg, #f59e0b, #10b981); border-radius: 999px;"></div>
+                      </div>
+                    </div>
+                  @elseif($statusType === 'paid')
                     <span class="status-badge occupied" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
                       Lunas Bulan Ini
+                    </span>
+                  @elseif($isDue)
+                    <span class="status-badge due" style="font-weight: 800; padding: 4px 12px; border-radius: 999px;">
+                      Belum Lunas (Jatuh Tempo)
                     </span>
                   @else
                     <span class="status-badge available" style="padding: 4px 12px; border-radius: 999px;">
@@ -799,13 +882,14 @@
                         if (str_starts_with($cleanPhone, '0')) {
                             $cleanPhone = '62' . substr($cleanPhone, 1);
                         }
-                        $branchLabel = $isLoc2 ? 'Kos Mas Robi 2 (Ringroad Exclusive)' : 'Kos Mas Robi 1 (Kampus Utama)';
-                        $waText = rawurlencode("Halo Kak {$t->name}, kami dari Pengelola {$branchLabel} ingin menginformasikan terkait tagihan sewa Kamar #{$r->number} sebesar Rp " . number_format($r->price, 0, ',', '.') . ". Silakan melakukan pembayaran ke Rekening BCA: 8830192831 (a.n. Robi Suryanto) atau Mandiri: 1370019283100. Terima kasih banyak Kak!");
                       @endphp
-                      <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" target="_blank" class="btn-secondary" style="background:#059669;color:#ffffff;border:none;padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Kirim Pesan WhatsApp Penagihan">
-                        WA Tagihan
+                      <a href="https://wa.me/{{ $cleanPhone }}?text={{ $waText }}" target="_blank" class="btn-secondary" style="background:#059669;color:#ffffff;border:none;padding:5px 10px;font-size:0.76rem;font-weight:700;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Kirim Pesan WhatsApp Penagihan / Info Sisa Cicilan">
+                        {{ $isPartialInstallment ? 'WA Sisa Cicilan' : 'WA Tagihan' }}
                       </a>
-                      <button type="button" class="btn-secondary" style="background:#0a5661;color:#ffffff;border:none;padding:5px 11px;font-size:0.76rem;font-weight:800;border-radius:8px;display:inline-flex;align-items:center;gap:4px;" onclick="openManualPaymentReceiptModal('{{ $r->id }}', '{{ $r->number }}', '{{ addslashes($t->name) }}', {{ (int)$r->price }}, '{{ $rLoc }}')" title="Catat pembayaran & terbitkan kuitansi digital resmi">
+                      <button type="button" class="btn-secondary" style="background:{{ $isPartialInstallment ? '#d97706' : '#0a5661' }};color:#ffffff;border:none;padding:5px 11px;font-size:0.76rem;font-weight:800;border-radius:8px;display:inline-flex;align-items:center;gap:4px;" onclick="openManualPaymentReceiptModal('{{ $r->id }}', '{{ $r->number }}', '{{ addslashes($t->name) }}', {{ (int)($isPartialInstallment ? $remainingBill : $rRentPrice) }}, '{{ $rLoc }}', {{ (int)$paidThisMonth }}, {{ (int)$remainingBill }}, {{ (int)$rRentPrice }})" title="Catat pembayaran & terbitkan kuitansi digital resmi">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span>{{ $isPartialInstallment ? 'Pelunasan Cicilan' : 'Input & Kirim Kuitansi' }}</span>
+                      </button>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         <span>Input & Kirim Kuitansi</span>
                       </button>
@@ -2733,12 +2817,24 @@
             <select id="payRecRoomId" class="form-control" required style="border-radius: 12px; font-weight: 700;" onchange="onManualPayRoomChanged(this)">
               <option value="">-- Pilih Kamar Penghuni --</option>
               @foreach($rooms as $r)
-                @php $t = $r->activeTenant; @endphp
-                <option value="{{ $r->id }}" data-price="{{ (int)$r->price }}" data-tenant="{{ $t ? $t->name : 'Unit Kosong' }}" data-room="{{ $r->number }}">
-                  Kamar #{{ $r->number }} ({{ $r->type }}) — {{ $t ? $t->name : '(Unit Kosong)' }} [Rp {{ number_format($r->price, 0, ',', '.') }}/bln]
+                @php
+                  $t = $r->activeTenant;
+                  $rPriceNum = (int)$r->price;
+                  $rIncomesM = ($allFinances ?? collect())->filter(function($f) use ($r, $nowMonthNum, $nowYearNum) {
+                      if ($f->type !== 'income' || $f->room_id != $r->id) return false;
+                      $dt = \Carbon\Carbon::parse($f->date);
+                      return $dt->month === $nowMonthNum && $dt->year === $nowYearNum;
+                  });
+                  $rPaidM = (int)$rIncomesM->sum('amount');
+                  $rRemM = max(0, $rPriceNum - $rPaidM);
+                  $rIsPartial = ($rPaidM > 0 && $rRemM > 0);
+                @endphp
+                <option value="{{ $r->id }}" data-price="{{ $rPriceNum }}" data-paid="{{ $rPaidM }}" data-rem="{{ $rRemM }}" data-full-price="{{ $rPriceNum }}" data-tenant="{{ $t ? $t->name : 'Unit Kosong' }}" data-room="{{ $r->number }}">
+                  Kamar #{{ $r->number }} ({{ $r->type }}) — {{ $t ? $t->name : '(Unit Kosong)' }} [Tarif Rp {{ number_format($r->price, 0, ',', '.') }}{{ $rIsPartial ? ' • Dicicil Rp ' . number_format($rPaidM, 0, ',', '.') . ' (Sisa Rp ' . number_format($rRemM, 0, ',', '.') . ')' : '' }}]
                 </option>
               @endforeach
             </select>
+            <div id="payRecInstallmentInfo" style="display: none; margin-top: 8px;"></div>
           </div>
 
           <div class="form-row" style="gap: 12px;">
@@ -3001,202 +3097,10 @@
     </div>
   </div>
 
-  <!-- =========================================================================
-       MODAL: POP-UP MODERN ALERT & NOTIFIKASI ELEGAN (PENGGANTI ALERT BROWSER)
-       ========================================================================= -->
-  <style>
-    @keyframes modernAlertPopIn {
-      0% { opacity: 0; transform: scale(0.88) translateY(16px); }
-      100% { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    #modalModernAlert.open .modal-dialog,
-    #modalModernConfirm.open .modal-dialog {
-      animation: modernAlertPopIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-  </style>
-  <div class="modal-backdrop" id="modalModernAlert" onclick="if(event.target === this) closeModernAlert()" style="display: none; position: fixed; inset: 0; background: rgba(3, 35, 40, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 100005; align-items: center; justify-content: center; padding: 20px;">
-    <div class="modal-dialog" style="max-width: 440px; width: 100%; margin: auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 28px 65px -12px rgba(3, 35, 40, 0.45); border: 1.5px solid rgba(13, 148, 136, 0.28); text-align: center; padding: 34px 28px;">
-      <div id="modernAlertIconWrap" style="width: 72px; height: 72px; border-radius: 22px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.32); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22); transition: all 0.2s;">
-        <!-- Injected Icon via JS -->
-      </div>
-      <h3 id="modernAlertTitle" style="margin: 0 0 10px; font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Pemberitahuan Sistem</h3>
-      <p id="modernAlertMessage" style="margin: 0 0 26px; font-size: 0.92rem; color: #475569; line-height: 1.6; white-space: pre-line; word-break: break-word;">Pesan informasi sistem.</p>
-      <div style="display: flex; justify-content: center;">
-        <button type="button" id="btnModernAlertOk" onclick="closeModernAlert()" style="min-width: 150px; padding: 12px 30px; background: linear-gradient(135deg, #0d9488 0%, #0a5661 100%); color: #ffffff; border: none; border-radius: 14px; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 6px 18px rgba(10, 86, 97, 0.32); transition: all 0.2s;">
-          Mengerti
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================================================================
-       MODAL: POP-UP MODERN KONFIRMASI TINDAKAN (PENGGANTI CONFIRM BROWSER)
-       ========================================================================= -->
-  <div class="modal-backdrop" id="modalModernConfirm" onclick="if(event.target === this) resolveModernConfirm(false)" style="display: none; position: fixed; inset: 0; background: rgba(3, 35, 40, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 100005; align-items: center; justify-content: center; padding: 20px;">
-    <div class="modal-dialog" style="max-width: 460px; width: 100%; margin: auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 28px 65px -12px rgba(3, 35, 40, 0.45); border: 1.5px solid rgba(225, 29, 72, 0.28); text-align: center; padding: 34px 28px;">
-      <div id="modernConfirmIconWrap" style="width: 72px; height: 72px; border-radius: 22px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; background: rgba(225, 29, 72, 0.12); color: #e11d48; border: 1.5px solid rgba(225, 29, 72, 0.32); box-shadow: 0 8px 24px rgba(225, 29, 72, 0.22);">
-        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      </div>
-      <h3 id="modernConfirmTitle" style="margin: 0 0 10px; font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Konfirmasi Tindakan</h3>
-      <p id="modernConfirmMessage" style="margin: 0 0 26px; font-size: 0.92rem; color: #475569; line-height: 1.6; white-space: pre-line; word-break: break-word;">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
-      <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-        <button type="button" id="btnModernConfirmCancel" onclick="resolveModernConfirm(false)" style="min-width: 120px; padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 14px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
-          Batal
-        </button>
-        <button type="button" id="btnModernConfirmOk" onclick="resolveModernConfirm(true)" style="min-width: 140px; padding: 12px 26px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); color: #ffffff; border: none; border-radius: 14px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 6px 18px rgba(225, 29, 72, 0.35); transition: all 0.2s;">
-          Ya, Lanjutkan
-        </button>
-      </div>
-    </div>
-  </div>
+  <!-- Modern Alert & Confirm modal is globally defined in layouts/app.blade.php -->
 
   <script>
-    // =========================================================================
-    // MODERN ALERT & CONFIRMATION DIALOG SYSTEM (OVERRIDE BROWSER POPUPS)
-    // =========================================================================
-    var _modernAlertCallback = null;
-    window.showModernAlert = function(message, type, title, onOk) {
-      var modal = document.getElementById('modalModernAlert');
-      if (!modal) {
-        if (typeof onOk === 'function') onOk();
-        return;
-      }
-      var msgText = String(message || '');
-      var msgLower = msgText.toLowerCase();
-
-      if (!type) {
-        if (msgLower.includes('berhasil') || msgLower.includes('sukses') || msgLower.includes('disimpan') || msgLower.includes('dihapus') || msgLower.includes('lunas') || msgLower.includes('diperbarui')) {
-          type = 'success';
-        } else if (msgLower.includes('gagal') || msgLower.includes('kesalahan') || msgLower.includes('error') || msgLower.includes('wajib') || msgLower.includes('tidak boleh') || msgLower.includes('minimal')) {
-          type = 'error';
-        } else {
-          type = 'info';
-        }
-      }
-
-      if (!title) {
-        if (type === 'success') title = 'Berhasil';
-        else if (type === 'error') title = 'Perhatian';
-        else title = 'Informasi Sistem';
-      }
-
-      var iconWrap = document.getElementById('modernAlertIconWrap');
-      if (iconWrap) {
-        if (type === 'success') {
-          iconWrap.style.background = 'rgba(16, 185, 129, 0.12)';
-          iconWrap.style.color = '#10b981';
-          iconWrap.style.borderColor = 'rgba(16, 185, 129, 0.32)';
-          iconWrap.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.22)';
-          iconWrap.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-        } else if (type === 'error') {
-          iconWrap.style.background = 'rgba(244, 63, 94, 0.12)';
-          iconWrap.style.color = '#f43f5e';
-          iconWrap.style.borderColor = 'rgba(244, 63, 94, 0.32)';
-          iconWrap.style.boxShadow = '0 8px 24px rgba(244, 63, 94, 0.22)';
-          iconWrap.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-        } else {
-          iconWrap.style.background = 'rgba(13, 148, 136, 0.12)';
-          iconWrap.style.color = '#0d9488';
-          iconWrap.style.borderColor = 'rgba(13, 148, 136, 0.32)';
-          iconWrap.style.boxShadow = '0 8px 24px rgba(13, 148, 136, 0.22)';
-          iconWrap.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
-        }
-      }
-
-      var titleEl = document.getElementById('modernAlertTitle');
-      if (titleEl) titleEl.textContent = title;
-
-      var msgEl = document.getElementById('modernAlertMessage');
-      if (msgEl) msgEl.textContent = msgText;
-
-      _modernAlertCallback = (typeof onOk === 'function') ? onOk : null;
-
-      modal.classList.add('open');
-      modal.style.display = 'flex';
-      modal.style.pointerEvents = 'auto';
-    };
-
-    window.closeModernAlert = function() {
-      var modal = document.getElementById('modalModernAlert');
-      if (modal) {
-        modal.classList.remove('open');
-        modal.style.display = 'none';
-        modal.style.pointerEvents = 'none';
-      }
-      if (typeof _modernAlertCallback === 'function') {
-        var cb = _modernAlertCallback;
-        _modernAlertCallback = null;
-        cb();
-      }
-    };
-
-    var _modernConfirmResolver = null;
-    window.showModernConfirm = function(message, options) {
-      options = options || {};
-      var title = options.title || 'Konfirmasi Tindakan';
-      var okText = options.okText || 'Ya, Lanjutkan';
-      var cancelText = options.cancelText || 'Batal';
-      var isDanger = options.danger !== false;
-
-      var modal = document.getElementById('modalModernConfirm');
-      if (!modal) {
-        return Promise.resolve(window.confirm(message));
-      }
-
-      var titleEl = document.getElementById('modernConfirmTitle');
-      if (titleEl) titleEl.textContent = title;
-
-      var msgEl = document.getElementById('modernConfirmMessage');
-      if (msgEl) msgEl.textContent = message;
-
-      var okBtn = document.getElementById('btnModernConfirmOk');
-      if (okBtn) {
-        okBtn.textContent = okText;
-        if (isDanger) {
-          okBtn.style.background = 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)';
-          okBtn.style.boxShadow = '0 6px 18px rgba(225, 29, 72, 0.35)';
-        } else {
-          okBtn.style.background = 'linear-gradient(135deg, #0d9488 0%, #0a5661 100%)';
-          okBtn.style.boxShadow = '0 6px 18px rgba(10, 86, 97, 0.32)';
-        }
-      }
-
-      var cancelBtn = document.getElementById('btnModernConfirmCancel');
-      if (cancelBtn) cancelBtn.textContent = cancelText;
-
-      modal.classList.add('open');
-      modal.style.display = 'flex';
-      modal.style.pointerEvents = 'auto';
-
-      return new Promise(function(resolve) {
-        _modernConfirmResolver = resolve;
-      });
-    };
-
-    window.resolveModernConfirm = function(val) {
-      var modal = document.getElementById('modalModernConfirm');
-      if (modal) {
-        modal.classList.remove('open');
-        modal.style.display = 'none';
-        modal.style.pointerEvents = 'none';
-      }
-      if (typeof _modernConfirmResolver === 'function') {
-        var res = _modernConfirmResolver;
-        _modernConfirmResolver = null;
-        res(val);
-      }
-    };
-
-    // Override window.alert & window.showNotification bawaan browser
-    window.alert = function(msg) {
-      window.showModernAlert(msg);
-    };
-    window.showNotification = function(type, msg) {
-      window.showModernAlert(msg, type);
-    };
-
     // Konfirmasi Logout Admin Modern
-    var modalAdminLogout = document.getElementById('modalAdminLogoutConfirm');
     var formLogoutAdmin = document.getElementById('formLogoutAdmin');
     document.getElementById('btnTriggerLogoutAdmin')?.addEventListener('click', function(e) {
       e.preventDefault();
@@ -3258,15 +3162,16 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (data.success) {
-          alert(data.message);
-          window.location.reload();
+          window.showModernAlert(data.message, 'success', 'Status Diperbarui', function() {
+            window.location.reload();
+          });
         } else {
-          alert(data.message || 'Gagal memperbarui status');
+          window.showModernAlert(data.message || 'Gagal memperbarui status', 'error', 'Gagal Memperbarui');
         }
       })
       .catch(function(err) {
         console.error(err);
-        alert('Terjadi kesalahan saat memproses status pindah kamar.');
+        window.showModernAlert('Terjadi kesalahan saat memproses status pindah kamar.', 'error', 'Gangguan Sistem');
       });
     }
 
@@ -3755,12 +3660,15 @@
       var paidCount = 0;
       var dueCount = 0;
       var dueNominal = 0;
+      var partialCount = 0;
+      var partialRemNominal = 0;
 
       rows.forEach(function(r) {
         var s = r.getAttribute("data-search") || "";
         var rStatus = r.getAttribute("data-status") || "";
         var rLoc = r.getAttribute("data-location") || "Lokasi 1";
         var rPrice = parseInt(r.getAttribute("data-price") || "0", 10);
+        var rRem = parseInt(r.getAttribute("data-rem") || "0", 10);
 
         var matchLoc = (currentBillingLocation === "all" || rLoc === currentBillingLocation);
         if (matchLoc) {
@@ -3768,6 +3676,10 @@
           if (rStatus === "due") {
             dueCount++;
             dueNominal += rPrice;
+          }
+          if (rStatus === "partial") {
+            partialCount++;
+            partialRemNominal += rRem;
           }
         }
 
@@ -3780,13 +3692,15 @@
       var paidEl = document.getElementById("billKpiPaidVal");
       var dueEl = document.getElementById("billKpiDueVal");
       var dueNomEl = document.getElementById("billKpiDueNom");
+      var partialEl = document.getElementById("billKpiPartialVal");
       var rateEl = document.getElementById("billKpiRateVal");
 
       if (paidEl) paidEl.textContent = paidCount + " Kamar";
       if (dueEl) dueEl.textContent = dueCount + " Kamar";
       if (dueNomEl) dueNomEl.textContent = "Rp " + dueNominal.toLocaleString("id-ID");
+      if (partialEl) partialEl.textContent = partialCount + " Kamar";
       if (rateEl) {
-        var totOcc = paidCount + dueCount;
+        var totOcc = paidCount + dueCount + partialCount;
         var rate = totOcc > 0 ? Math.round((paidCount / totOcc) * 1000) / 10 : 100;
         rateEl.textContent = rate + "%";
       }
@@ -3811,32 +3725,107 @@
     }
     window.filterBillingLocation = filterBillingLocation;
 
-    window.openManualPaymentReceiptModal = function(roomId, roomNumber, tenantName, price, location) {
-      if (roomId) {
-        var select = document.getElementById('payRecRoomId');
-        if (select) select.value = roomId;
-        var amt = document.getElementById('payRecAmount');
-        if (amt && price) amt.value = price;
-        var desc = document.getElementById('payRecDesc');
-        var nowMonth = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date());
-        if (desc) desc.value = 'Pembayaran Sewa Kamar #' + (roomNumber || '') + (tenantName && tenantName !== '-' ? ' (' + tenantName + ')' : '') + ' Periode ' + nowMonth;
+    window.openManualPaymentReceiptModal = function(roomId, roomNumber, tenantName, price, location, paidSoFar, remainingBill, fullPrice) {
+      var select = document.getElementById('payRecRoomId');
+      if (roomId && select) select.value = roomId;
+
+      var amt = document.getElementById('payRecAmount');
+      var desc = document.getElementById('payRecDesc');
+      var infoWrap = document.getElementById('payRecInstallmentInfo');
+      var nowMonth = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date());
+
+      paidSoFar = parseInt(paidSoFar || 0, 10);
+      remainingBill = parseInt(remainingBill || 0, 10);
+      fullPrice = parseInt(fullPrice || price || 0, 10);
+      var isPartial = (paidSoFar > 0 && remainingBill > 0);
+
+      if (amt) {
+        amt.value = isPartial ? remainingBill : (price || fullPrice || 0);
       }
+
+      if (infoWrap) {
+        if (isPartial) {
+          infoWrap.style.display = 'block';
+          infoWrap.innerHTML =
+            '<div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 14px; font-size: 0.8rem; color: #92400e;">' +
+              '<div style="font-weight: 800; font-size: 0.84rem; color: #b45309; margin-bottom: 4px;">Informasi Cicilan Aktif Unit Kamar #' + (roomNumber || '') + '</div>' +
+              '<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 4px; font-size: 0.78rem;">' +
+                '<span>Tarif: <strong>Rp ' + fullPrice.toLocaleString('id-ID') + '</strong></span>' +
+                '<span>Telah Dicicil: <strong style="color: #059669;">Rp ' + paidSoFar.toLocaleString('id-ID') + '</strong></span>' +
+                '<span>Sisa Pelunasan: <strong style="color: #dc2626;">Rp ' + remainingBill.toLocaleString('id-ID') + '</strong></span>' +
+              '</div>' +
+              '<div style="margin-top: 8px;">' +
+                '<button type="button" onclick="document.getElementById(\'payRecAmount\').value = ' + remainingBill + ';" style="font-size: 0.74rem; font-weight: 800; background: #d97706; color: #ffffff; border: none; border-radius: 8px; padding: 5px 12px; cursor: pointer;">' +
+                  'Isi Nominal Sisa Tagihan (Rp ' + remainingBill.toLocaleString('id-ID') + ')' +
+                '</button>' +
+              '</div>' +
+            '</div>';
+        } else {
+          infoWrap.style.display = 'none';
+          infoWrap.innerHTML = '';
+        }
+      }
+
+      if (desc) {
+        if (isPartial) {
+          desc.value = 'Pelunasan Sewa Kamar #' + (roomNumber || '') + (tenantName && tenantName !== '-' ? ' (' + tenantName + ')' : '') + ' Periode ' + nowMonth;
+        } else {
+          desc.value = 'Pembayaran Sewa Kamar #' + (roomNumber || '') + (tenantName && tenantName !== '-' ? ' (' + tenantName + ')' : '') + ' Periode ' + nowMonth;
+        }
+      }
+
       window.openModal('modalManualPaymentReceipt');
     };
 
     window.onManualPayRoomChanged = function(sel) {
       var opt = sel.options[sel.selectedIndex];
       if (!opt || !opt.value) return;
-      var price = opt.getAttribute('data-price');
+      var price = parseInt(opt.getAttribute('data-price') || '0', 10);
       var tenant = opt.getAttribute('data-tenant');
       var room = opt.getAttribute('data-room');
-      if (price) {
-        var amt = document.getElementById('payRecAmount');
-        if (amt) amt.value = price;
+      var paidSoFar = parseInt(opt.getAttribute('data-paid') || '0', 10);
+      var remainingBill = parseInt(opt.getAttribute('data-rem') || '0', 10);
+      var fullPrice = parseInt(opt.getAttribute('data-full-price') || String(price), 10);
+
+      var isPartial = (paidSoFar > 0 && remainingBill > 0);
+      var amt = document.getElementById('payRecAmount');
+      if (amt) {
+        amt.value = isPartial ? remainingBill : price;
       }
+
+      var infoWrap = document.getElementById('payRecInstallmentInfo');
+      if (infoWrap) {
+        if (isPartial) {
+          infoWrap.style.display = 'block';
+          infoWrap.innerHTML =
+            '<div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px; padding: 12px 14px; font-size: 0.8rem; color: #92400e;">' +
+              '<div style="font-weight: 800; font-size: 0.84rem; color: #b45309; margin-bottom: 4px;">Informasi Cicilan Aktif Unit Kamar #' + (room || '') + '</div>' +
+              '<div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin-top: 4px; font-size: 0.78rem;">' +
+                '<span>Tarif: <strong>Rp ' + fullPrice.toLocaleString('id-ID') + '</strong></span>' +
+                '<span>Telah Dicicil: <strong style="color: #059669;">Rp ' + paidSoFar.toLocaleString('id-ID') + '</strong></span>' +
+                '<span>Sisa Pelunasan: <strong style="color: #dc2626;">Rp ' + remainingBill.toLocaleString('id-ID') + '</strong></span>' +
+              '</div>' +
+              '<div style="margin-top: 8px;">' +
+                '<button type="button" onclick="document.getElementById(\'payRecAmount\').value = ' + remainingBill + ';" style="font-size: 0.74rem; font-weight: 800; background: #d97706; color: #ffffff; border: none; border-radius: 8px; padding: 5px 12px; cursor: pointer;">' +
+                  'Isi Nominal Sisa Tagihan (Rp ' + remainingBill.toLocaleString('id-ID') + ')' +
+                '</button>' +
+              '</div>' +
+            '</div>';
+        } else {
+          infoWrap.style.display = 'none';
+          infoWrap.innerHTML = '';
+        }
+      }
+
       var desc = document.getElementById('payRecDesc');
       var nowMonth = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date());
-      if (desc) desc.value = 'Pembayaran Sewa Kamar #' + (room || '') + (tenant && tenant !== '(Unit Kosong)' ? ' (' + tenant + ')' : '') + ' Periode ' + nowMonth;
+      if (desc) {
+        if (isPartial) {
+          desc.value = 'Pelunasan Sewa Kamar #' + (room || '') + (tenant && tenant !== '(Unit Kosong)' ? ' (' + tenant + ')' : '') + ' Periode ' + nowMonth;
+        } else {
+          desc.value = 'Pembayaran Sewa Kamar #' + (room || '') + (tenant && tenant !== '(Unit Kosong)' ? ' (' + tenant + ')' : '') + ' Periode ' + nowMonth;
+        }
+      }
     };
 
     window.submitManualPaymentReceipt = function(e) {
@@ -3874,22 +3863,28 @@
         btn.disabled = false;
         btn.innerHTML = prevTxt;
         if (data.success) {
-          alert(data.message || 'Pembayaran berhasil dicatat & kuitansi resmi langsung dikirim ke pelanggan!');
           window.closeModal('modalManualPaymentReceipt');
-          window.location.reload();
+          window.showModernAlert(data.message || 'Pembayaran berhasil dicatat & kuitansi resmi langsung dikirim ke pelanggan!', 'success', 'Pembayaran Berhasil', function() {
+            window.location.reload();
+          });
         } else {
-          alert(data.message || 'Gagal memproses pembayaran.');
+          window.showModernAlert(data.message || 'Gagal memproses pembayaran.', 'error', 'Gagal Memproses');
         }
       })
       .catch(function(err) {
         btn.disabled = false;
         btn.innerHTML = prevTxt;
-        alert('Terjadi kesalahan saat memproses pembayaran.');
+        window.showModernAlert('Terjadi kesalahan saat memproses pembayaran.', 'error', 'Gangguan Sistem');
       });
     };
 
-    function quickMarkPaid(roomNumber, tenantName, price) {
-      if (!confirm("Konfirmasi bahwa tagihan Kamar #" + roomNumber + " (" + tenantName + ") sebesar Rp " + price.toLocaleString("id-ID") + " telah lunas diterima?")) return;
+    async function quickMarkPaid(roomNumber, tenantName, price) {
+      var ok = await window.showModernConfirm("Konfirmasi bahwa tagihan Kamar #" + roomNumber + " (" + tenantName + ") sebesar Rp " + price.toLocaleString("id-ID") + " telah lunas diterima?", {
+        title: "Konfirmasi Pelunasan Sewa",
+        okText: "Ya, Tandai Lunas",
+        danger: false
+      });
+      if (!ok) return;
 
       fetch("/api/finances", {
         method: "POST",
@@ -3907,11 +3902,12 @@
       })
       .then(function(res) { return res.json(); })
       .then(function(data) {
-        alert("Pembayaran berhasil dikonfirmasi dan dicatat ke Buku Kas!");
-        window.location.reload();
+        window.showModernAlert("Pembayaran berhasil dikonfirmasi dan dicatat ke Buku Kas!", "success", "Pembayaran Berhasil Dicatat", function() {
+          window.location.reload();
+        });
       })
       .catch(function(err) {
-        alert("Gagal mencatat pembayaran.");
+        window.showModernAlert("Gagal mencatat pembayaran.", "error", "Gagal Mencatat");
       });
     }
 
@@ -3986,8 +3982,12 @@
       if (!hasTransactions) {
         trxRowsHtml =
           '<tr>' +
-            '<td colspan="6" style="padding:26px 16px;text-align:center;background:#f8fafc;color:#64748b;font-size:0.8rem;font-weight:700;border-bottom:1px solid #e2e8f0;">' +
-              'DATA NIHIL (Rp 0) — Belum ada transaksi keuangan yang dicatat pada ' + trxPeriodText + '.' +
+            '<td colspan="6" style="padding:28px 16px;text-align:center;background:#f8fafc;border-bottom:1px solid #e2e8f0;">' +
+              '<div style="font-weight:800;color:#0f172a;font-size:0.86rem;margin-bottom:4px;">DATA NIHIL (Rp 0) — Belum Ada Transaksi Tercatat pada ' + trxPeriodText + '</div>' +
+              '<div style="font-size:0.76rem;color:#64748b;margin-bottom:12px;">Data transaksi keuangan pada periode ini belum memiliki riwayat pembayaran sewa maupun beban operasional.</div>' +
+              '<button type="button" onclick="setPdfToAllMonths()" style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#0a5661 0%,#0d9488 100%);color:#ffffff;border:none;padding:8px 18px;border-radius:10px;font-size:0.78rem;font-weight:800;cursor:pointer;box-shadow:0 4px 12px rgba(10,86,97,0.22);">' +
+                '<span>Tampilkan Semua Bulan (1 Tahun Penuh)</span>' +
+              '</button>' +
             '</td>' +
           '</tr>';
       } else {
@@ -4019,24 +4019,24 @@
           '</div>';
 
       return (
-        '<div class="pdf-executive-sheet">' +
-          /* Executive Header */
-          '<div style="background:linear-gradient(135deg,#071f24 0%,#0a3d46 55%,#0a5661 100%);color:#ffffff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;border-bottom:4px solid #14b8a6;">' +
+        '<div class="pdf-executive-sheet" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">' +
+          /* Executive Header (Clean White Customer Theme) */
+          '<div style="background:#ffffff;color:#0f172a;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;border-bottom:3px solid #0d9488;">' +
             '<div style="max-width:440px;">' +
-              '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.16);border:1px solid rgba(45,212,191,0.38);padding:4px 12px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:0.06em;color:#5eead4;margin-bottom:10px;">' + (payload.isMonthFiltered ? 'LAPORAN KEUANGAN RESMI & BUKU KAS BULANAN' : 'LAPORAN KEUANGAN RESMI & BUKU KAS TAHUNAN') + '</div>' +
-              '<h1 style="margin:0;font-size:1.5rem;font-weight:900;letter-spacing:-0.02em;color:#ffffff;">' + payload.kosName + '</h1>' +
-              '<p style="margin:5px 0 0 0;font-size:0.78rem;color:rgba(255,255,255,0.78);line-height:1.45;">' + payload.kosAddress + '</p>' +
+              '<div style="display:inline-flex;align-items:center;gap:8px;background:#f0fdfa;border:1.5px solid #99f6e4;padding:4px 12px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:0.06em;color:#0a5661;margin-bottom:10px;">' + (payload.isMonthFiltered ? 'LAPORAN KEUANGAN RESMI & BUKU KAS BULANAN' : 'LAPORAN KEUANGAN RESMI & BUKU KAS TAHUNAN') + '</div>' +
+              '<h1 style="margin:0;font-size:1.55rem;font-weight:900;letter-spacing:-0.02em;color:#0a5661;">' + payload.kosName + '</h1>' +
+              '<p style="margin:5px 0 0 0;font-size:0.78rem;color:#64748b;line-height:1.45;">' + payload.kosAddress + '</p>' +
             '</div>' +
-            '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:14px;padding:12px 18px;text-align:right;min-width:210px;">' +
-              '<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.08em;color:#99f6e4;font-weight:800;">PERIODE ANGGARAN</div>' +
-              '<div style="font-size:1.35rem;font-weight:900;color:#ffffff;margin:2px 0;">' + payload.periodTitle + '</div>' +
-              '<div style="font-size:0.72rem;color:rgba(255,255,255,0.82);font-weight:600;">No. Dokumen: ' + docCode + '</div>' +
-              '<div style="font-size:0.7rem;color:rgba(255,255,255,0.68);margin-top:2px;">Dicetak: ' + printedDate + '</div>' +
+            '<div style="background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:14px;padding:12px 18px;text-align:right;min-width:210px;">' +
+              '<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.08em;color:#0d9488;font-weight:800;">PERIODE ANGGARAN</div>' +
+              '<div style="font-size:1.35rem;font-weight:900;color:#0f172a;margin:2px 0;">' + payload.periodTitle + '</div>' +
+              '<div style="font-size:0.72rem;color:#475569;font-weight:600;">No. Dokumen: ' + docCode + '</div>' +
+              '<div style="font-size:0.7rem;color:#64748b;margin-top:2px;">Dicetak: ' + printedDate + '</div>' +
             '</div>' +
           '</div>' +
 
           /* Body Content */
-          '<div style="padding:26px 32px;display:flex;flex-direction:column;gap:22px;">' +
+          '<div style="padding:26px 32px;display:flex;flex-direction:column;gap:22px;background:#ffffff;">' +
             /* Meta Scope Bar */
             '<div style="display:flex;justify-content:space-between;align-items:center;background:#f0fdfa;border:1px solid #99f6e4;border-radius:12px;padding:10px 16px;flex-wrap:wrap;gap:8px;">' +
               '<div style="font-size:0.78rem;color:#0f172a;"><strong>Cakupan Laporan:</strong> ' + payload.branchLabel + '</div>' +
@@ -4089,12 +4089,12 @@
               '<div style="border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;">' +
                 '<table style="width:100%;border-collapse:collapse;">' +
                   '<thead>' +
-                    '<tr style="background:#0f172a;color:#ffffff;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;">' +
-                      '<th style="padding:8px 10px;text-align:left;">Bulan</th>' +
-                      '<th style="padding:8px 10px;text-align:left;">Indikator Visual</th>' +
-                      '<th style="padding:8px 10px;text-align:right;">Pemasukan</th>' +
-                      '<th style="padding:8px 10px;text-align:right;">Pengeluaran</th>' +
-                      '<th style="padding:8px 10px;text-align:right;">Laba Bersih</th>' +
+                    '<tr style="background:#f8fafc;color:#0f172a;font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em;border-bottom:2px solid #0d9488;">' +
+                      '<th style="padding:10px 10px;text-align:left;font-weight:800;">Bulan</th>' +
+                      '<th style="padding:10px 10px;text-align:left;font-weight:800;">Indikator Visual</th>' +
+                      '<th style="padding:10px 10px;text-align:right;font-weight:800;">Pemasukan</th>' +
+                      '<th style="padding:10px 10px;text-align:right;font-weight:800;">Pengeluaran</th>' +
+                      '<th style="padding:10px 10px;text-align:right;font-weight:800;">Laba Bersih</th>' +
                     '</tr>' +
                   '</thead>' +
                   '<tbody>' + monthlyRowsHtml + '</tbody>' +
@@ -4171,6 +4171,15 @@
       }
     }
     window.closeFinancePdfModal = closeFinancePdfModal;
+
+    window.setPdfToAllMonths = function() {
+      var mSelect = document.getElementById("selectFinanceMonth");
+      if (mSelect) {
+        mSelect.value = "all";
+        if (typeof changeFinanceMonth === "function") changeFinanceMonth("all");
+      }
+      openFinancePdfModal();
+    };
 
     function downloadFinancePdfDocument() {
       var yr = document.getElementById("selectFinanceYear")?.value || 2026;
@@ -4437,7 +4446,7 @@
       var isActive = document.getElementById('newPmIsActive')?.checked ?? true;
 
       if (!name) {
-        alert('Mohon isi Nama Metode Tampilan terlebih dahulu!');
+        window.showModernAlert('Mohon isi Nama Metode Tampilan terlebih dahulu!', 'error', 'Perhatian');
         return;
       }
 
@@ -4623,12 +4632,12 @@
       var isActive = document.getElementById('newWfIsActive')?.checked ?? true;
 
       if (!name) {
-        alert('Mohon isi Nama WiFi (SSID) terlebih dahulu!');
+        window.showModernAlert('Mohon isi Nama WiFi (SSID) terlebih dahulu!', 'error', 'Form Belum Lengkap');
         document.getElementById('newWfName')?.focus();
         return;
       }
       if (!modem) {
-        alert('Mohon isi Modem / Lokasi Modem terlebih dahulu!');
+        window.showModernAlert('Mohon isi Modem / Lokasi Modem terlebih dahulu!', 'error', 'Form Belum Lengkap');
         document.getElementById('newWfModem')?.focus();
         return;
       }
@@ -4801,7 +4810,7 @@
       var list = document.getElementById('kosRulesEditorList');
       var items = list ? list.querySelectorAll('.kos-rule-edit-item') : [];
       if (items.length <= 1) {
-        alert('Minimal harus terdapat 1 poin peraturan kos.');
+        window.showModernAlert('Minimal harus terdapat 1 poin peraturan kos.', 'error', 'Peraturan Kos');
         return;
       }
       var row = btn.closest('.kos-rule-edit-item');
@@ -4857,8 +4866,13 @@
     // =========================================================================
     window.defaultSurveyTemplateText = {!! json_encode(\App\Models\Setting::DEFAULT_SURVEY_TEMPLATE) !!};
 
-    window.resetSurveyTemplateToDefault = function() {
-      if (confirm('Kembalikan format formulir ke format standar awal?')) {
+    window.resetSurveyTemplateToDefault = async function() {
+      var confirmed = await window.showModernConfirm('Kembalikan format formulir ke format standar awal?', {
+        title: 'Reset Template Formulir',
+        okText: 'Ya, Kembalikan',
+        danger: true
+      });
+      if (confirmed) {
         var el = document.getElementById('admin_survey_form_template');
         if (el) el.value = window.defaultSurveyTemplateText;
       }
@@ -4885,7 +4899,7 @@
 
       var textVal = el.value.trim();
       if (!textVal) {
-        alert('Format formulir tidak boleh kosong');
+        window.showModernAlert('Format formulir tidak boleh kosong', 'error', 'Perhatian');
         return;
       }
 
@@ -5029,17 +5043,17 @@
       var password = document.getElementById('adminPasswordInput').value;
 
       if (!name || !email) {
-        alert('Nama lengkap dan email admin wajib diisi.');
+        window.showModernAlert('Nama lengkap dan email admin wajib diisi.', 'error', 'Data Belum Lengkap');
         return;
       }
 
       if (!adminId && (!password || password.length < 6)) {
-        alert('Kata sandi untuk admin baru minimal 6 karakter.');
+        window.showModernAlert('Kata sandi untuk admin baru minimal 6 karakter.', 'error', 'Keamanan Password');
         return;
       }
 
       if (password && password.length < 6) {
-        alert('Kata sandi minimal 6 karakter.');
+        window.showModernAlert('Kata sandi minimal 6 karakter.', 'error', 'Keamanan Password');
         return;
       }
 
