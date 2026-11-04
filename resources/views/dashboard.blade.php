@@ -1141,14 +1141,7 @@
                         {{ $admInitials }}
                       </div>
                       <div>
-                        <div style="font-weight: 800; color: #0f172a; font-size: 0.92rem;" class="adm-name-text">{{ $admin->name }}</div>
-                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;">
-                          <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: #059669; font-weight: 800; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px;">
-                            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
-                            <span>Akun Staf Admin</span>
-                          </span>
-                          <span style="font-size: 0.7rem; color: #64748b; font-weight: 600;">ID #{{ $admin->id }}</span>
-                        </div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 0.94rem;" class="adm-name-text">{{ $admin->name }}</div>
                       </div>
                     </div>
                   </td>
@@ -1172,21 +1165,12 @@
                   </td>
                   <!-- Kolom Penugasan Cabang Kos (Owner dapat langsung mengganti di dalam tabel) -->
                   <td style="padding: 14px 20px;">
-                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
-                      <select class="admin-branch-select" onchange="changeAdminBranch({{ $admin->id }}, this.value)" style="padding: 7px 11px; font-size: 0.8rem; font-weight: 800; border-radius: 10px; border: 1.5px solid #0d9488; background: #f0fdfa; color: #0a5661; cursor: pointer; outline: none; transition: all 0.2s;">
+                    <div style="min-width: 200px;">
+                      <select class="admin-branch-select" onchange="changeAdminBranch({{ $admin->id }}, this.value)" style="width: 100%; padding: 8px 12px; font-size: 0.82rem; font-weight: 800; border-radius: 10px; border: 1.5px solid #0d9488; background: #f0fdfa; color: #0a5661; cursor: pointer; outline: none; transition: all 0.2s;">
                         <option value="all" {{ $curBranch === 'all' ? 'selected' : '' }}>Kedua Cabang (Kos 1 &amp; Kos 2)</option>
                         <option value="Lokasi 1" {{ $curBranch === 'Lokasi 1' ? 'selected' : '' }}>Admin Kos 1 ({{ $branch1Name }})</option>
                         <option value="Lokasi 2" {{ $curBranch === 'Lokasi 2' ? 'selected' : '' }}>Admin Kos 2 ({{ $branch2Name }})</option>
                       </select>
-                      <div id="branchIndicator_{{ $admin->id }}" style="font-size: 0.7rem; color: #64748b;">
-                        @if($curBranch === 'Lokasi 1')
-                          <span style="color: #059669; font-weight: 700;">Khusus Unit {{ $branch1Name }}</span>
-                        @elseif($curBranch === 'Lokasi 2')
-                          <span style="color: #0284c7; font-weight: 700;">Khusus Unit {{ $branch2Name }}</span>
-                        @else
-                          <span style="color: #0a5661; font-weight: 700;">Akses Semua Unit (2 Cabang)</span>
-                        @endif
-                      </div>
                     </div>
                   </td>
                   <td style="padding: 14px 20px;">
@@ -4989,10 +4973,6 @@
     window.changeAdminBranch = function(adminId, newBranch) {
       if (!adminId || !newBranch) return;
       var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
-      var indicator = document.getElementById('branchIndicator_' + adminId);
-      if (indicator) {
-        indicator.innerHTML = '<span style="color:#0a5661;font-weight:700;">Menyimpan cabang...</span>';
-      }
 
       fetch('/api/admins/' + adminId + '/branch', {
         method: 'POST',
@@ -5005,13 +4985,6 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (data.success) {
-          if (indicator) {
-            var labelText = newBranch === 'Lokasi 1'
-              ? 'Khusus Unit {{ $branch1Name }}'
-              : (newBranch === 'Lokasi 2' ? 'Khusus Unit {{ $branch2Name }}' : 'Akses Semua Unit (2 Cabang)');
-            var color = newBranch === 'Lokasi 1' ? '#059669' : (newBranch === 'Lokasi 2' ? '#0284c7' : '#0a5661');
-            indicator.innerHTML = '<span style="color:' + color + ';font-weight:700;">' + labelText + '</span>';
-          }
           window.showModernAlert(
             data.message || 'Penugasan cabang staf Admin berhasil diperbarui.',
             'success',
