@@ -120,7 +120,13 @@ class DashboardController extends Controller
             return in_array($r->status, ['occupied', 'due']);
         })->values();
 
+        // Data Akun Admin Operasional (Khusus Manajemen Owner)
+        $allAdmins = User::where('role', 'admin')->orderBy('created_at', 'desc')->get();
+        $totalAdminsCount = $allAdmins->count();
+
         return view('dashboard', compact(
+            'allAdmins',
+            'totalAdminsCount',
             'allFinances',
             'allMaintenance',
             'deviceType',
@@ -1256,6 +1262,124 @@ class DashboardController extends Controller
             'chartExpense' => $chartExpense,
             'chartNet' => $chartNet,
             'finances' => $finances
+        ]);
+    }
+
+    /**
+     * Simpan / Perbarui Akun Staf Admin (Khusus Role Owner)
+     */
+    public function saveAdmin(Request $request): JsonResponse
+    {
+        if (!auth()->check() || !auth()->user()->isOwner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Hanya Owner yang berhak mengelola akun Admin.'
+            ], 403);
+        }
+
+        $adminId = $request->input('id');
+
+        $validated = $request->validate([
+            'id' => 'nullable|integer|exists:users,id',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'password' => $adminId ? 'nullable|string|min:6' : 'required|string|min:6',
+        ], [
+            'name.required' => 'Nama lengkap admin wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Kata sandi wajib diisi untuk akun baru.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
+        ]);
+
+        // Cek duplikasi email pada pengguna lain
+        $existing = User::where('email', $validated['email'])
+            ->when($adminId, fn($q) => $q->where('id', '!=', $adminId))
+            ->first();
+
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Alamat email sudah digunakan oleh pengguna lain.'
+            ], 422);
+        }
+
+        if ($adminId) {
+            $admin = User::where('id', $adminId)->where('role', 'admin')->first();
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akun admin tidak ditemukan atau bukan bertipe admin.'
+                ], 404);
+            }
+
+            $admin->name = $validated['name'];
+            $admin->email = $validated['email'];
+            $admin->phone = $validated['phone'] ?? null;
+            if (!empty($validated['password'])) {
+                $admin->password = Hash::make($validated['password']);
+            }
+            $admin->save();
+            $msg = 'Akun staf Admin berhasil diperbarui.';
+        } else {
+            $admin = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'password' => Hash::make($validated['password']),
+                'role' => 'admin',
+            ]);
+            $msg = 'Akun staf Admin baru berhasil ditambahkan.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $msg,
+            'admin' => [
+                'id' => $admin->id,
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'phone' => $admin->phone,
+                'role' => $admin->role,
+                'created_at' => $admin->created_at ? $admin->created_at->format('d M Y') : '-',
+            ]
+        ]);
+    }
+
+    /**
+     * Hapus Akun Staf Admin (Khusus Role Owner)
+     */
+    public function deleteAdmin(Request $request, $id): JsonResponse
+    {
+        if (!auth()->check() || !auth()->user()->isOwner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Hanya Owner yang berhak mengelola akun Admin.'
+            ], 403);
+        }
+
+        if ((int)$id === auth()->id()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tidak dapat menghapus akun Owner yang sedang aktif.'
+            ], 422);
+        }
+
+        $admin = User::where('id', $id)->where('role', 'admin')->first();
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun admin tidak ditemukan.'
+            ], 404);
+        }
+
+        $adminName = $admin->name;
+        $admin->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Akun staf Admin '{$adminName}' berhasil dihapus."
         ]);
     }
 }

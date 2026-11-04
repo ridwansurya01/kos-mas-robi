@@ -195,6 +195,22 @@ Route::middleware(['auth'])->group(function () {
             if (!Auth::user()->isStaffOrOwner()) abort(403);
             return app(DashboardController::class)->updateRoomTransferStatus($req, $id);
         })->name('api.room_transfers.status');
+
+        // Manajemen Admin (Khusus Role Owner)
+        Route::post('/admins', function (\Illuminate\Http\Request $req) {
+            if (!Auth::user()->isOwner()) abort(403, 'Akses khusus Owner.');
+            return app(DashboardController::class)->saveAdmin($req);
+        })->name('api.admins.save');
+
+        Route::delete('/admins/{id}', function (\Illuminate\Http\Request $req, $id) {
+            if (!Auth::user()->isOwner()) abort(403, 'Akses khusus Owner.');
+            return app(DashboardController::class)->deleteAdmin($req, $id);
+        })->name('api.admins.delete');
+
+        Route::post('/admins/{id}/delete', function (\Illuminate\Http\Request $req, $id) {
+            if (!Auth::user()->isOwner()) abort(403, 'Akses khusus Owner.');
+            return app(DashboardController::class)->deleteAdmin($req, $id);
+        })->name('api.admins.delete_post');
     });
 });
 

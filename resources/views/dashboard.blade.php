@@ -14,7 +14,7 @@
 
     window.isOwnerUser = {{ Auth::user()->isOwner() ? 'true' : 'false' }};
     window.switchTab = function(tabId) {
-      if (tabId === 'tab-finances' && !window.isOwnerUser) {
+      if ((tabId === 'tab-finances' || tabId === 'tab-admins') && !window.isOwnerUser) {
         tabId = 'tab-dashboard';
       }
       var navTitles = {
@@ -25,6 +25,7 @@
         'tab-transfers': { title: 'Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
         'tab-maintenance': { title: 'Keluhan & Servis', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
         'tab-finances': { title: 'Laporan Keuangan', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
+        'tab-admins': { title: 'Manajemen Staf Admin', sub: 'Pantau siapa saja yang memiliki akses Admin operasional dan kelola akun staf' },
         'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
       };
       document.querySelectorAll('.tab-pane').forEach(function(pane) {
@@ -180,6 +181,12 @@
       <div class="nav-item" data-tab="tab-finances" onclick="window.switchTab('tab-finances')" role="button" tabindex="0">
         <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></span>
         <span>Laporan Keuangan</span>
+      </div>
+
+      <div class="nav-item" data-tab="tab-admins" onclick="window.switchTab('tab-admins')" role="button" tabindex="0">
+        <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span>Manajemen Admin</span>
+        <span class="nav-badge-count" id="badgeTotalAdmins" style="background: rgba(14, 116, 130, 0.22); color: #0a5661; border: 1px solid rgba(14, 116, 130, 0.35); font-weight:800;">{{ $totalAdminsCount ?? count($allAdmins ?? []) }}</span>
       </div>
       @endif
 
@@ -920,6 +927,195 @@
 
           <div class="mobile-card-list" id="financesMobileCardList">
             <!-- Dynamically populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- =====================================================================
+           PANE: TAB MANAJEMEN AKUN ADMIN OPERASIONAL (KHUSUS ROLE OWNER)
+           ===================================================================== -->
+      <div class="tab-pane" id="tab-admins">
+        <!-- Banner Header Hero -->
+        <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 26px 30px; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35); color: #ffffff;">
+          <div style="position:absolute; top:-40px; right:-40px; width:220px; height:220px; background:radial-gradient(circle, rgba(20, 184, 166, 0.25) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+          <div style="position:absolute; bottom:-60px; left:40px; width:180px; height:180px; background:radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 54px; height: 54px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.22); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #ffffff; flex-shrink: 0; backdrop-filter: blur(4px);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <div>
+                <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #5eead4; margin-bottom: 4px;">
+                  <span>Otoritas Pemilik Kos (Owner Access Only)</span>
+                </div>
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 800; color: #ffffff; margin: 0 0 4px; letter-spacing: -0.02em;">Manajemen Staf Admin</h2>
+                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.8); margin: 0; max-width: 650px; line-height: 1.5;">
+                  Ketahui secara transparan siapa saja yang memiliki akses login sebagai Admin operasional, buat akun staf baru, kelola password, atau cabut izin akses kapan pun.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <button type="button" class="btn-primary" onclick="openAddAdminModal()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 12px 22px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); cursor: pointer; transition: all 0.2s;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Tambah Admin Baru</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3 Stat Cards Ringkasan Akses -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <!-- Card 1: Total Admin -->
+          <div class="stat-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 20px;">
+            <div class="stat-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="stat-card-title" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Total Akun Admin Operasional</span>
+              <div class="stat-icon emerald" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" id="statCardTotalAdmins" style="font-size: 1.6rem; font-weight: 800; color: #0a5661; margin-bottom: 6px;">{{ $totalAdminsCount ?? count($allAdmins ?? []) }} Akun Aktif</div>
+            <div class="stat-card-meta" style="font-size: 0.74rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <span style="color: #059669; font-weight: 700;">● Hak Akses Terdaftar</span>
+              <span>Memegang kredensial login</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Akun Owner Utama -->
+          <div class="stat-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 20px;">
+            <div class="stat-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="stat-card-title" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Pemegang Hak Owner Utama</span>
+              <div class="stat-icon" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 86, 97, 0.12); color: #0a5661; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ Auth::user()->name }}</div>
+            <div class="stat-card-meta" style="font-size: 0.74rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <span style="color: #0a5661; font-weight: 700;">● {{ Auth::user()->email }}</span>
+              <span>Super Administrator</span>
+            </div>
+          </div>
+
+          <!-- Card 3: Proteksi Hak Istimewa -->
+          <div class="stat-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 20px;">
+            <div class="stat-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="stat-card-title" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Proteksi Keamanan Finansial</span>
+              <div class="stat-icon" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: flex; align-items: center; justify-content: center;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+            </div>
+            <div class="stat-card-value" style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Buku Kas Terproteksi</div>
+            <div class="stat-card-meta" style="font-size: 0.74rem; color: var(--text-muted);">
+              Admin tidak dapat melihat laporan arus kas & laba
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabel Daftar Seluruh Admin -->
+        <div class="content-card modern-table-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm);">
+          <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; background: #fafafa;">
+            <div>
+              <h3 style="margin: 0 0 2px; font-size: 1.05rem; font-weight: 800; color: #0f172a;">Daftar Akun yang Memiliki Akses Admin</h3>
+              <p style="margin: 0; font-size: 0.76rem; color: #64748b;">Hanya pengguna di bawah ini yang dapat masuk ke dashboard operasional kos.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <input type="text" id="searchAdminInput" oninput="filterAdminTable()" placeholder="Cari nama atau email admin..." style="padding: 8px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.8rem; width: 220px;">
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="tableAdminsList" style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0;">
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Staf Admin</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Email Login</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Kontak WhatsApp</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Cakupan Izin</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Terdaftar</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">Tindakan Owner</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyAdminRows">
+                @forelse($allAdmins as $admin)
+                @php
+                  $adminWords = explode(' ', trim($admin->name));
+                  $admInitials = count($adminWords) >= 2 
+                    ? strtoupper(substr($adminWords[0], 0, 1) . substr($adminWords[1], 0, 1))
+                    : strtoupper(substr($admin->name, 0, 2));
+                  $adminPhoneClean = preg_replace('/[^0-9]/', '', $admin->phone ?? '');
+                  if ($adminPhoneClean && str_starts_with($adminPhoneClean, '0')) {
+                    $adminPhoneClean = '62' . substr($adminPhoneClean, 1);
+                  }
+                @endphp
+                <tr class="admin-data-row" id="adminRow_{{ $admin->id }}" data-name="{{ strtolower($admin->name) }}" data-email="{{ strtolower($admin->email) }}" data-phone="{{ $admin->phone }}" style="border-bottom: 1px solid #f1f5f9;">
+                  <td style="padding: 14px 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">
+                        {{ $admInitials }}
+                      </div>
+                      <div>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem;" class="adm-name-text">{{ $admin->name }}</div>
+                        <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: #059669; font-weight: 700;">
+                          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+                          <span>Admin Aktif</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td style="padding: 14px 20px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <span style="font-weight: 600; color: #334155; font-size: 0.84rem;" class="adm-email-text">{{ $admin->email }}</span>
+                      <button type="button" onclick="navigator.clipboard.writeText('{{ $admin->email }}'); window.showNotification('success', 'Email tersalin!');" title="Salin Email" style="border: none; background: transparent; cursor: pointer; color: #94a3b8; padding: 2px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                  <td style="padding: 14px 20px;">
+                    @if($admin->phone)
+                      <a href="https://wa.me/{{ $adminPhoneClean }}" target="_blank" class="adm-phone-link" style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #0a5661; font-weight: 700; text-decoration: none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.19 8.19 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.06-1.1l-.29-.17-3.02.79.81-2.94-.19-.3a8.21 8.21 0 0 1-1.26-4.52c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.72 4.31 3.81.6.26 1.07.42 1.44.54.61.19 1.16.17 1.6.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
+                        <span>{{ $admin->phone }}</span>
+                      </a>
+                    @else
+                      <span class="adm-phone-link" style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Belum diisi</span>
+                    @endif
+                  </td>
+                  <td style="padding: 14px 20px;">
+                    <div style="display: inline-flex; flex-direction: column; gap: 4px;">
+                      <span style="font-size: 0.74rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Operasional Harian</span>
+                      <span style="font-size: 0.7rem; color: #64748b;">Kamar, Penghuni & Servis</span>
+                    </div>
+                  </td>
+                  <td style="padding: 14px 20px;">
+                    <span style="font-size: 0.8rem; color: #64748b;">{{ $admin->created_at ? $admin->created_at->format('d M Y') : '-' }}</span>
+                  </td>
+                  <td style="padding: 14px 20px; text-align: right;">
+                    <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
+                      <button type="button" class="btn-secondary" onclick="openEditAdminModal({{ json_encode($admin) }})" style="font-size: 0.76rem; padding: 6px 12px; border-radius: 8px; font-weight: 700;" title="Edit Data & Ganti Password">
+                        Edit
+                      </button>
+                      <button type="button" class="btn-secondary" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ addslashes($admin->name) }}')" style="font-size: 0.76rem; padding: 6px 10px; border-radius: 8px; font-weight: 700; color: #ef4444; border-color: #fecaca;" title="Hapus Akses Admin">
+                        Hapus
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                @empty
+                <tr id="emptyAdminRow">
+                  <td colspan="6" style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <div style="font-size: 0.95rem; font-weight: 700; color: #334155; margin-bottom: 4px;">Belum Ada Staf Admin Tambahan</div>
+                    <div style="font-size: 0.8rem; color: #64748b;">Klik tombol 'Tambah Admin Baru' di atas untuk memberikan akses kepada staf operasional kos.</div>
+                  </td>
+                </tr>
+                @endforelse
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -1837,6 +2033,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
       <span>Keuangan</span>
     </div>
+    <div class="bottom-nav-item" data-tab="tab-admins" onclick="window.switchTab('tab-admins')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Admin</span>
+    </div>
     @endif
     <div class="bottom-nav-item" data-tab="tab-settings" onclick="window.switchTab('tab-settings')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1896,8 +2096,84 @@
             <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">Unduh Cadangan JSON</button>
             <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">Reset Data Sampel</button>
           </div>
+          @if(Auth::user()->isOwner())
+          <button type="button" class="btn-primary" onclick="window.closeModal('modalAkunPengelola'); window.switchTab('tab-admins');" style="margin-top: 12px; width: 100%; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>Buka Menu Manajemen Staf Admin</span>
+          </button>
+          @endif
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: KELOLA AKUN ADMIN OPERASIONAL (KHUSUS ROLE OWNER)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modalManageAdmin" style="display: none;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 40px; height: 40px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ffffff;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <div>
+            <h3 id="modalManageAdminTitle" style="color: #fff; margin: 0; font-size: 1.12rem; font-weight: 800; letter-spacing: -0.2px;">Tambah Akun Admin Baru</h3>
+            <p style="color: rgba(255,255,255,0.75); font-size: 0.74rem; margin: 2px 0 0;">Berikan hak akses login staf operasional ke portal manajemen kos</p>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" data-close-modal="modalManageAdmin" aria-label="Tutup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="formManageAdmin" onsubmit="submitAdminForm(event)">
+        <input type="hidden" id="manageAdminId" value="">
+        <div class="modal-body" style="padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+          
+          <div class="form-group">
+            <label for="adminNameInput" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nama Lengkap Staf Admin *</label>
+            <input type="text" id="adminNameInput" class="form-control" placeholder="Contoh: Budi Santoso" required style="border-radius: 12px;">
+          </div>
+
+          <div class="form-group">
+            <label for="adminEmailInput" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Alamat Email Login *</label>
+            <input type="email" id="adminEmailInput" class="form-control" placeholder="Contoh: budi.admin@gmail.com" required style="border-radius: 12px;">
+          </div>
+
+          <div class="form-group">
+            <label for="adminPhoneInput" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nomor WhatsApp / HP Staf</label>
+            <input type="text" id="adminPhoneInput" class="form-control" placeholder="Contoh: 081234567890" style="border-radius: 12px;">
+          </div>
+
+          <div class="form-group">
+            <label for="adminPasswordInput" id="adminPasswordLabel" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Kata Sandi Login *</label>
+            <div style="position: relative;">
+              <input type="password" id="adminPasswordInput" class="form-control" placeholder="Minimal 6 karakter" required style="border-radius: 12px; padding-right: 42px;">
+              <button type="button" onclick="toggleInputPasswordVisibility('adminPasswordInput', 'iconEyeAdm')" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: #94a3b8; padding: 4px;">
+                <svg id="iconEyeAdm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <span id="adminPasswordHelp" style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: none;">Kosongkan bila tidak ingin mengubah kata sandi yang sudah ada.</span>
+          </div>
+
+          <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px; padding: 12px; font-size: 0.75rem; color: #0a5661; line-height: 1.5;">
+            <strong>Catatan Hak Akses:</strong> Akun ini akan memiliki role <strong>Admin</strong>. Staf dapat mengelola kamar, data penghuni, servis, dan respon survey WhatsApp, namun <em>tidak memiliki akses</em> ke Buku Kas Keuangan dan Pengaturan Admin.
+          </div>
+
+        </div>
+        <div class="modal-footer" style="padding: 16px 22px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-secondary" data-close-modal="modalManageAdmin">Batal</button>
+          <button type="submit" class="btn-primary" id="btnSubmitManageAdmin" style="padding: 10px 20px; border-radius: 10px; font-weight: 800;">
+            Simpan Akun Admin
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -4265,6 +4541,162 @@
       if (pwdInput) {
         pwdInput.value = 'kost' + Math.floor(1000 + Math.random() * 9000);
       }
+    };
+
+    // =========================================================================
+    // FITUR MANAJEMEN AKUN ADMIN OPERASIONAL (KHUSUS ROLE OWNER)
+    // =========================================================================
+    window.openAddAdminModal = function() {
+      document.getElementById('formManageAdmin').reset();
+      document.getElementById('manageAdminId').value = '';
+      document.getElementById('modalManageAdminTitle').textContent = 'Tambah Akun Admin Baru';
+      document.getElementById('adminPasswordInput').required = true;
+      document.getElementById('adminPasswordHelp').style.display = 'none';
+      document.getElementById('btnSubmitManageAdmin').textContent = 'Simpan Akun Admin';
+      window.openModal('modalManageAdmin');
+    };
+
+    window.openEditAdminModal = function(adminData) {
+      if (!adminData) return;
+      document.getElementById('manageAdminId').value = adminData.id;
+      document.getElementById('adminNameInput').value = adminData.name || '';
+      document.getElementById('adminEmailInput').value = adminData.email || '';
+      document.getElementById('adminPhoneInput').value = adminData.phone || '';
+      document.getElementById('adminPasswordInput').value = '';
+      document.getElementById('adminPasswordInput').required = false;
+      document.getElementById('adminPasswordHelp').style.display = 'block';
+      document.getElementById('modalManageAdminTitle').textContent = 'Edit Akun Staf Admin';
+      document.getElementById('btnSubmitManageAdmin').textContent = 'Perbarui Akun Admin';
+      window.openModal('modalManageAdmin');
+    };
+
+    window.toggleInputPasswordVisibility = function(inputId, iconId) {
+      var input = document.getElementById(inputId);
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
+    };
+
+    window.filterAdminTable = function() {
+      var query = (document.getElementById('searchAdminInput')?.value || '').toLowerCase().trim();
+      var rows = document.querySelectorAll('#tbodyAdminRows .admin-data-row');
+      rows.forEach(function(row) {
+        var name = (row.getAttribute('data-name') || '').toLowerCase();
+        var email = (row.getAttribute('data-email') || '').toLowerCase();
+        var phone = (row.getAttribute('data-phone') || '').toLowerCase();
+        if (!query || name.includes(query) || email.includes(query) || phone.includes(query)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    };
+
+    window.submitAdminForm = function(e) {
+      if (e) e.preventDefault();
+      var btn = document.getElementById('btnSubmitManageAdmin');
+      var adminId = document.getElementById('manageAdminId').value;
+      var name = document.getElementById('adminNameInput').value.trim();
+      var email = document.getElementById('adminEmailInput').value.trim();
+      var phone = document.getElementById('adminPhoneInput').value.trim();
+      var password = document.getElementById('adminPasswordInput').value;
+
+      if (!name || !email) {
+        alert('Nama lengkap dan email admin wajib diisi.');
+        return;
+      }
+
+      if (!adminId && (!password || password.length < 6)) {
+        alert('Kata sandi untuk admin baru minimal 6 karakter.');
+        return;
+      }
+
+      if (password && password.length < 6) {
+        alert('Kata sandi minimal 6 karakter.');
+        return;
+      }
+
+      var prevBtnText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = 'Menyimpan...';
+
+      fetch('/api/admins', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+          id: adminId || null,
+          name: name,
+          email: email,
+          phone: phone,
+          password: password || null
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        btn.disabled = false;
+        btn.textContent = prevBtnText;
+        if (data.success) {
+          window.closeModal('modalManageAdmin');
+          if (window.showNotification) {
+            window.showNotification('success', data.message || 'Akun admin berhasil disimpan.');
+          } else {
+            alert(data.message || 'Akun admin berhasil disimpan.');
+          }
+          setTimeout(function() {
+            window.location.reload();
+          }, 800);
+        } else {
+          alert(data.message || 'Gagal menyimpan akun admin');
+        }
+      })
+      .catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = prevBtnText;
+        alert('Terjadi kesalahan jaringan saat menyimpan data admin.');
+      });
+    };
+
+    window.confirmDeleteAdmin = function(adminId, adminName) {
+      if (!confirm('Apakah Anda yakin ingin menghapus hak akses dan akun staf Admin "' + adminName + '"? Staf tidak akan dapat login lagi.')) {
+        return;
+      }
+
+      fetch('/api/admins/' + adminId + '/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        }
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          if (window.showNotification) {
+            window.showNotification('success', data.message || 'Akun admin berhasil dihapus.');
+          } else {
+            alert(data.message || 'Akun admin berhasil dihapus.');
+          }
+          var row = document.getElementById('adminRow_' + adminId);
+          if (row) row.remove();
+          var badge = document.getElementById('badgeTotalAdmins');
+          if (badge) {
+            var curr = parseInt(badge.textContent) || 0;
+            if (curr > 0) badge.textContent = curr - 1;
+          }
+          var statCard = document.getElementById('statCardTotalAdmins');
+          if (statCard) {
+            var curr2 = parseInt(statCard.textContent) || 0;
+            if (curr2 > 0) statCard.textContent = (curr2 - 1) + ' Akun Aktif';
+          }
+        } else {
+          alert(data.message || 'Gagal menghapus akun admin.');
+        }
+      })
+      .catch(function(err) {
+        alert('Terjadi kesalahan saat menghapus data admin.');
+      });
     };
 
   </script>
