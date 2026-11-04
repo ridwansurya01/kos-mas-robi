@@ -788,6 +788,12 @@ class DashboardController extends Controller
         if (in_array($status, ['pending', 'progress', 'done'])) {
             $ticket->status = $status;
             $ticket->save();
+
+            // Kirim notifikasi email ke Gmail Penghuni saat status telah dilaksanakan atau telah selesai
+            if (in_array($status, ['progress', 'done'])) {
+                app(\App\Services\EmailNotificationService::class)->sendMaintenanceProgressToTenant($ticket);
+            }
+
             return response()->json(['success' => true, 'ticket' => $ticket]);
         }
 
@@ -1038,6 +1044,16 @@ class DashboardController extends Controller
         $setting->fill($validated);
         $setting->save();
 
+        // Broadcast update WiFi ke seluruh Penghuni jika ada perubahan wifi_list
+        if ($request->has('wifi_list') && !empty($validated['wifi_list'])) {
+            app(\App\Services\EmailNotificationService::class)->sendWifiUpdateToTenants($validated['wifi_list']);
+        }
+
+        // Broadcast update tata tertib ke seluruh Penghuni jika ada perubahan kos_rules
+        if ($request->has('kos_rules') && !empty($existingLc['kos_rules'])) {
+            app(\App\Services\EmailNotificationService::class)->sendRulesUpdateToTenants($existingLc['kos_rules']);
+        }
+
         return response()->json(['success' => true, 'setting' => $setting]);
     }
 
@@ -1194,6 +1210,9 @@ class DashboardController extends Controller
         }
 
         $transfer->save();
+
+        // Kirim notifikasi email ke Gmail Penghuni perihal status disetujui atau ditolak
+        app(\App\Services\EmailNotificationService::class)->sendRoomTransferDecisionToTenant($transfer);
 
         return response()->json([
             'success' => true,

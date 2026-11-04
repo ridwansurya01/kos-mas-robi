@@ -46,7 +46,7 @@
     <!-- Body -->
     <tr>
       <td style="padding: 30px 28px;">
-        <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-top: 0;">Halo, {{ $user->name }} </h2>
+        <h2 style="font-size: 17px; font-weight: 800; color: #0f172a; margin-top: 0;">Halo, {{ $user->name }}</h2>
         
         <p style="font-size: 14px; line-height: 1.6; color: #475569;">
           Kami ingin mengingatkan tagihan sewa kamar Anda di <strong>{{ $setting->kos_name ?? 'Kos Mas Robi' }}</strong>:

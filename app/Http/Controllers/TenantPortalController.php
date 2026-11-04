@@ -260,6 +260,9 @@ class TenantPortalController extends Controller
             'status' => 'pending',
         ]);
 
+        // Kirim notifikasi email ke Gmail Admin & Owner
+        app(\App\Services\EmailNotificationService::class)->sendMaintenanceRequestToStaff($ticket);
+
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
@@ -403,7 +406,7 @@ class TenantPortalController extends Controller
             return back()->with('error', 'Kamar tujuan tidak boleh sama dengan kamar Anda saat ini.');
         }
 
-        RoomTransfer::create([
+        $transfer = RoomTransfer::create([
             'user_id' => $user->id,
             'tenant_id' => $tenant?->id,
             'current_room_id' => $currentRoom?->id,
@@ -412,6 +415,9 @@ class TenantPortalController extends Controller
             'preferred_date' => $request->preferred_date,
             'status' => 'pending',
         ]);
+
+        // Kirim notifikasi email ke Gmail Admin & Owner
+        app(\App\Services\EmailNotificationService::class)->sendRoomTransferRequestToStaff($transfer);
 
         return back()->with('success', 'Pengajuan pindah kamar berhasil dikirim! Pengelola akan segera meninjau permohonan Anda.');
     }
