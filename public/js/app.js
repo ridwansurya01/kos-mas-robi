@@ -261,6 +261,8 @@
       card.className = 'room-card';
       card.setAttribute('data-room-id', room.number);
       card.setAttribute('data-status', room.status);
+      card.setAttribute('data-floor', String(room.floor || 1));
+      card.setAttribute('data-location', room.location || 'Lokasi 1');
 
       const featuresHtml = (room.facilities || []).slice(0, 3).map(f => `<span class="feature-pill">${f}</span>`).join('');
 
@@ -417,6 +419,10 @@
         : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">${getBranchName('Lokasi 1')}</span>`;
 
       const tr = document.createElement('tr');
+      tr.className = 'room-master-row';
+      tr.setAttribute('data-floor', String(room.floor || 1));
+      tr.setAttribute('data-location', room.location || 'Lokasi 1');
+      tr.setAttribute('data-search', `${room.number} ${room.type} ${room.location || ''} ${room.tenant || ''}`.toLowerCase());
       tr.innerHTML = `
         <td style="font-weight:800;font-size:1rem;color:#0a5661;">#${room.number}</td>
         <td>${locBadge}</td>
@@ -439,6 +445,9 @@
 
       const mCard = document.createElement('div');
       mCard.className = 'mobile-data-card';
+      mCard.setAttribute('data-floor', String(room.floor || 1));
+      mCard.setAttribute('data-location', room.location || 'Lokasi 1');
+      mCard.setAttribute('data-search', `${room.number} ${room.type} ${room.location || ''} ${room.tenant || ''}`.toLowerCase());
       mCard.innerHTML = `
         <div class="mobile-data-header">
           <div>
@@ -662,7 +671,12 @@
           ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Smart Door PIN & Co-Working</div>`
           : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Kartu RFID & Area Kampus</div>`;
 
+        const isDue = (t.status === 'due');
         const tr = document.createElement('tr');
+        tr.className = 'tenant-row';
+        tr.setAttribute('data-location', tLoc);
+        tr.setAttribute('data-status', isDue ? 'due' : 'active');
+        tr.setAttribute('data-search', `${t.tenant || ''} ${t.number || ''} ${tLoc} ${t.phone || ''} ${t.type || ''}`.toLowerCase());
         tr.innerHTML = `
           <td>
             <div style="font-weight:700;">${t.tenant}</div>
@@ -693,6 +707,9 @@
 
         const mCard = document.createElement('div');
         mCard.className = 'mobile-data-card';
+        mCard.setAttribute('data-location', tLoc);
+        mCard.setAttribute('data-status', isDue ? 'due' : 'active');
+        mCard.setAttribute('data-search', `${t.tenant || ''} ${t.number || ''} ${tLoc} ${t.phone || ''} ${t.type || ''}`.toLowerCase());
         mCard.innerHTML = `
           <div class="mobile-data-header">
             <span class="mobile-data-title">${t.tenant}</span>
@@ -933,6 +950,10 @@
         : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span>`;
 
       const tr = document.createElement('tr');
+      tr.className = 'finance-row';
+      tr.setAttribute('data-location', fLoc);
+      tr.setAttribute('data-type', trx.type);
+      tr.setAttribute('data-search', `${trx.id || ''} ${fLoc} ${trx.desc || ''} ${trx.category || ''} ${trx.type}`.toLowerCase());
       tr.innerHTML = `
         <td style="font-family:monospace;font-size:0.85rem;font-weight:700;">${trx.id}</td>
         <td>${trx.date}</td>
@@ -956,6 +977,9 @@
 
       const mCard = document.createElement('div');
       mCard.className = 'mobile-data-card';
+      mCard.setAttribute('data-location', fLoc);
+      mCard.setAttribute('data-type', trx.type);
+      mCard.setAttribute('data-search', `${trx.id || ''} ${fLoc} ${trx.desc || ''} ${trx.category || ''} ${trx.type}`.toLowerCase());
       mCard.innerHTML = `
         <div class="mobile-data-header">
           <span class="mobile-data-title" style="font-size:0.88rem;">${trx.desc}</span>
@@ -1130,6 +1154,10 @@
         : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">PIC: Pak Budi (Utilitas)</div>`;
 
       const tr = document.createElement('tr');
+      tr.className = 'maintenance-row';
+      tr.setAttribute('data-location', mLoc);
+      tr.setAttribute('data-status', item.status);
+      tr.setAttribute('data-search', `${item.id || ''} ${item.roomId || ''} ${item.reporter || ''} ${item.issue || ''} ${mLoc}`.toLowerCase());
       tr.innerHTML = `
         <td style="font-family:monospace;font-size:0.85rem;font-weight:700;">#${item.id}</td>
         <td>
@@ -1153,6 +1181,9 @@
 
       const mCard = document.createElement('div');
       mCard.className = 'mobile-data-card';
+      mCard.setAttribute('data-location', mLoc);
+      mCard.setAttribute('data-status', item.status);
+      mCard.setAttribute('data-search', `${item.id || ''} ${item.roomId || ''} ${item.reporter || ''} ${item.issue || ''} ${mLoc}`.toLowerCase());
       mCard.innerHTML = `
         <div class="mobile-data-header">
           <span class="mobile-data-title">Kamar #${item.roomId} (${isLoc2 ? getBranchName('Lokasi 2') : getBranchName('Lokasi 1')})</span>

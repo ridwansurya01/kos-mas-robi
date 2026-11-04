@@ -104,6 +104,419 @@
         document.body.style.overflow = '';
       }
     };
+
+    // =========================================================================
+    // GLOBAL FILTER & NAVIGATION SYSTEM (INSTANT ZERO-LAG DOM FILTERING)
+    // =========================================================================
+
+    // 1. DASHBOARD FILTERS (DENAH KAMAR, LANTAI 1 & 2, KOS UNEJ & UNMUH)
+    window.currentDashStatus = 'all';
+    window.currentDashFloor = 'all';
+    window.currentDashLocation = 'all';
+
+    window.applyDashboardFilters = function() {
+      var cards = document.querySelectorAll('#tab-dashboard .room-card');
+      var f1Sec = document.getElementById('dashboardFloor1Section');
+      var f2Sec = document.getElementById('dashboardFloor2Section');
+
+      if (f1Sec) {
+        f1Sec.style.display = (window.currentDashFloor === 'all' || window.currentDashFloor === '1') ? '' : 'none';
+      }
+      if (f2Sec) {
+        f2Sec.style.display = (window.currentDashFloor === 'all' || window.currentDashFloor === '2') ? '' : 'none';
+      }
+
+      cards.forEach(function(card) {
+        var cStatus = card.getAttribute('data-status') || '';
+        var cLoc = card.getAttribute('data-location') || 'Lokasi 1';
+        var cFloor = String(card.getAttribute('data-floor') || '1');
+
+        var matchStatus = (window.currentDashStatus === 'all' || cStatus === window.currentDashStatus);
+        var matchLoc = (window.currentDashLocation === 'all' || cLoc === window.currentDashLocation);
+        var matchFloor = (window.currentDashFloor === 'all' || cFloor === window.currentDashFloor);
+
+        card.style.display = (matchStatus && matchLoc && matchFloor) ? '' : 'none';
+      });
+    };
+
+    window.filterDashboardStatus = function(status, btn) {
+      window.currentDashStatus = status;
+      document.querySelectorAll('#dashboardFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyDashboardFilters();
+    };
+
+    window.filterDashboardFloor = function(floor, btn) {
+      window.currentDashFloor = String(floor);
+      document.querySelectorAll('#dashboardFloorFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#dashboardFloorFilters .filter-pill[data-dfloor="' + floor + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+      window.applyDashboardFilters();
+    };
+
+    window.filterDashboardLocation = function(loc, btn) {
+      window.currentDashLocation = loc;
+      document.querySelectorAll('#dashboardLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyDashboardFilters();
+    };
+
+    // 2. DAFTAR KAMAR MASTER FILTERS (LANTAI 1 & 2, KOS UNEJ & UNMUH)
+    window.currentRoomFloor = 'all';
+    window.currentRoomLocation = 'all';
+
+    window.applyRoomMasterFilters = function() {
+      var inputEl = document.getElementById('roomSearchInput');
+      var q = inputEl ? inputEl.value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#roomsMasterTableBody tr');
+      var cards = document.querySelectorAll('#roomsMobileCardList .mobile-data-card');
+
+      [rows, cards].forEach(function(list) {
+        list.forEach(function(el) {
+          var s = (el.getAttribute('data-search') || el.textContent || '').toLowerCase();
+          var fl = String(el.getAttribute('data-floor') || '1');
+          var loc = el.getAttribute('data-location') || 'Lokasi 1';
+
+          var matchSearch = !q || s.includes(q);
+          var matchFloor = (window.currentRoomFloor === 'all' || fl === window.currentRoomFloor);
+          var matchLoc = (window.currentRoomLocation === 'all' || loc === window.currentRoomLocation);
+
+          el.style.display = (matchSearch && matchFloor && matchLoc) ? '' : 'none';
+        });
+      });
+    };
+
+    window.filterRoomMasterFloor = function(floor, btn) {
+      window.currentRoomFloor = String(floor);
+      document.querySelectorAll('#roomTabFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyRoomMasterFilters();
+      if (typeof window.renderRoomsMasterTable === 'function') {
+        var inputEl = document.getElementById('roomSearchInput');
+        window.renderRoomsMasterTable(inputEl ? inputEl.value : '', window.currentRoomFloor, window.currentRoomLocation);
+      }
+    };
+
+    window.filterRoomMasterLocation = function(loc, btn) {
+      window.currentRoomLocation = loc;
+      document.querySelectorAll('#roomLocationFilters .loc-filter-btn').forEach(function(p) {
+        p.classList.remove('active');
+        p.style.background = '#ffffff';
+        p.style.color = p.getAttribute('data-location') === 'Lokasi 2' ? '#0d9488' : '#0a5661';
+        p.style.boxShadow = 'none';
+      });
+      if (btn) {
+        btn.classList.add('active');
+        btn.style.background = '#0a5661';
+        btn.style.color = '#ffffff';
+        btn.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+      }
+      window.applyRoomMasterFilters();
+      if (typeof window.renderRoomsMasterTable === 'function') {
+        var inputEl = document.getElementById('roomSearchInput');
+        window.renderRoomsMasterTable(inputEl ? inputEl.value : '', window.currentRoomFloor, window.currentRoomLocation);
+      }
+    };
+
+    // 3. DATA PENGHUNI FILTERS (AKTIF MENGHUNI, JATUH TEMPO, 2 CABANG)
+    window.currentTenantLoc = 'all';
+    window.currentTenantStatus = 'all';
+
+    window.applyTenantFilters = function() {
+      var inputEl = document.getElementById('tenantSearchInput');
+      var q = inputEl ? inputEl.value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#tenantsTableBody tr');
+      var cards = document.querySelectorAll('#tenantsMobileCardList .mobile-data-card');
+
+      [rows, cards].forEach(function(list) {
+        list.forEach(function(el) {
+          var s = (el.getAttribute('data-search') || el.textContent || '').toLowerCase();
+          var loc = el.getAttribute('data-location') || 'Lokasi 1';
+          var status = el.getAttribute('data-status') || 'active';
+
+          var matchSearch = !q || s.includes(q);
+          var matchLoc = (window.currentTenantLoc === 'all' || loc === window.currentTenantLoc);
+          var matchStatus = (window.currentTenantStatus === 'all' || status === window.currentTenantStatus);
+
+          el.style.display = (matchSearch && matchLoc && matchStatus) ? '' : 'none';
+        });
+      });
+    };
+
+    window.filterTenantLocation = function(loc, btn) {
+      window.currentTenantLoc = loc;
+      document.querySelectorAll('#tenantLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyTenantFilters();
+      if (typeof window.renderTenantsTable === 'function') {
+        var inputEl = document.getElementById('tenantSearchInput');
+        window.renderTenantsTable(inputEl ? inputEl.value : '', window.currentTenantStatus, window.currentTenantLoc);
+      }
+    };
+
+    window.filterTenantStatus = function(status, btn) {
+      window.currentTenantStatus = status;
+      document.querySelectorAll('#tenantStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyTenantFilters();
+      if (typeof window.renderTenantsTable === 'function') {
+        var inputEl = document.getElementById('tenantSearchInput');
+        window.renderTenantsTable(inputEl ? inputEl.value : '', window.currentTenantStatus, window.currentTenantLoc);
+      }
+    };
+
+    window.filterTenantTable = function() {
+      window.applyTenantFilters();
+    };
+
+    // 4. TAGIHAN SEWA FILTERS (CICILAN AKTIF, JATUH TEMPO, LUNAS, KOSONG, 2 CABANG)
+    window.currentBillingStatus = 'all';
+    window.currentBillingLocation = 'all';
+
+    window.applyBillingFilters = function() {
+      var inputEl = document.getElementById('billingSearchInput');
+      var input = inputEl ? inputEl.value.toLowerCase() : '';
+      var rows = document.querySelectorAll('#billingTableBody tr');
+
+      var paidCount = 0;
+      var dueCount = 0;
+      var dueNominal = 0;
+      var partialCount = 0;
+      var partialRemNominal = 0;
+
+      rows.forEach(function(r) {
+        var s = (r.getAttribute('data-search') || r.textContent || '').toLowerCase();
+        var rLoc = r.getAttribute('data-location') || 'Lokasi 1';
+        var rStatus = r.getAttribute('data-status') || '';
+        var rPrice = parseInt(r.getAttribute('data-price') || 0, 10);
+        var rRem = parseInt(r.getAttribute('data-rem') || 0, 10);
+
+        var matchLoc = (window.currentBillingLocation === 'all' || rLoc === window.currentBillingLocation);
+        if (matchLoc) {
+          if (rStatus === 'paid') paidCount++;
+          if (rStatus === 'due') {
+            dueCount++;
+            dueNominal += rPrice;
+          }
+          if (rStatus === 'partial') {
+            partialCount++;
+            partialRemNominal += rRem;
+          }
+        }
+
+        var matchSearch = !input || s.includes(input);
+        var matchStatus = (window.currentBillingStatus === 'all' || rStatus === window.currentBillingStatus);
+
+        r.style.display = (matchLoc && matchSearch && matchStatus) ? '' : 'none';
+      });
+
+      var paidEl = document.getElementById('billKpiPaidVal');
+      var dueEl = document.getElementById('billKpiDueVal');
+      var dueNomEl = document.getElementById('billKpiDueNom');
+      var partialEl = document.getElementById('billKpiPartialVal');
+      var rateEl = document.getElementById('billKpiRateVal');
+
+      if (paidEl) paidEl.textContent = paidCount + ' Kamar';
+      if (dueEl) dueEl.textContent = dueCount + ' Kamar';
+      if (dueNomEl) dueNomEl.textContent = 'Rp ' + dueNominal.toLocaleString('id-ID');
+      if (partialEl) partialEl.textContent = partialCount + ' Kamar';
+      if (rateEl) {
+        var totOcc = paidCount + dueCount + partialCount;
+        var rate = totOcc > 0 ? Math.round((paidCount / totOcc) * 1000) / 10 : 100;
+        rateEl.textContent = rate + '%';
+      }
+    };
+
+    window.filterBillingStatus = function(status, btn) {
+      window.currentBillingStatus = status;
+      document.querySelectorAll('#billingStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyBillingFilters();
+    };
+
+    window.filterBillingLocation = function(loc, btn) {
+      window.currentBillingLocation = loc;
+      document.querySelectorAll('#billingLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyBillingFilters();
+    };
+
+    window.filterBillingTable = function() {
+      window.applyBillingFilters();
+    };
+
+    // 5. PINDAH KAMAR FILTERS (MENUNGGU, DISETUJUI, DITOLAK, INTERNAL & LINTAS CABANG)
+    window.currentTransferStatus = 'all';
+    window.currentTransferLocation = 'all';
+
+    window.applyTransferFilters = function() {
+      var inputEl = document.getElementById('transferSearchInput');
+      var input = inputEl ? inputEl.value.toLowerCase() : '';
+      var rows = document.querySelectorAll('#transfersTableBody tr[data-status]');
+      rows.forEach(function(r) {
+        var searchData = (r.getAttribute('data-search') || r.textContent || '').toLowerCase();
+        var rStatus = r.getAttribute('data-status') || '';
+        var rLoc = r.getAttribute('data-location') || '';
+        var rFrom = r.getAttribute('data-from-loc') || '';
+        var rTo = r.getAttribute('data-to-loc') || '';
+
+        var matchSearch = !input || searchData.includes(input);
+        var matchStatus = (window.currentTransferStatus === 'all' || rStatus === window.currentTransferStatus);
+        var matchLoc = true;
+        if (window.currentTransferLocation === 'Lintas Cabang') {
+          matchLoc = (rLoc === 'Lintas Cabang');
+        } else if (window.currentTransferLocation !== 'all') {
+          matchLoc = (rLoc === window.currentTransferLocation || rFrom === window.currentTransferLocation || rTo === window.currentTransferLocation);
+        }
+
+        r.style.display = (matchSearch && matchStatus && matchLoc) ? '' : 'none';
+      });
+    };
+
+    window.filterTransferStatus = function(status, btn) {
+      window.currentTransferStatus = status;
+      document.querySelectorAll('#transferStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyTransferFilters();
+    };
+
+    window.filterTransferLocation = function(loc, btn) {
+      window.currentTransferLocation = loc;
+      document.querySelectorAll('#transferLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyTransferFilters();
+    };
+
+    window.filterTransferTable = function() {
+      window.applyTransferFilters();
+    };
+
+    // 6. KELUHAN & SERVIS FILTERS (MENUNGGU, DALAM PROSES, SELESAI, 2 CABANG)
+    window.currentMaintLoc = 'all';
+    window.currentMaintStatus = 'all';
+
+    window.applyMaintenanceFilters = function() {
+      var inputEl = document.getElementById('maintenanceSearchInput');
+      var q = inputEl ? inputEl.value.toLowerCase().trim() : '';
+
+      var rows = document.querySelectorAll('#maintenanceTableBody tr');
+      var cards = document.querySelectorAll('#maintenanceMobileCardList .mobile-data-card');
+
+      [rows, cards].forEach(function(list) {
+        list.forEach(function(el) {
+          var s = (el.getAttribute('data-search') || el.textContent || '').toLowerCase();
+          var loc = el.getAttribute('data-location') || 'Lokasi 1';
+          var status = el.getAttribute('data-status') || '';
+
+          var matchSearch = !q || s.includes(q);
+          var matchLoc = (window.currentMaintLoc === 'all' || loc === window.currentMaintLoc);
+          var matchStatus = (window.currentMaintStatus === 'all' || status === window.currentMaintStatus);
+
+          el.style.display = (matchSearch && matchLoc && matchStatus) ? '' : 'none';
+        });
+      });
+    };
+
+    window.filterMaintenanceLocation = function(loc, btn) {
+      window.currentMaintLoc = loc;
+      document.querySelectorAll('#maintenanceLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyMaintenanceFilters();
+      if (typeof window.renderMaintenanceTable === 'function') {
+        var inputEl = document.getElementById('maintenanceSearchInput');
+        window.renderMaintenanceTable(inputEl ? inputEl.value : '', window.currentMaintStatus, window.currentMaintLoc);
+      }
+    };
+
+    window.filterMaintenanceStatus = function(status, btn) {
+      window.currentMaintStatus = status;
+      document.querySelectorAll('#repairStatusFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) btn.classList.add('active');
+      window.applyMaintenanceFilters();
+      if (typeof window.renderMaintenanceTable === 'function') {
+        var inputEl = document.getElementById('maintenanceSearchInput');
+        window.renderMaintenanceTable(inputEl ? inputEl.value : '', window.currentMaintStatus, window.currentMaintLoc);
+      }
+    };
+
+    window.filterMaintenanceTable = function() {
+      window.applyMaintenanceFilters();
+    };
+
+    // 7. PENGATURAN KOS SUB-TABS (LANDING PAGE, TITIK LOKASI, TATA TERTIB, WIFI, FORMULIR)
+    window.switchSettingsSubtab = function(subtabId, btn) {
+      var subTabBtns = document.querySelectorAll('#settingsSubTabNav .btn-settings-subtab');
+      var subTabPanes = document.querySelectorAll('.settings-subtab-pane');
+
+      subTabBtns.forEach(function(b) {
+        b.classList.remove('active');
+        b.style.background = '';
+        b.style.color = '';
+      });
+
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#settingsSubTabNav .btn-settings-subtab[data-subtab="' + subtabId + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+
+      subTabPanes.forEach(function(pane) {
+        if (pane.id === subtabId) {
+          pane.classList.add('active');
+          pane.style.display = 'block';
+        } else {
+          pane.classList.remove('active');
+          pane.style.display = 'none';
+        }
+      });
+
+      if (typeof window.updateSettingsSubChip === 'function') {
+        window.updateSettingsSubChip('tab-settings');
+      }
+    };
+
+    // 8. LAPORAN KEUANGAN FILTERS (BUKU KAS UNEJ/UNMUH, PEMASUKAN, PENGELUARAN, LABA BERSIH)
+    window.currentFinLoc = 'all';
+    window.currentFinType = 'all';
+
+    window.filterFinanceBranch = function(loc, btn) {
+      window.currentFinLoc = loc;
+      document.querySelectorAll('#financeLocationFilters .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#financeLocationFilters .filter-pill[data-floc="' + loc + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+
+      if (typeof window.renderFinancesTable === 'function') {
+        var searchEl = document.getElementById('financeSearchInput');
+        window.renderFinancesTable(searchEl ? searchEl.value : '', window.currentFinType, window.currentFinLoc);
+      }
+    };
+
+    window.filterFinanceType = function(type, btn) {
+      window.currentFinType = type;
+      document.querySelectorAll('#financeTypeFilter .filter-pill').forEach(function(p) { p.classList.remove('active'); });
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        var matchBtn = document.querySelector('#financeTypeFilter .filter-pill[data-ftype="' + type + '"]');
+        if (matchBtn) matchBtn.classList.add('active');
+      }
+
+      if (typeof window.renderFinancesTable === 'function') {
+        var searchEl = document.getElementById('financeSearchInput');
+        window.renderFinancesTable(searchEl ? searchEl.value : '', window.currentFinType, window.currentFinLoc);
+      }
+    };
   </script>
 
   @php
@@ -3430,31 +3843,30 @@
   <script>
     // Konfirmasi Logout Admin Modern
     var formLogoutAdmin = document.getElementById('formLogoutAdmin');
-    document.getElementById('btnTriggerLogoutAdmin')?.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (modalAdminLogout) {
+    var modalAdminLogout = document.getElementById('modalAdminLogoutConfirm');
+    if (modalAdminLogout) {
+      document.getElementById('btnTriggerLogoutAdmin')?.addEventListener('click', function(e) {
+        e.preventDefault();
         modalAdminLogout.classList.add('open');
         modalAdminLogout.style.display = 'flex';
         modalAdminLogout.style.pointerEvents = 'auto';
-      }
-    });
-    document.getElementById('btnCancelAdminLogout')?.addEventListener('click', function() {
-      if (modalAdminLogout) {
+      });
+      document.getElementById('btnCancelAdminLogout')?.addEventListener('click', function() {
         modalAdminLogout.classList.remove('open');
         modalAdminLogout.style.display = 'none';
         modalAdminLogout.style.pointerEvents = 'none';
-      }
-    });
-    document.getElementById('btnConfirmAdminLogout')?.addEventListener('click', function() {
-      formLogoutAdmin?.submit();
-    });
-    modalAdminLogout?.addEventListener('click', function(e) {
-      if (e.target === modalAdminLogout) {
-        modalAdminLogout.classList.remove('open');
-        modalAdminLogout.style.display = 'none';
-        modalAdminLogout.style.pointerEvents = 'none';
-      }
-    });
+      });
+      document.getElementById('btnConfirmAdminLogout')?.addEventListener('click', function() {
+        formLogoutAdmin?.submit();
+      });
+      modalAdminLogout.addEventListener('click', function(e) {
+        if (e.target === modalAdminLogout) {
+          modalAdminLogout.classList.remove('open');
+          modalAdminLogout.style.display = 'none';
+          modalAdminLogout.style.pointerEvents = 'none';
+        }
+      });
+    }
 
     // Delegated dismissal for all modals in dashboard
     document.addEventListener('click', function(e) {
