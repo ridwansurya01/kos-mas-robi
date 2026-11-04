@@ -968,7 +968,6 @@
               <div style="display: flex; align-items: center; gap: 8px;">
                 <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin: 0;">Kurva Pertumbuhan Pendapatan <span id="curveYearLabel">(Tahun {{ $selectedYear ?? 2026 }})</span></h3>
               </div>
-              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0 0 0;">Grafik kurva dinamis pendapatan sewa dan arus kas riil Kos Mas Robi</p>
             </div>
 
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -1061,41 +1060,6 @@
            PANE: TAB MANAJEMEN AKUN ADMIN OPERASIONAL (KHUSUS ROLE OWNER)
            ===================================================================== -->
       <div class="tab-pane" id="tab-admins">
-        <!-- Banner Header Hero -->
-        <div style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-radius: 24px; padding: 26px 30px; margin-bottom: 24px; position: relative; overflow: hidden; box-shadow: 0 16px 40px -10px rgba(3, 35, 40, 0.35); color: #ffffff;">
-          <div style="position:absolute; top:-40px; right:-40px; width:220px; height:220px; background:radial-gradient(circle, rgba(20, 184, 166, 0.25) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
-          <div style="position:absolute; bottom:-60px; left:40px; width:180px; height:180px; background:radial-gradient(circle, rgba(244, 63, 94, 0.15) 0%, transparent 70%); border-radius:50%; pointer-events:none;"></div>
-          
-          <div style="display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; position: relative; z-index: 1;">
-            <div style="display: flex; align-items: center; gap: 16px;">
-              <div style="width: 54px; height: 54px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.22); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #ffffff; flex-shrink: 0; backdrop-filter: blur(4px);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                </svg>
-              </div>
-              <div>
-                <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #5eead4; margin-bottom: 4px;">
-                  <span>Otoritas Pemilik Kos (Owner Access Only)</span>
-                </div>
-                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 800; color: #ffffff; margin: 0 0 4px; letter-spacing: -0.02em;">Akun Admin</h2>
-                <p style="font-size: 0.82rem; color: rgba(255,255,255,0.8); margin: 0; max-width: 650px; line-height: 1.5;">
-                  Ketahui secara transparan siapa saja yang memiliki akses login sebagai Admin operasional, buat akun staf baru, kelola password, atau cabut izin akses kapan pun.
-                </p>
-              </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <button type="button" class="btn-primary" onclick="openAddAdminModal()" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 12px 22px; border-radius: 14px; font-weight: 800; font-size: 0.88rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35); cursor: pointer; transition: all 0.2s;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Tambah Admin Baru</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Tabel Daftar Seluruh Admin -->
         <div class="content-card modern-table-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-sm);">
           <div style="padding: 18px 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; background: #fafafa;">
@@ -1103,21 +1067,25 @@
               <h3 style="margin: 0 0 2px; font-size: 1.05rem; font-weight: 800; color: #0f172a;">Daftar Akun yang Memiliki Akses Admin</h3>
               <p style="margin: 0; font-size: 0.76rem; color: #64748b;">Hanya pengguna di bawah ini yang dapat masuk ke dashboard operasional kos.</p>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
               <input type="text" id="searchAdminInput" oninput="filterAdminTable()" placeholder="Cari nama atau email admin..." style="padding: 8px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.8rem; width: 220px;">
+              <button type="button" class="btn-primary" onclick="openAddAdminModal()" style="background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%); color: #ffffff; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 800; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(10, 86, 97, 0.25); cursor: pointer; transition: all 0.2s;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Tambah Admin Baru</span>
+              </button>
             </div>
           </div>
 
           <div class="table-responsive">
             <table class="data-table" id="tableAdminsList" style="width: 100%; border-collapse: collapse;">
               <thead>
-                <tr style="background: #f8fafc; border-bottom: 1.5px solid #e2e8f0;">
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Staf Admin</th>
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Email Login</th>
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Kontak WhatsApp</th>
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Penugasan Cabang Kos</th>
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Terdaftar</th>
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">Tindakan Owner</th>
+                <tr style="background: linear-gradient(135deg, #032328 0%, #063d45 45%, #0a5661 100%); border-bottom: 2px solid #0f766e;">
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em;">Staf Admin</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em;">Email Login</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em;">Kontak WhatsApp</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em;">Penugasan Cabang Kos</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em;">Terdaftar</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #ffffff; text-transform: uppercase; letter-spacing: 0.06em; text-align: right;">Tindakan Owner</th>
                 </tr>
               </thead>
               <tbody id="tbodyAdminRows">
@@ -1411,7 +1379,6 @@
               <div class="settings-hero-icon" style="width: 52px; height: 52px; background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #ffffff; flex-shrink: 0; backdrop-filter: blur(4px);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
               <div>
                 <h2 class="settings-hero-title" style="font-size: 1.4rem; font-weight: 900; color: #fff; margin: 0; letter-spacing: -0.3px;">Pusat Pengaturan Properti</h2>
-                <p class="settings-hero-desc" style="font-size: 0.82rem; color: rgba(255,255,255,0.6); margin: 4px 0 0; font-weight: 400;">Kelola konten, foto, peta, profil 2 lokasi & jaringan WiFi kost</p>
               </div>
             </div>
           </div>
@@ -1461,7 +1428,6 @@
                   <div class="settings-card-icon-badge coral"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">1. Hero Banner Utama (Bagian Teratas)</h3>
-                    <div class="settings-card-subtitle">Atur judul headline, deskripsi pengantar, tombol CTA, dan foto utama gedung kos</div>
                   </div>
                 </div>
                 <span style="font-size: 0.76rem; background: var(--bg-card); padding: 5px 12px; border-radius: 9999px; color: var(--text-secondary); font-weight: 700; border: 1px solid var(--border-color);">Tampilan Pertama Pengunjung</span>
@@ -1494,9 +1460,6 @@
                   </div>
                   <div style="display: flex; flex-direction: column; gap: 8px;">
                     <input type="file" id="lp_hero_image_file" name="hero_image_file" accept="image/*" class="form-control" style="font-size: 0.82rem; padding: 8px;">
-                    <div style="font-size: 0.76rem; color: var(--text-secondary); text-align: left; line-height: 1.4;">
-                      <em>Tips:</em> Bagian tengah foto akan otomatis disatukan secara mulus dengan gradasi warna latar belakang Landing Page.
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1565,7 +1528,6 @@
                   <div class="settings-card-icon-badge"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
                   <div>
                     <h3 class="settings-card-title">3. Kutipan Komitmen Pengelola & Footer</h3>
-                    <div class="settings-card-subtitle">Profil pemilik properti serta teks komitmen layanan yang dibaca calon penghuni</div>
                   </div>
                 </div>
               </div>
