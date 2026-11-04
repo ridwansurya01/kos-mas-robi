@@ -110,7 +110,7 @@ Aplikasi web manajemen hunian kost terintegrasi berbasis **Laravel 11** yang men
 
 | Peran (Role) | Email | Password | Hak Akses |
 |---|---|---|---|
-| **Owner / Pengelola** | `owner@kosmasrobi.com` | `password123` | Akses penuh dashboard `/admin`, keuangan, kamar, dan pengaturan |
+| **Owner / Pengelola** | `ownerkos@gmail.com` | `owner123` | Akses penuh dashboard `/admin`, keuangan, kamar, dan pengaturan |
 | **Penghuni (Anak Kos)** | `rian@kosmasrobi.com` | `password123` | Akses `/portal`, info kamar 101, bayar sewa, lapor keluhan |
 
 > 💡 **Tip:** Anda juga dapat menggunakan tombol **Demo Login 1-Klik** langsung di halaman login tanpa perlu mengetik manual.

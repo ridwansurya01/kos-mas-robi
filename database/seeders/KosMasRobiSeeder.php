@@ -20,10 +20,10 @@ class KosMasRobiSeeder extends Seeder
     {
         // 0. Users (Owner & Tenants)
         User::updateOrCreate(
-            ['email' => 'owner@kosmasrobi.com'],
+            ['email' => 'ownerkos@gmail.com'],
             [
                 'name' => 'Mas Robi',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('owner123'),
                 'role' => 'owner',
                 'phone' => '6281234567890',
                 'avatar' => null,
