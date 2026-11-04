@@ -95,6 +95,12 @@
   @php
     $landing = $setting->landing_content ?? [];
     $heroImg = $landing['hero_image'] ?? 'assets/images/kos_exterior.jpg';
+    $rawOwnerPhone = $setting->owner_phone ?? '6281234567890';
+    $cleanOwnerPhone = preg_replace('/[^0-9]/', '', $rawOwnerPhone);
+    if (str_starts_with($cleanOwnerPhone, '0')) {
+        $cleanOwnerPhone = '62' . substr($cleanOwnerPhone, 1);
+    }
+    $rawSurveyTemplate = $setting->survey_form_template;
     $bentoGallery = $landing['bento_gallery'] ?? [
         'assets/images/hero_scandinavian_room.jpg',
         'assets/images/rooms/room_2.jpg',
@@ -139,6 +145,10 @@
       </ul>
 
       <div class="lr-nav-actions">
+        <button type="button" class="lr-btn-ghost-white" onclick="openSurveyModal()" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.12);" title="Isi Formulir Survey">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Jadwal Survey</span>
+        </button>
         @auth
           @if(Auth::user()->isOwner())
             <a href="{{ route('admin.dashboard') }}" class="lr-btn-ghost-white">Login</a>
@@ -350,11 +360,12 @@
                   </div>
                 </div>
 
-                <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20tertarik%20booking%20Kamar%20%23{{ $room->number }}%20({{ urlencode($room->type) }})"
-                   target="_blank" class="lr-btn-book-round">
+                <button type="button" class="lr-btn-book-round"
+                        onclick="openSurveyModal({ room: 'Kamar #{{ $room->number }} - {{ $room->type }} (Lantai {{ $room->floor }})', branch: '{{ $room->location ?? 'Lokasi 1' }}' })"
+                        title="Isi Formulir Survey & Booking">
                   <span>Booking</span>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"/></svg>
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -548,10 +559,9 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
               <span>Buka Google Maps ↗</span>
             </a>
-            <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20mau%20tanya%20patokan%20lokasi%20atau%20jadwal%20survey%20ke%20Kos%20Mas%20Robi"
-               id="landingWaSurveyLink" target="_blank" class="lr-btn-survey">
+            <button type="button" id="landingWaSurveyLink" class="lr-btn-survey" onclick="openSurveyModal({ branch: window.currentLandingBranch || 'Lokasi 1' })" style="border:none; cursor:pointer;">
               <span>Janji Survey Lokasi</span>
-            </a>
+            </button>
           </div>
         </div>
 
@@ -591,6 +601,7 @@
           label: 'maps.google.com/kos-mas-robi-cabang-2'
         };
 
+        window.currentLandingBranch = 'Lokasi 1';
         function switchLandingMap(branchNum) {
           var btn1 = document.getElementById('btnLandingLoc1');
           var btn2 = document.getElementById('btnLandingLoc2');
@@ -599,15 +610,14 @@
           var linkEl = document.getElementById('landingGmapsLink');
           var frameEl = document.getElementById('landingMapIframe');
           var labelEl = document.getElementById('landingMapLabel');
-          var waEl = document.getElementById('landingWaSurveyLink');
 
           if (branchNum === 2) {
+            window.currentLandingBranch = 'Lokasi 2';
             titleEl.textContent = branchData2.title;
             addrEl.textContent = branchData2.address;
             linkEl.href = branchData2.gmapsUrl;
             frameEl.src = branchData2.embedUrl;
             labelEl.textContent = branchData2.label;
-            waEl.href = "https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20mau%20survey%20ke%20Cabang%202%20(Ringroad%20Exclusive)";
 
             btn2.style.background = '#0d9488';
             btn2.style.color = '#ffffff';
@@ -616,12 +626,12 @@
             btn1.style.color = 'var(--text-dark)';
             btn1.style.boxShadow = 'none';
           } else {
+            window.currentLandingBranch = 'Lokasi 1';
             titleEl.textContent = branchData1.title;
             addrEl.textContent = branchData1.address;
             linkEl.href = branchData1.gmapsUrl;
             frameEl.src = branchData1.embedUrl;
             labelEl.textContent = branchData1.label;
-            waEl.href = "https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Mas%20Robi,%20saya%20mau%20survey%20ke%20Cabang%201%20(Kampus%20Utama)";
 
             btn1.style.background = 'var(--teal-primary)';
             btn1.style.color = '#ffffff';
@@ -691,7 +701,7 @@
           <h5>Hubungi & Akses</h5>
           <ul class="lr-footer-list">
             <li>
-              <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}" target="_blank">
+              <a href="javascript:void(0)" onclick="openSurveyModal()" title="Jadwalkan Survey Kamar">
                 WhatsApp: {{ $setting->owner_phone ?? '6281234567890' }}
               </a>
             </li>
@@ -712,6 +722,276 @@
       </div>
     </div>
   </footer>
+
+  <!-- =========================================================================
+       MODAL FORMULIR SURVEY & HUBUNGI ADMIN (CALON PENGHUNI)
+       ========================================================================= -->
+  <div id="surveyModal" class="lr-survey-modal-backdrop" style="display: none;" onclick="if(event.target === this) closeSurveyModal()">
+    <div class="lr-survey-modal-card">
+      <div class="lr-survey-modal-header">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div class="lr-survey-icon-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+              <line x1="16" y1="2" x2="16" y2="6"/>
+              <line x1="8" y1="2" x2="8" y2="6"/>
+              <line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+          </div>
+          <div>
+            <h3 class="lr-survey-modal-title">Jadwal Survey & Booking Kamar</h3>
+            <p class="lr-survey-modal-sub">Isi data rencana kunjungan di bawah untuk langsung terhubung ke WhatsApp Pengelola.</p>
+          </div>
+        </div>
+        <button type="button" class="lr-survey-close-btn" onclick="closeSurveyModal()" title="Tutup Modal">&times;</button>
+      </div>
+
+      <form id="landingSurveyForm" onsubmit="submitSurveyToWhatsApp(event)" class="lr-survey-form-body">
+        <!-- 1. DATA CALON PENGHUNI -->
+        <div class="lr-survey-grid-2">
+          <div class="lr-survey-form-group">
+            <label for="sf_name">Nama Lengkap Calon Penghuni</label>
+            <input type="text" id="sf_name" class="lr-survey-input" placeholder="Tulis Nama Lengkap Anda" required oninput="renderSurveyPreview()">
+          </div>
+          <div class="lr-survey-form-group">
+            <label for="sf_job">Pekerjaan / Status</label>
+            <select id="sf_job" class="lr-survey-input" onchange="renderSurveyPreview()">
+              <option value="Mahasiswa">Mahasiswa</option>
+              <option value="Karyawan">Karyawan</option>
+              <option value="PNS / BUMN">PNS / BUMN</option>
+              <option value="Wiraswasta / Profesional">Wiraswasta / Profesional</option>
+              <option value="Umum">Umum / Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 2. PILIHAN LOKASI & KAMAR -->
+        <div class="lr-survey-grid-2">
+          <div class="lr-survey-form-group">
+            <label for="sf_branch">Pilihan Lokasi Kost</label>
+            <select id="sf_branch" class="lr-survey-input" onchange="renderSurveyPreview()">
+              <option value="{{ $b1['name'] ?? 'Lokasi 1' }}">{{ $b1['name'] ?? 'Lokasi 1 (Kampus Utama)' }}</option>
+              <option value="{{ $b2['name'] ?? 'Lokasi 2' }}">{{ $b2['name'] ?? 'Lokasi 2 (Ringroad Exclusive)' }}</option>
+            </select>
+          </div>
+          <div class="lr-survey-form-group">
+            <label for="sf_room">Pilihan Kamar</label>
+            <input type="text" id="sf_room" class="lr-survey-input" placeholder="Contoh: Kamar 104 - Lantai 2" oninput="renderSurveyPreview()">
+          </div>
+        </div>
+
+        <!-- 3. RENCANA SURVEY KAMAR -->
+        <div class="lr-survey-grid-3">
+          <div class="lr-survey-form-group">
+            <label for="sf_date">Tanggal Rencana Survey</label>
+            <input type="date" id="sf_date" class="lr-survey-input" required onchange="renderSurveyPreview()">
+          </div>
+          <div class="lr-survey-form-group">
+            <label for="sf_time">Jam Survey</label>
+            <input type="time" id="sf_time" value="14:00" class="lr-survey-input" required onchange="renderSurveyPreview()">
+          </div>
+          <div class="lr-survey-form-group">
+            <label for="sf_method">Metode Survey</label>
+            <select id="sf_method" class="lr-survey-input" onchange="renderSurveyPreview()">
+              <option value="Datang Langsung">Datang Langsung</option>
+              <option value="Video Call">Video Call</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 4. LIVE PREVIEW KOTAK PESAN WHATSAPP -->
+        <div class="lr-survey-preview-box">
+          <div class="lr-survey-preview-header">
+            <span class="lr-survey-preview-label">Pratinjau Pesan yang Dikirim ke WhatsApp:</span>
+            <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">Format Otomatis</span>
+          </div>
+          <div id="surveyPreviewBox" class="lr-survey-preview-content"></div>
+        </div>
+
+        <!-- 5. TOMBOL AKSI -->
+        <div class="lr-survey-actions">
+          <button type="submit" class="lr-survey-btn-submit">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.19 8.19 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.06-1.1l-.29-.17-3.02.79.81-2.94-.19-.3a8.21 8.21 0 0 1-1.26-4.52c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.72 4.31 3.81.6.26 1.07.42 1.44.54.61.19 1.16.17 1.6.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.17-.48-.29z"/>
+            </svg>
+            <span>Kirim Formulir ke WhatsApp Admin</span>
+          </button>
+          <div class="lr-survey-actions-sub">
+            <button type="button" class="lr-survey-btn-copy" onclick="copySurveyPreviewText()">
+              <span id="copySurveyStatus">Salin Teks Formulir</span>
+            </button>
+            <button type="button" class="lr-survey-btn-raw" onclick="openDirectWhatsAppBlank()">
+              <span>Buka WhatsApp Langsung (Format Kosong)</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FLOATING WHATSAPP BUTTON (LANDING PAGE) -->
+  <div class="lr-floating-wa-wrap" onclick="openSurveyModal()" title="Jadwalkan Survey Kamar atau Hubungi Admin">
+    <div class="lr-floating-wa-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2m.01 1.67c4.54 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.27-2.42 5.82a8.19 8.19 0 0 1-5.82 2.42c-1.42 0-2.82-.37-4.06-1.1l-.29-.17-3.02.79.81-2.94-.19-.3a8.21 8.21 0 0 1-1.26-4.52c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.03-1.25-.75-.67-1.26-1.5-1.41-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.38-.44.13-.15.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.13.17 1.78 2.72 4.31 3.81.6.26 1.07.42 1.44.54.61.19 1.16.17 1.6.1.49-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.17-.48-.29z"/>
+      </svg>
+    </div>
+    <span class="lr-floating-wa-label">Jadwal Survey & Booking</span>
+  </div>
+
+  <script>
+    // Survey Form Modal & WhatsApp Generator Logic
+    window.kosWaPhone = @json($cleanOwnerPhone);
+    window.activeSurveyTemplate = @json($rawSurveyTemplate);
+
+    function formatIndoDate(dateStr) {
+      if (!dateStr) return '';
+      var parts = dateStr.split('-');
+      if (parts.length !== 3) return dateStr;
+      var d = new Date(parts[0], parts[1] - 1, parts[2]);
+      var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      var months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      return days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    }
+
+    function formatIndoTime(timeStr) {
+      if (!timeStr) return '';
+      return timeStr.replace(':', '.') + ' WIB';
+    }
+
+    function getSurveyFormData() {
+      var nameEl = document.getElementById('sf_name');
+      var jobEl = document.getElementById('sf_job');
+      var branchEl = document.getElementById('sf_branch');
+      var roomEl = document.getElementById('sf_room');
+      var dateEl = document.getElementById('sf_date');
+      var timeEl = document.getElementById('sf_time');
+      var methodEl = document.getElementById('sf_method');
+
+      return {
+        name: nameEl ? nameEl.value.trim() : '',
+        job: jobEl ? jobEl.value : 'Mahasiswa',
+        branch: branchEl ? branchEl.value : 'Lokasi 1',
+        room: roomEl ? roomEl.value.trim() : '',
+        date: dateEl ? dateEl.value : '',
+        time: timeEl ? timeEl.value : '14:00',
+        method: methodEl ? methodEl.value : 'Datang Langsung'
+      };
+    }
+
+    function buildSurveyMessageText(data) {
+      var tpl = window.activeSurveyTemplate || '';
+      var nameVal = data.name || '[Tulis Nama Anda]';
+      var jobVal = data.job || '[Mahasiswa / Karyawan / dll]';
+      var branchVal = data.branch || '[Pilih Lokasi 1 / Lokasi 2]';
+      var roomVal = data.room || '[Tulis Nomor / Tipe Kamar, contoh: Kamar 104 - Lantai 2]';
+      var dateVal = data.date ? formatIndoDate(data.date) : '[Tulis Tanggal, contoh: Kamis, 5 November 2026]';
+      var timeVal = data.time ? formatIndoTime(data.time) : '[Tulis Jam, contoh : 14.00 WIB]';
+      var methodVal = data.method || '[Datang Langsung / Video Call]';
+
+      // Replace literal template bracket placeholders
+      tpl = tpl.replace(/\[Tulis Nama Anda\]/gi, nameVal);
+      tpl = tpl.replace(/\[Mahasiswa \/ Karyawan \/ dll\]/gi, jobVal);
+      tpl = tpl.replace(/\[Pilih Lokasi 1 \/ Lokasi 2\]/gi, branchVal);
+      tpl = tpl.replace(/\[Tulis Nomor \/ Tipe Kamar, contoh: Kamar 104 - Lantai 2\]/gi, roomVal);
+      tpl = tpl.replace(/\[Tulis Tanggal, contoh: Kamis, 5 November 2026\]/gi, dateVal);
+      tpl = tpl.replace(/\[Tulis Jam, contoh : 14.00 WIB\]/gi, timeVal);
+      tpl = tpl.replace(/\[Datang Langsung \/ Video Call\]/gi, methodVal);
+
+      // Support flexible generic tags if template was edited in admin settings
+      tpl = tpl.replace(/\[nama\]/gi, nameVal);
+      tpl = tpl.replace(/\[pekerjaan\]/gi, jobVal);
+      tpl = tpl.replace(/\[status\]/gi, jobVal);
+      tpl = tpl.replace(/\[lokasi\]/gi, branchVal);
+      tpl = tpl.replace(/\[cabang\]/gi, branchVal);
+      tpl = tpl.replace(/\[kamar\]/gi, roomVal);
+      tpl = tpl.replace(/\[tanggal\]/gi, dateVal);
+      tpl = tpl.replace(/\[jam\]/gi, timeVal);
+      tpl = tpl.replace(/\[waktu\]/gi, timeVal);
+      tpl = tpl.replace(/\[metode\]/gi, methodVal);
+
+      return tpl;
+    }
+
+    function renderSurveyPreview() {
+      var previewEl = document.getElementById('surveyPreviewBox');
+      if (!previewEl) return;
+      var data = getSurveyFormData();
+      previewEl.textContent = buildSurveyMessageText(data);
+    }
+
+    window.openSurveyModal = function(opts) {
+      opts = opts || {};
+      var modal = document.getElementById('surveyModal');
+      if (!modal) return;
+
+      if (opts.room) {
+        var roomEl = document.getElementById('sf_room');
+        if (roomEl) roomEl.value = opts.room;
+      }
+      if (opts.branch) {
+        var branchEl = document.getElementById('sf_branch');
+        if (branchEl) {
+          for (var i = 0; i < branchEl.options.length; i++) {
+            if (branchEl.options[i].value.indexOf(opts.branch) !== -1 || opts.branch.indexOf(branchEl.options[i].value) !== -1) {
+              branchEl.selectedIndex = i;
+              break;
+            }
+          }
+        }
+      }
+
+      // Set default date to tomorrow if empty
+      var dateEl = document.getElementById('sf_date');
+      if (dateEl && !dateEl.value) {
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        var yyyy = tomorrow.getFullYear();
+        var mm = String(tomorrow.getMonth() + 1).padStart(2, '0');
+        var dd = String(tomorrow.getDate()).padStart(2, '0');
+        dateEl.value = yyyy + '-' + mm + '-' + dd;
+        dateEl.min = new Date().toISOString().split('T')[0];
+      }
+
+      renderSurveyPreview();
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeSurveyModal = function() {
+      var modal = document.getElementById('surveyModal');
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    };
+
+    window.submitSurveyToWhatsApp = function(e) {
+      if (e) e.preventDefault();
+      var data = getSurveyFormData();
+      var msg = buildSurveyMessageText(data);
+      var waUrl = 'https://wa.me/' + window.kosWaPhone + '?text=' + encodeURIComponent(msg);
+      window.open(waUrl, '_blank');
+    };
+
+    window.copySurveyPreviewText = function() {
+      var data = getSurveyFormData();
+      var msg = buildSurveyMessageText(data);
+      navigator.clipboard.writeText(msg).then(function() {
+        var statusEl = document.getElementById('copySurveyStatus');
+        if (statusEl) {
+          statusEl.textContent = 'Format Tersalin!';
+          setTimeout(function() { statusEl.textContent = 'Salin Teks Formulir'; }, 2000);
+        }
+      });
+    };
+
+    window.openDirectWhatsAppBlank = function() {
+      var tpl = window.activeSurveyTemplate || '';
+      var waUrl = 'https://wa.me/' + window.kosWaPhone + '?text=' + encodeURIComponent(tpl);
+      window.open(waUrl, '_blank');
+    };
+  </script>
 
   <script>
     (function() {

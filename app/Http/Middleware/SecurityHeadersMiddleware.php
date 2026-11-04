@@ -42,3 +42,4 @@ class SecurityHeadersMiddleware
         return $response;
     }
 }
+

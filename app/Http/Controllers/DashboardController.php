@@ -869,6 +869,7 @@ class DashboardController extends Controller
             'bank_holder' => 'nullable|string',
             'payment_methods' => 'nullable',
             'wifi_list' => 'nullable',
+            'survey_form_template' => 'nullable|string',
         ]);
 
         if ($request->has('branches')) {
@@ -984,7 +985,7 @@ class DashboardController extends Controller
             'bento_tag', 'bento_title', 'bento_desc',
             'bento_card_tag', 'bento_card_title', 'bento_card_desc', 'bento_card_btn',
             'founder_name', 'founder_role', 'founder_avatar', 'founder_quote',
-            'footer_desc'
+            'footer_desc', 'survey_form_template'
         ];
 
         foreach ($fields as $field) {
@@ -1033,6 +1034,10 @@ class DashboardController extends Controller
             } elseif ($request->filled("gallery_url_{$i}")) {
                 $landing['bento_gallery'][$i] = $request->input("gallery_url_{$i}");
             }
+        }
+
+        if ($request->has('survey_form_template')) {
+            $setting->survey_form_template = $request->input('survey_form_template');
         }
 
         $setting->landing_content = $landing;

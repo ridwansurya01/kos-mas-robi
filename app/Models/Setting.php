@@ -24,6 +24,7 @@ class Setting extends Model
         'bank_holder',
         'payment_methods',
         'wifi_list',
+        'survey_form_template',
     ];
 
     protected $casts = [
@@ -39,6 +40,7 @@ class Setting extends Model
         'active_payment_methods',
         'active_wifi_list',
         'kos_rules',
+        'survey_form_template',
     ];
 
     /**
@@ -534,5 +536,22 @@ class Setting extends Model
         }
 
         return $defaultRules;
+    }
+
+    /**
+     * Get customizable survey & contact form template for prospective tenants.
+     */
+    public function getSurveyFormTemplateAttribute($value = null): string
+    {
+        if (!empty($value)) {
+            return $value;
+        }
+
+        $lc = $this->landing_content ?? [];
+        if (!empty($lc['survey_form_template'])) {
+            return $lc['survey_form_template'];
+        }
+
+        return "Halo Admin, saya tertarik untuk menyewa kamar disini \n\nSebelum melanjutkan pemesanan, saya ingin menjadwalkan survey kamar terlebih dahulu sesuai ketentuan. Berikut data diri dan rencana kunjungan saya:\n\n *DATA CALON PENGHUNI*\n• Nama Lengkap : [Tulis Nama Anda]\n• Pekerjaan/Status : [Mahasiswa / Karyawan / dll]\n\n*PILIHAN LOKASI KOST*\n• Lokasi Kost : [Pilih Lokasi 1 / Lokasi 2]\n\n*RENCANA SURVEY KAMAR*\n• Pilihan Kamar : [Tulis Nomor / Tipe Kamar, contoh: Kamar 104 - Lantai 2]\n• Tanggal Survey : [Tulis Tanggal, contoh: Kamis, 5 November 2026]\n• Jam Survey : [Tulis Jam, contoh : 14.00 WIB]\n• Metode Survey : [Datang Langsung / Video Call]\n\nMohon konfirmasinya apakah jadwal tersebut tersedia ya Kak. Terima kasih!";
     }
 }

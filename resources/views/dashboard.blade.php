@@ -1155,6 +1155,9 @@
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-wifi" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Jaringan WiFi</span>
             </button>
+            <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-survey" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
+              <span>Formulir Calon Penghuni</span>
+            </button>
           </div>
         </div>
 
@@ -1732,6 +1735,66 @@
               </button>
               <span id="wfSaveStatus" style="font-size: 0.82rem; font-weight: 700;"></span>
             </div>
+          </div>
+        </div>
+
+        <!-- =========================================================================
+             SUBTAB 5: PENGATURAN FORMULIR SURVEY & HUBUNGI ADMIN (CALON PENGHUNI)
+             ========================================================================= -->
+        <div class="settings-subtab-pane" id="subtab-survey" style="display: none;">
+          <div class="settings-modern-card" style="max-width: 960px; margin: 0 auto;">
+            <div class="settings-card-header">
+              <div class="settings-card-title-group">
+                <div class="settings-card-icon-badge" style="background: rgba(16, 185, 129, 0.12); color: #059669;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title">Template Formulir Calon Penghuni (WhatsApp)</h3>
+                  <div class="settings-card-subtitle">Ubah susunan kalimat atau format formulir yang dikirimkan calon penghuni saat menghubungi Admin</div>
+                </div>
+              </div>
+              <span style="font-size: 0.76rem; background: var(--bg-card); padding: 5px 12px; border-radius: 9999px; color: #059669; font-weight: 700; border: 1px solid rgba(16, 185, 129, 0.3);">WhatsApp Otomatis</span>
+            </div>
+
+            <!-- Petunjuk Variabel Tag -->
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px;">
+              <div style="font-weight: 800; font-size: 0.86rem; color: var(--text-primary); margin-bottom: 6px;">Petunjuk Variabel Dinamis:</div>
+              <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.5;">
+                Anda dapat menyusun dan mengganti kalimat formulir ini kapan saja. Sistem otomatis mengisi variabel dalam tanda kurung siku berikut saat calon penghuni mengisi formulir di Landing Page:
+              </p>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Tulis Nama Anda]</span>
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Mahasiswa / Karyawan / dll]</span>
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Pilih Lokasi 1 / Lokasi 2]</span>
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Tulis Nomor / Tipe Kamar, contoh: Kamar 104 - Lantai 2]</span>
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Tulis Tanggal, contoh: Kamis, 5 November 2026]</span>
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Tulis Jam, contoh : 14.00 WIB]</span>
+                <span style="font-size: 0.74rem; background: var(--bg-card); border: 1px solid var(--border-color); padding: 4px 10px; border-radius: 6px; font-family: monospace; font-weight: 700; color: #0a5661;">[Datang Langsung / Video Call]</span>
+              </div>
+            </div>
+
+            <!-- Form Editor -->
+            <form id="settingsSurveyTemplateForm" onsubmit="saveSurveyTemplateToServer(event)" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="form-group">
+                <label for="admin_survey_form_template" style="font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; justify-content: space-between;">
+                  <span>Isi Teks Formulir / Format Pesan WhatsApp:</span>
+                  <button type="button" class="btn-secondary" onclick="resetSurveyTemplateToDefault()" style="font-size: 0.74rem; padding: 4px 12px; border-radius: 6px; font-weight: 700;">Kembalikan Format Awal</button>
+                </label>
+                <textarea id="admin_survey_form_template" class="form-control" rows="15" style="font-family: monospace, sans-serif; font-size: 0.88rem; line-height: 1.6; padding: 14px; border-radius: 12px;" placeholder="Tulis format formulir pesan WhatsApp disini...">{{ $setting->survey_form_template }}</textarea>
+              </div>
+
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button type="submit" class="btn-primary" style="padding: 11px 24px; border-radius: 12px; font-weight: 800; display: inline-flex; align-items: center; gap: 8px;">
+                  <span>Simpan Perubahan Formulir</span>
+                </button>
+                <button type="button" class="btn-secondary" onclick="copyAdminSurveyTemplate()" style="padding: 11px 18px; border-radius: 12px; font-weight: 700;">
+                  <span>Salin Teks Format</span>
+                </button>
+                <span id="surveyTemplateSaveStatus" style="font-size: 0.84rem; font-weight: 700;"></span>
+              </div>
+            </form>
           </div>
         </div>
 
@@ -4097,6 +4160,74 @@
         }
       });
     }
+
+    // =========================================================================
+    // FITUR PENGATURAN TEMPLATE FORMULIR CALON PENGHUNI
+    // =========================================================================
+    window.defaultSurveyTemplateText = @json("Halo Admin, saya tertarik untuk menyewa kamar disini \n\nSebelum melanjutkan pemesanan, saya ingin menjadwalkan survey kamar terlebih dahulu sesuai ketentuan. Berikut data diri dan rencana kunjungan saya:\n\n *DATA CALON PENGHUNI*\n• Nama Lengkap : [Tulis Nama Anda]\n• Pekerjaan/Status : [Mahasiswa / Karyawan / dll]\n\n*PILIHAN LOKASI KOST*\n• Lokasi Kost : [Pilih Lokasi 1 / Lokasi 2]\n\n*RENCANA SURVEY KAMAR*\n• Pilihan Kamar : [Tulis Nomor / Tipe Kamar, contoh: Kamar 104 - Lantai 2]\n• Tanggal Survey : [Tulis Tanggal, contoh: Kamis, 5 November 2026]\n• Jam Survey : [Tulis Jam, contoh : 14.00 WIB]\n• Metode Survey : [Datang Langsung / Video Call]\n\nMohon konfirmasinya apakah jadwal tersebut tersedia ya Kak. Terima kasih!");
+
+    window.resetSurveyTemplateToDefault = function() {
+      if (confirm('Kembalikan format formulir ke format standar awal?')) {
+        var el = document.getElementById('admin_survey_form_template');
+        if (el) el.value = window.defaultSurveyTemplateText;
+      }
+    };
+
+    window.copyAdminSurveyTemplate = function() {
+      var el = document.getElementById('admin_survey_form_template');
+      if (!el) return;
+      navigator.clipboard.writeText(el.value).then(function() {
+        var statusEl = document.getElementById('surveyTemplateSaveStatus');
+        if (statusEl) {
+          statusEl.textContent = 'Format tersalin ke papan klip!';
+          statusEl.style.color = '#10b981';
+          setTimeout(function() { statusEl.textContent = ''; }, 2500);
+        }
+      });
+    };
+
+    window.saveSurveyTemplateToServer = function(e) {
+      if (e) e.preventDefault();
+      var el = document.getElementById('admin_survey_form_template');
+      var statusEl = document.getElementById('surveyTemplateSaveStatus');
+      if (!el) return;
+
+      var textVal = el.value.trim();
+      if (!textVal) {
+        alert('Format formulir tidak boleh kosong');
+        return;
+      }
+
+      if (statusEl) {
+        statusEl.textContent = 'Menyimpan format formulir...';
+        statusEl.style.color = '#0a5661';
+      }
+
+      fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({
+          survey_form_template: textVal
+        })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (statusEl) {
+          statusEl.textContent = 'Format formulir calon penghuni berhasil disimpan!';
+          statusEl.style.color = '#10b981';
+          setTimeout(function() { statusEl.textContent = ''; }, 3500);
+        }
+      })
+      .catch(function(err) {
+        if (statusEl) {
+          statusEl.textContent = 'Gagal menyimpan format formulir';
+          statusEl.style.color = '#ef4444';
+        }
+      });
+    };
 
   </script>
 
