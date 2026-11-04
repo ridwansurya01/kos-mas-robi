@@ -4195,7 +4195,7 @@
     // =========================================================================
     // FITUR PENGATURAN TEMPLATE FORMULIR CALON PENGHUNI
     // =========================================================================
-    window.defaultSurveyTemplateText = @json("Halo Admin, saya tertarik untuk menyewa kamar disini \n\nSebelum melanjutkan pemesanan, saya ingin menjadwalkan survey kamar terlebih dahulu sesuai ketentuan. Berikut data diri dan rencana kunjungan saya:\n\n *DATA CALON PENGHUNI*\n• Nama Lengkap : [Tulis Nama Anda]\n• Pekerjaan/Status : [Mahasiswa / Karyawan / dll]\n\n*PILIHAN LOKASI KOST*\n• Lokasi Kost : [Pilih Lokasi 1 / Lokasi 2]\n\n*RENCANA SURVEY KAMAR*\n• Pilihan Kamar : [Tulis Nomor / Tipe Kamar, contoh: Kamar 104 - Lantai 2]\n• Tanggal Survey : [Tulis Tanggal, contoh: Kamis, 5 November 2026]\n• Jam Survey : [Tulis Jam, contoh : 14.00 WIB]\n• Metode Survey : [Datang Langsung / Video Call]\n\nMohon konfirmasinya apakah jadwal tersebut tersedia ya Kak. Terima kasih!");
+    window.defaultSurveyTemplateText = {!! json_encode(\App\Models\Setting::DEFAULT_SURVEY_TEMPLATE) !!};
 
     window.resetSurveyTemplateToDefault = function() {
       if (confirm('Kembalikan format formulir ke format standar awal?')) {
