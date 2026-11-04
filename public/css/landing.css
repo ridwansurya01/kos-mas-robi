@@ -1276,49 +1276,7 @@ body {
   }
 }
 
-/* ==========================================================================
-   FLOATING SURVEY & WHATSAPP BUTTON (LANDING PAGE)
-   ========================================================================== */
-.lr-floating-wa-wrap {
-  position: fixed;
-  bottom: 28px;
-  right: 28px;
-  z-index: 999;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  color: #ffffff;
-  padding: 12px 20px 12px 14px;
-  border-radius: var(--radius-full);
-  box-shadow: 0 10px 25px -4px rgba(5, 150, 105, 0.45), 0 4px 10px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  text-decoration: none;
-}
-.lr-floating-wa-wrap:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 16px 32px -4px rgba(5, 150, 105, 0.55), 0 6px 14px rgba(0, 0, 0, 0.12);
-  color: #ffffff;
-}
-.lr-floating-wa-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.lr-floating-wa-label {
-  font-family: 'Outfit', sans-serif;
-  font-size: 0.92rem;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-  white-space: nowrap;
-}
+
 
 /* ==========================================================================
    SURVEY & BOOKING MODAL (PREMIUM REAL ESTATE MODAL)
@@ -1553,14 +1511,7 @@ body {
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  .lr-floating-wa-wrap {
-    bottom: 20px;
-    right: 20px;
-    padding: 10px 16px 10px 12px;
-  }
-  .lr-floating-wa-label {
-    font-size: 0.84rem;
-  }
+
   .lr-survey-modal-card {
     border-radius: 20px;
   }
