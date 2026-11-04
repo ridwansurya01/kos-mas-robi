@@ -25,7 +25,7 @@
         'tab-transfers': { title: 'Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
         'tab-maintenance': { title: 'Keluhan & Servis', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
         'tab-finances': { title: 'Laporan Keuangan', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
-        'tab-admins': { title: 'Manajemen Staf Admin', sub: 'Pantau siapa saja yang memiliki akses Admin operasional dan kelola akun staf' },
+        'tab-admins': { title: 'Akun Admin', sub: 'Pantau siapa saja yang memiliki akses Admin operasional dan kelola akun staf' },
         'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
       };
       document.querySelectorAll('.tab-pane').forEach(function(pane) {
@@ -185,7 +185,7 @@
 
       <div class="nav-item" data-tab="tab-admins" onclick="window.switchTab('tab-admins')" role="button" tabindex="0">
         <span class="nav-icon-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
-        <span>Manajemen Admin</span>
+        <span>Akun Admin</span>
         <span class="nav-badge-count" id="badgeTotalAdmins" style="background: rgba(14, 116, 130, 0.22); color: #0a5661; border: 1px solid rgba(14, 116, 130, 0.35); font-weight:800;">{{ $totalAdminsCount ?? count($allAdmins ?? []) }}</span>
       </div>
       @endif
@@ -981,7 +981,7 @@
                 <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #5eead4; margin-bottom: 4px;">
                   <span>Otoritas Pemilik Kos (Owner Access Only)</span>
                 </div>
-                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 800; color: #ffffff; margin: 0 0 4px; letter-spacing: -0.02em;">Manajemen Staf Admin</h2>
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 800; color: #ffffff; margin: 0 0 4px; letter-spacing: -0.02em;">Akun Admin</h2>
                 <p style="font-size: 0.82rem; color: rgba(255,255,255,0.8); margin: 0; max-width: 650px; line-height: 1.5;">
                   Ketahui secara transparan siapa saja yang memiliki akses login sebagai Admin operasional, buat akun staf baru, kelola password, atau cabut izin akses kapan pun.
                 </p>
@@ -993,53 +993,6 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Tambah Admin Baru</span>
               </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- 3 Stat Cards Ringkasan Akses -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-bottom: 24px;">
-          <!-- Card 1: Total Admin -->
-          <div class="stat-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 20px;">
-            <div class="stat-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span class="stat-card-title" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Total Akun Admin Operasional</span>
-              <div class="stat-icon emerald" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
-              </div>
-            </div>
-            <div class="stat-card-value" id="statCardTotalAdmins" style="font-size: 1.6rem; font-weight: 800; color: #0a5661; margin-bottom: 6px;">{{ $totalAdminsCount ?? count($allAdmins ?? []) }} Akun Aktif</div>
-            <div class="stat-card-meta" style="font-size: 0.74rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
-              <span style="color: #059669; font-weight: 700;">● Hak Akses Terdaftar</span>
-              <span>Memegang kredensial login</span>
-            </div>
-          </div>
-
-          <!-- Card 2: Akun Owner Utama -->
-          <div class="stat-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 20px;">
-            <div class="stat-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span class="stat-card-title" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Pemegang Hak Owner Utama</span>
-              <div class="stat-icon" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(10, 86, 97, 0.12); color: #0a5661; display: flex; align-items: center; justify-content: center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              </div>
-            </div>
-            <div class="stat-card-value" style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ Auth::user()->name }}</div>
-            <div class="stat-card-meta" style="font-size: 0.74rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
-              <span style="color: #0a5661; font-weight: 700;">● {{ Auth::user()->email }}</span>
-              <span>Super Administrator</span>
-            </div>
-          </div>
-
-          <!-- Card 3: Proteksi Hak Istimewa -->
-          <div class="stat-card" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 18px; padding: 20px;">
-            <div class="stat-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <span class="stat-card-title" style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">Proteksi Keamanan Finansial</span>
-              <div class="stat-icon" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(245, 158, 11, 0.12); color: #d97706; display: flex; align-items: center; justify-content: center;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              </div>
-            </div>
-            <div class="stat-card-value" style="font-size: 1.3rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Buku Kas Terproteksi</div>
-            <div class="stat-card-meta" style="font-size: 0.74rem; color: var(--text-muted);">
-              Admin tidak dapat melihat laporan arus kas & laba
             </div>
           </div>
         </div>
@@ -2126,7 +2079,7 @@
           @if(Auth::user()->isOwner())
           <button type="button" class="btn-primary" onclick="window.closeModal('modalAkunPengelola'); window.switchTab('tab-admins');" style="margin-top: 12px; width: 100%; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px;">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span>Buka Menu Manajemen Staf Admin</span>
+            <span>Buka Menu Akun Admin</span>
           </button>
           @endif
         </div>
@@ -2961,7 +2914,200 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       MODAL: POP-UP MODERN ALERT & NOTIFIKASI ELEGAN (PENGGANTI ALERT BROWSER)
+       ========================================================================= -->
+  <style>
+    @keyframes modernAlertPopIn {
+      0% { opacity: 0; transform: scale(0.88) translateY(16px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    #modalModernAlert.open .modal-dialog,
+    #modalModernConfirm.open .modal-dialog {
+      animation: modernAlertPopIn 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+  <div class="modal-backdrop" id="modalModernAlert" onclick="if(event.target === this) closeModernAlert()" style="display: none; position: fixed; inset: 0; background: rgba(3, 35, 40, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 100005; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 440px; width: 100%; margin: auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 28px 65px -12px rgba(3, 35, 40, 0.45); border: 1.5px solid rgba(13, 148, 136, 0.28); text-align: center; padding: 34px 28px;">
+      <div id="modernAlertIconWrap" style="width: 72px; height: 72px; border-radius: 22px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1.5px solid rgba(16, 185, 129, 0.32); box-shadow: 0 8px 24px rgba(16, 185, 129, 0.22); transition: all 0.2s;">
+        <!-- Injected Icon via JS -->
+      </div>
+      <h3 id="modernAlertTitle" style="margin: 0 0 10px; font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Pemberitahuan Sistem</h3>
+      <p id="modernAlertMessage" style="margin: 0 0 26px; font-size: 0.92rem; color: #475569; line-height: 1.6; white-space: pre-line; word-break: break-word;">Pesan informasi sistem.</p>
+      <div style="display: flex; justify-content: center;">
+        <button type="button" id="btnModernAlertOk" onclick="closeModernAlert()" style="min-width: 150px; padding: 12px 30px; background: linear-gradient(135deg, #0d9488 0%, #0a5661 100%); color: #ffffff; border: none; border-radius: 14px; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 6px 18px rgba(10, 86, 97, 0.32); transition: all 0.2s;">
+          Mengerti
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL: POP-UP MODERN KONFIRMASI TINDAKAN (PENGGANTI CONFIRM BROWSER)
+       ========================================================================= -->
+  <div class="modal-backdrop" id="modalModernConfirm" onclick="if(event.target === this) resolveModernConfirm(false)" style="display: none; position: fixed; inset: 0; background: rgba(3, 35, 40, 0.82); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 100005; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 460px; width: 100%; margin: auto; background: #ffffff; border-radius: 24px; overflow: hidden; box-shadow: 0 28px 65px -12px rgba(3, 35, 40, 0.45); border: 1.5px solid rgba(225, 29, 72, 0.28); text-align: center; padding: 34px 28px;">
+      <div id="modernConfirmIconWrap" style="width: 72px; height: 72px; border-radius: 22px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; background: rgba(225, 29, 72, 0.12); color: #e11d48; border: 1.5px solid rgba(225, 29, 72, 0.32); box-shadow: 0 8px 24px rgba(225, 29, 72, 0.22);">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <h3 id="modernConfirmTitle" style="margin: 0 0 10px; font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Konfirmasi Tindakan</h3>
+      <p id="modernConfirmMessage" style="margin: 0 0 26px; font-size: 0.92rem; color: #475569; line-height: 1.6; white-space: pre-line; word-break: break-word;">Apakah Anda yakin ingin melanjutkan tindakan ini?</p>
+      <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+        <button type="button" id="btnModernConfirmCancel" onclick="resolveModernConfirm(false)" style="min-width: 120px; padding: 12px 24px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; border-radius: 14px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;">
+          Batal
+        </button>
+        <button type="button" id="btnModernConfirmOk" onclick="resolveModernConfirm(true)" style="min-width: 140px; padding: 12px 26px; background: linear-gradient(135deg, #e11d48 0%, #be123c 100%); color: #ffffff; border: none; border-radius: 14px; font-weight: 800; font-size: 0.9rem; cursor: pointer; box-shadow: 0 6px 18px rgba(225, 29, 72, 0.35); transition: all 0.2s;">
+          Ya, Lanjutkan
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // =========================================================================
+    // MODERN ALERT & CONFIRMATION DIALOG SYSTEM (OVERRIDE BROWSER POPUPS)
+    // =========================================================================
+    var _modernAlertCallback = null;
+    window.showModernAlert = function(message, type, title, onOk) {
+      var modal = document.getElementById('modalModernAlert');
+      if (!modal) {
+        if (typeof onOk === 'function') onOk();
+        return;
+      }
+      var msgText = String(message || '');
+      var msgLower = msgText.toLowerCase();
+
+      if (!type) {
+        if (msgLower.includes('berhasil') || msgLower.includes('sukses') || msgLower.includes('disimpan') || msgLower.includes('dihapus') || msgLower.includes('lunas') || msgLower.includes('diperbarui')) {
+          type = 'success';
+        } else if (msgLower.includes('gagal') || msgLower.includes('kesalahan') || msgLower.includes('error') || msgLower.includes('wajib') || msgLower.includes('tidak boleh') || msgLower.includes('minimal')) {
+          type = 'error';
+        } else {
+          type = 'info';
+        }
+      }
+
+      if (!title) {
+        if (type === 'success') title = 'Berhasil';
+        else if (type === 'error') title = 'Perhatian';
+        else title = 'Informasi Sistem';
+      }
+
+      var iconWrap = document.getElementById('modernAlertIconWrap');
+      if (iconWrap) {
+        if (type === 'success') {
+          iconWrap.style.background = 'rgba(16, 185, 129, 0.12)';
+          iconWrap.style.color = '#10b981';
+          iconWrap.style.borderColor = 'rgba(16, 185, 129, 0.32)';
+          iconWrap.style.boxShadow = '0 8px 24px rgba(16, 185, 129, 0.22)';
+          iconWrap.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        } else if (type === 'error') {
+          iconWrap.style.background = 'rgba(244, 63, 94, 0.12)';
+          iconWrap.style.color = '#f43f5e';
+          iconWrap.style.borderColor = 'rgba(244, 63, 94, 0.32)';
+          iconWrap.style.boxShadow = '0 8px 24px rgba(244, 63, 94, 0.22)';
+          iconWrap.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+        } else {
+          iconWrap.style.background = 'rgba(13, 148, 136, 0.12)';
+          iconWrap.style.color = '#0d9488';
+          iconWrap.style.borderColor = 'rgba(13, 148, 136, 0.32)';
+          iconWrap.style.boxShadow = '0 8px 24px rgba(13, 148, 136, 0.22)';
+          iconWrap.innerHTML = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+        }
+      }
+
+      var titleEl = document.getElementById('modernAlertTitle');
+      if (titleEl) titleEl.textContent = title;
+
+      var msgEl = document.getElementById('modernAlertMessage');
+      if (msgEl) msgEl.textContent = msgText;
+
+      _modernAlertCallback = (typeof onOk === 'function') ? onOk : null;
+
+      modal.classList.add('open');
+      modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
+    };
+
+    window.closeModernAlert = function() {
+      var modal = document.getElementById('modalModernAlert');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
+      }
+      if (typeof _modernAlertCallback === 'function') {
+        var cb = _modernAlertCallback;
+        _modernAlertCallback = null;
+        cb();
+      }
+    };
+
+    var _modernConfirmResolver = null;
+    window.showModernConfirm = function(message, options) {
+      options = options || {};
+      var title = options.title || 'Konfirmasi Tindakan';
+      var okText = options.okText || 'Ya, Lanjutkan';
+      var cancelText = options.cancelText || 'Batal';
+      var isDanger = options.danger !== false;
+
+      var modal = document.getElementById('modalModernConfirm');
+      if (!modal) {
+        return Promise.resolve(window.confirm(message));
+      }
+
+      var titleEl = document.getElementById('modernConfirmTitle');
+      if (titleEl) titleEl.textContent = title;
+
+      var msgEl = document.getElementById('modernConfirmMessage');
+      if (msgEl) msgEl.textContent = message;
+
+      var okBtn = document.getElementById('btnModernConfirmOk');
+      if (okBtn) {
+        okBtn.textContent = okText;
+        if (isDanger) {
+          okBtn.style.background = 'linear-gradient(135deg, #e11d48 0%, #be123c 100%)';
+          okBtn.style.boxShadow = '0 6px 18px rgba(225, 29, 72, 0.35)';
+        } else {
+          okBtn.style.background = 'linear-gradient(135deg, #0d9488 0%, #0a5661 100%)';
+          okBtn.style.boxShadow = '0 6px 18px rgba(10, 86, 97, 0.32)';
+        }
+      }
+
+      var cancelBtn = document.getElementById('btnModernConfirmCancel');
+      if (cancelBtn) cancelBtn.textContent = cancelText;
+
+      modal.classList.add('open');
+      modal.style.display = 'flex';
+      modal.style.pointerEvents = 'auto';
+
+      return new Promise(function(resolve) {
+        _modernConfirmResolver = resolve;
+      });
+    };
+
+    window.resolveModernConfirm = function(val) {
+      var modal = document.getElementById('modalModernConfirm');
+      if (modal) {
+        modal.classList.remove('open');
+        modal.style.display = 'none';
+        modal.style.pointerEvents = 'none';
+      }
+      if (typeof _modernConfirmResolver === 'function') {
+        var res = _modernConfirmResolver;
+        _modernConfirmResolver = null;
+        res(val);
+      }
+    };
+
+    // Override window.alert & window.showNotification bawaan browser
+    window.alert = function(msg) {
+      window.showModernAlert(msg);
+    };
+    window.showNotification = function(type, msg) {
+      window.showModernAlert(msg, type);
+    };
+
     // Konfirmasi Logout Admin Modern
     var modalAdminLogout = document.getElementById('modalAdminLogoutConfirm');
     var formLogoutAdmin = document.getElementById('formLogoutAdmin');
@@ -4766,29 +4912,35 @@
         btn.textContent = prevBtnText;
         if (data.success) {
           window.closeModal('modalManageAdmin');
-          if (window.showNotification) {
-            window.showNotification('success', data.message || 'Akun admin berhasil disimpan.');
-          } else {
-            alert(data.message || 'Akun admin berhasil disimpan.');
-          }
-          setTimeout(function() {
-            window.location.reload();
-          }, 800);
+          window.showModernAlert(
+            data.message || 'Akun staf Admin berhasil diperbarui.',
+            'success',
+            'Akun Berhasil Disimpan',
+            function() {
+              window.location.reload();
+            }
+          );
         } else {
-          alert(data.message || 'Gagal menyimpan akun admin');
+          window.showModernAlert(data.message || 'Gagal menyimpan akun admin', 'error', 'Penyimpanan Gagal');
         }
       })
       .catch(function(err) {
         btn.disabled = false;
         btn.textContent = prevBtnText;
-        alert('Terjadi kesalahan jaringan saat menyimpan data admin.');
+        window.showModernAlert('Terjadi kesalahan jaringan saat menyimpan data admin.', 'error', 'Gangguan Koneksi');
       });
     };
 
-    window.confirmDeleteAdmin = function(adminId, adminName) {
-      if (!confirm('Apakah Anda yakin ingin menghapus hak akses dan akun staf Admin "' + adminName + '"? Staf tidak akan dapat login lagi.')) {
-        return;
-      }
+    window.confirmDeleteAdmin = async function(adminId, adminName) {
+      var confirmed = await window.showModernConfirm(
+        'Apakah Anda yakin ingin menghapus hak akses dan akun staf Admin "' + adminName + '"? Staf tidak akan dapat login lagi ke sistem.',
+        {
+          title: 'Hapus Akses Admin',
+          okText: 'Ya, Hapus Akses',
+          danger: true
+        }
+      );
+      if (!confirmed) return;
 
       fetch('/api/admins/' + adminId + '/delete', {
         method: 'POST',
@@ -4800,11 +4952,7 @@
       .then(function(res) { return res.json(); })
       .then(function(data) {
         if (data.success) {
-          if (window.showNotification) {
-            window.showNotification('success', data.message || 'Akun admin berhasil dihapus.');
-          } else {
-            alert(data.message || 'Akun admin berhasil dihapus.');
-          }
+          window.showModernAlert(data.message || 'Akun admin berhasil dihapus.', 'success', 'Akun Berhasil Dihapus');
           var row = document.getElementById('adminRow_' + adminId);
           if (row) row.remove();
           var badge = document.getElementById('badgeTotalAdmins');
@@ -4812,17 +4960,12 @@
             var curr = parseInt(badge.textContent) || 0;
             if (curr > 0) badge.textContent = curr - 1;
           }
-          var statCard = document.getElementById('statCardTotalAdmins');
-          if (statCard) {
-            var curr2 = parseInt(statCard.textContent) || 0;
-            if (curr2 > 0) statCard.textContent = (curr2 - 1) + ' Akun Aktif';
-          }
         } else {
-          alert(data.message || 'Gagal menghapus akun admin.');
+          window.showModernAlert(data.message || 'Gagal menghapus akun admin.', 'error', 'Gagal Menghapus');
         }
       })
       .catch(function(err) {
-        alert('Terjadi kesalahan saat menghapus data admin.');
+        window.showModernAlert('Terjadi kesalahan saat menghapus data admin.', 'error', 'Gangguan Sistem');
       });
     };
 

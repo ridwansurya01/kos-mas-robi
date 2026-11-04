@@ -1733,7 +1733,15 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           form.reset();
 
           if (resData.user && resData.user.wa_creds_url) {
-            const sendWa = confirm(`Akun penghuni ${name} berhasil dibuat!\n\nEmail Login: ${resData.user.email}\nPassword: ${resData.user.plain_password}\n\nKirim informasi akun ini ke WhatsApp penghuni sekarang?`);
+            let sendWa = false;
+            if (typeof window.showModernConfirm === 'function') {
+              sendWa = await window.showModernConfirm(
+                `Akun penghuni ${name} berhasil dibuat!\n\nEmail Login: ${resData.user.email}\nPassword: ${resData.user.plain_password}\n\nKirim informasi akun ini ke WhatsApp penghuni sekarang?`,
+                { title: 'Kirim Kredensial via WhatsApp', okText: 'Kirim ke WhatsApp', cancelText: 'Nanti Saja', danger: false }
+              );
+            } else {
+              sendWa = confirm(`Akun penghuni ${name} berhasil dibuat!\n\nEmail Login: ${resData.user.email}\nPassword: ${resData.user.plain_password}\n\nKirim informasi akun ini ke WhatsApp penghuni sekarang?`);
+            }
             if (sendWa) {
               window.open(resData.user.wa_creds_url, '_blank');
             }
@@ -1774,8 +1782,18 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const room = appData.rooms.find(r => r.number === roomNumber);
     if (!room) return;
 
-    if (confirm(`Apakah Anda yakin ingin memproses checkout untuk ${room.tenant} dari Kamar #${room.number}? Kamar akan berstatus Kosong.`)) {
-      try {
+    let confirmed = false;
+    if (typeof window.showModernConfirm === 'function') {
+      confirmed = await window.showModernConfirm(
+        `Apakah Anda yakin ingin memproses checkout untuk ${room.tenant} dari Kamar #${room.number}? Kamar akan berstatus Kosong.`,
+        { title: 'Konfirmasi Checkout Penghuni', okText: 'Ya, Proses Checkout', danger: true }
+      );
+    } else {
+      confirmed = confirm(`Apakah Anda yakin ingin memproses checkout untuk ${room.tenant} dari Kamar #${room.number}? Kamar akan berstatus Kosong.`);
+    }
+    if (!confirmed) return;
+
+    try {
         await fetch(`/api/tenants/${room.id}/checkout`, {
           method: 'POST',
           headers: {
@@ -2441,8 +2459,18 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     });
 
     btnReset?.addEventListener('click', async () => {
-      if (confirm('Apakah Anda yakin ingin mereset seluruh database ke sampel awal Laravel Seeder?')) {
-        try {
+      let confirmed = false;
+      if (typeof window.showModernConfirm === 'function') {
+        confirmed = await window.showModernConfirm(
+          'Apakah Anda yakin ingin mereset seluruh database ke sampel awal Laravel Seeder? Tindakan ini akan mengembalikan data kamar dan penghuni ke setelan default.',
+          { title: 'Reset Database Sampel', okText: 'Ya, Reset Sampel', danger: true }
+        );
+      } else {
+        confirmed = confirm('Apakah Anda yakin ingin mereset seluruh database ke sampel awal Laravel Seeder?');
+      }
+      if (!confirmed) return;
+
+      try {
           const res = await fetch('/api/reset', {
             method: 'POST',
             headers: {
