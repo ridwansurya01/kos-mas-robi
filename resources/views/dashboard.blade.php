@@ -500,12 +500,111 @@
               </tr>
             </thead>
             <tbody id="tenantsTableBody">
-              <!-- Dynamically populated -->
+              @php
+                $activeTenantsList = $rooms->filter(function($r) {
+                  return $r->activeTenant || in_array($r->status, ['occupied', 'due']);
+                });
+              @endphp
+              @forelse($activeTenantsList as $roomItem)
+                @php
+                  $tName = $roomItem->activeTenant ? $roomItem->activeTenant->name : ($roomItem->tenant ?: ($roomItem->booked_by_name ?: ('Penghuni #' . $roomItem->number)));
+                  $tPhone = $roomItem->activeTenant ? ($roomItem->activeTenant->phone ?? '') : ($roomItem->phone ?? '');
+                  $tStart = $roomItem->activeTenant ? ($roomItem->activeTenant->start_date ? \Carbon\Carbon::parse($roomItem->activeTenant->start_date)->format('Y-m-d') : '-') : '-';
+                  $tDue = $roomItem->activeTenant ? ($roomItem->activeTenant->due_day ?? 1) : ($roomItem->due_day ?? 1);
+                  $isDue = $roomItem->status === 'due';
+                  $isLoc2 = ($roomItem->location ?? '') === 'Lokasi 2';
+                @endphp
+                <tr>
+                  <td>
+                    <div style="font-weight:700;">{{ $tName }}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);">{{ $roomItem->type ?? '-' }}</div>
+                  </td>
+                  <td>
+                    <strong style="color:var(--brand-primary-light);">Kamar #{{ $roomItem->number }}</strong>
+                    <div style="font-size:0.72rem;color:var(--text-muted);">Lantai {{ $roomItem->floor ?? 1 }} &bull; Rp {{ number_format($roomItem->price, 0, ',', '.') }}/bln</div>
+                  </td>
+                  <td>
+                    @if($isLoc2)
+                      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">{{ $branch2Name }}</span>
+                      <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Smart Door PIN &amp; Co-Working</div>
+                    @else
+                      <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">{{ $branch1Name }}</span>
+                      <div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Kartu RFID &amp; Area Kampus</div>
+                    @endif
+                  </td>
+                  <td>
+                    <a href="https://wa.me/{{ $tPhone }}" target="_blank" style="color:var(--accent-blue);display:inline-flex;align-items:center;gap:4px;font-weight:600;">
+                      {{ $tPhone ?: '-' }}
+                    </a>
+                  </td>
+                  <td>{{ $tStart }}</td>
+                  <td>Tgl <strong>{{ $tDue }}</strong> / bln</td>
+                  <td>
+                    @if($isDue)
+                      <span class="status-badge due">Jatuh Tempo</span>
+                    @else
+                      <span class="status-badge occupied">Lunas</span>
+                    @endif
+                  </td>
+                  <td>
+                    <div style="display:flex;gap:6px;">
+                      <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('{{ $roomItem->number }}')">WA Tagihan</button>
+                      <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.recordPaymentForRoom('{{ $roomItem->number }}')">Bayar</button>
+                      <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;color:#f87171;" onclick="window.kosApp.checkoutTenant('{{ $roomItem->number }}')">Keluar</button>
+                    </div>
+                  </td>
+                </tr>
+              @empty
+                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ada data penghuni</td></tr>
+              @endforelse
             </tbody>
           </table>
 
           <div class="mobile-card-list" id="tenantsMobileCardList">
-            <!-- Dynamically populated -->
+            @foreach($activeTenantsList as $roomItem)
+              @php
+                $tName = $roomItem->activeTenant ? $roomItem->activeTenant->name : ($roomItem->tenant ?: ($roomItem->booked_by_name ?: ('Penghuni #' . $roomItem->number)));
+                $tPhone = $roomItem->activeTenant ? ($roomItem->activeTenant->phone ?? '') : ($roomItem->phone ?? '');
+                $tDue = $roomItem->activeTenant ? ($roomItem->activeTenant->due_day ?? 1) : ($roomItem->due_day ?? 1);
+                $isDue = $roomItem->status === 'due';
+                $isLoc2 = ($roomItem->location ?? '') === 'Lokasi 2';
+              @endphp
+              <div class="mobile-data-card">
+                <div class="mobile-data-header">
+                  <span class="mobile-data-title">{{ $tName }}</span>
+                  @if($isDue)
+                    <span class="status-badge due">Jatuh Tempo</span>
+                  @else
+                    <span class="status-badge occupied">Lunas</span>
+                  @endif
+                </div>
+                <div class="mobile-data-row">
+                  <span>Cabang Kos:</span>
+                  <span>{{ $isLoc2 ? $branch2Name : $branch1Name }}</span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>Kamar:</span>
+                  <span style="font-weight:700;">Kamar #{{ $roomItem->number }} ({{ $roomItem->type ?? '-' }})</span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>WhatsApp:</span>
+                  <span><a href="https://wa.me/{{ $tPhone }}" target="_blank" style="color:var(--accent-blue);">{{ $tPhone ?: '-' }}</a></span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>Jatuh Tempo:</span>
+                  <span>Tanggal {{ $tDue }} setiap bulan</span>
+                </div>
+                <div class="mobile-data-row">
+                  <span>Tarif Sewa:</span>
+                  <span style="font-weight:700;color:var(--brand-primary-light);">Rp {{ number_format($roomItem->price, 0, ',', '.') }}</span>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                  <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('{{ $roomItem->number }}')">Kirim WA</button>
+                  <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.recordPaymentForRoom('{{ $roomItem->number }}')">Catat Bayar</button>
+                  <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('{{ $roomItem->number }}')" title="Penghuni Keluar"></button>
+                </div>
+              </div>
+            @endforeach
           </div>
         </div>
       </div>
@@ -2842,51 +2941,53 @@
   <!-- =========================================================================
        MODAL: LAPORAN KEUANGAN PDF MODERN & EKSEKUTIF (PREVIEW & CETAK/SIMPAN PDF)
        ========================================================================= -->
-  <div class="modal-backdrop" id="modalFinancePdfPreview" onclick="if(event.target === this) closeFinancePdfModal()" style="display: none; position: fixed; inset: 0; background: rgba(3, 35, 40, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
-    <div class="modal-dialog" style="max-width: 960px; width: 100%; max-height: 94vh; margin: auto; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #0f172a; border: 1.5px solid rgba(45, 212, 191, 0.35); box-shadow: 0 28px 65px rgba(0,0,0,0.6);">
-      <!-- Toolbar Header PDF -->
-      <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: linear-gradient(135deg, #071f24 0%, #0a3d46 60%, #0d5c68 100%); border-bottom: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap; gap: 12px;">
+  <div class="modal-backdrop" id="modalFinancePdfPreview" onclick="if(event.target === this) closeFinancePdfModal()" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 960px; width: 100%; max-height: 94vh; margin: auto; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #ffffff; border: 1.5px solid rgba(13, 148, 136, 0.25); box-shadow: 0 25px 60px rgba(10, 86, 97, 0.22), 0 0 1px rgba(0,0,0,0.08);">
+      <!-- Toolbar Header PDF (Clean Modern White Theme) -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: #ffffff; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(45, 212, 191, 0.16); border: 1px solid rgba(45, 212, 191, 0.35); display: flex; align-items: center; justify-content: center; color: #2dd4bf;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: #f0fdfa; border: 1.5px solid #99f6e4; display: flex; align-items: center; justify-content: center; color: #0a5661;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
           </div>
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #ffffff;" id="pdfModalTitleText">Dokumen PDF Laporan Keuangan</h3>
-              <span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.68rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; letter-spacing: 0.04em;">A4 EXECUTIVE PDF</span>
+              <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;" id="pdfModalTitleText">Dokumen PDF Laporan Keuangan</h3>
+              <span style="background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; font-size: 0.68rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; letter-spacing: 0.04em;">A4 EXECUTIVE PDF</span>
             </div>
-            <p style="margin: 2px 0 0 0; font-size: 0.76rem; color: rgba(255,255,255,0.72);" id="pdfModalSubtitleText">Pratinjau resmi dokumen laporan keuangan siap unduh & cetak</p>
+            <p style="margin: 2px 0 0 0; font-size: 0.76rem; color: #64748b;" id="pdfModalSubtitleText">Pratinjau resmi dokumen laporan keuangan siap unduh &amp; cetak</p>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
-          <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);">
+          <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%); color: #ffffff; border: none; padding: 10px 18px; border-radius: 12px; font-size: 0.82rem; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(10, 86, 97, 0.28);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>Download / Cetak PDF</span>
           </button>
-          <button type="button" class="modal-close-btn" data-close-modal="modalFinancePdfPreview" onclick="closeFinancePdfModal()" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px; cursor: pointer;">
+          <button type="button" class="modal-close-btn" data-close-modal="modalFinancePdfPreview" onclick="closeFinancePdfModal()" style="background: #f8fafc; color: #475569; border: 1px solid #cbd5e1; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
       </div>
 
-      <!-- Canvas Area A4 Document Sheet -->
-      <div style="padding: 24px; overflow-y: auto; background: #1e293b; flex: 1; display: flex; justify-content: center;">
-        <div id="financePdfA4Sheet" style="width: 100%; max-width: 820px; background: #ffffff; color: #0f172a; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.35); overflow: hidden; font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;">
+      <!-- Canvas Area A4 Document Sheet (Soft Clean Light Gray Backdrop) -->
+      <div style="padding: 24px; overflow-y: auto; background: #f1f5f9; flex: 1; display: flex; justify-content: center;">
+        <div id="financePdfA4Sheet" style="width: 100%; max-width: 820px; background: #ffffff; color: #0f172a; border-radius: 14px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; overflow: hidden; font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;">
           <!-- Injected dynamically by openFinancePdfModal() -->
         </div>
       </div>
 
-      <!-- Footer PDF Modal -->
-      <div style="padding: 14px 24px; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-        <span style="font-size: 0.76rem; color: #94a3b8;">Format Dokumen: Standar A4 Portrait • Otomatis menyesuaikan Periode Bulan, Tahun & Cabang Kos yang dipilih</span>
+      <!-- Footer PDF Modal (Clean Modern White Theme) -->
+      <div style="padding: 14px 24px; background: #ffffff; border-top: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <span style="font-size: 0.76rem; color: #64748b;">Format Dokumen: Standar A4 Portrait &bull; Otomatis menyesuaikan Periode Bulan, Tahun &amp; Cabang Kos yang dipilih</span>
         <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn-secondary" data-close-modal="modalFinancePdfPreview" onclick="closeFinancePdfModal()" style="background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">Tutup Pratinjau</button>
-          <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0d9488 0%, #0a5661 100%); color: #ffffff; border: 1px solid #14b8a6; padding: 9px 20px; border-radius: 11px; font-size: 0.82rem; font-weight: 800; cursor: pointer;">
+          <button type="button" class="btn-secondary" data-close-modal="modalFinancePdfPreview" onclick="closeFinancePdfModal()" style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; cursor: pointer; padding: 9px 18px; border-radius: 10px; font-weight: 700;">Tutup Pratinjau</button>
+          <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%); color: #ffffff; border: 1px solid #0d9488; padding: 9px 20px; border-radius: 11px; font-size: 0.82rem; font-weight: 800; cursor: pointer; box-shadow: 0 4px 14px rgba(10, 86, 97, 0.25);">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span>Simpan sebagai PDF</span>
           </button>
         </div>
       </div>
+    </div>
+  </div>
     </div>
   </div>
 

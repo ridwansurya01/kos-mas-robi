@@ -78,10 +78,10 @@
           custom_interior_request: r.custom_interior_request || '',
           custom_interior_admin_notes: r.custom_interior_admin_notes || '',
           booked_by_name: r.booked_by_name || '',
-          tenant: r.active_tenant ? r.active_tenant.name : null,
-          phone: r.active_tenant ? r.active_tenant.phone : '',
-          startDate: r.active_tenant ? r.active_tenant.start_date : '',
-          dueDay: r.active_tenant ? r.active_tenant.due_day : 1
+          tenant: r.active_tenant ? r.active_tenant.name : (r.tenant || (r.status === 'occupied' || r.status === 'due' ? (r.booked_by_name || ('Penghuni #' + r.number)) : null)),
+          phone: r.active_tenant ? (r.active_tenant.phone || '') : (r.phone || ''),
+          startDate: r.active_tenant ? (r.active_tenant.start_date ? String(r.active_tenant.start_date).substring(0, 10) : '') : (r.startDate || ''),
+          dueDay: r.active_tenant ? (r.active_tenant.due_day || 1) : (r.dueDay || r.due_day || 1)
         }));
         appData.finances = (json.finances || []).map(f => ({
           id: f.transaction_code,
@@ -391,10 +391,16 @@
     mobileList.innerHTML = '';
 
     const filtered = appData.rooms.filter(r => {
-      const matchSearch = r.number.toLowerCase().includes(search.toLowerCase()) ||
-                          r.type.toLowerCase().includes(search.toLowerCase()) ||
-                          (r.location && r.location.toLowerCase().includes(search.toLowerCase())) ||
-                          (r.tenant && r.tenant.toLowerCase().includes(search.toLowerCase()));
+      const q = (search || '').toLowerCase().trim();
+      const numStr = String(r.number || '').toLowerCase();
+      const typeStr = String(r.type || '').toLowerCase();
+      const locStr = String(r.location || '').toLowerCase();
+      const tenantStr = String(r.tenant || '').toLowerCase();
+      const matchSearch = !q ||
+                          numStr.includes(q) ||
+                          typeStr.includes(q) ||
+                          locStr.includes(q) ||
+                          tenantStr.includes(q);
       const matchFloor = floorFilter === 'all' || String(r.floor) === String(floorFilter);
       const matchLocation = locationFilter === 'all' || (r.location || 'Lokasi 1') === locationFilter;
       return matchSearch && matchFloor && matchLocation;
@@ -539,7 +545,20 @@
     tbody.innerHTML = '';
     mobileList.innerHTML = '';
 
-    const tenants = appData.rooms.filter(r => r.tenant && r.tenant.trim() !== '');
+    const tenants = (appData.rooms || []).map(r => {
+      let tName = '';
+      if (typeof r.tenant === 'string' && r.tenant.trim() !== '') {
+        tName = r.tenant.trim();
+      } else if (r.active_tenant && r.active_tenant.name) {
+        tName = String(r.active_tenant.name).trim();
+      } else if (r.status === 'occupied' || r.status === 'due') {
+        tName = r.booked_by_name ? String(r.booked_by_name).trim() : ('Penghuni #' + r.number);
+      }
+      const tPhone = r.phone || (r.active_tenant && r.active_tenant.phone) || '';
+      const tStart = r.startDate || (r.active_tenant && r.active_tenant.start_date ? String(r.active_tenant.start_date).substring(0, 10) : '');
+      const tDue = r.dueDay || (r.active_tenant && r.active_tenant.due_day) || 1;
+      return Object.assign({}, r, { tenant: tName, phone: tPhone, startDate: tStart, dueDay: tDue });
+    }).filter(r => r.tenant && r.tenant !== '');
 
     const loc1Count = tenants.filter(t => resolveRoomLocation(t) === 'Lokasi 1').length;
     const loc2Count = tenants.filter(t => resolveRoomLocation(t) === 'Lokasi 2').length;
@@ -551,13 +570,18 @@
     const filtered = tenants.filter(t => {
       const tLoc = resolveRoomLocation(t);
       const matchLoc = (locationFilter === 'all' || tLoc === locationFilter);
-      const q = search.toLowerCase();
+      const q = (search || '').toLowerCase().trim();
+      const tName = String(t.tenant || '').toLowerCase();
+      const tPhone = String(t.phone || '').toLowerCase();
+      const tNum = String(t.number || '').toLowerCase();
+      const tLocStr = String(tLoc || '').toLowerCase();
+      const tType = String(t.type || '').toLowerCase();
       const matchSearch = !q ||
-                          t.tenant.toLowerCase().includes(q) ||
-                          (t.phone || '').includes(q) ||
-                          String(t.number).toLowerCase().includes(q) ||
-                          tLoc.toLowerCase().includes(q) ||
-                          (t.type || '').toLowerCase().includes(q);
+                          tName.includes(q) ||
+                          tPhone.includes(q) ||
+                          tNum.includes(q) ||
+                          tLocStr.includes(q) ||
+                          tType.includes(q);
       let matchStatus = true;
       if (statusFilter === 'active') matchStatus = t.status === 'occupied';
       if (statusFilter === 'due') matchStatus = t.status === 'due';
@@ -565,80 +589,84 @@
     });
 
     filtered.forEach(t => {
-      const isDue = t.status === 'due';
-      const statusLabel = isDue 
-        ? '<span class="status-badge due">Jatuh Tempo</span>' 
-        : '<span class="status-badge occupied">Lunas</span>';
+      try {
+        const isDue = t.status === 'due';
+        const statusLabel = isDue 
+          ? '<span class="status-badge due">Jatuh Tempo</span>' 
+          : '<span class="status-badge occupied">Lunas</span>';
 
-      const tLoc = resolveRoomLocation(t);
-      const isLoc2 = tLoc === 'Lokasi 2';
-      const branchBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Smart Door PIN & Co-Working</div>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Kartu RFID & Area Kampus</div>`;
+        const tLoc = resolveRoomLocation(t);
+        const isLoc2 = tLoc === 'Lokasi 2';
+        const branchBadge = isLoc2
+          ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Smart Door PIN & Co-Working</div>`
+          : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Kartu RFID & Area Kampus</div>`;
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>
-          <div style="font-weight:700;">${t.tenant}</div>
-          <div style="font-size:0.75rem;color:var(--text-muted);">${t.type}</div>
-        </td>
-        <td>
-          <strong style="color:var(--brand-primary-light);">Kamar #${t.number}</strong>
-          <div style="font-size:0.72rem;color:var(--text-muted);">Lantai ${t.floor || 1} • ${formatRupiah(t.price)}/bln</div>
-        </td>
-        <td>${branchBadge}</td>
-        <td>
-          <a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);display:inline-flex;align-items:center;gap:4px;font-weight:600;">
-            ${t.phone || '-'}
-          </a>
-        </td>
-        <td>${t.startDate || '-'}</td>
-        <td>Tgl <strong>${t.dueDay}</strong> / bln</td>
-        <td>${statusLabel}</td>
-        <td>
-          <div style="display:flex;gap:6px;">
-            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">WA Tagihan</button>
-            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Bayar</button>
-            <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')">Keluar</button>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>
+            <div style="font-weight:700;">${t.tenant}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">${t.type || '-'}</div>
+          </td>
+          <td>
+            <strong style="color:var(--brand-primary-light);">Kamar #${t.number}</strong>
+            <div style="font-size:0.72rem;color:var(--text-muted);">Lantai ${t.floor || 1} • ${formatRupiah(t.price)}/bln</div>
+          </td>
+          <td>${branchBadge}</td>
+          <td>
+            <a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);display:inline-flex;align-items:center;gap:4px;font-weight:600;">
+              ${t.phone || '-'}
+            </a>
+          </td>
+          <td>${t.startDate || '-'}</td>
+          <td>Tgl <strong>${t.dueDay}</strong> / bln</td>
+          <td>${statusLabel}</td>
+          <td>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">WA Tagihan</button>
+              <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Bayar</button>
+              <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')">Keluar</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+
+        const mCard = document.createElement('div');
+        mCard.className = 'mobile-data-card';
+        mCard.innerHTML = `
+          <div class="mobile-data-header">
+            <span class="mobile-data-title">${t.tenant}</span>
+            ${statusLabel}
           </div>
-        </td>
-      `;
-      tbody.appendChild(tr);
-
-      const mCard = document.createElement('div');
-      mCard.className = 'mobile-data-card';
-      mCard.innerHTML = `
-        <div class="mobile-data-header">
-          <span class="mobile-data-title">${t.tenant}</span>
-          ${statusLabel}
-        </div>
-        <div class="mobile-data-row">
-          <span>Cabang Kos:</span>
-          <span>${isLoc2 ? '' + getBranchName('Lokasi 2') : '' + getBranchName('Lokasi 1')}</span>
-        </div>
-        <div class="mobile-data-row">
-          <span>Kamar:</span>
-          <span style="font-weight:700;">Kamar #${t.number} (${t.type})</span>
-        </div>
-        <div class="mobile-data-row">
-          <span>WhatsApp:</span>
-          <span><a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);">${t.phone}</a></span>
-        </div>
-        <div class="mobile-data-row">
-          <span>Jatuh Tempo:</span>
-          <span>Tanggal ${t.dueDay} setiap bulan</span>
-        </div>
-        <div class="mobile-data-row">
-          <span>Tarif Sewa:</span>
-          <span style="font-weight:700;color:var(--brand-primary-light);">${formatRupiah(t.price)}</span>
-        </div>
-        <div style="display:flex;gap:8px;margin-top:10px;">
-          <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">Kirim WA</button>
-          <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Catat Bayar</button>
-          <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')" title="Penghuni Keluar"></button>
-        </div>
-      `;
-      mobileList.appendChild(mCard);
+          <div class="mobile-data-row">
+            <span>Cabang Kos:</span>
+            <span>${isLoc2 ? '' + getBranchName('Lokasi 2') : '' + getBranchName('Lokasi 1')}</span>
+          </div>
+          <div class="mobile-data-row">
+            <span>Kamar:</span>
+            <span style="font-weight:700;">Kamar #${t.number} (${t.type || '-'})</span>
+          </div>
+          <div class="mobile-data-row">
+            <span>WhatsApp:</span>
+            <span><a href="https://wa.me/${t.phone}" target="_blank" style="color:var(--accent-blue);">${t.phone || '-'}</a></span>
+          </div>
+          <div class="mobile-data-row">
+            <span>Jatuh Tempo:</span>
+            <span>Tanggal ${t.dueDay} setiap bulan</span>
+          </div>
+          <div class="mobile-data-row">
+            <span>Tarif Sewa:</span>
+            <span style="font-weight:700;color:var(--brand-primary-light);">${formatRupiah(t.price)}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">Kirim WA</button>
+            <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Catat Bayar</button>
+            <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')" title="Penghuni Keluar"></button>
+          </div>
+        `;
+        mobileList.appendChild(mCard);
+      } catch (rowErr) {
+        console.error('Error rendering single tenant item:', rowErr, t);
+      }
     });
 
     if (filtered.length === 0) {
@@ -2613,13 +2641,13 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
   // --- RENDER ALL VIEWS ---
   function renderAllViews() {
-    syncBranchNamesInDOM();
-    renderRoomGrid();
-    renderRoomsMasterTable();
-    renderTenantsTable('', 'all', activeTenantLocationFilter);
-    renderFinancesTable('', 'all', activeFinanceLocationFilter);
-    renderMaintenanceTable('', 'all', activeMaintLocationFilter);
-    updateDashboardStats();
+    try { syncBranchNamesInDOM(); } catch (e) { console.error('Error in syncBranchNamesInDOM:', e); }
+    try { renderRoomGrid(); } catch (e) { console.error('Error in renderRoomGrid:', e); }
+    try { renderRoomsMasterTable(); } catch (e) { console.error('Error in renderRoomsMasterTable:', e); }
+    try { renderTenantsTable('', 'all', activeTenantLocationFilter); } catch (e) { console.error('Error in renderTenantsTable:', e); }
+    try { renderFinancesTable('', 'all', activeFinanceLocationFilter); } catch (e) { console.error('Error in renderFinancesTable:', e); }
+    try { renderMaintenanceTable('', 'all', activeMaintLocationFilter); } catch (e) { console.error('Error in renderMaintenanceTable:', e); }
+    try { updateDashboardStats(); } catch (e) { console.error('Error in updateDashboardStats:', e); }
   }
 
   // --- INITIAL DATA SYNC (ZERO-LATENCY INSTANT RENDER) ---
@@ -2645,10 +2673,10 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           custom_interior_request: r.custom_interior_request || '',
           custom_interior_admin_notes: r.custom_interior_admin_notes || '',
           booked_by_name: r.booked_by_name || '',
-          tenant: r.active_tenant ? r.active_tenant.name : (r.tenant || null),
-          phone: r.active_tenant ? r.active_tenant.phone : (r.phone || ''),
-          startDate: r.active_tenant ? r.active_tenant.start_date : '',
-          dueDay: r.active_tenant ? r.active_tenant.due_day : (r.due_day || 1)
+          tenant: r.active_tenant ? r.active_tenant.name : (r.tenant || (r.status === 'occupied' || r.status === 'due' ? (r.booked_by_name || ('Penghuni #' + r.number)) : null)),
+          phone: r.active_tenant ? (r.active_tenant.phone || '') : (r.phone || ''),
+          startDate: r.active_tenant ? (r.active_tenant.start_date ? String(r.active_tenant.start_date).substring(0, 10) : '') : (r.startDate || ''),
+          dueDay: r.active_tenant ? (r.active_tenant.due_day || 1) : (r.dueDay || r.due_day || 1)
         }));
       }
       if (Array.isArray(data.finances) && data.finances.length > 0) {
