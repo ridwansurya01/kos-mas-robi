@@ -742,6 +742,7 @@
               $maxYearOpt = max(2050, $currYear + 5);
               $yearsList = range(2024, $maxYearOpt);
             @endphp
+            <!-- Picker Tahun Laporan -->
             <div class="finance-year-picker-wrap" id="finYearPickerWrap" onwheel="handleYearWheelScroll(event)" title="Pilih atau gulir roda mouse untuk melihat laporan keuangan tahun berapa pun">
               <span class="fyp-label">Tahun Laporan:</span>
               <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2020 ? 'disabled' : '' }}>
@@ -753,6 +754,32 @@
                 @endforeach
               </select>
               <button type="button" class="fyp-scroll-btn" id="btnNextYear" onclick="scrollFinanceYear(1)" title="Tahun Berikutnya">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+
+            <!-- Picker Bulan Laporan (Rekapan Per Bulan Khusus Owner) -->
+            <div class="finance-year-picker-wrap" id="finMonthPickerWrap" title="Pilih bulan rekapan laporan keuangan">
+              <span class="fyp-label">Bulan:</span>
+              <button type="button" class="fyp-scroll-btn" id="btnPrevMonth" onclick="scrollFinanceMonth(-1)" title="Bulan Sebelumnya">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              </button>
+              <select id="selectFinanceMonth" class="fyp-select" onchange="changeFinanceMonth(this.value)">
+                <option value="all" selected>Semua Bulan (1 Tahun)</option>
+                <option value="1">Januari</option>
+                <option value="2">Februari</option>
+                <option value="3">Maret</option>
+                <option value="4">April</option>
+                <option value="5">Mei</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">Agustus</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <button type="button" class="fyp-scroll-btn" id="btnNextMonth" onclick="scrollFinanceMonth(1)" title="Bulan Berikutnya">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
@@ -2862,8 +2889,8 @@
   <!-- =========================================================================
        MODAL: LAPORAN KEUANGAN PDF MODERN & EKSEKUTIF (PREVIEW & CETAK/SIMPAN PDF)
        ========================================================================= -->
-  <div class="modal-overlay" id="modalFinancePdfPreview" style="display: none; z-index: 9998;">
-    <div class="modal-container" style="max-width: 940px; width: 95%; max-height: 92vh; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #0f172a; border: 1px solid rgba(255,255,255,0.14); box-shadow: 0 28px 65px rgba(0,0,0,0.45);">
+  <div class="modal-backdrop" id="modalFinancePdfPreview" onclick="if(event.target === this) closeFinancePdfModal()" style="display: none; position: fixed; inset: 0; background: rgba(3, 35, 40, 0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 99999; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 960px; width: 100%; max-height: 94vh; margin: auto; display: flex; flex-direction: column; border-radius: 24px; overflow: hidden; background: #0f172a; border: 1.5px solid rgba(45, 212, 191, 0.35); box-shadow: 0 28px 65px rgba(0,0,0,0.6);">
       <!-- Toolbar Header PDF -->
       <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: linear-gradient(135deg, #071f24 0%, #0a3d46 60%, #0d5c68 100%); border-bottom: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 12px;">
@@ -2883,7 +2910,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>Download / Cetak PDF</span>
           </button>
-          <button type="button" class="modal-close-btn" data-close-modal="modalFinancePdfPreview" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px;">
+          <button type="button" class="modal-close-btn" data-close-modal="modalFinancePdfPreview" onclick="closeFinancePdfModal()" style="background: rgba(255,255,255,0.12); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); width: 36px; height: 36px; border-radius: 10px; cursor: pointer;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
@@ -2898,9 +2925,9 @@
 
       <!-- Footer PDF Modal -->
       <div style="padding: 14px 24px; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-        <span style="font-size: 0.76rem; color: #94a3b8;">Format Dokumen: Standar A4 Portrait • Otomatis menyesuaikan Tahun & Cabang Kos yang dipilih</span>
+        <span style="font-size: 0.76rem; color: #94a3b8;">Format Dokumen: Standar A4 Portrait • Otomatis menyesuaikan Periode Bulan, Tahun & Cabang Kos yang dipilih</span>
         <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn-secondary" data-close-modal="modalFinancePdfPreview" style="background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15);">Tutup Pratinjau</button>
+          <button type="button" class="btn-secondary" data-close-modal="modalFinancePdfPreview" onclick="closeFinancePdfModal()" style="background: rgba(255,255,255,0.08); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); cursor: pointer;">Tutup Pratinjau</button>
           <button type="button" onclick="downloadFinancePdfDocument()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #0d9488 0%, #0a5661 100%); color: #ffffff; border: 1px solid #14b8a6; padding: 9px 20px; border-radius: 11px; font-size: 0.82rem; font-weight: 800; cursor: pointer;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
             <span>Simpan sebagai PDF</span>
@@ -3114,6 +3141,33 @@
       }
     }
     window.updateYearNavButtons = updateYearNavButtons;
+
+    function scrollFinanceMonth(delta) {
+      var select = document.getElementById('selectFinanceMonth');
+      if (!select) return;
+      var curVal = select.value;
+      var options = ['all', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+      var curIdx = options.indexOf(curVal);
+      if (curIdx === -1) curIdx = 0;
+      var newIdx = curIdx + delta;
+      if (newIdx < 0) newIdx = options.length - 1;
+      if (newIdx >= options.length) newIdx = 0;
+      select.value = options[newIdx];
+      changeFinanceMonth(options[newIdx]);
+    }
+    window.scrollFinanceMonth = scrollFinanceMonth;
+
+    function changeFinanceMonth(monthVal) {
+      if (window.kosApp && typeof window.kosApp.renderFinancesTable === 'function') {
+        var searchVal = document.getElementById('financeSearchInput')?.value || '';
+        var activeTypeBtn = document.querySelector('#financeTypeFilter .filter-pill.active');
+        var activeType = activeTypeBtn ? (activeTypeBtn.getAttribute('data-ftype') || 'all') : 'all';
+        var activeLocBtn = document.querySelector('#financeLocationFilters .filter-pill.active');
+        var activeLoc = activeLocBtn ? (activeLocBtn.getAttribute('data-floc') || 'all') : 'all';
+        window.kosApp.renderFinancesTable(searchVal, activeType, activeLoc);
+      }
+    }
+    window.changeFinanceMonth = changeFinanceMonth;
 
     async function changeFinanceYear(year) {
       var yr = parseInt(year, 10) || 2026;
@@ -3617,6 +3671,10 @@
         ? window.kosApp.getFinanceReportPayload()
         : {
             year: parseInt(document.getElementById("selectFinanceYear")?.value || 2026, 10),
+            isMonthFiltered: false,
+            monthNum: null,
+            monthName: "Semua Bulan (1 Tahun)",
+            periodTitle: "TAHUN 2026",
             locationFilter: "all",
             branchLabel: "Gabungan 2 Cabang",
             branch1Name: "{{ $branch1Name }}",
@@ -3637,7 +3695,8 @@
       var maxMonthVal = Math.max.apply(null, payload.mInc.concat(payload.mExp, [1]));
       var hasTransactions = payload.transactions && payload.transactions.length > 0;
       var printedDate = new Date().toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
-      var docCode = "FIN-PDF/" + payload.year + "/" + (payload.locationFilter === "all" ? "ALL" : (payload.locationFilter === "Lokasi 2" ? "B2" : "B1"));
+      var monthCode = payload.isMonthFiltered ? ("M" + payload.monthNum + "/") : "";
+      var docCode = "FIN-PDF/" + payload.year + "/" + monthCode + (payload.locationFilter === "all" ? "ALL" : (payload.locationFilter === "Lokasi 2" ? "B2" : "B1"));
 
       var monthlyRowsHtml = "";
       for (var m = 0; m < 12; m++) {
@@ -3645,9 +3704,15 @@
         var exp = payload.mExp[m] || 0;
         var net = payload.mNet[m] || 0;
         var barPct = maxMonthVal > 0 ? Math.min(100, Math.round((inc / maxMonthVal) * 100)) : 0;
+        var isSelectedMonthRow = payload.isMonthFiltered && (payload.monthNum === (m + 1));
+        var rowBg = isSelectedMonthRow ? 'background: #f0fdfa; border: 1.5px solid #0d9488;' : 'border-bottom: 1px solid #f1f5f9;';
+        var monthLabelBadge = isSelectedMonthRow
+          ? '<span style="display:inline-block;margin-left:6px;font-size:0.62rem;font-weight:800;background:#0d9488;color:#ffffff;padding:1px 6px;border-radius:999px;">Bulan Terpilih</span>'
+          : '';
+
         monthlyRowsHtml +=
-          '<tr style="border-bottom:1px solid #f1f5f9;">' +
-            '<td style="padding:7px 10px;font-weight:700;color:#1e293b;font-size:0.76rem;">' + fullMonths[m] + ' ' + payload.year + '</td>' +
+          '<tr style="' + rowBg + '">' +
+            '<td style="padding:7px 10px;font-weight:700;color:#1e293b;font-size:0.76rem;">' + fullMonths[m] + ' ' + payload.year + monthLabelBadge + '</td>' +
             '<td style="padding:7px 10px;width:130px;">' +
               '<div style="width:100%;height:7px;background:#f1f5f9;border-radius:999px;overflow:hidden;">' +
                 '<div style="width:' + barPct + '%;height:100%;background:linear-gradient(90deg,#0d9488,#10b981);border-radius:999px;"></div>' +
@@ -3659,12 +3724,13 @@
           '</tr>';
       }
 
+      var trxPeriodText = payload.isMonthFiltered ? (payload.monthName + ' ' + payload.year) : ('Tahun ' + payload.year);
       var trxRowsHtml = "";
       if (!hasTransactions) {
         trxRowsHtml =
           '<tr>' +
             '<td colspan="6" style="padding:26px 16px;text-align:center;background:#f8fafc;color:#64748b;font-size:0.8rem;font-weight:700;border-bottom:1px solid #e2e8f0;">' +
-              'DATA NIHIL (Rp 0) — Belum ada transaksi keuangan yang dicatat pada Tahun ' + payload.year + '.' +
+              'DATA NIHIL (Rp 0) — Belum ada transaksi keuangan yang dicatat pada ' + trxPeriodText + '.' +
             '</td>' +
           '</tr>';
       } else {
@@ -3682,18 +3748,31 @@
         });
       }
 
+      var kpiPeriodSuffix = payload.isMonthFiltered ? (payload.monthName.substring(0,3) + ' ' + payload.year) : payload.year;
+      var fourthKpiHtml = payload.isMonthFiltered
+        ? '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #0284c7;border-radius:12px;padding:14px;">' +
+            '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">STATUS SURPLUS BULANAN</div>' +
+            '<div style="font-size:1.1rem;font-weight:900;color:#0284c7;margin-top:6px;">' + (payload.totalNet >= 0 ? 'Surplus Finansial' : 'Defisit Kas') + '</div>' +
+            '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Kondisi Kas ' + payload.monthName + '</div>' +
+          '</div>'
+        : '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #0284c7;border-radius:12px;padding:14px;">' +
+            '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">RATA-RATA BERSIH / BLN</div>' +
+            '<div style="font-size:1.1rem;font-weight:900;color:#0284c7;margin-top:6px;">' + formatRpPdf(payload.avgMonthly) + '</div>' +
+            '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Estimasi Rata-rata Bulanan</div>' +
+          '</div>';
+
       return (
         '<div class="pdf-executive-sheet">' +
           /* Executive Header */
           '<div style="background:linear-gradient(135deg,#071f24 0%,#0a3d46 55%,#0a5661 100%);color:#ffffff;padding:28px 32px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;border-bottom:4px solid #14b8a6;">' +
             '<div style="max-width:440px;">' +
-              '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.16);border:1px solid rgba(45,212,191,0.38);padding:4px 12px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:0.06em;color:#5eead4;margin-bottom:10px;">LAPORAN KEUANGAN RESMI & BUKU KAS TAHUNAN</div>' +
+              '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(45,212,191,0.16);border:1px solid rgba(45,212,191,0.38);padding:4px 12px;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:0.06em;color:#5eead4;margin-bottom:10px;">' + (payload.isMonthFiltered ? 'LAPORAN KEUANGAN RESMI & BUKU KAS BULANAN' : 'LAPORAN KEUANGAN RESMI & BUKU KAS TAHUNAN') + '</div>' +
               '<h1 style="margin:0;font-size:1.5rem;font-weight:900;letter-spacing:-0.02em;color:#ffffff;">' + payload.kosName + '</h1>' +
               '<p style="margin:5px 0 0 0;font-size:0.78rem;color:rgba(255,255,255,0.78);line-height:1.45;">' + payload.kosAddress + '</p>' +
             '</div>' +
             '<div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);border-radius:14px;padding:12px 18px;text-align:right;min-width:210px;">' +
-              '<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.08em;color:#99f6e4;font-weight:800;">PERIODE TAHUN ANGGARAN</div>' +
-              '<div style="font-size:1.35rem;font-weight:900;color:#ffffff;margin:2px 0;">TAHUN ' + payload.year + '</div>' +
+              '<div style="font-size:0.66rem;text-transform:uppercase;letter-spacing:0.08em;color:#99f6e4;font-weight:800;">PERIODE ANGGARAN</div>' +
+              '<div style="font-size:1.35rem;font-weight:900;color:#ffffff;margin:2px 0;">' + payload.periodTitle + '</div>' +
               '<div style="font-size:0.72rem;color:rgba(255,255,255,0.82);font-weight:600;">No. Dokumen: ' + docCode + '</div>' +
               '<div style="font-size:0.7rem;color:rgba(255,255,255,0.68);margin-top:2px;">Dicetak: ' + printedDate + '</div>' +
             '</div>' +
@@ -3710,25 +3789,21 @@
             /* 4 KPI Executive Cards */
             '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">' +
               '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #10b981;border-radius:12px;padding:14px;">' +
-                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">TOTAL PEMASUKAN (' + payload.year + ')</div>' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">TOTAL PEMASUKAN (' + kpiPeriodSuffix + ')</div>' +
                 '<div style="font-size:1.1rem;font-weight:900;color:#059669;margin-top:6px;">' + formatRpPdf(payload.totalInc) + '</div>' +
                 '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Pendapatan Sewa Kamar</div>' +
               '</div>' +
               '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #ef4444;border-radius:12px;padding:14px;">' +
-                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">BEBAN OPERASIONAL (' + payload.year + ')</div>' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">BEBAN OPERASIONAL (' + kpiPeriodSuffix + ')</div>' +
                 '<div style="font-size:1.1rem;font-weight:900;color:#dc2626;margin-top:6px;">' + formatRpPdf(payload.totalExp) + '</div>' +
                 '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Listrik, WiFi & Perawatan</div>' +
               '</div>' +
               '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #0d9488;border-radius:12px;padding:14px;">' +
-                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">LABA BERSIH (' + payload.year + ')</div>' +
+                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">LABA BERSIH (' + kpiPeriodSuffix + ')</div>' +
                 '<div style="font-size:1.1rem;font-weight:900;color:#0a5661;margin-top:6px;">' + formatRpPdf(payload.totalNet) + '</div>' +
-                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Net Cashflow Tahunan</div>' +
+                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Net Cashflow Periode</div>' +
               '</div>' +
-              '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-top:3.5px solid #0284c7;border-radius:12px;padding:14px;">' +
-                '<div style="font-size:0.66rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;">RATA-RATA BERSIH / BLN</div>' +
-                '<div style="font-size:1.1rem;font-weight:900;color:#0284c7;margin-top:6px;">' + formatRpPdf(payload.avgMonthly) + '</div>' +
-                '<div style="font-size:0.68rem;color:#64748b;margin-top:3px;">Estimasi Rata-rata Bulanan</div>' +
-              '</div>' +
+              fourthKpiHtml +
             '</div>' +
 
             /* Komparasi Neraca 2 Cabang Kos */
@@ -3772,7 +3847,7 @@
 
             /* Rincian Buku Kas & Transaksi */
             '<div>' +
-              '<div style="font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">II. Rincian Buku Kas & Transaksi Resmi (Tahun ' + payload.year + ')</div>' +
+              '<div style="font-size:0.84rem;font-weight:800;color:#0f172a;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em;">II. Rincian Buku Kas & Transaksi Resmi (' + trxPeriodText + ')</div>' +
               '<div style="border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;">' +
                 '<table style="width:100%;border-collapse:collapse;">' +
                   '<thead>' +
@@ -3794,7 +3869,7 @@
             '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:10px;padding-top:16px;border-top:2px dashed #cbd5e1;flex-wrap:wrap;gap:16px;">' +
               '<div style="max-width:420px;">' +
                 '<div style="display:inline-block;background:#ecfdf5;border:1.5px solid #6ee7b7;color:#065f46;font-size:0.7rem;font-weight:800;padding:4px 12px;border-radius:8px;letter-spacing:0.04em;">DOKUMEN KEUANGAN TERVERIFIKASI SISTEM</div>' +
-                '<p style="margin:6px 0 0 0;font-size:0.72rem;color:#64748b;line-height:1.45;">Laporan keuangan ini dihasilkan secara otomatis oleh Sistem Manajemen ' + payload.kosName + ' berdasarkan pencatatan kas riil pada periode Tahun ' + payload.year + '.</p>' +
+                '<p style="margin:6px 0 0 0;font-size:0.72rem;color:#64748b;line-height:1.45;">Laporan keuangan ini dihasilkan secara otomatis oleh Sistem Manajemen ' + payload.kosName + ' berdasarkan pencatatan kas riil pada periode ' + trxPeriodText + '.</p>' +
               '</div>' +
               '<div style="text-align:center;min-width:190px;">' +
                 '<div style="font-size:0.74rem;color:#475569;margin-bottom:44px;">Mengetahui, Pengelola Kos</div>' +
@@ -3811,12 +3886,17 @@
       var sheet = document.getElementById("financePdfA4Sheet");
       var modal = document.getElementById("modalFinancePdfPreview");
       var yr = document.getElementById("selectFinanceYear")?.value || 2026;
+      var mSelect = document.getElementById("selectFinanceMonth");
+      var mVal = mSelect ? mSelect.value : 'all';
+      var mNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      var periodText = (mVal !== 'all' && mNames[mVal]) ? (mNames[mVal] + ' ' + yr) : ('Tahun ' + yr);
+
       if (sheet) {
         sheet.innerHTML = buildFinancePdfHtml();
       }
       var titleEl = document.getElementById("pdfModalTitleText");
       if (titleEl) {
-        titleEl.textContent = "Dokumen PDF Laporan Keuangan — Tahun " + yr;
+        titleEl.textContent = "Dokumen PDF Laporan Keuangan — " + periodText;
       }
       if (modal) {
         modal.classList.add("open");
@@ -3826,31 +3906,78 @@
     }
     window.openFinancePdfModal = openFinancePdfModal;
 
+    function closeFinancePdfModal() {
+      var modal = document.getElementById("modalFinancePdfPreview");
+      if (modal) {
+        modal.classList.remove("open");
+        modal.style.display = "none";
+      }
+    }
+    window.closeFinancePdfModal = closeFinancePdfModal;
+
     function downloadFinancePdfDocument() {
       var yr = document.getElementById("selectFinanceYear")?.value || 2026;
+      var mSelect = document.getElementById("selectFinanceMonth");
+      var mVal = mSelect ? mSelect.value : 'all';
+      var mNames = ['', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      var periodSlug = (mVal !== 'all' && mNames[mVal]) ? ('Bulan_' + mNames[mVal] + '_') : '';
+      var docTitle = "Laporan_Keuangan_Kos_Mas_Robi_" + periodSlug + "Tahun_" + yr;
       var htmlContent = buildFinancePdfHtml();
-      var printWin = window.open("", "_blank", "width=960,height=800");
-      if (!printWin) {
-        window.print();
-        return;
+
+      // Gunakan isolasi iframe tersembunyi agar tampilan dashboard utama tidak pernah terdistorsi
+      var printFrame = document.getElementById("financePdfPrintIframe");
+      if (!printFrame) {
+        printFrame = document.createElement("iframe");
+        printFrame.id = "financePdfPrintIframe";
+        printFrame.style.position = "fixed";
+        printFrame.style.right = "0";
+        printFrame.style.bottom = "0";
+        printFrame.style.width = "0";
+        printFrame.style.height = "0";
+        printFrame.style.border = "0";
+        printFrame.style.visibility = "hidden";
+        document.body.appendChild(printFrame);
       }
-      var docTitle = "Laporan_Keuangan_Kos_Mas_Robi_Tahun_" + yr;
-      printWin.document.open();
-      printWin.document.write(
+
+      var frameDoc = printFrame.contentWindow || printFrame.contentDocument;
+      if (frameDoc.document) frameDoc = frameDoc.document;
+
+      frameDoc.open();
+      frameDoc.write(
         '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>' + docTitle + '</title>' +
         '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' +
         '<style>' +
           '*, *::before, *::after { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }' +
-          'body { margin: 0; padding: 20px; background: #f1f5f9; font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; }' +
-          '.pdf-executive-sheet { max-width: 840px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }' +
-          '@page { size: A4 portrait; margin: 10mm; }' +
-          '@media print { body { background: #ffffff; padding: 0; } .pdf-executive-sheet { max-width: 100%; box-shadow: none; border-radius: 0; } }' +
+          'body { margin: 0; padding: 20px; background: #ffffff; font-family: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif; color: #0f172a; }' +
+          '.pdf-executive-sheet { max-width: 840px; margin: 0 auto; background: #ffffff; border-radius: 14px; overflow: hidden; }' +
+          '@page { size: A4 portrait; margin: 8mm; }' +
+          '@media print { body { padding: 0; background: #ffffff; } .pdf-executive-sheet { max-width: 100%; border-radius: 0; box-shadow: none; } }' +
         '</style></head><body>' +
         htmlContent +
-        '<script>window.onload = function() { setTimeout(function() { window.print(); }, 250); };<\/script>' +
         '</body></html>'
       );
-      printWin.document.close();
+      frameDoc.close();
+
+      setTimeout(function() {
+        try {
+          printFrame.contentWindow.focus();
+          printFrame.contentWindow.print();
+        } catch(e) {
+          var pop = window.open("", "_blank", "width=960,height=800");
+          if (pop) {
+            pop.document.open();
+            pop.document.write(
+              '<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><title>' + docTitle + '</title>' +
+              '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">' +
+              '<style>*, *::before, *::after { box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } body { margin: 0; padding: 20px; background: #f1f5f9; font-family: "Outfit", sans-serif; } .pdf-executive-sheet { max-width: 840px; margin: 0 auto; background: #fff; } @page { size: A4 portrait; margin: 8mm; } @media print { body { padding: 0; } }</style></head><body>' +
+              htmlContent +
+              '<script>window.onload=function(){setTimeout(function(){window.print();},250);};<\/script>' +
+              '</body></html>'
+            );
+            pop.document.close();
+          }
+        }
+      }, 350);
     }
     window.downloadFinancePdfDocument = downloadFinancePdfDocument;
 
