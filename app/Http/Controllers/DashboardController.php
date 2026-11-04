@@ -923,6 +923,15 @@ class DashboardController extends Controller
      */
     public function saveSettings(Request $request): JsonResponse
     {
+        if (!auth()->check() || !auth()->user()->isOwner()) {
+            if ($request->hasAny(['kos_name', 'owner_name', 'owner_phone', 'branches', 'bank_name', 'bank_account', 'bank_holder'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akses ditolak: Hanya Role Owner yang berhak mengubah informasi profil properti dan akun pengelola.'
+                ], 403);
+            }
+        }
+
         $validated = $request->validate([
             'kos_name' => 'nullable|string',
             'owner_name' => 'nullable|string',
@@ -1284,6 +1293,7 @@ class DashboardController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:30',
+            'branch_assignment' => 'nullable|string|in:all,Lokasi 1,Lokasi 2',
             'password' => $adminId ? 'nullable|string|min:6' : 'required|string|min:6',
         ], [
             'name.required' => 'Nama lengkap admin wajib diisi.',
@@ -1305,6 +1315,8 @@ class DashboardController extends Controller
             ], 422);
         }
 
+        $branchAssignment = $validated['branch_assignment'] ?? 'all';
+
         if ($adminId) {
             $admin = User::where('id', $adminId)->where('role', 'admin')->first();
             if (!$admin) {
@@ -1317,6 +1329,7 @@ class DashboardController extends Controller
             $admin->name = $validated['name'];
             $admin->email = $validated['email'];
             $admin->phone = $validated['phone'] ?? null;
+            $admin->branch_assignment = $branchAssignment;
             if (!empty($validated['password'])) {
                 $admin->password = Hash::make($validated['password']);
             }
@@ -1327,6 +1340,7 @@ class DashboardController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
+                'branch_assignment' => $branchAssignment,
                 'password' => Hash::make($validated['password']),
                 'role' => 'admin',
             ]);
@@ -1342,8 +1356,54 @@ class DashboardController extends Controller
                 'email' => $admin->email,
                 'phone' => $admin->phone,
                 'role' => $admin->role,
+                'branch_assignment' => $admin->branch_assignment ?? 'all',
                 'created_at' => $admin->created_at ? $admin->created_at->format('d M Y') : '-',
             ]
+        ]);
+    }
+
+    /**
+     * Ganti Penugasan Cabang Kos Admin Langsung dari Tabel (Khusus Role Owner)
+     */
+    public function updateAdminBranch(Request $request, $id): JsonResponse
+    {
+        if (!auth()->check() || !auth()->user()->isOwner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Hanya Owner yang berhak mengganti penugasan cabang Admin.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'branch_assignment' => 'required|string|in:all,Lokasi 1,Lokasi 2',
+        ]);
+
+        $admin = User::where('id', $id)->where('role', 'admin')->first();
+        if (!$admin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akun staf admin tidak ditemukan.'
+            ], 404);
+        }
+
+        $admin->branch_assignment = $validated['branch_assignment'];
+        $admin->save();
+
+        $setting = Setting::first();
+        $b1Name = $setting->branches['lokasi_1']['name'] ?? 'Kos Pertama';
+        $b2Name = $setting->branches['lokasi_2']['name'] ?? 'Kos Kedua';
+
+        $branchLabel = match ($admin->branch_assignment) {
+            'Lokasi 1' => 'Kos Pertama (' . $b1Name . ')',
+            'Lokasi 2' => 'Kos Kedua (' . $b2Name . ')',
+            default => 'Kedua Kos / Semua Cabang (Kos 1 & 2)',
+        };
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Penugasan cabang Admin "' . $admin->name . '" berhasil dialihkan ke: ' . $branchLabel,
+            'branch_assignment' => $admin->branch_assignment,
+            'branch_label' => $branchLabel,
         ]);
     }
 

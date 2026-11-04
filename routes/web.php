@@ -211,6 +211,11 @@ Route::middleware(['auth'])->group(function () {
             if (!Auth::user()->isOwner()) abort(403, 'Akses khusus Owner.');
             return app(DashboardController::class)->deleteAdmin($req, $id);
         })->name('api.admins.delete_post');
+
+        Route::post('/admins/{id}/branch', function (\Illuminate\Http\Request $req, $id) {
+            if (!Auth::user()->isOwner()) abort(403, 'Akses khusus Owner.');
+            return app(DashboardController::class)->updateAdminBranch($req, $id);
+        })->name('api.admins.branch');
     });
 });
 

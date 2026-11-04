@@ -1115,7 +1115,7 @@
                   <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Staf Admin</th>
                   <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Email Login</th>
                   <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Kontak WhatsApp</th>
-                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Cakupan Izin</th>
+                  <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Penugasan Cabang Kos</th>
                   <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Terdaftar</th>
                   <th style="padding: 14px 20px; font-size: 0.74rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">Tindakan Owner</th>
                 </tr>
@@ -1131,18 +1131,23 @@
                   if ($adminPhoneClean && str_starts_with($adminPhoneClean, '0')) {
                     $adminPhoneClean = '62' . substr($adminPhoneClean, 1);
                   }
+                  $curBranch = $admin->branch_assignment ?? 'all';
                 @endphp
                 <tr class="admin-data-row" id="adminRow_{{ $admin->id }}" data-name="{{ strtolower($admin->name) }}" data-email="{{ strtolower($admin->email) }}" data-phone="{{ $admin->phone }}" style="border-bottom: 1px solid #f1f5f9;">
+                  <!-- Kolom Staf Admin (Sesuai nama akun yang dimiliki oleh si admin) -->
                   <td style="padding: 14px 20px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
-                      <div style="width: 38px; height: 38px; border-radius: 12px; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0;">
+                      <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0a5661 0%, #0e7482 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(10, 86, 97, 0.2);">
                         {{ $admInitials }}
                       </div>
                       <div>
-                        <div style="font-weight: 800; color: #0f172a; font-size: 0.88rem;" class="adm-name-text">{{ $admin->name }}</div>
-                        <div style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: #059669; font-weight: 700;">
-                          <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
-                          <span>Admin Aktif</span>
+                        <div style="font-weight: 800; color: #0f172a; font-size: 0.92rem;" class="adm-name-text">{{ $admin->name }}</div>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap;">
+                          <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.72rem; color: #059669; font-weight: 800; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 6px;">
+                            <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #10b981;"></span>
+                            <span>Akun Staf Admin</span>
+                          </span>
+                          <span style="font-size: 0.7rem; color: #64748b; font-weight: 600;">ID #{{ $admin->id }}</span>
                         </div>
                       </div>
                     </div>
@@ -1165,10 +1170,23 @@
                       <span class="adm-phone-link" style="font-size: 0.78rem; color: #94a3b8; font-style: italic;">Belum diisi</span>
                     @endif
                   </td>
+                  <!-- Kolom Penugasan Cabang Kos (Owner dapat langsung mengganti di dalam tabel) -->
                   <td style="padding: 14px 20px;">
-                    <div style="display: inline-flex; flex-direction: column; gap: 4px;">
-                      <span style="font-size: 0.74rem; background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Operasional Harian</span>
-                      <span style="font-size: 0.7rem; color: #64748b;">Kamar, Penghuni & Servis</span>
+                    <div style="display: flex; flex-direction: column; gap: 4px; min-width: 220px;">
+                      <select class="admin-branch-select" onchange="changeAdminBranch({{ $admin->id }}, this.value)" style="padding: 7px 11px; font-size: 0.8rem; font-weight: 800; border-radius: 10px; border: 1.5px solid #0d9488; background: #f0fdfa; color: #0a5661; cursor: pointer; outline: none; transition: all 0.2s;">
+                        <option value="all" {{ $curBranch === 'all' ? 'selected' : '' }}>Kedua Cabang (Kos 1 &amp; Kos 2)</option>
+                        <option value="Lokasi 1" {{ $curBranch === 'Lokasi 1' ? 'selected' : '' }}>Admin Kos 1 ({{ $branch1Name }})</option>
+                        <option value="Lokasi 2" {{ $curBranch === 'Lokasi 2' ? 'selected' : '' }}>Admin Kos 2 ({{ $branch2Name }})</option>
+                      </select>
+                      <div id="branchIndicator_{{ $admin->id }}" style="font-size: 0.7rem; color: #64748b;">
+                        @if($curBranch === 'Lokasi 1')
+                          <span style="color: #059669; font-weight: 700;">Khusus Unit {{ $branch1Name }}</span>
+                        @elseif($curBranch === 'Lokasi 2')
+                          <span style="color: #0284c7; font-weight: 700;">Khusus Unit {{ $branch2Name }}</span>
+                        @else
+                          <span style="color: #0a5661; font-weight: 700;">Akses Semua Unit (2 Cabang)</span>
+                        @endif
+                      </div>
                     </div>
                   </td>
                   <td style="padding: 14px 20px;">
@@ -1813,9 +1831,15 @@
               </div>
 
               <div style="display: flex; gap: 14px; align-items: center; margin-top: 20px;">
-                <button type="submit" class="btn-primary" style="padding: 12px 28px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
-                  Simpan Seluruh Pengaturan 2 Lokasi & Peta
-                </button>
+                @if(Auth::user()->isOwner())
+                  <button type="submit" class="btn-primary" style="padding: 12px 28px; font-weight: 800; border-radius: 12px; display: flex; align-items: center; gap: 8px;">
+                    Simpan Seluruh Pengaturan 2 Lokasi &amp; Peta
+                  </button>
+                @else
+                  <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 12px 18px; color: #dc2626; font-size: 0.8rem; font-weight: 700;">
+                    Akses Dibatasi: Hanya Role Owner yang berhak mengubah pengaturan properti, profil 2 lokasi kos, dan peta.
+                  </div>
+                @endif
               </div>
             </div>
 
@@ -2153,17 +2177,23 @@
         <form id="settingsGeneralProfileForm" style="display: flex; flex-direction: column; gap: 16px;">
           <div class="form-group">
             <label for="setKosName" style="font-weight: 700;">Nama Resmi Properti Kos</label>
-            <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}">
+            <input type="text" id="setKosName" class="form-control" value="{{ $setting->kos_name }}" {{ !Auth::user()->isOwner() ? 'disabled readonly style=background:#f8fafc;cursor:not-allowed;color:#64748b;' : '' }}>
           </div>
           <div class="form-group">
             <label for="setOwnerName" style="font-weight: 700;">Nama Pemilik / Pengelola Utama</label>
-            <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}">
+            <input type="text" id="setOwnerName" class="form-control" value="{{ $setting->owner_name }}" {{ !Auth::user()->isOwner() ? 'disabled readonly style=background:#f8fafc;cursor:not-allowed;color:#64748b;' : '' }}>
           </div>
           <div class="form-group">
             <label for="setOwnerPhone" style="font-weight: 700;">No. WhatsApp Pengelola (Format 62...)</label>
-            <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}">
+            <input type="text" id="setOwnerPhone" class="form-control" value="{{ $setting->owner_phone }}" {{ !Auth::user()->isOwner() ? 'disabled readonly style=background:#f8fafc;cursor:not-allowed;color:#64748b;' : '' }}>
           </div>
-          <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 6px; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Akun Pengelola</button>
+          @if(Auth::user()->isOwner())
+            <button type="submit" class="btn-primary" style="align-self: flex-start; margin-top: 6px; padding: 10px 22px; border-radius: 12px; font-weight: 800;">Simpan Akun Pengelola</button>
+          @else
+            <div style="background: #fef2f2; border: 1.5px solid #fecaca; border-radius: 12px; padding: 12px 16px; color: #dc2626; font-size: 0.78rem; font-weight: 700; line-height: 1.5;">
+              Akses Terbatas: Hanya Role Owner yang memiliki hak untuk mengubah profil properti &amp; akun pengelola. Akun staf Admin tidak dapat mengubah profil.
+            </div>
+          @endif
         </form>
 
         <hr style="border: none; border-top: 1px solid var(--border-color); margin: 22px 0;">
@@ -2228,6 +2258,16 @@
           <div class="form-group">
             <label for="adminPhoneInput" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Nomor WhatsApp / HP Staf</label>
             <input type="text" id="adminPhoneInput" class="form-control" placeholder="Contoh: 081234567890" style="border-radius: 12px;">
+          </div>
+
+          <div class="form-group">
+            <label for="adminBranchInput" style="font-weight: 700; font-size: 0.82rem; color: #334155;">Penugasan Cabang Kos *</label>
+            <select id="adminBranchInput" class="form-control" style="border-radius: 12px; font-weight: 700; color: #0f172a;">
+              <option value="all">Kedua Cabang Kos (Kos 1 &amp; Kos 2)</option>
+              <option value="Lokasi 1">Admin Kos Pertama ({{ $branch1Name }})</option>
+              <option value="Lokasi 2">Admin Kos Kedua ({{ $branch2Name }})</option>
+            </select>
+            <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">Tentukan apakah staf ini mengelola Kos Pertama, Kos Kedua, atau Kedua Cabang Kos.</span>
           </div>
 
           <div class="form-group">
@@ -4923,6 +4963,7 @@
     window.openAddAdminModal = function() {
       document.getElementById('formManageAdmin').reset();
       document.getElementById('manageAdminId').value = '';
+      if (document.getElementById('adminBranchInput')) document.getElementById('adminBranchInput').value = 'all';
       document.getElementById('modalManageAdminTitle').textContent = 'Tambah Akun Admin Baru';
       document.getElementById('adminPasswordInput').required = true;
       document.getElementById('adminPasswordHelp').style.display = 'none';
@@ -4936,12 +4977,53 @@
       document.getElementById('adminNameInput').value = adminData.name || '';
       document.getElementById('adminEmailInput').value = adminData.email || '';
       document.getElementById('adminPhoneInput').value = adminData.phone || '';
+      if (document.getElementById('adminBranchInput')) document.getElementById('adminBranchInput').value = adminData.branch_assignment || 'all';
       document.getElementById('adminPasswordInput').value = '';
       document.getElementById('adminPasswordInput').required = false;
       document.getElementById('adminPasswordHelp').style.display = 'block';
       document.getElementById('modalManageAdminTitle').textContent = 'Edit Akun Staf Admin';
       document.getElementById('btnSubmitManageAdmin').textContent = 'Perbarui Akun Admin';
       window.openModal('modalManageAdmin');
+    };
+
+    window.changeAdminBranch = function(adminId, newBranch) {
+      if (!adminId || !newBranch) return;
+      var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
+      var indicator = document.getElementById('branchIndicator_' + adminId);
+      if (indicator) {
+        indicator.innerHTML = '<span style="color:#0a5661;font-weight:700;">Menyimpan cabang...</span>';
+      }
+
+      fetch('/api/admins/' + adminId + '/branch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': csrfToken
+        },
+        body: JSON.stringify({ branch_assignment: newBranch })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          if (indicator) {
+            var labelText = newBranch === 'Lokasi 1'
+              ? 'Khusus Unit {{ $branch1Name }}'
+              : (newBranch === 'Lokasi 2' ? 'Khusus Unit {{ $branch2Name }}' : 'Akses Semua Unit (2 Cabang)');
+            var color = newBranch === 'Lokasi 1' ? '#059669' : (newBranch === 'Lokasi 2' ? '#0284c7' : '#0a5661');
+            indicator.innerHTML = '<span style="color:' + color + ';font-weight:700;">' + labelText + '</span>';
+          }
+          window.showModernAlert(
+            data.message || 'Penugasan cabang staf Admin berhasil diperbarui.',
+            'success',
+            'Penugasan Cabang Berhasil Diubah'
+          );
+        } else {
+          window.showModernAlert(data.message || 'Gagal mengubah penugasan cabang admin.', 'error', 'Gagal Memperbarui');
+        }
+      })
+      .catch(function(err) {
+        window.showModernAlert('Terjadi kesalahan jaringan saat menyimpan penugasan cabang.', 'error', 'Gangguan Jaringan');
+      });
     };
 
     window.toggleInputPasswordVisibility = function(inputId, iconId) {
@@ -4972,6 +5054,7 @@
       var name = document.getElementById('adminNameInput').value.trim();
       var email = document.getElementById('adminEmailInput').value.trim();
       var phone = document.getElementById('adminPhoneInput').value.trim();
+      var branchAssignment = document.getElementById('adminBranchInput') ? document.getElementById('adminBranchInput').value : 'all';
       var password = document.getElementById('adminPasswordInput').value;
 
       if (!name || !email) {
@@ -5004,6 +5087,7 @@
           name: name,
           email: email,
           phone: phone,
+          branch_assignment: branchAssignment,
           password: password || null
         })
       })
