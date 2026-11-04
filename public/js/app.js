@@ -2763,12 +2763,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     recordPaymentForRoom,
     showReceiptModal,
     updateRepairStatus,
+    openTransactionModal,
     renderAllViews,
     renderFinancesTable,
     getFinanceReportPayload,
     getAppData: () => appData
   };
 
+  window.openTransactionModal = openTransactionModal;
   window.openRoomDetailModal = openRoomDetailModal;
   window.openModal = openModal;
   window.closeModal = closeModal;

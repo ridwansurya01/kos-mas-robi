@@ -1824,8 +1824,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     checkoutTenant,
     recordPaymentForRoom,
     showReceiptModal,
-    updateRepairStatus
+    updateRepairStatus,
+    openTransactionModal
   };
+
+  window.openTransactionModal = openTransactionModal;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -842,9 +842,9 @@
               $yearsList = range(2024, $maxYearOpt);
             @endphp
             <!-- Picker Tahun Laporan -->
-            <div class="finance-year-picker-wrap" id="finYearPickerWrap" onwheel="handleYearWheelScroll(event)" title="Pilih atau gulir roda mouse untuk melihat laporan keuangan tahun berapa pun">
+            <div class="finance-year-picker-wrap" id="finYearPickerWrap" title="Pilih tahun laporan keuangan">
               <span class="fyp-label">Tahun Laporan:</span>
-              <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2020 ? 'disabled' : '' }}>
+              <button type="button" class="fyp-scroll-btn" id="btnPrevYear" onclick="scrollFinanceYear(-1)" title="Tahun Sebelumnya" {{ $currYear <= 2024 ? 'disabled' : '' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
               </button>
               <select id="selectFinanceYear" class="fyp-select" onchange="changeFinanceYear(this.value); updateYearNavButtons();">
@@ -852,7 +852,7 @@
                   <option value="{{ $yr }}" {{ $currYear == $yr ? 'selected' : '' }}>Tahun {{ $yr }}</option>
                 @endforeach
               </select>
-              <button type="button" class="fyp-scroll-btn" id="btnNextYear" onclick="scrollFinanceYear(1)" title="Tahun Berikutnya">
+              <button type="button" class="fyp-scroll-btn" id="btnNextYear" onclick="scrollFinanceYear(1)" title="Tahun Berikutnya" {{ $currYear >= 2045 ? 'disabled' : '' }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
@@ -882,11 +882,11 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             </div>
-            <button type="button" class="btn-secondary" onclick="openFinancePdfModal()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0f2e33 0%,#0a5661 100%);color:#ffffff;border:1px solid #0d9488;font-weight:700;padding:10px 18px;border-radius:12px;box-shadow:0 6px 16px rgba(10,86,97,0.22);">
+            <button type="button" class="btn-secondary" onclick="openFinancePdfModal()" style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0f2e33 0%,#0a5661 100%);color:#ffffff;border:1px solid #0d9488;font-weight:700;padding:10px 18px;border-radius:12px;box-shadow:0 6px 16px rgba(10,86,97,0.22);cursor:pointer;">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
               <span>File PDF Laporan Keuangan</span>
             </button>
-            <button type="button" class="btn-primary-action" id="btnRecordTransaction">
+            <button type="button" class="btn-primary-action" id="btnRecordTransaction" onclick="window.openTransactionModal ? window.openTransactionModal() : window.openModal('modalTransaction')" style="cursor:pointer;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span>Catat Transaksi Baru</span>
             </button>
@@ -1146,10 +1146,10 @@
                   </td>
                   <td style="padding: 14px 20px; text-align: right;">
                     <div style="display: inline-flex; gap: 6px; align-items: center; justify-content: flex-end;">
-                      <button type="button" class="btn-secondary" onclick="openEditAdminModal({{ json_encode($admin) }})" style="font-size: 0.76rem; padding: 6px 12px; border-radius: 8px; font-weight: 700;" title="Edit Data & Ganti Password">
+                      <button type="button" class="btn-secondary" onclick="openEditAdminModal({{ $admin->id }}, '{{ addslashes($admin->name) }}', '{{ addslashes($admin->email) }}', '{{ addslashes($admin->phone ?? '') }}', '{{ $admin->branch_assignment ?? 'all' }}')" style="font-size: 0.76rem; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer;" title="Edit Data & Ganti Password">
                         Edit
                       </button>
-                      <button type="button" class="btn-secondary" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ addslashes($admin->name) }}')" style="font-size: 0.76rem; padding: 6px 10px; border-radius: 8px; font-weight: 700; color: #ef4444; border-color: #fecaca;" title="Hapus Akses Admin">
+                      <button type="button" class="btn-secondary" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ addslashes($admin->name) }}')" style="font-size: 0.76rem; padding: 6px 10px; border-radius: 8px; font-weight: 700; color: #ef4444; border-color: #fecaca; cursor: pointer;" title="Hapus Akses Admin">
                         Hapus
                       </button>
                     </div>
@@ -3328,9 +3328,7 @@
     var currentCurvePeriod = "1y";
 
     function handleYearWheelScroll(e) {
-      e.preventDefault();
-      var delta = e.deltaY > 0 ? 1 : -1;
-      scrollFinanceYear(delta);
+      // Dinonaktifkan untuk mencegah lonjakan tahun otomatis dan lag saat scrolling halaman
     }
     window.handleYearWheelScroll = handleYearWheelScroll;
 
@@ -3339,11 +3337,8 @@
       if (!select) return;
       var currentYear = parseInt(select.value, 10) || 2026;
       var targetYear = currentYear + delta;
-      if (targetYear < 2020) {
-        targetYear = 2020;
-        updateYearNavButtons();
-        return;
-      }
+      if (targetYear < 2024) targetYear = 2024;
+      if (targetYear > 2045) targetYear = 2045;
 
       var optionExists = false;
       for (var i = 0; i < select.options.length; i++) {
@@ -3368,9 +3363,11 @@
     function updateYearNavButtons() {
       var select = document.getElementById('selectFinanceYear');
       var btnPrev = document.getElementById('btnPrevYear');
-      if (select && btnPrev) {
+      var btnNext = document.getElementById('btnNextYear');
+      if (select) {
         var currentYear = parseInt(select.value, 10) || 2026;
-        btnPrev.disabled = (currentYear <= 2020);
+        if (btnPrev) btnPrev.disabled = (currentYear <= 2024);
+        if (btnNext) btnNext.disabled = (currentYear >= 2045);
       }
     }
     window.updateYearNavButtons = updateYearNavButtons;
@@ -3402,7 +3399,8 @@
     }
     window.changeFinanceMonth = changeFinanceMonth;
 
-    async function changeFinanceYear(year) {
+    var finYearDebounceTimer = null;
+    function changeFinanceYear(year) {
       var yr = parseInt(year, 10) || 2026;
       var select = document.getElementById('selectFinanceYear');
       if (select && parseInt(select.value, 10) !== yr) {
@@ -3415,7 +3413,7 @@
       var curveYearEl = document.getElementById('curveYearLabel');
       if (curveYearEl) curveYearEl.textContent = '(Tahun ' + yr + ')';
 
-      // Sinkronkan tabel transaksi, 4 KPI, dan kurva secara instan dari data lokal
+      // Sinkronkan tabel transaksi, 4 KPI, dan kurva secara instan dari data lokal (ZERO LAG)
       if (window.kosApp && typeof window.kosApp.renderFinancesTable === 'function') {
         var searchVal = document.getElementById('financeSearchInput')?.value || '';
         var activeTypeBtn = document.querySelector('#financeTypeFilter .filter-pill.active');
@@ -3425,24 +3423,50 @@
         window.kosApp.renderFinancesTable(searchVal, activeType, activeLoc);
       }
 
-      try {
-        var activeLocEl = document.querySelector('#financeLocationFilters .filter-pill.active');
-        var locParam = activeLocEl ? (activeLocEl.getAttribute('data-floc') || 'all') : 'all';
-        var res = await fetch('/api/finances/stats?year=' + encodeURIComponent(yr) + '&location=' + encodeURIComponent(locParam));
-        var data = await res.json();
-        if (data && data.success) {
-          if (document.getElementById('finKpiIncomeVal')) {
-            document.getElementById('finKpiIncomeVal').textContent = 'Rp ' + Number(data.income || 0).toLocaleString('id-ID');
+      clearTimeout(finYearDebounceTimer);
+      finYearDebounceTimer = setTimeout(async function() {
+        try {
+          var activeLocEl = document.querySelector('#financeLocationFilters .filter-pill.active');
+          var locParam = activeLocEl ? (activeLocEl.getAttribute('data-floc') || 'all') : 'all';
+          var res = await fetch('/api/finances/stats?year=' + encodeURIComponent(yr) + '&location=' + encodeURIComponent(locParam));
+          var data = await res.json();
+          if (data && data.success) {
+            var mSelect = document.getElementById('selectFinanceMonth');
+            var isMonthActive = mSelect && mSelect.value !== 'all';
+            if (!isMonthActive) {
+              if (document.getElementById('finKpiIncomeVal')) {
+                document.getElementById('finKpiIncomeVal').textContent = 'Rp ' + Number(data.income || 0).toLocaleString('id-ID');
+              }
+              if (document.getElementById('finKpiExpenseVal')) {
+                document.getElementById('finKpiExpenseVal').textContent = 'Rp ' + Number(data.expense || 0).toLocaleString('id-ID');
+              }
+              if (document.getElementById('finKpiNetVal')) {
+                document.getElementById('finKpiNetVal').textContent = 'Rp ' + Number(data.net || 0).toLocaleString('id-ID');
+              }
+              if (document.getElementById('finKpiAvgVal')) {
+                document.getElementById('finKpiAvgVal').textContent = 'Rp ' + Number(data.avgMonthly || 0).toLocaleString('id-ID');
+              }
+            }
+
+            window.chartIncomeFull = Array.isArray(data.chartIncome) ? data.chartIncome : new Array(12).fill(0);
+            window.chartExpenseFull = Array.isArray(data.chartExpense) ? data.chartExpense : new Array(12).fill(0);
+            window.chartNetFull = Array.isArray(data.chartNet) ? data.chartNet : new Array(12).fill(0);
+            drawRevenueCurve();
           }
-          if (document.getElementById('finKpiExpenseVal')) {
-            document.getElementById('finKpiExpenseVal').textContent = 'Rp ' + Number(data.expense || 0).toLocaleString('id-ID');
-          }
-          if (document.getElementById('finKpiNetVal')) {
-            document.getElementById('finKpiNetVal').textContent = 'Rp ' + Number(data.net || 0).toLocaleString('id-ID');
-          }
-          if (document.getElementById('finKpiAvgVal')) {
-            document.getElementById('finKpiAvgVal').textContent = 'Rp ' + Number(data.avgMonthly || 0).toLocaleString('id-ID');
-          }
+        } catch (err) {
+          console.error('Error changing finance year:', err);
+        }
+      }, 150);
+    }
+    window.changeFinanceYear = changeFinanceYear;
+
+    window.openTransactionModal = function() {
+      if (window.kosApp && typeof window.kosApp.openTransactionModal === 'function') {
+        window.kosApp.openTransactionModal();
+      } else {
+        window.openModal('modalTransaction');
+      }
+    };
 
           window.chartIncomeFull = Array.isArray(data.chartIncome) ? data.chartIncome : new Array(12).fill(0);
           window.chartExpenseFull = Array.isArray(data.chartExpense) ? data.chartExpense : new Array(12).fill(0);
@@ -4917,8 +4941,20 @@
       window.openModal('modalManageAdmin');
     };
 
-    window.openEditAdminModal = function(adminData) {
-      if (!adminData) return;
+    window.openEditAdminModal = function(idOrData, name, email, phone, branch) {
+      var adminData;
+      if (typeof idOrData === 'object' && idOrData !== null) {
+        adminData = idOrData;
+      } else {
+        adminData = {
+          id: idOrData,
+          name: name,
+          email: email,
+          phone: phone,
+          branch_assignment: branch
+        };
+      }
+      if (!adminData || !adminData.id) return;
       document.getElementById('manageAdminId').value = adminData.id;
       document.getElementById('adminNameInput').value = adminData.name || '';
       document.getElementById('adminEmailInput').value = adminData.email || '';
