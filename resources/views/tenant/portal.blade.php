@@ -25,7 +25,7 @@
         </svg>
       </div>
       <div>
-        <div class="tp-brand-name">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</div>
+        <div class="tp-brand-name">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</div>
         <div class="tp-brand-sub">Portal Anak Kos</div>
       </div>
     </div>

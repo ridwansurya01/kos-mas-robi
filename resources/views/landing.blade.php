@@ -133,7 +133,7 @@
             <path d="M9 21V12h6v9"/>
           </svg>
         </div>
-        <div class="lr-brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</div>
+        <div class="lr-brand-title">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</div>
       </a>
 
       <ul class="lr-nav-menu">
@@ -145,24 +145,27 @@
       </ul>
 
       <div class="lr-nav-actions">
-        <button type="button" class="lr-btn-ghost-white" onclick="openSurveyModal()" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.12);" title="Isi Formulir Survey">
+        <button type="button" class="lr-btn-ghost-white lr-nav-survey-btn" onclick="openSurveyModal()" style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.12);" title="Isi Formulir Survey">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Jadwal Survey</span>
+          <span class="lr-nav-survey-text">Jadwal Survey</span>
         </button>
         @auth
           @if(Auth::user()->isOwner() || Auth::user()->isAdmin())
             <a href="{{ route('admin.dashboard') }}" class="lr-btn-pill-teal">
-              <span>Dashboard Admin</span>
+              <span class="lr-nav-btn-text-full">Dashboard Admin</span>
+              <span class="lr-nav-btn-text-short">Admin</span>
             </a>
           @else
             <a href="{{ route('tenant.portal') }}" class="lr-btn-pill-teal">
-              <span>Portal Anak Kos</span>
+              <span class="lr-nav-btn-text-full">Portal Anak Kos</span>
+              <span class="lr-nav-btn-text-short">Portal</span>
             </a>
           @endif
         @else
           <a href="{{ route('login') }}" class="lr-btn-pill-teal">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            <span>Login Penghuni</span>
+            <span class="lr-nav-btn-text-full">Login Penghuni</span>
+            <span class="lr-nav-btn-text-short">Login</span>
           </a>
         @endauth
       </div>
@@ -177,7 +180,7 @@
     {{-- Photo positioned on the right, alpha masked smoothly into background --}}
     <div class="lr-hero-photo-bg">
       <img src="{{ asset($heroImg) }}"
-           alt="Bangunan {{ $setting->kos_name ?? 'Kos Mas Robi' }}"
+           alt="Bangunan {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}"
            onerror="this.src='{{ asset('assets/images/kos_exterior.jpg') }}'">
     </div>
 

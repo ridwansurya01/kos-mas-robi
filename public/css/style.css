@@ -5832,19 +5832,56 @@ body:has(.tp-page) {
   }
 
   .mobile-header-brand {
-    min-width: 0;
+    display: flex !important;
+    align-items: center;
     gap: 10px !important;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .mobile-header-brand .brand-icon-box {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 11px !important;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mobile-header-brand .brand-details {
     min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  .mobile-header-brand .brand-details h2 {
-    font-size: 1rem !important;
+  .mobile-header-brand .brand-details h2,
+  .mobile-header-brand .brand-details h2.brand-title {
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.015em !important;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .mobile-header-brand .brand-subtitle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 2px;
+  }
+
+  .mobile-header-brand .brand-badge {
+    font-size: 0.64rem !important;
+    font-weight: 700 !important;
+    padding: 1px 7px !important;
+    border-radius: 6px !important;
+    white-space: nowrap;
   }
 
   .mobile-header-brand .brand-status-dot {

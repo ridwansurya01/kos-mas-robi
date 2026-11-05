@@ -540,7 +540,7 @@
         </svg>
       </div>
       <div class="brand-details">
-        <h2 class="brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
+        <h2 class="brand-title">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</h2>
         <div class="brand-subtitle-wrap">
           <span class="brand-status-dot"></span>
           <span class="brand-badge modern-badge">{{ Auth::user()->isOwner() ? 'Manajemen Owner' : 'Manajemen Admin' }}</span>
@@ -649,7 +649,7 @@
             </svg>
           </div>
           <div class="brand-details">
-            <h2 class="brand-title">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h2>
+            <h2 class="brand-title">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</h2>
             <div class="brand-subtitle-wrap">
               <span class="brand-status-dot"></span>
               <span class="brand-badge modern-badge">{{ Auth::user()->isOwner() ? 'Manajemen Owner' : 'Manajemen Admin' }}</span>
