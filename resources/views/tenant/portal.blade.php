@@ -1,6 +1,6 @@
 @extends('layouts.portal')
 
-@section('title', 'Portal Anak Kos — ' . ($setting->kos_name ?? 'Kos Mas Robi'))
+@section('title', 'Portal Anak Kos — ' . (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING'))
 
 @section('content')
 
@@ -8,11 +8,11 @@
     $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
     $userInitial = strtoupper(substr($user->name ?? 'P', 0, 1));
     $isB2 = ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2';
-    $b1NamePortal = $branches['lokasi_1']['name'] ?? ($setting->branches['lokasi_1']['name'] ?? 'Kos Mas Robi 1 - Kampus Utama');
-    $b2NamePortal = $branches['lokasi_2']['name'] ?? ($setting->branches['lokasi_2']['name'] ?? 'Kos Mas Robi 2 - Ringroad Exclusive');
+    $b1NamePortal = $branches['lokasi_1']['name'] ?? ($setting->branches['lokasi_1']['name'] ?? 'SMART LIVING 1 - Kampus Utama');
+    $b2NamePortal = $branches['lokasi_2']['name'] ?? ($setting->branches['lokasi_2']['name'] ?? 'SMART LIVING 2 - Ringroad Exclusive');
     $branchName = $isB2 ? $b2NamePortal : $b1NamePortal;
     $branchAddr = $isB2 ? ($branches['lokasi_2']['address'] ?? 'Jl. Kaliurang KM 12, Sardonoharjo, Sleman') : ($branches['lokasi_1']['address'] ?? 'Jl. Pandega Marta, Pogung, Sinduadi (3 Mnt UGM)');
-    $branchMaps = $isB2 ? ($branches['lokasi_2']['gmaps_url'] ?? 'https://maps.google.com/?q=Kos+Mas+Robi+Ringroad') : ($branches['lokasi_1']['gmaps_url'] ?? 'https://maps.google.com/?q=Kos+Mas+Robi+Kampus');
+    $branchMaps = $isB2 ? ($branches['lokasi_2']['gmaps_url'] ?? 'https://maps.google.com/?q=SMART+LIVING+Ringroad') : ($branches['lokasi_1']['gmaps_url'] ?? 'https://maps.google.com/?q=SMART+LIVING+Kampus');
   @endphp
 
   {{-- ======================================================= NAVBAR ======================================================= --}}
@@ -111,7 +111,7 @@
         {{-- Right Side Blended Photo with Gradient Mask --}}
         <div class="tp-hero-landing-photo-wrap">
           <img src="{{ asset($heroImg) }}"
-               alt="{{ $setting->kos_name ?? 'Kos Mas Robi' }}"
+               alt="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}"
                onerror="this.src='{{ asset('assets/images/kos_exterior.jpg') }}'"
                class="tp-hero-landing-photo">
         </div>
@@ -464,7 +464,7 @@
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               <span>Kuitansi & Riwayat</span>
             </button>
-            <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20penghuni%20Kamar%20%23{{ $room->number ?? '102' }}%20ingin%20konfirmasi%20sewa"
+            <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin,%20saya%20penghuni%20Kamar%20%23{{ $room->number ?? '102' }}%20ingin%20konfirmasi%20sewa"
                target="_blank" class="tp-btn-primary-action tp-btn-wa-green" style="text-decoration: none;">
               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
@@ -730,7 +730,7 @@
             <span>Permintaan Custom Interior & Booking Kamar</span>
           </div>
           <p class="tp-custom-interior-desc">
-            Ingin tata letak furnitur tambahan seperti ambalan kayu estetik, lampu warm white, karpet, atau penataan khusus? Tuliskan permintaan Anda di bawah beserta perkiraan anggaran. Mas Robi akan meninjau dan menetapkan anggaran khusus secara fleksibel.
+            Ingin tata letak furnitur tambahan seperti ambalan kayu estetik, lampu warm white, karpet, atau penataan khusus? Tuliskan permintaan Anda di bawah beserta perkiraan anggaran. Admin akan meninjau dan menetapkan anggaran khusus secara fleksibel.
           </p>
 
           <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -808,7 +808,7 @@
       </div>
       <div class="modal-ftr">
         <button type="button" class="btn-secondary" data-close-modal="modalComplaint">Batal</button>
-        <button type="submit" class="btn-primary">Kirim Laporan ke Mas Robi</button>
+        <button type="submit" class="btn-primary">Kirim Laporan ke Admin</button>
       </div>
     </form>
   </div>
@@ -952,7 +952,7 @@
           </div>
           <h4 class="tp-rec-empty-heading">Belum Ada Kuitansi Resmi yang Dikirimkan</h4>
           <p class="tp-rec-empty-paragraph">
-            Pengelola kos belum menerbitkan atau mengirimkan kuitansi pembayaran untuk kamar Anda. Kuitansi resmi dan riwayat pembayaran akan otomatis muncul di sini setelah divalidasi dan dikirimkan oleh Admin Kos Mas Robi.
+            Pengelola kos belum menerbitkan atau mengirimkan kuitansi pembayaran untuk kamar Anda. Kuitansi resmi dan riwayat pembayaran akan otomatis muncul di sini setelah divalidasi dan dikirimkan oleh Admin.
           </p>
         </div>
       @endif
@@ -960,7 +960,7 @@
 
     <div class="modal-ftr tp-receipts-modal-ftr">
       <button type="button" class="btn-secondary" data-close-modal="modalReceipts">Tutup</button>
-      <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20ingin%20konfirmasi%20kuitansi%20pembayaran%20sewa%20kamar%20%23{{ $room->number ?? '102' }}"
+      <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin,%20saya%20ingin%20konfirmasi%20kuitansi%20pembayaran%20sewa%20kamar%20%23{{ $room->number ?? '102' }}"
          target="_blank" class="btn-primary tp-btn-wa-green" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/></svg>
         <span>Konfirmasi via WhatsApp Admin</span>
@@ -997,7 +997,7 @@
       <div class="tp-receipt-slip-card">
         {{-- Slip Top Header --}}
         <div class="tp-slip-hdr">
-          <div class="tp-slip-brand">{{ $setting->kos_name ?? 'Kos Mas Robi' }}</div>
+          <div class="tp-slip-brand">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</div>
           <div class="tp-slip-subbrand">KUITANSI ELEKTRONIK RESMI PEMBAYARAN SEWA KOST</div>
           <div class="tp-slip-code-pill" id="dtlRecCode">TRX-000</div>
         </div>
@@ -1052,7 +1052,7 @@
 
         {{-- Slip Footer --}}
         <div class="tp-slip-footer">
-          <p>Kuitansi elektronik ini merupakan bukti pembayaran resmi yang sah dari Sistem Manajemen {{ $setting->kos_name ?? 'Kos Mas Robi' }}. Disimpan secara digital dan dapat dicetak sewaktu-waktu.</p>
+          <p>Kuitansi elektronik ini merupakan bukti pembayaran resmi yang sah dari Sistem Manajemen {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}. Disimpan secara digital dan dapat dicetak sewaktu-waktu.</p>
         </div>
       </div>
     </div>
@@ -1213,7 +1213,7 @@
         </div>
         <div>
           <h3 class="modal-title">Tata Tertib & Peraturan Kos</h3>
-          <p class="modal-subtitle">Pedoman kenyamanan dan ketertiban bersama di {{ $setting->kos_name ?? 'Kos Mas Robi' }}</p>
+          <p class="modal-subtitle">Pedoman kenyamanan dan ketertiban bersama di {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</p>
         </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalRules" aria-label="Tutup Modal">
@@ -1461,7 +1461,7 @@
             <div class="tp-profile-room-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div class="tp-profile-room-details">
               <strong>Kamar Saat Ini: #{{ $room->number ?? '102' }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2 (Ringroad)' : 'Cabang 1 (Kampus)' }}</strong>
-              <p>{{ $tenantBranch['name'] ?? 'Kos Mas Robi' }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
+              <p>{{ $tenantBranch['name'] ?? (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
             </div>
           </div>
 
@@ -1611,7 +1611,7 @@
 
 <script>
 /* ============================================================
-   Kos Mas Robi — Portal JS (AJAX + Animations + Auto-slide)
+   SMART LIVING — Portal JS (AJAX + Animations + Auto-slide)
    ============================================================ */
 
 window.catalogRoomsData = @json($allRooms);
@@ -2411,8 +2411,8 @@ function openRoomCustomModal(room) {
     existingBox.style.display = 'block';
     var badge = document.getElementById('mCustomExistingBadge');
     var statusLabels = {
-      pending: 'Menunggu Konfirmasi Mas Robi',
-      approved: 'Disetujui Mas Robi',
+      pending: 'Menunggu Konfirmasi Admin',
+      approved: 'Disetujui Admin',
       in_progress: 'Sedang Dikerjakan',
       completed: 'Selesai Dipasang',
       rejected: 'Tidak Disetujui'
@@ -2420,7 +2420,7 @@ function openRoomCustomModal(room) {
     badge.textContent = statusLabels[room.custom_interior_status] || room.custom_interior_status;
     document.getElementById('mCustomExistingReqText').textContent = room.custom_interior_request || '-';
     document.getElementById('mCustomExistingBudget').textContent = 'Rp ' + Number(room.custom_interior_budget || 0).toLocaleString('id-ID');
-    document.getElementById('mCustomExistingNotes').textContent = room.custom_interior_admin_notes ? ('Catatan Mas Robi: ' + room.custom_interior_admin_notes) : '';
+    document.getElementById('mCustomExistingNotes').textContent = room.custom_interior_admin_notes ? ('Catatan Admin: ' + room.custom_interior_admin_notes) : '';
   } else {
     existingBox.style.display = 'none';
   }
@@ -2545,21 +2545,21 @@ function closeRoomCustomModal() {
       ],
       'Transfer QRIS' => [
         'badge' => 'QRIS Instant All Payment',
-        'bank' => 'QRIS Resmi Kos Mas Robi',
+        'bank' => 'QRIS Resmi ' . (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING'),
         'number' => 'NMID: ID102026192831',
-        'holder' => 'Kos Mas Robi / Robi Suryanto',
+        'holder' => (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') . ' / Admin',
         'isCash' => false,
         'isQris' => true,
         'instruction' => '<strong>Scan QRIS All Payment:</strong> Buka aplikasi m-Banking atau e-Wallet (GoPay, OVO, DANA, ShopeePay). Scan kode QRIS yang tersedia atau gunakan NMID di atas.'
       ],
       'Tunai (Cash)' => [
         'badge' => 'Pembayaran Tunai (Cash)',
-        'bank' => 'Tunai Langsung ke Mas Robi',
+        'bank' => 'Tunai Langsung ke Admin',
         'number' => 'Bayar Cash / Uang Tunai',
-        'holder' => 'Mas Robi (Kamar Pengelola Lt. 1)',
+        'holder' => 'Admin (Kamar Pengelola Lt. 1)',
         'isCash' => true,
         'isQris' => false,
-        'instruction' => '<strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Mas Robi di kantor/kamar pengelola lantai 1.'
+        'instruction' => '<strong>Pembayaran Tunai (Cash):</strong> Silakan tentukan tanggal penyerahan uang tunai pada kolom di bawah. Lalu serahkan uang tunai sewa kamar langsung kepada Admin di kantor/kamar pengelola lantai 1.'
       ]
     ];
   }
