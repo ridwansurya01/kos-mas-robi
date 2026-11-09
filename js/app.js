@@ -29,6 +29,7 @@
       bank_holder: 'Robi Suryanto'
     },
     rooms: [],
+    tenants: [],
     finances: [],
     maintenance: []
   };
@@ -109,6 +110,26 @@
           priority: m.priority,
           status: m.status
         }));
+        if (Array.isArray(json.tenants)) {
+          appData.tenants = json.tenants.map(t => ({
+            id: t.id,
+            name: t.name,
+            phone: t.phone || '',
+            idCard: t.id_card || '',
+            roomId: t.room_id,
+            roomNumber: t.room ? t.room.number : '',
+            roomType: t.room ? t.room.type : '',
+            roomFloor: t.room ? t.room.floor : 1,
+            roomPrice: t.room ? Number(t.room.price) : Number(t.rent_amount || 0),
+            location: t.room ? (t.room.location || 'Lokasi 1') : 'Lokasi 1',
+            startDate: t.start_date ? String(t.start_date).substring(0, 10) : '',
+            dueDay: t.due_day || 1,
+            rentAmount: Number(t.rent_amount || 0),
+            emergencyContact: t.emergency_contact || '',
+            status: t.status,
+            roomStatus: t.room ? t.room.status : 'occupied'
+          }));
+        }
         renderAllViews();
       }
     } catch (e) {
@@ -165,24 +186,30 @@
 
   // --- NAVIGATION CONTROLLER ---
   const navTitles = {
-    'tab-dashboard': { title: 'Dashboard Ikhtisar', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
-    'tab-rooms': { title: 'Manajemen Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
-    'tab-tenants': { title: 'Data Penghuni Kos', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
-    'tab-bills': { title: 'Tagihan Sewa & Invoice', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
-    'tab-transfers': { title: 'Pengajuan Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
-    'tab-maintenance': { title: 'Keluhan & Perbaikan', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
-    'tab-finances': { title: 'Laporan Keuangan & Arus Kas', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
+    'tab-dashboard': { title: 'Dashboard', sub: 'Monitoring real-time hunian, status kamar, dan operasional' },
+    'tab-rooms': { title: 'Daftar Kamar', sub: 'Daftar seluruh unit kamar, fasilitas, dan tarif sewa' },
+    'tab-tenants': { title: 'Data Penghuni', sub: 'Kelola kontak anak kos, sewa aktif, dan pengingat WhatsApp' },
+    'tab-bills': { title: 'Tagihan Sewa', sub: 'Monitoring jatuh tempo sewa, kirim WA pengingat tagihan, dan konfirmasi lunas' },
+    'tab-transfers': { title: 'Pindah Kamar', sub: 'Daftar permohonan alih kamar dari anak kos dan persetujuan' },
+    'tab-maintenance': { title: 'Keluhan & Servis', sub: 'Daftar laporan fasilitas kos dan penanganan teknisi' },
+    'tab-finances': { title: 'Laporan Keuangan', sub: 'Analisis kurva pendapatan bulanan s/d 1 tahun penuh, laba bersih, dan buku kas' },
     'tab-admins': { title: 'Akun Admin', sub: 'Pantau siapa saja yang memiliki akses Admin operasional dan kelola akun staf' },
-    'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan tampilan landing page, titik lokasi, profil properti, dan jaringan WiFi' }
+    'tab-settings': { title: 'Pengaturan Kos', sub: 'Pengaturan profil properti, nomor rekening, dan cadangan data' }
   };
 
   function switchTab(tabId) {
+    if ((tabId === 'tab-finances' || tabId === 'tab-admins') && window.isOwnerUser === false) {
+      tabId = 'tab-dashboard';
+    }
+
     const panes = document.querySelectorAll('.tab-pane');
     const sidebarItems = document.querySelectorAll('.app-sidebar .nav-item');
     const bottomNavItems = document.querySelectorAll('.mobile-bottom-nav .bottom-nav-item');
     const pageTitle = document.getElementById('pageTitle');
     const pageSubtitle = document.getElementById('pageSubtitle');
     const breadcrumbCurrent = document.getElementById('breadcrumbCurrent');
+    const headerActiveTitle = document.getElementById('headerActiveTitle');
+    const mobileActiveTitle = document.getElementById('mobileActiveTitle');
 
     panes.forEach(pane => {
       pane.classList.toggle('active', pane.id === tabId);
@@ -201,9 +228,20 @@
     });
 
     if (navTitles[tabId]) {
-      if (pageTitle) pageTitle.textContent = navTitles[tabId].title;
-      if (pageSubtitle) pageSubtitle.textContent = navTitles[tabId].sub;
-      if (breadcrumbCurrent) breadcrumbCurrent.textContent = navTitles[tabId].title;
+      const info = navTitles[tabId];
+      if (pageTitle) pageTitle.textContent = info.title;
+      if (pageSubtitle) pageSubtitle.textContent = info.sub;
+      if (breadcrumbCurrent) breadcrumbCurrent.textContent = info.title;
+      if (headerActiveTitle) headerActiveTitle.textContent = info.title;
+      if (mobileActiveTitle) mobileActiveTitle.textContent = info.title;
+
+      document.querySelectorAll('.header-active-page-title, [data-page-title]').forEach(el => {
+        el.textContent = info.title;
+      });
+    }
+
+    if (typeof window.updateSettingsSubChip === 'function') {
+      window.updateSettingsSubChip(tabId);
     }
 
     if (tabId === 'tab-finances' && typeof window.drawRevenueCurve === 'function') {
@@ -215,9 +253,7 @@
   }
 
   function initNavigation() {
-    if (!window.switchTab) {
-      window.switchTab = switchTab;
-    }
+    window.switchTab = switchTab;
 
     document.addEventListener('click', (e) => {
       const tabTarget = e.target.closest('[data-tab]');
@@ -246,10 +282,32 @@
   function renderRoomGrid(filter = 'all') {
     const f1Grid = document.getElementById('floor1Grid');
     const f2Grid = document.getElementById('floor2Grid');
+    const f3Grid = document.getElementById('floor3Grid');
+    const f3Section = document.getElementById('dashboardFloor3Section');
     if (!f1Grid || !f2Grid) return;
 
     f1Grid.innerHTML = '';
     f2Grid.innerHTML = '';
+
+    const hasFloor3Rooms = appData.rooms.some(r => Number(r.floor) === 3);
+    if (f3Section) {
+      f3Section.style.display = hasFloor3Rooms ? '' : 'none';
+    }
+    if (f3Grid) f3Grid.innerHTML = '';
+
+    // Handle any dynamic higher floors (3, 4, 5, dst)
+    document.querySelectorAll('#tab-dashboard [id^="dashboardFloor"]').forEach(sec => {
+      const match = sec.id.match(/dashboardFloor(\d+)Section/);
+      if (match) {
+        const flNum = parseInt(match[1]);
+        if (flNum >= 3) {
+          const hasRoomsOnFloor = appData.rooms.some(r => Number(r.floor) === flNum);
+          sec.style.display = hasRoomsOnFloor ? '' : 'none';
+          const grid = document.getElementById('floor' + flNum + 'Grid');
+          if (grid) grid.innerHTML = '';
+        }
+      }
+    });
 
     const filteredRooms = appData.rooms.filter(room => {
       if (filter === 'all') return true;
@@ -320,10 +378,18 @@
         openRoomDetailModal(room.number);
       });
 
-      if (Number(room.floor) === 1) {
+      const rFloor = Number(room.floor);
+      if (rFloor === 1) {
         f1Grid.appendChild(card);
-      } else {
+      } else if (rFloor === 2) {
         f2Grid.appendChild(card);
+      } else {
+        const targetGrid = document.getElementById('floor' + rFloor + 'Grid');
+        if (targetGrid) {
+          targetGrid.appendChild(card);
+        } else if (f3Grid && rFloor === 3) {
+          f3Grid.appendChild(card);
+        }
       }
     });
 
@@ -332,6 +398,9 @@
     }
     if (f2Grid.children.length === 0) {
       f2Grid.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem;padding:12px;">Tidak ada kamar dengan status ini di Lantai 2</div>';
+    }
+    if (hasFloor3Rooms && f3Grid && f3Grid.children.length === 0) {
+      f3Grid.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem;padding:12px;">Tidak ada kamar dengan status ini di Lantai 3</div>';
     }
   }
 
@@ -388,7 +457,7 @@
   }
 
   // --- TAB: MASTER KAMAR ---
-  function renderRoomsMasterTable(search = '', floorFilter = 'all', locationFilter = 'all') {
+  function renderRoomsMasterTable(search = '', floorFilter = 'all', locationFilter = 'all', statusFilter = 'all') {
     const tbody = document.getElementById('roomsMasterTableBody');
     const mobileList = document.getElementById('roomsMobileCardList');
     if (!tbody || !mobileList) return;
@@ -398,31 +467,46 @@
 
     const filtered = appData.rooms.filter(r => {
       const q = (search || '').toLowerCase().trim();
+      const branchName1 = (typeof getBranchName === 'function' ? getBranchName('Lokasi 1') : 'KOS UNEJ').toLowerCase();
+      const branchName2 = (typeof getBranchName === 'function' ? getBranchName('Lokasi 2') : 'KOS UNMUH').toLowerCase();
+      const branchName = r.location === 'Lokasi 2' ? branchName2 : branchName1;
+
       const numStr = String(r.number || '').toLowerCase();
       const typeStr = String(r.type || '').toLowerCase();
       const locStr = String(r.location || '').toLowerCase();
       const tenantStr = String(r.tenant || '').toLowerCase();
-      const matchSearch = !q ||
-                          numStr.includes(q) ||
-                          typeStr.includes(q) ||
-                          locStr.includes(q) ||
-                          tenantStr.includes(q);
+      const facStr = Array.isArray(r.facilities) ? r.facilities.join(' ').toLowerCase() : String(r.facilities || '').toLowerCase();
+      const floorStr = `lantai ${r.floor} lt ${r.floor} ${r.floor}`.toLowerCase();
+      const priceStr = `${r.price} ${formatRupiah(r.price)}`.toLowerCase();
+      const statusMap = { 'available': 'tersedia kosong', 'occupied': 'terisi lunas', 'due': 'jatuh tempo', 'repair': 'servis perbaikan', 'booked': 'booking dipesan' };
+      const statusStr = (statusMap[r.status] || r.status || '').toLowerCase();
+
+      const combined = `${numStr} kamar #${numStr} ${typeStr} ${locStr} ${branchName} ${tenantStr} ${facStr} ${floorStr} ${priceStr} ${statusStr}`;
+
+      const matchSearch = !q || combined.includes(q);
       const matchFloor = floorFilter === 'all' || String(r.floor) === String(floorFilter);
       const matchLocation = locationFilter === 'all' || (r.location || 'Lokasi 1') === locationFilter;
-      return matchSearch && matchFloor && matchLocation;
+      const matchStatus = statusFilter === 'all' || r.status === statusFilter;
+
+      if (q) {
+        return matchSearch && matchFloor && matchLocation && matchStatus;
+      }
+      return matchFloor && matchLocation && matchStatus;
     });
 
     filtered.forEach(room => {
       const isLoc2 = room.location === 'Lokasi 2';
+      const branchLabel = isLoc2 ? getBranchName('Lokasi 2') : getBranchName('Lokasi 1');
       const locBadge = isLoc2
-        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">${getBranchName('Lokasi 2')}</span>`
-        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">${getBranchName('Lokasi 1')}</span>`;
+        ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0f9ff;color:#0284c7;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #bae6fd;">${branchLabel}</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;background:#f0fdfa;color:#0a5661;font-weight:800;padding:4px 10px;border-radius:8px;border:1.5px solid #99f6e4;">${branchLabel}</span>`;
 
       const tr = document.createElement('tr');
       tr.className = 'room-master-row';
       tr.setAttribute('data-floor', String(room.floor || 1));
       tr.setAttribute('data-location', room.location || 'Lokasi 1');
-      tr.setAttribute('data-search', `${room.number} ${room.type} ${room.location || ''} ${room.tenant || ''}`.toLowerCase());
+      tr.setAttribute('data-status', room.status || 'available');
+      tr.setAttribute('data-search', `${room.number} kamar #${room.number} ${room.type} ${room.location || ''} ${branchLabel} ${room.tenant || ''} ${(room.facilities || []).join(' ')} lantai ${room.floor} ${formatRupiah(room.price)} ${room.price} ${room.status}`.toLowerCase());
       tr.innerHTML = `
         <td style="font-weight:800;font-size:1rem;color:#0a5661;">#${room.number}</td>
         <td>${locBadge}</td>
@@ -438,6 +522,7 @@
           <div style="display:flex;gap:6px;">
             <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:0.78rem;font-weight:700;border-radius:8px;" onclick="window.kosApp.editRoom('${room.number}')">Edit</button>
             <button type="button" class="btn-secondary" style="padding:5px 12px;font-size:0.78rem;font-weight:700;border-radius:8px;" onclick="window.kosApp.openRoomDetailModal('${room.number}')">Detail</button>
+            <button type="button" class="btn-sm" style="padding:5px 10px;font-size:0.78rem;font-weight:700;border-radius:8px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;cursor:pointer;" onclick="window.confirmDeleteRoom('${room.id || room.number}', '${room.number}')">Hapus</button>
           </div>
         </td>
       `;
@@ -447,7 +532,8 @@
       mCard.className = 'mobile-data-card';
       mCard.setAttribute('data-floor', String(room.floor || 1));
       mCard.setAttribute('data-location', room.location || 'Lokasi 1');
-      mCard.setAttribute('data-search', `${room.number} ${room.type} ${room.location || ''} ${room.tenant || ''}`.toLowerCase());
+      mCard.setAttribute('data-status', room.status || 'available');
+      mCard.setAttribute('data-search', `${room.number} kamar #${room.number} ${room.type} ${room.location || ''} ${branchLabel} ${room.tenant || ''} ${(room.facilities || []).join(' ')} lantai ${room.floor} ${formatRupiah(room.price)} ${room.price} ${room.status}`.toLowerCase());
       mCard.innerHTML = `
         <div class="mobile-data-header">
           <div>
@@ -471,6 +557,7 @@
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:6px;border-radius:8px;" onclick="window.kosApp.editRoom('${room.number}')">Edit Kamar</button>
           <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:6px;border-radius:8px;" onclick="window.kosApp.openRoomDetailModal('${room.number}')">Lihat Detail</button>
+          <button type="button" style="padding:6px 12px;font-size:0.8rem;font-weight:700;border-radius:8px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;cursor:pointer;" onclick="window.confirmDeleteRoom('${room.id || room.number}', '${room.number}')">Hapus</button>
         </div>
       `;
       mobileList.appendChild(mCard);
@@ -549,7 +636,7 @@
   }
 
   // --- TAB: DATA PENGHUNI (2 KOS) ---
-  function renderTenantsTable(search = '', statusFilter = 'all', locationFilter = activeTenantLocationFilter) {
+  function renderTenantsTable(search = '', statusFilter = 'all', locationFilter = activeTenantLocationFilter, forceRebuild = false) {
     activeTenantLocationFilter = locationFilter;
     const tbody = document.getElementById('tenantsTableBody');
     const mobileList = document.getElementById('tenantsMobileCardList');
@@ -559,8 +646,8 @@
     const domRows = tbody.querySelectorAll('.tenant-row');
     const domCards = mobileList ? mobileList.querySelectorAll('.mobile-data-card') : [];
 
-    // Prioritize instant DOM filtering if server rendered rows are present (Zero-loss & Zero-latency)
-    if (domRows.length > 0) {
+    // Prioritize instant DOM filtering if server rendered rows are present and no forceRebuild
+    if (!forceRebuild && domRows.length > 0) {
       let visibleCount = 0;
       domRows.forEach(row => {
         const loc = row.getAttribute('data-location') || 'Lokasi 1';
@@ -615,47 +702,93 @@
     if (mobileList) mobileList.innerHTML = '';
     tbody.innerHTML = '';
 
-    const tenants = (appData.rooms || []).map(r => {
-      let tName = '';
-      if (typeof r.tenant === 'string' && r.tenant.trim() !== '') {
-        tName = r.tenant.trim();
-      } else if (r.active_tenant && r.active_tenant.name) {
-        tName = String(r.active_tenant.name).trim();
-      } else if (r.status === 'occupied' || r.status === 'due') {
-        tName = r.booked_by_name ? String(r.booked_by_name).trim() : ('Penghuni #' + r.number);
-      }
-      const tPhone = r.phone || (r.active_tenant && r.active_tenant.phone) || '';
-      const tStart = r.startDate || (r.active_tenant && r.active_tenant.start_date ? String(r.active_tenant.start_date).substring(0, 10) : '');
-      const tDue = r.dueDay || (r.active_tenant && r.active_tenant.due_day) || 1;
-      return Object.assign({}, r, { tenant: tName, phone: tPhone, startDate: tStart, dueDay: tDue });
-    }).filter(r => r.tenant && r.tenant !== '');
+    let tenantList = [];
+    if (Array.isArray(appData.tenants) && appData.tenants.length > 0) {
+      tenantList = appData.tenants.map(t => {
+        const foundRoom = appData.rooms.find(r => String(r.id) === String(t.roomId) || String(r.number) === String(t.roomNumber));
+        return {
+          id: t.id,
+          dbId: t.id,
+          tenant: t.name,
+          phone: t.phone || '',
+          number: foundRoom ? foundRoom.number : (t.roomNumber || '-'),
+          floor: foundRoom ? foundRoom.floor : (t.roomFloor || 1),
+          type: foundRoom ? foundRoom.type : (t.roomType || '-'),
+          price: foundRoom ? foundRoom.price : (t.roomPrice || 0),
+          location: foundRoom ? (foundRoom.location || 'Lokasi 1') : (t.location || 'Lokasi 1'),
+          startDate: t.startDate || '-',
+          dueDay: t.dueDay || 1,
+          status: foundRoom ? foundRoom.status : (t.roomStatus || 'occupied')
+        };
+      });
+      const coveredRoomNums = new Set(tenantList.map(t => String(t.number)));
+      (appData.rooms || []).forEach(r => {
+        if ((r.status === 'occupied' || r.status === 'due') && !coveredRoomNums.has(String(r.number))) {
+          tenantList.push({
+            id: r.id,
+            dbId: r.id,
+            tenant: r.tenant || ('Penghuni #' + r.number),
+            phone: r.phone || '',
+            number: r.number,
+            floor: r.floor || 1,
+            type: r.type || '-',
+            price: r.price || 0,
+            location: r.location || 'Lokasi 1',
+            startDate: r.startDate || '-',
+            dueDay: r.dueDay || 1,
+            status: r.status
+          });
+        }
+      });
+    } else {
+      tenantList = (appData.rooms || []).map(r => {
+        let tName = '';
+        if (typeof r.tenant === 'string' && r.tenant.trim() !== '') {
+          tName = r.tenant.trim();
+        } else if (r.active_tenant && r.active_tenant.name) {
+          tName = String(r.active_tenant.name).trim();
+        } else if (r.status === 'occupied' || r.status === 'due') {
+          tName = r.booked_by_name ? String(r.booked_by_name).trim() : ('Penghuni #' + r.number);
+        }
+        const tPhone = r.phone || (r.active_tenant && r.active_tenant.phone) || '';
+        const tStart = r.startDate || (r.active_tenant && r.active_tenant.start_date ? String(r.active_tenant.start_date).substring(0, 10) : '');
+        const tDue = r.dueDay || (r.active_tenant && r.active_tenant.due_day) || 1;
+        return Object.assign({}, r, { tenant: tName, phone: tPhone, startDate: tStart, dueDay: tDue });
+      }).filter(r => r.tenant && r.tenant !== '');
+    }
 
-    const loc1Count = tenants.filter(t => resolveRoomLocation(t) === 'Lokasi 1').length;
-    const loc2Count = tenants.filter(t => resolveRoomLocation(t) === 'Lokasi 2').length;
+    const loc1Count = tenantList.filter(t => resolveRoomLocation(t) === 'Lokasi 1').length;
+    const loc2Count = tenantList.filter(t => resolveRoomLocation(t) === 'Lokasi 2').length;
     const elLoc1 = document.getElementById('tenantCountLoc1');
     const elLoc2 = document.getElementById('tenantCountLoc2');
     if (elLoc1) elLoc1.textContent = `${loc1Count} Orang`;
     if (elLoc2) elLoc2.textContent = `${loc2Count} Orang`;
 
-    const filtered = tenants.filter(t => {
+    const filtered = tenantList.filter(t => {
       const tLoc = resolveRoomLocation(t);
-      const matchLoc = (locationFilter === 'all' || tLoc === locationFilter);
+      const branchName = tLoc === 'Lokasi 2' ? getBranchName('Lokasi 2') : getBranchName('Lokasi 1');
       const q = (search || '').toLowerCase().trim();
       const tName = String(t.tenant || '').toLowerCase();
       const tPhone = String(t.phone || '').toLowerCase();
       const tNum = String(t.number || '').toLowerCase();
       const tLocStr = String(tLoc || '').toLowerCase();
+      const tBranchStr = String(branchName || '').toLowerCase();
       const tType = String(t.type || '').toLowerCase();
-      const matchSearch = !q ||
-                          tName.includes(q) ||
-                          tPhone.includes(q) ||
-                          tNum.includes(q) ||
-                          tLocStr.includes(q) ||
-                          tType.includes(q);
+      const tDue = String(t.dueDay || '').toLowerCase();
+      const tStatusTxt = t.status === 'due' ? 'jatuh tempo belum bayar' : 'lunas terisi aktif';
+
+      const combined = `${tName} ${tPhone} kamar #${tNum} ${tNum} ${tLocStr} ${tBranchStr} ${tType} tgl ${tDue} ${tStatusTxt}`;
+      const matchSearch = !q || combined.includes(q);
+
+      if (q) {
+        return matchSearch;
+      }
+
+      const matchLoc = (locationFilter === 'all' || tLoc === locationFilter);
       let matchStatus = true;
-      if (statusFilter === 'active') matchStatus = t.status === 'occupied';
-      if (statusFilter === 'due') matchStatus = t.status === 'due';
-      return matchLoc && matchSearch && matchStatus;
+      if (statusFilter === 'active') matchStatus = (t.status === 'occupied' || t.status === 'active');
+      if (statusFilter === 'due') matchStatus = (t.status === 'due');
+      return matchLoc && matchStatus;
     });
 
     filtered.forEach(t => {
@@ -671,7 +804,6 @@
           ? `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#ccfbf1;color:#0a5661;border:1px solid #5eead4;">${getBranchName('Lokasi 2')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Smart Door PIN & Co-Working</div>`
           : `<span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:800;padding:3px 9px;border-radius:999px;background:#dcfce7;color:#059669;border:1px solid #86efac;">${getBranchName('Lokasi 1')}</span><div style="font-size:0.7rem;color:var(--text-secondary);margin-top:3px;">Kartu RFID & Area Kampus</div>`;
 
-        const isDue = (t.status === 'due');
         const tr = document.createElement('tr');
         tr.className = 'tenant-row';
         tr.setAttribute('data-location', tLoc);
@@ -693,12 +825,18 @@
             </a>
           </td>
           <td>${t.startDate || '-'}</td>
-          <td>Tgl <strong>${t.dueDay}</strong> / bln</td>
+          <td>
+            <button type="button" class="btn-edit-due-date" onclick="window.openEditDueDayModal('${t.dbId || t.id || t.number}', '${(t.tenant || '').replace(/'/g, "\\'")}', '${t.number}', ${t.dueDay || 1})" title="Klik untuk ubah tanggal jatuh tempo sewa">
+              <span>Tgl <strong id="dueDayText_${t.number}">${t.dueDay || 1}</strong> / bln</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </button>
+          </td>
           <td>${statusLabel}</td>
           <td>
             <div style="display:flex;gap:6px;">
-              <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">WA Tagihan</button>
+              <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">Tagihan</button>
               <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Bayar</button>
+              <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;" onclick="window.openEditTenantModal('${t.dbId || t.id || ''}', '${t.number}')">Edit</button>
               <button type="button" class="btn-secondary" style="padding:4px 8px;font-size:0.78rem;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')">Keluar</button>
             </div>
           </td>
@@ -736,9 +874,10 @@
             <span style="font-weight:700;color:var(--brand-primary-light);">${formatRupiah(t.price)}</span>
           </div>
           <div style="display:flex;gap:8px;margin-top:10px;">
-            <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">Kirim WA</button>
+            <button type="button" class="btn-primary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.sendWhatsAppReminder('${t.number}')">Tagihan</button>
             <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.kosApp.recordPaymentForRoom('${t.number}')">Catat Bayar</button>
-            <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')" title="Penghuni Keluar"></button>
+            <button type="button" class="btn-secondary" style="flex:1;font-size:0.8rem;padding:7px;" onclick="window.openEditTenantModal('${t.dbId || t.id || ''}', '${t.number}')">Edit</button>
+            <button type="button" class="btn-secondary" style="font-size:0.8rem;padding:7px;color:#f87171;" onclick="window.kosApp.checkoutTenant('${t.number}')" title="Penghuni Keluar">Keluar</button>
           </div>
         `;
         mobileList.appendChild(mCard);
@@ -772,7 +911,7 @@
     tbody.innerHTML = '';
     mobileList.innerHTML = '';
 
-    const selectYearEl = document.getElementById('selectFinanceYear');
+    const selectYearEl = document.getElementById('inputFinanceYear') || document.getElementById('selectFinanceYear');
     const selectedYear = parseInt(selectYearEl?.value || 2026, 10) || 2026;
     const selectMonthEl = document.getElementById('selectFinanceMonth');
     const selectedMonth = selectMonthEl ? selectMonthEl.value : 'all';
@@ -1016,7 +1155,7 @@
   }
 
   function getFinanceReportPayload() {
-    const selectYearEl = document.getElementById('selectFinanceYear');
+    const selectYearEl = document.getElementById('inputFinanceYear') || document.getElementById('selectFinanceYear');
     const selectedYear = parseInt(selectYearEl?.value || 2026, 10) || 2026;
     const selectMonthEl = document.getElementById('selectFinanceMonth');
     const selectedMonth = selectMonthEl ? selectMonthEl.value : 'all';
@@ -1171,9 +1310,9 @@
         <td>${statusBadge}</td>
         <td>
           <select class="form-control" style="padding:4px 8px;font-size:0.78rem;" onchange="window.kosApp.updateRepairStatus('${item.id}', this.value)">
-            <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Menunggu</option>
-            <option value="progress" ${item.status === 'progress' ? 'selected' : ''}>Dikerjakan</option>
             <option value="done" ${item.status === 'done' ? 'selected' : ''}>Selesai</option>
+            <option value="progress" ${item.status === 'progress' ? 'selected' : ''}>Dalam Proses</option>
+            <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Menunggu</option>
           </select>
         </td>
       `;
@@ -1200,9 +1339,9 @@
         </div>
         <div style="margin-top:8px;">
           <select class="form-control" style="padding:6px;font-size:0.82rem;" onchange="window.kosApp.updateRepairStatus('${item.id}', this.value)">
-            <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Status: Menunggu</option>
-            <option value="progress" ${item.status === 'progress' ? 'selected' : ''}>Status: Sedang Dikerjakan</option>
             <option value="done" ${item.status === 'done' ? 'selected' : ''}>Status: Selesai</option>
+            <option value="progress" ${item.status === 'progress' ? 'selected' : ''}>Status: Dalam Proses</option>
+            <option value="pending" ${item.status === 'pending' ? 'selected' : ''}>Status: Menunggu</option>
           </select>
         </div>
       `;
@@ -1264,18 +1403,44 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.add('open');
-      modal.style.display = 'flex';
-      modal.style.pointerEvents = 'auto';
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('pointer-events', 'auto', 'important');
+      modal.style.setProperty('visibility', 'visible', 'important');
+      modal.style.setProperty('opacity', '1', 'important');
+      modal.style.setProperty('z-index', '2000', 'important');
       document.body.style.overflow = 'hidden';
+
+      if (modalId === 'modalTransaction') {
+        const dateInput = document.getElementById('transDate');
+        if (dateInput && !dateInput.value) {
+          dateInput.value = new Date().toISOString().split('T')[0];
+        }
+        if (typeof window.populateTransactionRooms === 'function') {
+          window.populateTransactionRooms();
+        }
+      }
     }
   }
 
   function closeModal(modalId) {
+    if (!modalId) {
+      document.querySelectorAll('.modal-backdrop.open, .kmr-logout-overlay.open').forEach(m => {
+        m.classList.remove('open');
+        m.style.setProperty('display', 'none', 'important');
+        m.style.setProperty('pointer-events', 'none', 'important');
+        m.style.setProperty('visibility', 'hidden', 'important');
+        m.style.setProperty('opacity', '0', 'important');
+      });
+      document.body.style.overflow = '';
+      return;
+    }
     const modal = document.getElementById(modalId);
     if (modal) {
       modal.classList.remove('open');
-      modal.style.display = 'none';
-      modal.style.pointerEvents = 'none';
+      modal.style.setProperty('display', 'none', 'important');
+      modal.style.setProperty('pointer-events', 'none', 'important');
+      modal.style.setProperty('visibility', 'hidden', 'important');
+      modal.style.setProperty('opacity', '0', 'important');
       document.body.style.overflow = '';
     }
   }
@@ -1302,6 +1467,14 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal-backdrop.open, .kmr-logout-overlay.open').forEach(m => closeModal(m.id));
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      const transferBtn = e.target.closest('.btn-transfer-action');
+      if (transferBtn && typeof window.openConfirmRoomTransferModal === 'function') {
+        e.preventDefault();
+        window.openConfirmRoomTransferModal(transferBtn);
       }
     });
   }
@@ -1610,6 +1783,50 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     openModal('modalAddRoom');
   }
 
+  function openAddRoomModal() {
+    const locInput = document.getElementById('roomLocationInput');
+    const title = document.getElementById('mRoomFormTitle');
+    if (title) title.textContent = 'Tambah Master Kamar Baru';
+    const editId = document.getElementById('roomEditId');
+    if (editId) editId.value = '';
+    const numInput = document.getElementById('roomNumberInput');
+    if (numInput) { numInput.value = ''; numInput.disabled = false; }
+    const floorInput = document.getElementById('roomFloorInput');
+    if (floorInput) floorInput.value = '1';
+    const priceInput = document.getElementById('roomPriceInput');
+    if (priceInput) priceInput.value = '1500000';
+    
+    if (locInput) {
+      locInput.value = 'Lokasi 1';
+      syncRoomTypesForLocation('Lokasi 1');
+    } else {
+      const facInput = document.getElementById('roomFacilitiesInput');
+      if (facInput) facInput.value = 'AC, Springbed, Lemari, Meja Belajar, KM Dalam';
+    }
+
+    const statusInput = document.getElementById('roomStatusInput');
+    if (statusInput) statusInput.value = 'available';
+    const customStatus = document.getElementById('roomCustomInteriorStatusInput');
+    const customBudget = document.getElementById('roomCustomInteriorBudgetInput');
+    const customReq = document.getElementById('roomCustomInteriorRequestInput');
+    const customNotes = document.getElementById('roomCustomInteriorNotesInput');
+    if (customStatus) customStatus.value = 'none';
+    if (customBudget) customBudget.value = 0;
+    if (customReq) customReq.value = '';
+    if (customNotes) customNotes.value = '';
+    
+    // Kosongkan seluruh slot foto sampai admin mengupload foto baru
+    for (let i = 1; i <= 4; i++) {
+      if (typeof window.setRoomPhotoSlot === 'function') {
+        window.setRoomPhotoSlot(i, '');
+      } else {
+        const input = document.getElementById(`roomImageInput${i}`);
+        if (input) input.value = '';
+      }
+    }
+    openModal('modalAddRoom');
+  }
+
   function initRoomForm() {
     const form = document.getElementById('formAddRoom');
     const btnNew = document.getElementById('btnAddNewRoom');
@@ -1620,40 +1837,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     });
 
     btnNew?.addEventListener('click', () => {
-      document.getElementById('mRoomFormTitle').textContent = 'Tambah Master Kamar Baru';
-      document.getElementById('roomEditId').value = '';
-      document.getElementById('roomNumberInput').value = '';
-      document.getElementById('roomNumberInput').disabled = false;
-      document.getElementById('roomFloorInput').value = '1';
-      document.getElementById('roomPriceInput').value = '1500000';
-      
-      if (locInput) {
-        locInput.value = 'Lokasi 1';
-        syncRoomTypesForLocation('Lokasi 1');
-      } else {
-        document.getElementById('roomFacilitiesInput').value = 'AC, Springbed, Lemari, Meja Belajar, KM Dalam';
-      }
-
-      document.getElementById('roomStatusInput').value = 'available';
-      const customStatus = document.getElementById('roomCustomInteriorStatusInput');
-      const customBudget = document.getElementById('roomCustomInteriorBudgetInput');
-      const customReq = document.getElementById('roomCustomInteriorRequestInput');
-      const customNotes = document.getElementById('roomCustomInteriorNotesInput');
-      if (customStatus) customStatus.value = 'none';
-      if (customBudget) customBudget.value = 0;
-      if (customReq) customReq.value = '';
-      if (customNotes) customNotes.value = '';
-      
-      // Kosongkan seluruh slot foto sampai admin mengupload foto baru
-      for (let i = 1; i <= 4; i++) {
-        if (typeof window.setRoomPhotoSlot === 'function') {
-          window.setRoomPhotoSlot(i, '');
-        } else {
-          const input = document.getElementById(`roomImageInput${i}`);
-          if (input) input.value = '';
-        }
-      }
-      openModal('modalAddRoom');
+      openAddRoomModal();
     });
 
     form?.addEventListener('submit', async (e) => {
@@ -1748,10 +1932,15 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   // --- ADD TENANT MODAL ---
   function openAddTenantModal(targetRoomNumber = null) {
     const select = document.getElementById('tenantSelectRoom');
+    if (!select) return;
     select.innerHTML = '';
 
-    const loc1Rooms = appData.rooms.filter(r => (r.location || 'Lokasi 1') === 'Lokasi 1');
-    const loc2Rooms = appData.rooms.filter(r => r.location === 'Lokasi 2');
+    // Hanya tampilkan kamar yang berstatus kosong (available)
+    const availRooms = appData.rooms.filter(r => r.status === 'available' || (targetRoomNumber && String(r.number) === String(targetRoomNumber)));
+    const loc1Rooms = availRooms.filter(r => (r.location || 'Lokasi 1') === 'Lokasi 1');
+    const loc2Rooms = availRooms.filter(r => r.location === 'Lokasi 2');
+
+    let totalAvailCount = 0;
 
     if (loc1Rooms.length > 0) {
       const grp1 = document.createElement('optgroup');
@@ -1760,9 +1949,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         const opt = document.createElement('option');
         opt.value = r.id;
         opt.setAttribute('data-number', r.number);
-        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? 'Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
-        if (targetRoomNumber && r.number === targetRoomNumber) opt.selected = true;
+        opt.setAttribute('data-price', r.price);
+        opt.textContent = `Kamar #${r.number} (${r.type}) - Tersedia (${formatRupiah(r.price)}/bln)`;
+        if (targetRoomNumber && String(r.number) === String(targetRoomNumber)) opt.selected = true;
         grp1.appendChild(opt);
+        totalAvailCount++;
       });
       select.appendChild(grp1);
     }
@@ -1774,16 +1965,27 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         const opt = document.createElement('option');
         opt.value = r.id;
         opt.setAttribute('data-number', r.number);
-        opt.textContent = `Kamar #${r.number} (${r.type}) - ${r.status === 'available' ? 'Tersedia' : 'Terisi: ' + (r.tenant || '')}`;
-        if (targetRoomNumber && r.number === targetRoomNumber) opt.selected = true;
+        opt.setAttribute('data-price', r.price);
+        opt.textContent = `Kamar #${r.number} (${r.type}) - Tersedia (${formatRupiah(r.price)}/bln)`;
+        if (targetRoomNumber && String(r.number) === String(targetRoomNumber)) opt.selected = true;
         grp2.appendChild(opt);
+        totalAvailCount++;
       });
       select.appendChild(grp2);
     }
 
+    if (totalAvailCount === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.disabled = true;
+      opt.selected = true;
+      opt.textContent = 'Tidak ada kamar kosong yang tersedia saat ini';
+      select.appendChild(opt);
+    }
+
     function updateRentTariff() {
       const selectedId = select.value;
-      const found = appData.rooms.find(r => r.id === selectedId);
+      const found = appData.rooms.find(r => String(r.id) === String(selectedId));
       if (found) {
         document.getElementById('tenantRentAmount').value = found.price;
       }
@@ -1813,15 +2015,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('tenantFullName').value.trim();
-      const phone = document.getElementById('tenantPhone').value.trim();
       const email = document.getElementById('tenantEmail')?.value.trim() || '';
       const password = document.getElementById('tenantPassword')?.value.trim() || '';
-      const idCard = document.getElementById('tenantIdNumber').value.trim();
       const roomId = document.getElementById('tenantSelectRoom').value;
       const startDate = document.getElementById('tenantStartDate').value;
       const dueDay = Number(document.getElementById('tenantDueDay').value);
       const rentAmount = Number(document.getElementById('tenantRentAmount').value);
-      const emergencyContact = document.getElementById('tenantEmergencyContact').value.trim();
 
       try {
         const res = await fetch('/api/tenants', {
@@ -1834,13 +2033,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
             name,
             email,
             password,
-            phone,
-            id_card: idCard,
+            phone: '-',
             room_id: roomId,
             start_date: startDate,
             due_day: dueDay,
-            rent_amount: rentAmount,
-            emergency_contact: emergencyContact
+            rent_amount: rentAmount
           })
         });
 
@@ -1848,23 +2045,35 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
         if (res.ok && resData.success) {
           showToast(`Penghuni ${name} dan akun login berhasil didaftarkan!`, 'success');
+          const room = appData.rooms.find(r => String(r.id) === String(roomId));
+          if (room) {
+            room.status = 'occupied';
+            room.tenant = name;
+            room.phone = '-';
+            room.startDate = startDate;
+            room.dueDay = dueDay;
+            room.price = rentAmount;
+          }
+          if (resData.tenant) {
+            appData.tenants = [resData.tenant, ...(appData.tenants || [])];
+          }
           await fetchServerData();
+          renderTenantsTable('', 'all', activeTenantLocationFilter, true);
+          renderRoomGrid();
           closeModal('modalAddTenant');
           form.reset();
 
-          if (resData.user && resData.user.wa_creds_url) {
-            let sendWa = false;
-            if (typeof window.showModernConfirm === 'function') {
-              sendWa = await window.showModernConfirm(
-                `Akun penghuni ${name} berhasil dibuat!\n\nEmail Login: ${resData.user.email}\nPassword: ${resData.user.plain_password}\n\nKirim informasi akun ini ke WhatsApp penghuni sekarang?`,
-                { title: 'Kirim Kredensial via WhatsApp', okText: 'Kirim ke WhatsApp', cancelText: 'Nanti Saja', danger: false }
-              );
-            } else {
-              sendWa = confirm(`Akun penghuni ${name} berhasil dibuat!\n\nEmail Login: ${resData.user.email}\nPassword: ${resData.user.plain_password}\n\nKirim informasi akun ini ke WhatsApp penghuni sekarang?`);
-            }
-            if (sendWa) {
-              window.open(resData.user.wa_creds_url, '_blank');
-            }
+          if (resData.user) {
+            const elName = document.getElementById('mCredTenantName');
+            const elRoom = document.getElementById('mCredTenantRoom');
+            const elEmail = document.getElementById('mCredTenantEmail');
+            const elPass = document.getElementById('mCredTenantPassword');
+            if (elName) elName.textContent = resData.user.name || name;
+            if (elRoom) elRoom.textContent = resData.user.room_info || ('Kamar #' + roomId);
+            if (elEmail) elEmail.textContent = resData.user.email;
+            if (elPass) elPass.textContent = resData.user.plain_password;
+            window.createdTenantCredsText = `Halo ${resData.user.name || name},\nBerikut akun portal anak kos Anda:\n• Unit: ${resData.user.room_info || ('Kamar #' + roomId)}\n• Email: ${resData.user.email}\n• Kata Sandi: ${resData.user.plain_password}\n• Link Portal: ${resData.user.login_url || window.location.origin + '/login'}\n\nSilakan login ke portal anak kos untuk melengkapi data diri Anda.`;
+            openModal('modalTenantCreatedCredentials');
           }
           return;
         } else {
@@ -1879,7 +2088,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const room = appData.rooms.find(r => r.id === roomId);
       if (room) {
         room.tenant = name;
-        room.phone = phone;
+        room.phone = '-';
         room.startDate = startDate;
         room.dueDay = dueDay;
         room.price = rentAmount;
@@ -1914,23 +2123,22 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     if (!confirmed) return;
 
     try {
-        await fetch(`/api/tenants/${room.id}/checkout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': getCsrfToken()
-          }
-        });
-        await fetchServerData();
-      } catch (e) {
-        room.tenant = null;
-        room.phone = '';
-        room.startDate = '';
-        room.status = 'available';
-        renderAllViews();
-      }
-      showToast(`Kamar #${roomNumber} sekarang telah dikosongkan.`, 'info');
+      await fetch(`/api/tenants/${room.id}/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': getCsrfToken()
+        }
+      });
+      await fetchServerData();
+    } catch (e) {
+      room.tenant = null;
+      room.phone = '';
+      room.startDate = '';
+      room.status = 'available';
+      renderAllViews();
     }
+    showToast(`Kamar #${roomNumber} sekarang telah dikosongkan.`, 'info');
   }
 
   // --- TRANSACTION MODAL ---
@@ -2030,16 +2238,18 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           const txYear = parseFinanceYearMonth(date).year;
           const selectYearEl = document.getElementById('selectFinanceYear');
           if (selectYearEl && txYear) {
-            if (![...selectYearEl.options].some(o => parseInt(o.value, 10) === txYear)) {
-              const opt = document.createElement('option');
-              opt.value = txYear;
-              opt.textContent = 'Tahun ' + txYear;
-              selectYearEl.appendChild(opt);
-            }
             selectYearEl.value = txYear;
+          }
+          const inputYearEl = document.getElementById('inputFinanceYear');
+          if (inputYearEl && txYear) {
+            inputYearEl.value = txYear;
+            window.currentActiveFinanceYear = txYear;
           }
           showToast(`Transaksi ${formatRupiah(amount)} berhasil disimpan di Laravel!`, 'success');
           await fetchServerData();
+          if (typeof window.fetchLiveNotifications === 'function') {
+            window.fetchLiveNotifications();
+          }
           closeModal('modalTransaction');
           form.reset();
 
@@ -2118,16 +2328,13 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   }
 
   // --- MAINTENANCE CONTROLLER ---
-  function initMaintenanceForm() {
-    const form = document.getElementById('formRepairTicket');
-    const btnNew = document.getElementById('btnNewRepairTicket');
-
-    btnNew?.addEventListener('click', () => {
-      const select = document.getElementById('repairRoomSelect');
+  function openRepairTicketModal() {
+    const select = document.getElementById('repairRoomSelect');
+    if (select) {
       select.innerHTML = '';
 
-      const loc1Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 1');
-      const loc2Rooms = appData.rooms.filter(r => resolveRoomLocation(r) === 'Lokasi 2');
+      const loc1Rooms = (appData.rooms || []).filter(r => resolveRoomLocation(r) === 'Lokasi 1');
+      const loc2Rooms = (appData.rooms || []).filter(r => resolveRoomLocation(r) === 'Lokasi 2');
 
       if (loc1Rooms.length > 0) {
         const grp1 = document.createElement('optgroup');
@@ -2152,8 +2359,17 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         });
         select.appendChild(grp2);
       }
+    }
 
-      openModal('modalRepairTicket');
+    openModal('modalRepairTicket');
+  }
+
+  function initMaintenanceForm() {
+    const form = document.getElementById('formRepairTicket');
+    const btnNew = document.getElementById('btnNewRepairTicket');
+
+    btnNew?.addEventListener('click', () => {
+      openRepairTicketModal();
     });
 
     form?.addEventListener('submit', async (e) => {
@@ -2207,16 +2423,54 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   }
 
   async function updateRepairStatus(ticketCode, newStatus) {
-    const ticket = appData.maintenance.find(m => m.id === ticketCode);
-    if (!ticket) return;
-    ticket.status = newStatus;
+    if (appData && Array.isArray(appData.maintenance)) {
+      const ticket = appData.maintenance.find(m => String(m.id) === String(ticketCode));
+      if (ticket) ticket.status = newStatus;
+    }
+
+    // Direct DOM update on table row & mobile card
+    const selectEls = document.querySelectorAll('select');
+    selectEls.forEach(selectEl => {
+      const onch = selectEl.getAttribute('onchange') || '';
+      if (onch.includes(ticketCode)) {
+        selectEl.value = newStatus;
+        const row = selectEl.closest('tr');
+        if (row) {
+          const cell = row.querySelector('.maint-status-col') || (selectEl.closest('td') ? selectEl.closest('td').previousElementSibling : null);
+          if (cell) {
+            if (newStatus === 'done') {
+              cell.innerHTML = '<span class="status-badge occupied">Selesai</span>';
+            } else if (newStatus === 'progress') {
+              cell.innerHTML = '<span class="status-badge due">Dalam Proses</span>';
+            } else {
+              cell.innerHTML = '<span class="status-badge repair">Menunggu</span>';
+            }
+          }
+          row.setAttribute('data-status', newStatus);
+        }
+        const mobileCard = selectEl.closest('.mobile-data-card');
+        if (mobileCard) {
+          const cardBadgeWrap = mobileCard.querySelector('.maint-card-badge') || mobileCard.querySelector('.mobile-data-header .status-badge');
+          if (cardBadgeWrap) {
+            if (cardBadgeWrap.classList.contains('maint-card-badge')) {
+              cardBadgeWrap.innerHTML = `<span class="status-badge ${newStatus === 'done' ? 'occupied' : (newStatus === 'progress' ? 'due' : 'repair')}">${newStatus === 'done' ? 'Selesai' : (newStatus === 'progress' ? 'Dalam Proses' : 'Menunggu')}</span>`;
+            } else {
+              cardBadgeWrap.className = `status-badge ${newStatus === 'done' ? 'occupied' : (newStatus === 'progress' ? 'due' : 'repair')}`;
+              cardBadgeWrap.textContent = newStatus === 'done' ? 'Selesai' : (newStatus === 'progress' ? 'Dalam Proses' : 'Menunggu');
+            }
+          }
+          mobileCard.setAttribute('data-status', newStatus);
+        }
+      }
+    });
 
     try {
       await fetch(`/api/maintenance/${ticketCode}/status`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-TOKEN': getCsrfToken()
+          'X-CSRF-TOKEN': getCsrfToken(),
+          'Accept': 'application/json'
         },
         body: JSON.stringify({ status: newStatus })
       });
@@ -2224,8 +2478,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       console.warn('Status updated locally');
     }
 
-    renderAllViews();
-    showToast(`Status Tiket #${ticketCode} diubah menjadi ${newStatus}.`, 'info');
+    const label = newStatus === 'done' ? 'Selesai' : (newStatus === 'progress' ? 'Dalam Proses' : 'Menunggu');
+    showToast(`Status Tiket #${ticketCode} diubah menjadi ${label}.`, 'info');
+    if (typeof window.fetchLiveNotifications === 'function') {
+      window.fetchLiveNotifications();
+    }
   }
 
   // --- SETTINGS, BACKUP & RESTORE ---
@@ -2233,6 +2490,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const profileForm = document.getElementById('settingsProfileForm');
     const generalProfileForm = document.getElementById('settingsGeneralProfileForm');
     const landingForm = document.getElementById('landingPageEditorForm');
+    const loginPageForm = document.getElementById('loginPageEditorForm');
     const bankForm = document.getElementById('settingsBankForm');
     const btnExport = document.getElementById('btnExportData');
     const btnReset = document.getElementById('btnResetData');
@@ -2316,6 +2574,96 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         if (btn) btn.disabled = false;
       }
     });
+
+    // Save Login Page Form
+    loginPageForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSaveLoginPage');
+      const btnBottom = document.getElementById('btnSaveLoginPageBottom');
+      const statusEl = document.getElementById('loginPageSaveStatus');
+      if (btn) btn.disabled = true;
+      if (btnBottom) btnBottom.disabled = true;
+      if (statusEl) {
+        statusEl.textContent = 'Menyimpan...';
+        statusEl.style.color = '#0a5661';
+      }
+
+      const formData = new FormData(loginPageForm);
+      try {
+        const res = await fetch('/api/settings/login-page', {
+          method: 'POST',
+          headers: {
+            'X-CSRF-TOKEN': getCsrfToken()
+          },
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || 'Pengaturan tampilan Login Page berhasil disimpan!', 'success');
+          if (statusEl) {
+            statusEl.textContent = 'Tersimpan!';
+            statusEl.style.color = '#10b981';
+            setTimeout(() => { statusEl.textContent = ''; }, 3000);
+          }
+        } else {
+          showToast(data.message || 'Gagal menyimpan pengaturan', 'warning');
+          if (statusEl) statusEl.textContent = '';
+        }
+      } catch (err) {
+        showToast('Gagal terhubung ke server', 'warning');
+        if (statusEl) statusEl.textContent = '';
+      } finally {
+        if (btn) btn.disabled = false;
+        if (btnBottom) btnBottom.disabled = false;
+      }
+    });
+
+    window.updateLoginPreview = function() {
+      const brand = document.getElementById('lp_brand_title');
+      const headline = document.getElementById('lp_headline');
+      const desc = document.getElementById('lp_desc');
+      const f1 = document.getElementById('lp_feature_1');
+      const f2 = document.getElementById('lp_feature_2');
+      const f3 = document.getElementById('lp_feature_3');
+      const nTitle = document.getElementById('lp_notice_title');
+      const nText = document.getElementById('lp_notice_text');
+      const nBtn = document.getElementById('lp_notice_btn_text');
+
+      const pBrand = document.getElementById('prevBrandTitle');
+      const pHead = document.getElementById('prevHeadline');
+      const pDesc = document.getElementById('prevDesc');
+      const pF1 = document.getElementById('prevFeat1');
+      const pF2 = document.getElementById('prevFeat2');
+      const pF3 = document.getElementById('prevFeat3');
+      const pNTitle = document.getElementById('prevNoticeTitle');
+      const pNText = document.getElementById('prevNoticeText');
+      const pNBtn = document.getElementById('prevNoticeBtnText');
+
+      if (pBrand && brand) pBrand.textContent = brand.value || 'SMART LIVING';
+      if (pHead && headline) pHead.innerHTML = (headline.value || 'Smart Living & Kost Eksklusif').replace(/\n/g, '<br>');
+      if (pDesc && desc) pDesc.textContent = desc.value || '';
+      if (pF1 && f1) pF1.textContent = f1.value || '';
+      if (pF2 && f2) pF2.textContent = f2.value || '';
+      if (pF3 && f3) pF3.textContent = f3.value || '';
+      if (pNTitle && nTitle) pNTitle.textContent = nTitle.value || 'Belum Memiliki Akun?';
+      if (pNText && nText) pNText.textContent = nText.value || '';
+      if (pNBtn && nBtn) pNBtn.textContent = nBtn.value || 'Hubungi Admin via WhatsApp';
+    };
+
+    window.resetLoginPageDefaults = function() {
+      if (!confirm('Kembalikan seluruh teks Login Page ke template standar sistem?')) return;
+      const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      setVal('lp_brand_title', 'SMART LIVING');
+      setVal('lp_headline', "Smart Living &\nKost Eksklusif");
+      setVal('lp_desc', 'Sistem manajemen hunian modern, nyaman, full furnished, dan aman 24 jam di Sleman, DI Yogyakarta.');
+      setVal('lp_feature_1', 'Akses Portal Layanan Penghuni 24 Jam');
+      setVal('lp_feature_2', 'Konfirmasi Pembayaran & Kuitansi Digital');
+      setVal('lp_feature_3', 'Smart Key Mandiri & CCTV Seluruh Lorong');
+      setVal('lp_notice_title', 'Belum Memiliki Akun?');
+      setVal('lp_notice_text', 'Pembuatan akun baru hanya dilakukan langsung oleh Admin saat penempatan kamar.');
+      setVal('lp_notice_btn_text', 'Hubungi Admin via WhatsApp');
+      window.updateLoginPreview();
+    };
 
     // Switcher 2 Titik Lokasi Settings
     window.switchBranchSettings = function(branchKey) {
@@ -2421,6 +2769,39 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       renderAllViews();
     });
 
+    // Preview photo branch on file change
+    window.previewBranchFile = function(inputEl, previewImgId) {
+      const file = inputEl.files && inputEl.files[0];
+      if (file) {
+        const img = document.getElementById(previewImgId);
+        if (img) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            img.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+    };
+
+    // Update branch active state badges in settings
+    window.updateBranchActiveState = function(branchKey, isChecked) {
+      const badgeId = (branchKey === 'lokasi_2') ? 'badgeB2Active' : 'badgeB1Active';
+      const tabBadgeId = (branchKey === 'lokasi_2') ? 'badgeStatusTabB2' : 'badgeStatusTabB1';
+      const badge = document.getElementById(badgeId);
+      const tabBadge = document.getElementById(tabBadgeId);
+
+      if (badge) {
+        badge.textContent = isChecked ? 'Aktif / Ditampilkan' : 'Disembunyikan';
+        badge.style.background = isChecked ? '#dcfce7' : '#fee2e2';
+        badge.style.color = isChecked ? '#15803d' : '#b91c1c';
+      }
+      if (tabBadge) {
+        tabBadge.textContent = isChecked ? 'Tampil' : 'Disembunyikan';
+        tabBadge.style.background = isChecked ? '#10b981' : '#ef4444';
+      }
+    };
+
     profileForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -2431,6 +2812,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const b1_gmaps_embed = document.getElementById('b1_gmaps_embed')?.value.trim() || '';
       const b1_room_types = (document.getElementById('b1_room_types')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
       const b1_facilities = (document.getElementById('b1_facilities')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+      const b1_is_active = document.getElementById('b1_is_active') ? document.getElementById('b1_is_active').checked : true;
+      const b1_image_url = document.getElementById('b1_image_url')?.value || '';
 
       const b2_name = document.getElementById('b2_name')?.value.trim() || 'Kos Mas Robi 2 - Ringroad Exclusive';
       const b2_tagline = document.getElementById('b2_tagline')?.value.trim() || '';
@@ -2439,6 +2822,8 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       const b2_gmaps_embed = document.getElementById('b2_gmaps_embed')?.value.trim() || '';
       const b2_room_types = (document.getElementById('b2_room_types')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
       const b2_facilities = (document.getElementById('b2_facilities')?.value || '').split(',').map(s => s.trim()).filter(Boolean);
+      const b2_is_active = document.getElementById('b2_is_active') ? document.getElementById('b2_is_active').checked : true;
+      const b2_image_url = document.getElementById('b2_image_url')?.value || '';
 
       const branchesPayload = {
         lokasi_1: {
@@ -2452,7 +2837,9 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           room_types: b1_room_types,
           facilities: b1_facilities,
           badge: b1_name,
-          color: '#0a5661'
+          color: '#0a5661',
+          is_active: b1_is_active,
+          image: b1_image_url
         },
         lokasi_2: {
           id: 'lokasi_2',
@@ -2465,7 +2852,9 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           room_types: b2_room_types,
           facilities: b2_facilities,
           badge: b2_name,
-          color: '#0d9488'
+          color: '#0d9488',
+          is_active: b2_is_active,
+          image: b2_image_url
         }
       };
 
@@ -2479,22 +2868,31 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         highlightItems.push({ icon, title, desc });
       });
 
+      const formData = new FormData();
+      formData.append('branches', JSON.stringify(branchesPayload));
+      formData.append('kos_address', b1_address);
+      formData.append('gmaps_url', b1_gmaps_url);
+      formData.append('location_highlights', JSON.stringify(highlightItems));
+      formData.append('b1_is_active', b1_is_active ? '1' : '0');
+      formData.append('b2_is_active', b2_is_active ? '1' : '0');
+      if (b1_image_url) formData.append('b1_image_url', b1_image_url);
+      if (b2_image_url) formData.append('b2_image_url', b2_image_url);
+
+      const b1File = document.getElementById('branch1_image_file')?.files?.[0];
+      if (b1File) formData.append('branch1_image', b1File);
+      const b2File = document.getElementById('branch2_image_file')?.files?.[0];
+      if (b2File) formData.append('branch2_image', b2File);
+
       try {
         const res = await fetch('/api/settings', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
             'X-CSRF-TOKEN': getCsrfToken()
           },
-          body: JSON.stringify({
-            branches: branchesPayload,
-            kos_address: b1_address,
-            gmaps_url: b1_gmaps_url,
-            location_highlights: highlightItems
-          })
+          body: formData
         });
         const data = await res.json();
-        showToast('Pengaturan 2 Titik Lokasi & Nama Cabang berhasil disinkronkan!', 'success');
+        showToast('Pengaturan Titik Lokasi, Foto Profil & Status Tampilan berhasil disimpan!', 'success');
         
         if (data.setting && data.setting.branches) {
           appData.settings = Object.assign({}, appData.settings, data.setting);
@@ -2506,6 +2904,41 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           if (if2 && data.setting.branches.lokasi_2) {
             if2.src = resolveLiveEmbed(data.setting.branches.lokasi_2.gmaps_embed || data.setting.branches.lokasi_2.gmaps_url, b2_address);
           }
+
+          // Update profile photo previews & dashboard thumbnails
+          if (data.setting.branches.lokasi_1?.image) {
+            const b1Path = '/' + data.setting.branches.lokasi_1.image.replace(/^\/+/, '');
+            const p1 = document.getElementById('previewBranch1Image');
+            const d1 = document.getElementById('dashThumbBranch1');
+            if (p1) p1.src = b1Path;
+            if (d1) d1.src = b1Path;
+            const urlInput1 = document.getElementById('b1_image_url');
+            if (urlInput1) urlInput1.value = data.setting.branches.lokasi_1.image;
+          }
+          if (data.setting.branches.lokasi_2?.image) {
+            const b2Path = '/' + data.setting.branches.lokasi_2.image.replace(/^\/+/, '');
+            const p2 = document.getElementById('previewBranch2Image');
+            const d2 = document.getElementById('dashThumbBranch2');
+            if (p2) p2.src = b2Path;
+            if (d2) d2.src = b2Path;
+            const urlInput2 = document.getElementById('b2_image_url');
+            if (urlInput2) urlInput2.value = data.setting.branches.lokasi_2.image;
+          }
+
+          // Update dashboard branch visibility in DOM
+          const isB1Vis = (data.setting.branches.lokasi_1?.is_active !== false);
+          const isB2Vis = (data.setting.branches.lokasi_2?.is_active !== false);
+          const dashItem1 = document.getElementById('dashBranchItem1');
+          const dashItem2 = document.getElementById('dashBranchItem2');
+          const pillB1 = document.getElementById('filterPillB1');
+          const pillB2 = document.getElementById('filterPillB2');
+          const noticeAllHidden = document.getElementById('dashBranchesAllHiddenNotice');
+
+          if (dashItem1) dashItem1.style.display = isB1Vis ? '' : 'none';
+          if (dashItem2) dashItem2.style.display = isB2Vis ? '' : 'none';
+          if (pillB1) pillB1.style.display = isB1Vis ? '' : 'none';
+          if (pillB2) pillB2.style.display = isB2Vis ? '' : 'none';
+          if (noticeAllHidden) noticeAllHidden.style.display = (!isB1Vis && !isB2Vis) ? 'block' : 'none';
         } else {
           appData.settings.branches = branchesPayload;
         }
@@ -2591,20 +3024,19 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
       if (!confirmed) return;
 
       try {
-          const res = await fetch('/api/reset', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-CSRF-TOKEN': getCsrfToken()
-            }
-          });
-          if (res.ok) {
-            showToast('Database berhasil direset ke data sampel!', 'success');
-            await fetchServerData();
+        const res = await fetch('/api/reset', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': getCsrfToken()
           }
-        } catch (e) {
-          showToast('Gagal mereset database', 'warning');
+        });
+        if (res.ok) {
+          showToast('Database berhasil direset ke data sampel!', 'success');
+          await fetchServerData();
         }
+      } catch (e) {
+        showToast('Gagal mereset database', 'warning');
       }
     });
   }
@@ -2622,9 +3054,20 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     const roomSearch = document.getElementById('roomSearchInput');
     let currentFloor = 'all';
     let currentLocation = 'all';
+    let currentStatus = 'all';
 
     roomSearch?.addEventListener('input', (e) => {
-      renderRoomsMasterTable(e.target.value, currentFloor, currentLocation);
+      renderRoomsMasterTable(e.target.value, currentFloor, currentLocation, currentStatus);
+    });
+
+    document.querySelectorAll('#roomStatusMasterFilters .filter-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#roomStatusMasterFilters .filter-pill').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatus = btn.getAttribute('data-rstatus') || 'all';
+        window.currentRoomStatus = currentStatus;
+        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation, currentStatus);
+      });
     });
 
     document.querySelectorAll('#roomTabFilters .filter-pill').forEach(btn => {
@@ -2632,7 +3075,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         document.querySelectorAll('#roomTabFilters .filter-pill').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentFloor = btn.getAttribute('data-floor');
-        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation);
+        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation, currentStatus);
       });
     });
 
@@ -2651,7 +3094,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
         btn.style.color = '#ffffff';
         btn.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
         btn.style.border = 'none';
-        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation);
+        renderRoomsMasterTable(roomSearch?.value || '', currentFloor, currentLocation, currentStatus);
       });
     });
 
@@ -2736,7 +3179,7 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     try { syncBranchNamesInDOM(); } catch (e) { console.error('Error in syncBranchNamesInDOM:', e); }
     try { renderRoomGrid(); } catch (e) { console.error('Error in renderRoomGrid:', e); }
     try { renderRoomsMasterTable(); } catch (e) { console.error('Error in renderRoomsMasterTable:', e); }
-    try { renderTenantsTable('', 'all', activeTenantLocationFilter); } catch (e) { console.error('Error in renderTenantsTable:', e); }
+    try { renderTenantsTable('', 'all', activeTenantLocationFilter, true); } catch (e) { console.error('Error in renderTenantsTable:', e); }
     try { renderFinancesTable('', 'all', activeFinanceLocationFilter); } catch (e) { console.error('Error in renderFinancesTable:', e); }
     try { renderMaintenanceTable('', 'all', activeMaintLocationFilter); } catch (e) { console.error('Error in renderMaintenanceTable:', e); }
     try { updateDashboardStats(); } catch (e) { console.error('Error in updateDashboardStats:', e); }
@@ -2769,6 +3212,26 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
           phone: r.active_tenant ? (r.active_tenant.phone || '') : (r.phone || ''),
           startDate: r.active_tenant ? (r.active_tenant.start_date ? String(r.active_tenant.start_date).substring(0, 10) : '') : (r.startDate || ''),
           dueDay: r.active_tenant ? (r.active_tenant.due_day || 1) : (r.dueDay || r.due_day || 1)
+        }));
+      }
+      if (Array.isArray(data.tenants) && data.tenants.length > 0) {
+        appData.tenants = data.tenants.map(t => ({
+          id: t.id,
+          name: t.name,
+          phone: t.phone || '',
+          idCard: t.id_card || '',
+          roomId: t.room_id,
+          roomNumber: t.room ? t.room.number : '',
+          roomType: t.room ? t.room.type : '',
+          roomFloor: t.room ? t.room.floor : 1,
+          roomPrice: t.room ? Number(t.room.price) : Number(t.rent_amount || 0),
+          location: t.room ? (t.room.location || 'Lokasi 1') : 'Lokasi 1',
+          startDate: t.start_date ? String(t.start_date).substring(0, 10) : '',
+          dueDay: t.due_day || 1,
+          rentAmount: Number(t.rent_amount || 0),
+          emergencyContact: t.emergency_contact || '',
+          status: t.status,
+          roomStatus: t.room ? t.room.status : 'occupied'
         }));
       }
       if (Array.isArray(data.finances) && data.finances.length > 0) {
@@ -2832,10 +3295,12 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     safeRun('initSearchListeners', initSearchListeners);
     safeRun('loadInitialAdminData', loadInitialAdminData);
 
-    try {
-      await fetchServerData();
-    } catch (e) {
-      console.warn('fetchServerData error:', e);
+    if (!window.initialAdminData || !window.initialAdminData.rooms || window.initialAdminData.rooms.length === 0) {
+      try {
+        await fetchServerData();
+      } catch (e) {
+        console.warn('fetchServerData error:', e);
+      }
     }
     console.log('Kos Mas Robi Laravel System initialized.');
   }
@@ -2852,6 +3317,11 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
     sendWhatsAppReminder,
     assignNewTenantToRoom,
     checkoutTenant,
+    editTenant: (tenantId, roomNumber) => {
+      if (typeof window.openEditTenantModal === 'function') {
+        window.openEditTenantModal(tenantId, roomNumber);
+      }
+    },
     recordPaymentForRoom,
     showReceiptModal,
     updateRepairStatus,
@@ -2864,6 +3334,9 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
 
   window.openTransactionModal = openTransactionModal;
   window.openRoomDetailModal = openRoomDetailModal;
+  window.openAddRoomModal = openAddRoomModal;
+  window.openAddTenantModal = openAddTenantModal;
+  window.openRepairTicketModal = openRepairTicketModal;
   window.openModal = openModal;
   window.closeModal = closeModal;
   window.switchTab = switchTab;
@@ -2878,6 +3351,23 @@ Mohon konfirmasi dengan mengirimkan bukti transfer jika sudah melakukan pembayar
   window.renderMaintenanceTable = renderMaintenanceTable;
   window.renderRoomsMasterTable = renderRoomsMasterTable;
   window.renderTenantsTable = renderTenantsTable;
+
+  window.copyCreatedTenantCreds = function(btn) {
+    const text = window.createdTenantCredsText || '';
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      const origHtml = btn.innerHTML;
+      btn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Tersalin!</span>
+      `;
+      setTimeout(() => {
+        btn.innerHTML = origHtml;
+      }, 2500);
+    }).catch(() => {
+      prompt('Salin kredensial akun anak kos:', text);
+    });
+  };
 
   if (document.getElementById('appSidebar') || document.readyState !== 'loading') {
     init();

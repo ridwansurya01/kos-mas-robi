@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 use App\Models\Room;
 use App\Models\Tenant;
 use App\Models\Finance;
@@ -36,8 +38,21 @@ class TenantPortalController extends Controller
         }
 
         // Get Room info for this tenant
-        $room = $user->room ?? Room::where('number', '102')->first();
-        $tenant = Tenant::where('room_id', $room?->id)->where('status', 'active')->first();
+        $room = $user->room;
+        $tenant = $room ? ($room->activeTenant ?? Tenant::where('room_id', $room->id)->where('status', 'active')->first()) : null;
+
+        // Customer is considered actively registered in a room if:
+        // 1. $user->room_id is not empty
+        // 2. $room exists and has status 'occupied' or 'due'
+        // 3. The room's tenant record is not marked inactive (or has an active tenant)
+        $hasActiveRoom = false;
+        if (!empty($user->room_id) && $room && in_array($room->status, ['occupied', 'due'])) {
+            $hasInactive = Tenant::where('room_id', $room->id)->where('status', 'inactive')->exists();
+            $hasActive = Tenant::where('room_id', $room->id)->where('status', 'active')->exists();
+            if ($hasActive || !$hasInactive) {
+                $hasActiveRoom = true;
+            }
+        }
 
         $setting = Setting::first() ?? new Setting();
 
@@ -50,15 +65,19 @@ class TenantPortalController extends Controller
         }
 
         // Check recent payment receipts for this room that have been verified and sent by Admin
-        $recentPayments = Finance::where('room_id', $room?->id)
-            ->where('type', 'income')
-            ->where('is_sent_to_tenant', true)
-            ->orderBy('date', 'desc')
-            ->get();
+        $recentPayments = ($room && $hasActiveRoom)
+            ? Finance::where('room_id', $room->id)
+                ->where('type', 'income')
+                ->where('is_sent_to_tenant', true)
+                ->orderBy('date', 'desc')
+                ->get()
+            : collect();
 
-        $myTickets = MaintenanceTicket::where('room_id', $room?->id)
-            ->orderBy('report_date', 'desc')
-            ->get();
+        $myTickets = ($room && $hasActiveRoom)
+            ? MaintenanceTicket::where('room_id', $room->id)
+                ->orderBy('report_date', 'desc')
+                ->get()
+            : collect();
 
         $myTransfers = RoomTransfer::where('user_id', $user->id)
             ->with(['currentRoom', 'targetRoom'])
@@ -105,6 +124,8 @@ class TenantPortalController extends Controller
         $branches = $setting->branches ?? Setting::defaultBranches();
         $tenantBranch = $branches[$tenantBranchKey] ?? ($branches['lokasi_1'] ?? null);
 
+        $isProfileComplete = $this->isProfileComplete($user, $tenant);
+
         return view('tenant.portal', compact(
             'user',
             'room',
@@ -127,7 +148,9 @@ class TenantPortalController extends Controller
             'recentPayments',
             'myTickets',
             'myTransfers',
-            'greeting'
+            'greeting',
+            'hasActiveRoom',
+            'isProfileComplete'
         ));
     }
 
@@ -137,6 +160,12 @@ class TenantPortalController extends Controller
     public function submitPayment(Request $request)
     {
         $user = Auth::user();
+        if ($user && $user->isTenant() && !$this->isProfileComplete($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses pembayaran ditangguhkan. Silakan lengkapi formulir data diri Anda terlebih dahulu.'
+            ], 403);
+        }
         $isCash = str_contains(strtolower($request->input('payment_method', '')), 'tunai') 
                || str_contains(strtolower($request->input('payment_method', '')), 'cash');
 
@@ -164,7 +193,7 @@ class TenantPortalController extends Controller
 
         $validated = $request->validate($rules, $messages);
 
-        $room = $user->room ?? Room::where('number', '102')->first();
+        $room = $user->room;
         $userTimezone = in_array(strtoupper($validated['timezone'] ?? ''), ['WIB', 'WITA', 'WIT']) 
             ? strtoupper($validated['timezone']) 
             : 'WIB';
@@ -243,12 +272,41 @@ class TenantPortalController extends Controller
     public function submitComplaint(Request $request)
     {
         $user = Auth::user();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        if ($user->isTenant() && !$this->isProfileComplete($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses fitur ditangguhkan. Silakan lengkapi formulir data diri Anda terlebih dahulu.'
+            ], 403);
+        }
+
+        $room = $user->room;
+        $hasActiveRoom = false;
+        if (!empty($user->room_id) && $room && in_array($room->status, ['occupied', 'due'])) {
+            $hasInactive = Tenant::where('room_id', $room->id)->where('status', 'inactive')->exists();
+            $hasActive = Tenant::where('room_id', $room->id)->where('status', 'active')->exists();
+            if ($hasActive || !$hasInactive) {
+                $hasActiveRoom = true;
+            }
+        }
+
+        if (!$hasActiveRoom) {
+            $errorMsg = 'Fitur Keluhan & Servis hanya dapat digunakan oleh customer yang terdaftar aktif di kamar kos. Akun Anda belum dikaitkan ke unit kamar aktif atau masa sewa telah selesai.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMsg,
+                ], 403);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
         $validated = $request->validate([
             'issue_description' => 'required|string',
             'priority' => 'required|string',
         ]);
-
-        $room = $user->room ?? Room::where('number', '102')->first();
 
         $ticket = MaintenanceTicket::create([
             'ticket_code' => 'TK-' . rand(100, 999),
@@ -290,9 +348,23 @@ class TenantPortalController extends Controller
             'origin_address' => 'nullable|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'required|string|max:25',
+            'id_card' => 'nullable|string|max:40',
+            'id_card_photo' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'emergency_contact' => 'nullable|string|max:255',
             'avatar_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'avatar_preset' => 'nullable|string',
         ]);
+
+        if ($request->hasFile('id_card_photo')) {
+            $file = $request->file('id_card_photo');
+            $idCardDir = public_path('assets/images/id_cards');
+            if (!file_exists($idCardDir)) {
+                mkdir($idCardDir, 0755, true);
+            }
+            $filename = 'id_card_' . $user->id . '_' . time() . '_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
+            $file->move($idCardDir, $filename);
+            $user->id_card_photo = 'assets/images/id_cards/' . $filename;
+        }
 
         if ($request->hasFile('avatar_file')) {
             $file = $request->file('avatar_file');
@@ -321,12 +393,21 @@ class TenantPortalController extends Controller
         $user->phone = $validated['phone'];
         $user->save();
 
-        // Also sync name & phone to active tenant record if exists
+        // Also sync name, phone, id_card & emergency_contact to active tenant record if exists
         if ($user->room_id) {
             $tenant = Tenant::where('room_id', $user->room_id)->where('status', 'active')->first();
             if ($tenant) {
                 $tenant->name = $user->name;
                 $tenant->phone = $user->phone;
+                if ($request->filled('id_card')) {
+                    $tenant->id_card = $request->input('id_card');
+                }
+                if ($user->id_card_photo) {
+                    $tenant->id_card_photo = $user->id_card_photo;
+                }
+                if ($request->filled('emergency_contact')) {
+                    $tenant->emergency_contact = $request->input('emergency_contact');
+                }
                 $tenant->save();
             }
         }
@@ -355,7 +436,25 @@ class TenantPortalController extends Controller
     public function requestCustomInterior(Request $request, $id)
     {
         $user = Auth::user();
-        $room = Room::findOrFail($id);
+        if ($user && $user->isTenant() && !$this->isProfileComplete($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses fitur ditangguhkan. Silakan lengkapi formulir data diri Anda terlebih dahulu.'
+            ], 403);
+        }
+        $room = Room::with('activeTenant')->findOrFail($id);
+
+        // Kamar yang sudah terisi, disewa, atau dibooking oleh orang lain TIDAK BISA dipesan
+        if ($room->status !== 'available' || $room->activeTenant || (!empty($room->booked_by_user_id) && $room->booked_by_user_id != $user->id)) {
+            $errorMsg = 'Maaf, Kamar #' . $room->number . ' saat ini sudah terisi atau disewa oleh penghuni lain. Pemesanan hanya dapat dilakukan untuk kamar yang kosong dan tersedia.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMsg,
+                ], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
 
         $validated = $request->validate([
             'custom_interior_request' => 'required|string|max:1000',
@@ -392,6 +491,33 @@ class TenantPortalController extends Controller
         if (!$user) {
             return redirect()->route('login');
         }
+        if ($user->isTenant() && !$this->isProfileComplete($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses fitur ditangguhkan. Silakan lengkapi formulir data diri Anda terlebih dahulu.'
+            ], 403);
+        }
+
+        $room = $user->room;
+        $hasActiveRoom = false;
+        if (!empty($user->room_id) && $room && in_array($room->status, ['occupied', 'due'])) {
+            $hasInactive = Tenant::where('room_id', $room->id)->where('status', 'inactive')->exists();
+            $hasActive = Tenant::where('room_id', $room->id)->where('status', 'active')->exists();
+            if ($hasActive || !$hasInactive) {
+                $hasActiveRoom = true;
+            }
+        }
+
+        if (!$hasActiveRoom) {
+            $errorMsg = 'Fitur Pindah Kamar hanya dapat digunakan oleh customer yang terdaftar aktif di kamar kos. Akun Anda belum dikaitkan ke unit kamar aktif atau masa sewa telah selesai.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMsg,
+                ], 403);
+            }
+            return back()->with('error', $errorMsg);
+        }
 
         $request->validate([
             'target_room_id' => 'required|exists:rooms,id',
@@ -399,17 +525,41 @@ class TenantPortalController extends Controller
             'preferred_date' => 'nullable|date',
         ]);
 
-        $currentRoom = $user->room ?? Room::where('number', '102')->first();
-        $tenant = Tenant::where('room_id', $currentRoom?->id)->where('status', 'active')->first();
+        $currentRoom = $room;
+        $tenant = Tenant::where('room_id', $currentRoom->id)->where('status', 'active')->first();
 
         if ($currentRoom && $request->target_room_id == $currentRoom->id) {
             return back()->with('error', 'Kamar tujuan tidak boleh sama dengan kamar Anda saat ini.');
         }
 
+        $targetRoom = Room::with('activeTenant')->findOrFail($request->target_room_id);
+
+        // Validasi: Kamar tujuan HARUS berstatus available, belum disewa siapapun, dan belum dibooking
+        if ($targetRoom->status !== 'available' || $targetRoom->activeTenant || !empty($targetRoom->booked_by_user_id)) {
+            $errorMsg = 'Maaf, Kamar #' . $targetRoom->number . ' saat ini sudah terisi atau sudah disewa oleh orang lain. Pindah kamar hanya dapat diajukan ke kamar kosong yang tersedia.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $errorMsg], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
+        // Cek apakah ada pengajuan mutasi lain yang pending untuk kamar tujuan tersebut
+        $pendingOtherTransfer = RoomTransfer::where('target_room_id', $targetRoom->id)
+            ->where('status', 'pending')
+            ->where('user_id', '!=', $user->id)
+            ->exists();
+        if ($pendingOtherTransfer) {
+            $errorMsg = 'Kamar #' . $targetRoom->number . ' saat ini sedang dalam proses peninjauan mutasi oleh penghuni lain. Silakan pilih unit kamar kosong lainnya.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $errorMsg], 422);
+            }
+            return back()->with('error', $errorMsg);
+        }
+
         $transfer = RoomTransfer::create([
             'user_id' => $user->id,
             'tenant_id' => $tenant?->id,
-            'current_room_id' => $currentRoom?->id,
+            'current_room_id' => $currentRoom->id,
             'target_room_id' => $request->target_room_id,
             'reason' => $request->reason,
             'preferred_date' => $request->preferred_date,
@@ -602,5 +752,111 @@ class TenantPortalController extends Controller
     public function sendNewPasswordToGmail(Request $request)
     {
         return $this->sendPasswordOtp($request);
+    }
+
+    /**
+     * Check if a tenant has completed their personal data (phone, id_card/id_card_photo, emergency_contact).
+     */
+    public function isProfileComplete(User $user, ?Tenant $tenant = null): bool
+    {
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_profile_completed') && $user->is_profile_completed === false) {
+            return false;
+        }
+
+        if (!$tenant && $user->room_id) {
+            $tenant = Tenant::where('room_id', $user->room_id)->where('status', 'active')->first() ?? Tenant::where('room_id', $user->room_id)->first();
+        }
+
+        if ($tenant) {
+            $phoneValid = !empty($tenant->phone) && $tenant->phone !== '-';
+            $idValid = (!empty($tenant->id_card) && $tenant->id_card !== '-') || !empty($tenant->id_card_photo) || !empty($user->id_card_photo);
+            $emergencyValid = !empty($tenant->emergency_contact) && $tenant->emergency_contact !== '-';
+            if (!$phoneValid || !$idValid || !$emergencyValid) {
+                return false;
+            }
+        } elseif (empty($user->phone) || $user->phone === '-') {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Handle submission of mandatory tenant personal data from the initial login modal.
+     */
+    public function completeProfile(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Sesi login telah berakhir. Silakan login kembali.'], 401);
+        }
+
+        $tenant = $user->room ? ($user->room->activeTenant ?? Tenant::where('room_id', $user->room_id)->where('status', 'active')->first()) : null;
+        if (!$tenant && $user->room_id) {
+            $tenant = Tenant::where('room_id', $user->room_id)->first();
+        }
+
+        $hasExistingPhoto = !empty($user->id_card_photo) || (!empty($tenant) && !empty($tenant->id_card_photo));
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|min:9|max:25',
+            'id_card' => 'nullable|string|max:40',
+            'id_card_photo' => ($hasExistingPhoto ? 'nullable' : 'required') . '|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'emergency_contact' => 'required|string|min:5|max:255',
+        ], [
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'phone.required' => 'Nomor WhatsApp wajib diisi.',
+            'phone.min' => 'Nomor WhatsApp minimal 9 digit.',
+            'id_card_photo.required' => 'Wajib melampirkan foto kartu identitas (KTP / SIM / KTM / KTA).',
+            'id_card_photo.image' => 'File kartu identitas harus berupa foto/gambar.',
+            'id_card_photo.mimes' => 'Format foto kartu identitas harus berupa JPG, PNG, atau WEBP.',
+            'id_card_photo.max' => 'Ukuran foto kartu identitas maksimal 5 MB.',
+            'emergency_contact.required' => 'Kontak darurat (Ortu / Wali / Saudara) wajib diisi.',
+        ]);
+
+        $user->name = $validated['name'];
+        $user->phone = $validated['phone'];
+
+        if ($request->hasFile('id_card_photo')) {
+            $file = $request->file('id_card_photo');
+            $idCardDir = public_path('assets/images/id_cards');
+            if (!file_exists($idCardDir)) {
+                mkdir($idCardDir, 0755, true);
+            }
+            $filename = 'id_card_' . $user->id . '_' . time() . '_' . rand(100, 999) . '.' . $file->getClientOriginalExtension();
+            $file->move($idCardDir, $filename);
+            $user->id_card_photo = 'assets/images/id_cards/' . $filename;
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_profile_completed')) {
+            $user->is_profile_completed = true;
+        }
+        $user->save();
+
+        if ($tenant) {
+            $tenant->name = $validated['name'];
+            $tenant->phone = $validated['phone'];
+            if (!empty($validated['id_card'])) {
+                $tenant->id_card = $validated['id_card'];
+            }
+            if ($user->id_card_photo) {
+                $tenant->id_card_photo = $user->id_card_photo;
+            }
+            $tenant->emergency_contact = $validated['emergency_contact'];
+            $tenant->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data diri dan foto kartu identitas Anda berhasil disimpan! Seluruh fitur portal kini telah aktif.',
+            'user' => [
+                'name' => $user->name,
+                'phone' => $user->phone,
+                'id_card' => $tenant?->id_card,
+                'id_card_photo' => $user->id_card_photo ? asset($user->id_card_photo) : null,
+                'emergency_contact' => $tenant?->emergency_contact,
+            ]
+        ]);
     }
 }

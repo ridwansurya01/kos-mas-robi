@@ -18,6 +18,7 @@ use App\Mail\MaintenanceProgressMail;
 use App\Mail\WifiUpdateMail;
 use App\Mail\RulesUpdateMail;
 use App\Mail\MonthlyFinanceReportMail;
+use App\Mail\NewSurveyNotificationMail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
@@ -360,5 +361,37 @@ class EmailNotificationService
             'owners_notified' => $sentCount,
             'report_data' => $reportData,
         ];
+    }
+
+    /**
+     * Notify Admins and Owner when a prospective tenant submits a survey request.
+     */
+    public function sendNewSurveyNotification(\App\Models\SurveyRequest $survey): void
+    {
+        try {
+            $owners = User::where('role', 'owner')->whereNotNull('email')->get();
+            $admins = User::where('role', 'admin')->whereNotNull('email')->get();
+
+            $branch = $survey->branch ?? 'Lokasi 1';
+
+            // Send to Owners
+            foreach ($owners as $owner) {
+                Mail::to($owner->email)->send(new NewSurveyNotificationMail($owner, $survey));
+                Log::info("Survey notification email sent to owner: {$owner->email}");
+            }
+
+            // Send to Admins
+            foreach ($admins as $admin) {
+                $assignment = $admin->branch_assignment ?? 'all';
+                $canReceive = ($assignment === 'all' || $assignment === $branch);
+
+                if ($canReceive) {
+                    Mail::to($admin->email)->send(new NewSurveyNotificationMail($admin, $survey));
+                    Log::info("Survey notification email sent to admin: {$admin->email}");
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed sending survey notification email: " . $e->getMessage());
+        }
     }
 }

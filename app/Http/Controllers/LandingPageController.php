@@ -36,7 +36,7 @@ class LandingPageController extends Controller
             }
         }
 
-        $allRooms = $roomsQuery->orderBy('number')->get();
+        $allRooms = Room::orderBy('number')->get();
         $popularRooms = Room::orderBy('price', 'desc')->take(3)->get();
         $availableCount = Room::where('status', 'available')->count();
         $totalRooms = Room::count();
@@ -50,6 +50,60 @@ class LandingPageController extends Controller
             'availableCount',
             'totalRooms'
         ));
+    }
+
+    /**
+     * Store incoming survey booking from landing page (via AJAX).
+     */
+    public function submitSurvey(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:50',
+            'job' => 'nullable|string|max:100',
+            'branch' => 'nullable|string|max:100',
+            'room' => 'nullable|string|max:150',
+            'date' => 'nullable|string|max:50',
+            'time' => 'nullable|string|max:50',
+            'method' => 'nullable|string|max:50',
+            'message' => 'nullable|string|max:5000',
+        ]);
+
+        $surveyDate = null;
+        if (!empty($validated['date'])) {
+            try {
+                $surveyDate = \Carbon\Carbon::parse($validated['date'])->format('Y-m-d');
+            } catch (\Throwable $e) {
+                $surveyDate = null;
+            }
+        }
+
+        $survey = \App\Models\SurveyRequest::create([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'] ?? null,
+            'job' => $validated['job'] ?? 'Mahasiswa',
+            'branch' => $validated['branch'] ?? 'Lokasi 1',
+            'room' => $validated['room'] ?? null,
+            'survey_date' => $surveyDate,
+            'survey_time' => $validated['time'] ?? '14:00',
+            'survey_method' => $validated['method'] ?? 'Datang Langsung',
+            'message' => $validated['message'] ?? null,
+            'status' => 'pending',
+            'is_read' => false,
+        ]);
+
+        // Kirim notifikasi otomatis ke Gmail Admin dan Owner
+        try {
+            app(\App\Services\EmailNotificationService::class)->sendNewSurveyNotification($survey);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Failed notifying staff of new survey: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permohonan survey lokasi berhasil dicatat dan notifikasi telah dikirim ke Dashboard Pengelola.',
+            'survey' => $survey,
+        ]);
     }
 }
 

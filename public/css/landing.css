@@ -106,12 +106,18 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 13px;
-  background: linear-gradient(135deg, var(--teal-primary) 0%, var(--teal-medium) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
+  overflow: hidden;
   box-shadow: 0 4px 14px var(--teal-glow);
+}
+
+.lr-brand-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 13px;
 }
 
 .lr-brand-title {
@@ -1718,3 +1724,1497 @@ body {
     padding: 18px 16px;
   }
 }
+
+/* ==========================================================================
+   FEATURED ROOMS SLIDER (1 Slide = 6 Kamar: 3 Kamar Lt. 1, 3 Kamar Lt. 2)
+   ========================================================================== */
+.lr-room-slider-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.lr-room-slider-viewport {
+  overflow: hidden;
+  width: 100%;
+  position: relative;
+  border-radius: 20px;
+}
+
+.lr-room-slider-track {
+  display: flex;
+  width: 100%;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.lr-room-slide {
+  min-width: 100%;
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 4px 2px;
+}
+
+/* Slide Floor Rows */
+.lr-slide-floor-row {
+  margin-bottom: 24px;
+}
+
+.lr-slide-floor-row:last-child {
+  margin-bottom: 0;
+}
+
+.lr-slide-floor-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid rgba(10, 86, 97, 0.12);
+}
+
+.lr-floor-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.lr-floor-tag.floor-1 {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.lr-floor-tag.floor-2 {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.lr-floor-hint {
+  font-size: 0.84rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Slider Navigation Bar & Bottom Controls */
+.lr-slider-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.lr-filter-pill-type {
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lr-filter-pill-type:hover {
+  border-color: var(--teal-primary);
+  color: var(--teal-primary);
+}
+
+.lr-filter-pill-type.active {
+  background: var(--teal-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--teal-primary) !important;
+  box-shadow: 0 2px 8px rgba(10, 86, 97, 0.25);
+}
+
+.lr-filter-pill-branch {
+  padding: 9px 20px;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid rgba(10, 86, 97, 0.15);
+  background: #ffffff;
+  color: #0a5661;
+  transition: all 0.2s ease;
+}
+
+.lr-filter-pill-branch:hover {
+  background: #f0fdfa;
+}
+
+.lr-filter-pill-branch.active {
+  background: var(--teal-primary) !important;
+  color: #ffffff !important;
+  border-color: var(--teal-primary) !important;
+  box-shadow: 0 2px 8px rgba(10, 86, 97, 0.25);
+}
+
+.lr-slider-ctrl-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: transparent;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+.lr-slider-ctrl-group .lr-dots-indicator {
+  margin: 0 !important;
+  gap: 6px !important;
+  padding: 0 4px;
+}
+
+.lr-slider-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1.5px solid #ccfbf1;
+  background: #f0fdfa;
+  color: #0a5661;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lr-slider-btn:hover:not(:disabled) {
+  background: #0a5661;
+  color: #ffffff;
+  border-color: #0a5661;
+  transform: scale(1.06);
+}
+
+.lr-slider-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.lr-slider-badge-text {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: #0f172a;
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+/* Side Floating Nav Buttons */
+.lr-slider-side-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  color: #0a5661;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  transition: all 0.25s ease;
+}
+
+.lr-slider-side-btn:hover:not(:disabled) {
+  background: #0a5661;
+  color: #ffffff;
+  border-color: #0a5661;
+  transform: translateY(-50%) scale(1.08);
+  box-shadow: 0 8px 22px rgba(10, 86, 97, 0.28);
+}
+
+.lr-slider-side-btn.prev {
+  left: -24px;
+}
+
+.lr-slider-side-btn.next {
+  right: -24px;
+}
+
+.lr-slider-side-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Bottom Interactive Dots */
+.lr-dots-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 36px;
+}
+
+.lr-dot-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.lr-dot-btn .lr-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+}
+
+.lr-dot-btn.active .lr-dot {
+  width: 28px;
+  border-radius: 999px;
+  background: #0a5661;
+  box-shadow: 0 2px 8px rgba(10, 86, 97, 0.35);
+}
+
+.lr-dot-btn:hover .lr-dot {
+  background: #0a5661;
+}
+
+@media (max-width: 1240px) {
+  .lr-slider-side-btn.prev { left: 8px; }
+  .lr-slider-side-btn.next { right: 8px; }
+}
+
+@media (max-width: 768px) {
+  .lr-slider-side-btn { display: none; }
+  .lr-slider-nav-bar { flex-direction: column; align-items: stretch; }
+  .lr-slider-ctrl-group { justify-content: center; }
+}
+
+/* =========================================================================
+   ROOM CARD THUMBNAIL HOVER & LIGHTBOX POPUP SLIDER
+   ========================================================================= */
+.lr-card-thumb-wrap {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.lr-card-thumb-wrap .lr-card-thumb {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lr-card-thumb-wrap:hover .lr-card-thumb {
+  transform: scale(1.05);
+}
+
+/* Card Thumbnail Multi-Photo Slider (Saat Dikecilkan / Pada Kartu Kamar) */
+.lr-card-thumb-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.lr-card-thumb-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease;
+  pointer-events: none;
+}
+
+.lr-card-thumb-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lr-card-thumb-wrap:hover .lr-card-thumb-slide.active {
+  transform: scale(1.05);
+}
+
+/* Mini Slide Nav Buttons on Card Thumbnail */
+.lr-thumb-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(3, 35, 40, 0.82);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 6;
+  opacity: 0;
+  transition: all 0.22s ease;
+  padding: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.lr-card-thumb-wrap:hover .lr-thumb-nav-btn {
+  opacity: 1;
+}
+
+.lr-thumb-nav-btn:hover {
+  background: #0a5661;
+  border-color: #14b8a6;
+  transform: translateY(-50%) scale(1.12);
+  color: #ffffff;
+}
+
+.lr-thumb-nav-btn.prev {
+  left: 8px;
+}
+
+.lr-thumb-nav-btn.next {
+  right: 8px;
+}
+
+/* Mini Dots Indicator */
+.lr-thumb-dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 6;
+  background: rgba(3, 35, 40, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.lr-thumb-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.lr-thumb-dot.active {
+  width: 16px;
+  border-radius: 999px;
+  background: #2dd4bf;
+}
+
+.lr-thumb-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(3, 35, 40, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #e2e8f0;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 6;
+}
+
+@media (max-width: 768px) {
+  .lr-thumb-nav-btn {
+    opacity: 0.88;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.lr-thumb-hover-hint {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 35, 40, 0.3);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.lr-card-thumb-wrap:hover .lr-thumb-hover-hint {
+  opacity: 1;
+}
+
+.lr-thumb-hover-hint span {
+  background: rgba(3, 35, 40, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* LIGHTBOX BACKDROP */
+.lr-lightbox-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 35, 40, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 99999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.lr-lightbox-backdrop.active {
+  opacity: 1;
+}
+
+.lr-lightbox-card {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transform: scale(0.92);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.lr-lightbox-backdrop.active .lr-lightbox-card {
+  transform: scale(1);
+}
+
+.lr-lightbox-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.lr-lightbox-close:hover {
+  background: #dc2626;
+  transform: rotate(90deg);
+}
+
+.lr-lightbox-image-wrap {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  background: #0f172a;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.lr-lightbox-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.25s ease;
+}
+
+.lr-lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  transition: all 0.2s ease;
+}
+
+.lr-lightbox-arrow:hover {
+  background: #0a5661;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 14px rgba(10, 86, 97, 0.4);
+}
+
+.lr-lightbox-arrow.prev { left: 16px; }
+.lr-lightbox-arrow.next { right: 16px; }
+
+.lr-lightbox-badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  z-index: 4;
+}
+
+.lr-lightbox-badge-branch {
+  background: rgba(3, 35, 40, 0.9);
+  backdrop-filter: blur(6px);
+  color: #a7f3d0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid #10b981;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.lr-lightbox-badge-floor {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+
+.lr-lightbox-counter {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  z-index: 4;
+}
+
+.lr-lightbox-footer {
+  padding: 18px 24px 20px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lr-lightbox-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lr-lightbox-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0a5661;
+  margin: 0;
+}
+
+.lr-lightbox-price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f766e;
+  margin-top: 3px;
+}
+
+.lr-lightbox-price span {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.lr-lightbox-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.lr-lightbox-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.lr-lightbox-dot.active {
+  width: 26px;
+  border-radius: 999px;
+  background: #0a5661;
+  box-shadow: 0 2px 8px rgba(10, 86, 97, 0.35);
+}
+
+@media (max-width: 640px) {
+  .lr-lightbox-image-wrap {
+    height: 300px;
+  }
+  .lr-lightbox-card {
+    border-radius: 18px;
+  }
+  .lr-lightbox-arrow {
+    width: 38px;
+    height: 38px;
+  }
+  .lr-lightbox-arrow.prev { left: 8px; }
+  .lr-lightbox-arrow.next { right: 8px; }
+}
+
+/* =========================================================================
+   MODERN 3D FLUTTER-STYLE INTERACTION ENGINE (ISOLATED & HIGH-PERFORMANCE)
+   ========================================================================= */
+body.flutter-3d-enabled .lr-featured-grid,
+body.flutter-3d-enabled .lr-room-slider-viewport,
+body.flutter-3d-enabled .lr-card-featured-wrapper {
+  perspective: 1200px;
+  perspective-origin: center center;
+}
+
+body.flutter-3d-enabled .lr-card-featured {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.16s ease-out, box-shadow 0.25s ease-out, border-color 0.25s ease;
+  will-change: transform, box-shadow;
+  cursor: pointer;
+}
+
+/* Efek Kilau Holografik 3D (Dinonaktifkan sesuai permintaan pengguna) */
+.lr-card-3d-glare {
+  display: none !important;
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+body.flutter-3d-enabled .lr-card-featured.is-tilting .lr-card-3d-glare {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Layer Kedalaman Multi-plane 3D (Parallax Dalam Kartu) */
+body.flutter-3d-enabled .lr-card-featured .lr-card-thumb-wrap {
+  transform: translateZ(14px);
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease;
+}
+
+body.flutter-3d-enabled .lr-card-featured .lr-card-body {
+  transform: translateZ(20px);
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease;
+}
+
+body.flutter-3d-enabled .lr-card-featured .lr-pill-avail,
+body.flutter-3d-enabled .lr-card-featured .lr-pill-floor,
+body.flutter-3d-enabled .lr-card-featured .lr-card-room-title {
+  transform: translateZ(30px);
+}
+
+body.flutter-3d-enabled .lr-card-featured .lr-btn-booking {
+  transform: translateZ(34px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.flutter-3d-enabled .lr-card-featured.is-tilting {
+  box-shadow: 0 28px 55px -12px rgba(10, 86, 97, 0.34), 0 14px 28px -8px rgba(0, 0, 0, 0.14) !important;
+  border-color: rgba(13, 148, 136, 0.65) !important;
+}
+
+/* 3D Floating Interactive Badge di Hero Section */
+.lr-hero-3d-badge {
+  display: none !important;
+}
+
+/* 3D Floating Mode Switcher Floating Widget di Pojok Bawah */
+.flutter-3d-switcher-widget {
+  display: none !important;
+}
+
+/* =========================================================================
+   1. FLUTTER INTRO ENTRY: LOGO RESMI DENGAN ANIMASI ULAR MENGGAMBAR GARIS PUTIH
+   ========================================================================= */
+.flutter-3d-intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999999;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.85s ease;
+  overflow: hidden;
+}
+
+/* Status intro Anti-FOUC */
+html.f3d-intro-skip #flutter3dIntroOverlay {
+  display: none !important;
+}
+
+html.f3d-intro-active body {
+  overflow: hidden !important;
+}
+
+html.f3d-intro-active .lr-navbar,
+html.f3d-intro-active .lr-hero-content {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.f3d-intro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  position: relative;
+  z-index: 2;
+  user-select: none;
+}
+
+/* =========================================================================
+   LOGO RESMI BADGE: SAMA PERSIS GAMBAR PENGGUNA (BACKGROUND #0a5964)
+   ========================================================================= */
+.f3d-logo-badge-wrap {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Badge Squircle Asli (#0a5964) */
+.f3d-official-logo-badge {
+  width: 190px;
+  height: 190px;
+  background: #0a5964;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 24px 50px -10px rgba(10, 89, 100, 0.38),
+    0 10px 24px -5px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+  overflow: hidden;
+}
+
+.f3d-svg-canvas {
+  width: 155px;
+  height: 155px;
+  overflow: visible;
+}
+
+/* =========================================================================
+   ANIMASI ULAR BERJALAN MENGGAMBAR GARIS PUTIH
+   (Awalnya garis putih 0 / tidak ada, muncul mengikuti ular berjalan)
+   ========================================================================= */
+.f3d-drawn-white {
+  stroke-dasharray: 0 1000;
+  stroke-dashoffset: 0;
+}
+
+.f3d-snake-tracer {
+  stroke-dasharray: 0 1000;
+  stroke-dashoffset: 0;
+  opacity: 0;
+  filter: drop-shadow(0 0 6px #10b981) drop-shadow(0 0 14px #2dd4bf);
+  transition: opacity 0.25s ease;
+}
+
+/* =========================================================================
+   CINEMATIC PORTAL & SPATIAL FLY-THROUGH TRANSITION (INTRO KE LANDING PAGE)
+   Transisi Super Premium: Corona Aura Bloom, 3D Fly-Through, & Landing Arrival
+   ========================================================================= */
+
+/* Wadah Utama Intro & Efek Ambient Aura */
+.f3d-intro-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.f3d-ambient-aura {
+  position: absolute;
+  width: 440px;
+  height: 440px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(45, 212, 191, 0.32) 0%, rgba(10, 89, 100, 0.14) 45%, transparent 72%);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.65);
+  filter: blur(28px);
+  transition: opacity 0.55s ease, transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
+}
+
+.f3d-intro-container.is-complete .f3d-ambient-aura {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+/* Tahap 1: Kilau Penyelesaian Logo Sempurna (Completion Corona Burst) */
+.f3d-official-logo-badge.logo-complete-burst {
+  transform: scale(1.05) translateZ(24px);
+  box-shadow: 
+    0 0 55px 12px rgba(45, 212, 191, 0.45),
+    0 0 110px 30px rgba(10, 89, 100, 0.25),
+    0 28px 65px -10px rgba(10, 89, 100, 0.5);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.45s ease;
+}
+
+.f3d-official-logo-badge.logo-complete-burst .f3d-drawn-white {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.95)) drop-shadow(0 0 18px rgba(45, 212, 191, 0.8));
+  transition: filter 0.4s ease;
+}
+
+/* Tahap 2: Portal Fly-Through & Frosted Veil Dissolve (Keluar Dari Intro) */
+.flutter-3d-intro-overlay.smooth-exit {
+  opacity: 0;
+  transform: scale(1.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  pointer-events: none;
+  visibility: hidden;
+  transition: 
+    opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    backdrop-filter 0.95s ease,
+    visibility 0.95s ease;
+}
+
+.flutter-3d-intro-overlay.smooth-exit .f3d-official-logo-badge {
+  transform: perspective(1000px) translate3d(0, -20px, 320px) scale(1.48) rotateX(-6deg);
+  filter: blur(20px);
+  opacity: 0;
+  transition: 
+    transform 0.95s cubic-bezier(0.2, 0.9, 0.2, 1.0),
+    filter 0.8s ease,
+    opacity 0.75s ease;
+}
+
+.flutter-3d-intro-overlay.smooth-exit .f3d-ambient-aura {
+  transform: scale(1.8);
+  opacity: 0;
+  transition: transform 0.9s ease-out, opacity 0.75s ease;
+}
+
+/* Tahap 3: Orchestrated Landing Page Arrival (Kedatangan Megah Elemen Halaman) */
+
+/* State awal saat intro sedang berjalan */
+body.intro-active .lr-navbar {
+  transform: translateY(-40px);
+  opacity: 0;
+  filter: blur(6px);
+  pointer-events: none;
+  transition: none;
+}
+
+body.intro-active .lr-hero-photo-bg img {
+  transform: scale(1.12) translateY(-10px);
+  filter: blur(10px) contrast(90%);
+  transition: none;
+}
+
+body.intro-active .lr-hero-title {
+  transform: perspective(900px) translateY(36px) translateZ(-40px) rotateX(10deg);
+  opacity: 0;
+  filter: blur(10px);
+  transition: none;
+}
+
+body.intro-active .lr-hero-desc {
+  transform: translateY(28px);
+  opacity: 0;
+  filter: blur(6px);
+  transition: none;
+}
+
+body.intro-active .lr-hero-cta-group {
+  transform: translateY(24px) scale(0.96);
+  opacity: 0;
+  filter: blur(4px);
+  transition: none;
+}
+
+/* State kedatangan saat intro selesai (smooth landing cascade) */
+body.intro-complete .lr-navbar {
+  transform: translateY(0);
+  opacity: 1;
+  filter: blur(0px);
+  pointer-events: auto;
+  transition: 
+    transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+    opacity 0.85s ease 0.15s,
+    filter 0.85s ease 0.15s;
+}
+
+body.intro-complete .lr-hero-photo-bg img {
+  transform: scale(1) translateY(0);
+  filter: blur(0px) contrast(100%);
+  transition: 
+    transform 1.35s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.intro-complete .lr-hero-title {
+  transform: perspective(900px) translateY(0) translateZ(0) rotateX(0deg);
+  opacity: 1;
+  filter: blur(0px);
+  transition: 
+    transform 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.22s,
+    opacity 0.95s ease 0.22s,
+    filter 0.95s ease 0.22s;
+}
+
+body.intro-complete .lr-hero-desc {
+  transform: translateY(0);
+  opacity: 1;
+  filter: blur(0px);
+  transition: 
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) 0.32s,
+    opacity 0.9s ease 0.32s,
+    filter 0.9s ease 0.32s;
+}
+
+body.intro-complete .lr-hero-cta-group {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  filter: blur(0px);
+  transition: 
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.42s,
+    opacity 0.85s ease 0.42s,
+    filter 0.85s ease 0.42s;
+}
+
+/* =========================================================================
+   2. FITUR NO. 1: KOTAK FASILITAS & KEUNGGULAN (3D ISOMETRIC BADGES & TILT)
+   ========================================================================= */
+body.flutter-3d-enabled .lr-feature-pill-stack {
+  perspective: 1000px;
+}
+
+body.flutter-3d-enabled .lr-feat-pill-item {
+  transform-style: preserve-3d;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+  will-change: transform, box-shadow;
+}
+
+body.flutter-3d-enabled .lr-feat-pill-item:hover {
+  transform: perspective(800px) translateY(-5px) translateZ(16px) rotateX(4deg) rotateY(-4deg);
+  box-shadow: 0 16px 30px -8px rgba(10, 86, 97, 0.22), 0 4px 10px rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(13, 148, 136, 0.45) !important;
+}
+
+body.flutter-3d-enabled .lr-feat-pill-item .lr-feat-circle-icon {
+  transform: translateZ(14px);
+  transition: transform 0.25s ease;
+}
+
+body.flutter-3d-enabled .lr-feat-pill-item:hover .lr-feat-circle-icon {
+  transform: translateZ(24px) scale(1.1);
+}
+
+body.flutter-3d-enabled .lr-gallery-grid {
+  perspective: 1200px;
+}
+
+body.flutter-3d-enabled .lr-gallery-hero-card {
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out, box-shadow 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+body.flutter-3d-enabled .lr-gallery-hero-card.is-tilting {
+  box-shadow: 0 30px 60px -15px rgba(10, 86, 97, 0.4) !important;
+}
+
+body.flutter-3d-enabled .lr-gallery-photo-card {
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+body.flutter-3d-enabled .lr-gallery-photo-card:hover {
+  transform: perspective(900px) translateY(-6px) translateZ(18px) rotateX(3deg) rotateY(-3deg);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.22) !important;
+}
+
+/* =========================================================================
+   3. FITUR NO. 2: KOTAK PENCARIAN KAMAR (3D FLOATING GLASSMORPHISM & TILT)
+   ========================================================================= */
+body.flutter-3d-enabled .lr-search-wrapper {
+  perspective: 1400px;
+}
+
+body.flutter-3d-enabled .lr-search-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform, box-shadow;
+  box-shadow: 0 24px 50px -14px rgba(10, 86, 97, 0.18), 0 8px 18px -6px rgba(0, 0, 0, 0.05);
+}
+
+body.flutter-3d-enabled .lr-search-card.is-tilting {
+  box-shadow: 0 35px 70px -15px rgba(10, 86, 97, 0.32), 0 16px 30px -8px rgba(0, 0, 0, 0.12) !important;
+  border-color: rgba(13, 148, 136, 0.5) !important;
+}
+
+body.flutter-3d-enabled .lr-search-card .lr-search-input-pill {
+  transform: translateZ(16px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.flutter-3d-enabled .lr-search-card .lr-search-input-pill:focus-within {
+  transform: translateZ(24px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(10, 86, 97, 0.18);
+}
+
+body.flutter-3d-enabled .lr-search-card .lr-search-right-cta {
+  transform: translateZ(24px);
+  transform-style: preserve-3d;
+}
+
+body.flutter-3d-enabled .lr-search-card .lr-btn-search-submit {
+  transform: translateZ(28px);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.flutter-3d-enabled .lr-search-card .lr-btn-search-submit:hover {
+  transform: translateZ(36px) scale(1.04);
+  box-shadow: 0 14px 28px rgba(10, 86, 97, 0.35);
+}
+
+/* =========================================================================
+   4. FITUR NO. 3: KARTU 2 TITIK CABANG KOS & 3D BOUNCING PIN
+   ========================================================================= */
+body.flutter-3d-enabled .lr-location-grid {
+  perspective: 1200px;
+}
+
+body.flutter-3d-enabled .lr-loc-card-left {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform, box-shadow;
+}
+
+body.flutter-3d-enabled .lr-loc-card-left.is-tilting {
+  box-shadow: 0 32px 65px -14px rgba(10, 86, 97, 0.28), 0 12px 24px -6px rgba(0, 0, 0, 0.08) !important;
+  border-color: rgba(13, 148, 136, 0.5) !important;
+}
+
+body.flutter-3d-enabled .lr-loc-card-left .lr-loc-header {
+  transform: translateZ(18px);
+}
+
+body.flutter-3d-enabled .lr-loc-pin-box {
+  transform-style: preserve-3d;
+  animation: pinBounce3D 2.4s ease-in-out infinite;
+  box-shadow: 0 8px 20px rgba(10, 86, 97, 0.35);
+}
+
+@keyframes pinBounce3D {
+  0%, 100% {
+    transform: translateY(0px) translateZ(20px) rotateX(0deg);
+  }
+  50% {
+    transform: translateY(-8px) translateZ(32px) rotateX(-12deg);
+    box-shadow: 0 18px 28px rgba(10, 86, 97, 0.45);
+  }
+}
+
+body.flutter-3d-enabled .lr-loc-poi-card {
+  transform-style: preserve-3d;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+body.flutter-3d-enabled .lr-loc-poi-card:hover {
+  transform: translateZ(16px) translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+}
+
+body.flutter-3d-enabled .lr-loc-map-wrap {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+/* =========================================================================
+   6. FLOATING 3D INTERACTION CONTROLLER & REPLAY INTRO
+   ========================================================================= */
+
+.lr-3d-levitating-house {
+  width: 70px;
+  height: 70px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.25);
+  animation: levitate3D 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes levitate3D {
+  0% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg) translateZ(20px);
+  }
+  100% {
+    transform: translateY(-12px) rotateX(10deg) rotateY(-8deg) translateZ(40px);
+    box-shadow: 0 26px 50px rgba(0, 0, 0, 0.35);
+  }
+}
+
+.lr-btn-3d-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #eb6e4b;
+  color: #ffffff;
+  padding: 14px 28px;
+  border-radius: 999px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.94rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(235, 110, 75, 0.45);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.lr-btn-3d-primary:hover {
+  background: #e25b34;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 18px 40px rgba(235, 110, 75, 0.6);
+  color: #ffffff;
+}
+
+.lr-btn-3d-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.lr-btn-3d-secondary:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: #ffffff;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.lr-replay-intro-btn {
+  background: none;
+  border: none;
+  color: #2dd4bf;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 4px;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.lr-replay-intro-btn:hover {
+  color: #ffffff;
+}
+
+/* =========================================================================
+   7. KINETIC PRISM SPATIAL REVEAL (SISTEM ANIMASI MASUK KONTEN FITUR EKSKLUSIF)
+   Kombinasi 3D Spatial Depth, Defokus Lensa, Spring Easing, & Kilau Prisma
+   ========================================================================= */
+
+/* State awal elemen saat belum terlihat di viewport */
+[data-spatial-reveal].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateY(44px) translateZ(-50px) rotateX(7deg);
+  filter: blur(10px) saturate(85%);
+  transition: 
+    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity, filter;
+}
+
+/* State aktif ketika masuk viewport (revealed) */
+[data-spatial-reveal].lr-revealed {
+  opacity: 1;
+  transform: perspective(1400px) translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg) scale(1);
+  filter: blur(0px) saturate(100%);
+}
+
+/* Penundaan stagger berantai untuk ritme editorial visual */
+[data-spatial-reveal][data-stagger="1"] { transition-delay: 0.08s; }
+[data-spatial-reveal][data-stagger="2"] { transition-delay: 0.16s; }
+[data-spatial-reveal][data-stagger="3"] { transition-delay: 0.24s; }
+[data-spatial-reveal][data-stagger="4"] { transition-delay: 0.32s; }
+[data-spatial-reveal][data-stagger="5"] { transition-delay: 0.40s; }
+[data-spatial-reveal][data-stagger="6"] { transition-delay: 0.48s; }
+
+/* 1. Fitur Pencarian: Magnetic Floating Dock Arrival */
+[data-spatial-reveal="search-dock"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateY(54px) scale(0.96) translateZ(-40px);
+  filter: blur(12px);
+}
+[data-spatial-reveal="search-dock"].lr-revealed {
+  opacity: 1;
+  transform: perspective(1400px) translateY(0) scale(1) translateZ(0);
+  filter: blur(0px);
+}
+
+/* 2. Fitur Kamar: 3D Spatial Wave Unfold (Kartu Kiri, Tengah, Kanan) */
+[data-spatial-reveal="room-card-left"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateY(46px) translateZ(-60px) rotateX(8deg) rotateY(-6deg);
+  filter: blur(8px);
+}
+[data-spatial-reveal="room-card-center"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateY(46px) translateZ(-60px) rotateX(8deg);
+  filter: blur(8px);
+}
+[data-spatial-reveal="room-card-right"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateY(46px) translateZ(-60px) rotateX(8deg) rotateY(6deg);
+  filter: blur(8px);
+}
+[data-spatial-reveal^="room-card"].lr-revealed {
+  opacity: 1;
+  transform: perspective(1400px) translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg) scale(1);
+  filter: blur(0px);
+}
+
+/* 3. Fitur Fasilitas: Bento Text Mask Reveal */
+[data-spatial-reveal="bento-text"].lr-reveal-init {
+  opacity: 0;
+  transform: translateY(30px);
+  filter: blur(6px);
+  clip-path: inset(0 0 100% 0);
+}
+[data-spatial-reveal="bento-text"].lr-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+  clip-path: inset(0 0 0% 0);
+}
+
+/* 4. Fitur Fasilitas: Domino Slide Stack Pills */
+[data-spatial-reveal="pill-domino"].lr-reveal-init {
+  opacity: 0;
+  transform: translateX(36px) scale(0.94);
+  filter: blur(6px);
+}
+[data-spatial-reveal="pill-domino"].lr-revealed {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  filter: blur(0px);
+}
+
+/* 5. Fitur Fasilitas: Bento Hero & Photo Collage Depth Zoom */
+[data-spatial-reveal="photo-depth"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1200px) translateY(38px) scale(0.95) rotateX(6deg);
+  filter: blur(8px);
+}
+[data-spatial-reveal="photo-depth"].lr-revealed {
+  opacity: 1;
+  transform: perspective(1200px) translateY(0) scale(1) rotateX(0deg);
+  filter: blur(0px);
+}
+
+/* 6. Fitur Lokasi: Tandem Docking (Kartu Kiri & Frame Peta Kanan) */
+[data-spatial-reveal="location-left"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateX(-36px) translateY(30px) rotateY(7deg);
+  filter: blur(8px);
+}
+[data-spatial-reveal="location-left"].lr-revealed {
+  opacity: 1;
+  transform: perspective(1400px) translateX(0) translateY(0) rotateY(0deg);
+  filter: blur(0px);
+}
+[data-spatial-reveal="location-right"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateX(36px) translateY(30px) rotateY(-7deg);
+  filter: blur(8px);
+}
+[data-spatial-reveal="location-right"].lr-revealed {
+  opacity: 1;
+  transform: perspective(1400px) translateX(0) translateY(0) rotateY(0deg);
+  filter: blur(0px);
+}
+
+/* 7. Fitur Lokasi: POI Checklist Cascading */
+[data-spatial-reveal="poi-cascade"].lr-reveal-init {
+  opacity: 0;
+  transform: translateX(-24px) translateY(10px);
+  filter: blur(4px);
+}
+[data-spatial-reveal="poi-cascade"].lr-revealed {
+  opacity: 1;
+  transform: translateX(0) translateY(0);
+  filter: blur(0px);
+}
+
+/* 8. Fitur Founder Quote: Glassmorphism Ambient Expansion */
+[data-spatial-reveal="quote-unfold"].lr-reveal-init {
+  opacity: 0;
+  transform: perspective(1400px) translateY(44px) scale(0.94) rotateX(6deg);
+  filter: blur(10px);
+}
+[data-spatial-reveal="quote-unfold"].lr-revealed {
+  opacity: 1;
+  transform: perspective(1400px) translateY(0) scale(1) rotateX(0deg);
+  filter: blur(0px);
+}
+
+/* 9. Section Header Universal */
+[data-spatial-reveal="section-header"].lr-reveal-init {
+  opacity: 0;
+  transform: translateY(26px);
+  filter: blur(6px);
+}
+[data-spatial-reveal="section-header"].lr-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+/* 10. Footer Columns Cascade */
+[data-spatial-reveal="footer-col"].lr-reveal-init {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(5px);
+}
+[data-spatial-reveal="footer-col"].lr-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+/* Item inner pills */
+[data-spatial-reveal="card-item"].lr-reveal-init {
+  opacity: 0;
+  transform: translateY(20px);
+  filter: blur(4px);
+}
+[data-spatial-reveal="card-item"].lr-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0px);
+}
+
+/* Pelepasan transisi setelah animasi selesai agar 3D tilt interaktif 100% responsif */
+[data-spatial-reveal].lr-revealed-ready {
+  will-change: auto;
+  transition: transform 0.2s ease-out, box-shadow 0.25s ease;
+}
+
+/* =========================================================================
+   KILAU CAHAYA PRISMA OPTIK (Dinonaktifkan sesuai instruksi pengguna)
+   ========================================================================= */
+.lr-prism-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.lr-prism-shimmer::after,
+.lr-revealed.lr-prism-shimmer::after {
+  display: none !important;
+  animation: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-spatial-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    clip-path: none !important;
+    transition: none !important;
+  }
+  .lr-prism-shimmer::after {
+    display: none !important;
+  }
+}
+

@@ -25,6 +25,7 @@ class Setting extends Model
         'payment_methods',
         'wifi_list',
         'survey_form_template',
+        'email_settings',
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class Setting extends Model
         'landing_content' => 'array',
         'payment_methods' => 'array',
         'wifi_list' => 'array',
+        'email_settings' => 'array',
     ];
 
     protected $appends = [
@@ -41,6 +43,7 @@ class Setting extends Model
         'active_wifi_list',
         'kos_rules',
         'survey_form_template',
+        'login_content',
     ];
 
     /**
@@ -214,10 +217,10 @@ class Setting extends Model
             'bento_card_desc' => 'Tersedia dapur bersama komplit dengan kompor dan kulkas, area parkir motor dan mobil luas berpagar aman, serta pembersihan area publik rutin setiap hari.',
             'bento_card_btn' => 'Lihat Unit Kamar',
             'bento_gallery' => [
-                'assets/images/hero_scandinavian_room.jpg',
-                'assets/images/rooms/room_2.jpg',
-                'assets/images/rooms/room_3.jpg',
-                'assets/images/kos_exterior.jpg'
+                'assets/images/hero_scandinavian_room.webp',
+                'assets/images/rooms/room_2.webp',
+                'assets/images/rooms/room_3.webp',
+                'assets/images/kos_exterior.webp'
             ],
 
             'founder_name' => $this->owner_name ?? 'Mas Robi',
@@ -318,20 +321,20 @@ class Setting extends Model
     }
 
     /**
-     * Get 2 Branches / Titik Lokasi with rich defaults.
+     * Get default branch configuration.
      */
-    public function getBranchesAttribute($value): array
+    public static function defaultBranches(): array
     {
-        $defaults = [
+        return [
             'lokasi_1' => [
                 'id' => 'lokasi_1',
                 'code' => 'Lokasi 1',
                 'name' => 'Kos Mas Robi 1 - Kampus Utama',
                 'tagline' => 'Hunian Tenang, Nyaman & 3 Menit ke Kampus Utama',
-                'address' => $this->kos_address ?: 'Jl. Pandega Marta No. 88, Caturtunggal, Depok, Sleman, D.I. Yogyakarta',
-                'gmaps_url' => $this->gmaps_url ?: 'https://maps.google.com/?q=Jl.+Pandega+Marta+No.88+Yogyakarta',
-                'gmaps_embed' => $this->gmaps_embed ?: '',
-                'phone' => $this->owner_phone ?: '081234567890',
+                'address' => 'Jl. Pandega Marta No. 88, Caturtunggal, Depok, Sleman, D.I. Yogyakarta',
+                'gmaps_url' => 'https://maps.google.com/?q=Jl.+Pandega+Marta+No.88+Yogyakarta',
+                'gmaps_embed' => '',
+                'phone' => '081234567890',
                 'room_types' => ['VIP AC (KM Dalam)', 'Deluxe AC', 'Standard Fan (KM Luar)'],
                 'facilities' => [
                     'AC Dingin & Hemat Listrik',
@@ -344,6 +347,8 @@ class Setting extends Model
                 ],
                 'badge' => 'Kampus Utama',
                 'color' => '#0a5661',
+                'image' => 'assets/images/kos_exterior.webp',
+                'is_active' => true,
             ],
             'lokasi_2' => [
                 'id' => 'lokasi_2',
@@ -353,7 +358,7 @@ class Setting extends Model
                 'address' => 'Jl. Kaliurang KM 12, Sardonoharjo, Ngaglik, Sleman, D.I. Yogyakarta',
                 'gmaps_url' => 'https://maps.google.com/?q=Jl.+Kaliurang+KM+12+Yogyakarta',
                 'gmaps_embed' => '',
-                'phone' => $this->owner_phone ?: '081234567890',
+                'phone' => '081234567890',
                 'room_types' => ['Executive Suite (Balkon)', 'Superior AC Plus', 'Studio Mezzanine'],
                 'facilities' => [
                     'Smart Digital Door Lock (Kartu & PIN)',
@@ -366,13 +371,38 @@ class Setting extends Model
                 ],
                 'badge' => 'Ringroad Exclusive',
                 'color' => '#0d9488',
+                'image' => 'assets/images/landing/hero_corridor_teal.webp',
+                'is_active' => true,
             ]
         ];
+    }
+
+    /**
+     * Get 2 Branches / Titik Lokasi with rich defaults.
+     */
+    public function getBranchesAttribute($value): array
+    {
+        $defaults = self::defaultBranches();
+        if ($this->kos_address) $defaults['lokasi_1']['address'] = $this->kos_address;
+        if ($this->gmaps_url) $defaults['lokasi_1']['gmaps_url'] = $this->gmaps_url;
+        if ($this->gmaps_embed) $defaults['lokasi_1']['gmaps_embed'] = $this->gmaps_embed;
+        if ($this->owner_phone) {
+            $defaults['lokasi_1']['phone'] = $this->owner_phone;
+            $defaults['lokasi_2']['phone'] = $this->owner_phone;
+        }
 
         if (!empty($value)) {
             $decoded = is_string($value) ? json_decode($value, true) : $value;
             if (is_array($decoded) && !empty($decoded)) {
-                return array_merge($defaults, $decoded);
+                foreach ($defaults as $k => $defBranch) {
+                    if (isset($decoded[$k]) && is_array($decoded[$k])) {
+                        $defaults[$k] = array_merge($defBranch, $decoded[$k]);
+                        if (array_key_exists('is_active', $decoded[$k])) {
+                            $defaults[$k]['is_active'] = (bool)$decoded[$k]['is_active'];
+                        }
+                    }
+                }
+                return $defaults;
             }
         }
 
@@ -555,5 +585,66 @@ class Setting extends Model
         }
 
         return self::DEFAULT_SURVEY_TEMPLATE;
+    }
+
+    /**
+     * Get customizable branding & informational contents for the Login Page.
+     */
+    public function getLoginPageContent(): array
+    {
+        $default = [
+            'brand_title' => $this->kos_name ?? 'SMART LIVING',
+            'headline' => "Smart Living &\nKost Eksklusif",
+            'desc' => 'Sistem manajemen hunian modern, nyaman, full furnished, dan aman 24 jam di Sleman, DI Yogyakarta.',
+            'features' => [
+                'Akses Portal Layanan Penghuni 24 Jam',
+                'Konfirmasi Pembayaran & Kuitansi Digital',
+                'Smart Key Mandiri & CCTV Seluruh Lorong'
+            ],
+            'notice_title' => 'Belum Memiliki Akun?',
+            'notice_text' => 'Pembuatan akun baru hanya dilakukan langsung oleh Admin saat penempatan kamar.',
+            'notice_btn_text' => 'Hubungi Admin via WhatsApp',
+            'help_phone' => $this->owner_phone ?? '6281234567890',
+            'wa_help_message' => "Halo Admin " . ($this->kos_name ?? 'Kos') . ", saya penghuni baru dan ingin dibuatkan akun login portal anak kos."
+        ];
+
+        $lc = $this->landing_content ?? [];
+        if (!empty($lc['login_page']) && is_array($lc['login_page'])) {
+            return array_merge($default, $lc['login_page']);
+        }
+
+        return $default;
+    }
+
+    public function getLoginContentAttribute(): array
+    {
+        return $this->getLoginPageContent();
+    }
+
+    /**
+     * Get email configuration settings with default fallback.
+     */
+    public function getEmailSettingsAttribute($value): array
+    {
+        $defaults = [
+            'mail_mailer' => 'smtp',
+            'mail_host' => 'smtp.gmail.com',
+            'mail_port' => 587,
+            'mail_encryption' => 'tls',
+            'mail_username' => env('MAIL_USERNAME', ''),
+            'mail_password' => env('MAIL_PASSWORD', ''),
+            'mail_from_address' => env('MAIL_FROM_ADDRESS', 'kosmasrobi@gmail.com'),
+            'mail_from_name' => env('MAIL_FROM_NAME', $this->kos_name ?? 'Kos Mas Robi'),
+            'is_enabled' => true,
+        ];
+
+        if (!empty($value)) {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+            if (is_array($decoded)) {
+                return array_merge($defaults, $decoded);
+            }
+        }
+
+        return $defaults;
     }
 }

@@ -34,8 +34,8 @@
 
   <div class="auth-card">
     <div style="text-align: center; margin-bottom: 26px;">
-      <a href="{{ route('home') }}" class="auth-logo-badge">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg>
+      <a href="{{ route('home') }}" class="auth-logo-badge" title="Kembali ke Beranda" style="padding: 0; overflow: hidden; background: transparent; border: none; box-shadow: none;">
+        <img src="{{ asset('assets/images/logo_kos_jember.png') }}" alt="Logo" style="width: 58px; height: 58px; object-fit: contain; border-radius: 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
       </a>
       <h2 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0 0 8px; letter-spacing: -0.02em;">Buat Password Baru</h2>
       <p style="font-size: 0.85rem; color: #64748b; margin: 0;">Password baru Anda harus minimal 6 karakter.</p>

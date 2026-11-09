@@ -3,84 +3,191 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <meta name="description" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
-  <meta name="keywords" content="kos eksklusif, sewa kost jogja, kos mas robi, kos sleman yogyakarta, sewa kamar kos modern, kos mahasiswa ugm, kos full furnished, kost ac kamar mandi dalam">
-  <meta name="author" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }}">
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <title>{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember</title>
+
+  <!-- SEO Meta Tags for Google Search Ranking: info kost jember & kos jember -->
+  <meta name="description" content="Info Kost Jember terbaik &amp; eksklusif di {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} Kos Jember. Hunian kost modern, bersih, aman 24 jam, full furnished, AC, WiFi 100 Mbps, kamar mandi dalam, lokasi strategis dekat kampus UNEJ, UNMUH, dan Polije Jember.">
+  <meta name="keywords" content="info kost jember, kos jember, kost jember, sewa kost jember, info kos jember, kost unej jember, kos unej, kost unmuh jember, kost dekat polije jember, kos mahasiswa jember, kost putri jember, kost putra jember, kost bebas jember, kos eksklusif jember, kost ac jember, smart living jember, kos mas robi jember">
+  <meta name="author" content="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
   <meta name="theme-color" content="#0a5661">
   <link rel="canonical" href="{{ url()->current() }}">
 
-  <!-- Open Graph Meta Tags (Facebook, WhatsApp, LinkedIn preview) -->
+  <!-- Geo Target Meta Tags for Local Google Search Dominance in Jember -->
+  <meta name="geo.region" content="ID-JI">
+  <meta name="geo.placename" content="Jember, Jawa Timur, Indonesia">
+  <meta name="geo.position" content="-8.1724;113.7007">
+  <meta name="ICBM" content="-8.1724, 113.7007">
+
+  <!-- Open Graph Meta Tags (Google, WhatsApp, Facebook, LinkedIn preview) -->
   <meta property="og:locale" content="id_ID">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern Sleman Yogyakarta">
-  <meta property="og:description" content="Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
+  <meta property="og:title" content="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember | Info Kost Jember Terbaik &amp; Eksklusif">
+  <meta property="og:description" content="Info Kost Jember terbaik &amp; eksklusif di {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} Kos Jember. Fasilitas lengkap AC, WiFi 100M, KM Dalam, dekat kampus UNEJ &amp; UNMUH Jember.">
   <meta property="og:url" content="{{ url()->current() }}">
-  <meta property="og:site_name" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }}">
-  <meta property="og:image" content="{{ asset('assets/images/kos_exterior.jpg') }}">
+  <meta property="og:site_name" content="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember">
+  <meta property="og:image" content="{{ asset('assets/images/hero_scandinavian_room.jpg') }}">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }}">
+  <meta property="og:image:alt" content="Info Kost Jember - {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} Kos Jember">
 
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern">
-  <meta name="twitter:description" content="Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.">
-  <meta name="twitter:image" content="{{ asset('assets/images/kos_exterior.jpg') }}">
+  <meta name="twitter:title" content="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember | Info Kost Jember">
+  <meta name="twitter:description" content="Info Kost Jember terbaik &amp; eksklusif di {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} Kos Jember. Hunian kost modern, AC, WiFi 100M, KM Dalam, dekat kampus UNEJ &amp; UNMUH Jember.">
+  <meta name="twitter:image" content="{{ asset('assets/images/hero_scandinavian_room.jpg') }}">
 
-  <!-- Google Schema.org JSON-LD Structured Data for Top Search Engine Ranking -->
+  <!-- Favicon Sesuai Logo Landing Page (Teal Gradient Badge dengan Ikon Rumah & Pintu Putih) -->
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=3">
+  <link rel="alternate icon" type="image/png" href="{{ asset('favicon.png') }}?v=3">
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=3">
+  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=3">
+
+  <!-- Google Schema.org JSON-LD Structured Data (LocalBusiness, LodgingBusiness, FAQPage, BreadcrumbList) for Top Ranking on Google -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "LodgingBusiness",
-    "name": "{{ $setting->kos_name ?? 'Kos Mas Robi' }}",
-    "description": "Hunian kost eksklusif modern, nyaman, full furnished, WiFi kencang 100 Mbps, dan aman 24 jam di Sleman, Yogyakarta.",
-    "url": "{{ url('/') }}",
-    "image": "{{ asset('assets/images/kos_exterior.jpg') }}",
-    "telephone": "+{{ preg_replace('/[^0-9]/', '', $setting->owner_phone ?? '6281234567890') }}",
-    "priceRange": "Rp 900.000 - Rp 2.500.000",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "{{ $setting->kos_address ?? 'Sleman, DI Yogyakarta' }}",
-      "addressLocality": "Sleman",
-      "addressRegion": "DI Yogyakarta",
-      "postalCode": "55281",
-      "addressCountry": "ID"
-    },
-    "geo": {
-      "@type": "GeoCoordinates",
-      "latitude": -7.765,
-      "longitude": 110.375
-    },
-    "amenityFeature": [
+    "@graph": [
       {
-        "@type": "LocationFeatureSpecification",
-        "name": "WiFi High Speed 100 Mbps",
-        "value": true
+        "@type": "LodgingBusiness",
+        "@id": "{{ url('/') }}#lodging",
+        "name": "{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember",
+        "alternateName": [
+          "Info Kost Jember",
+          "Kos Jember SMART LIVING",
+          "Kost Jember",
+          "Kos Mas Robi Jember",
+          "Kost Dekat Kampus UNEJ & UNMUH Jember"
+        ],
+        "description": "Info Kost Jember terbaik, eksklusif, dan modern di SMART LIVING Kos Jember. Fasilitas kamar full furnished, AC, kamar mandi dalam, WiFi fiber 100 Mbps, keamanan CCTV 24 jam, lokasi strategis dekat Universitas Jember (UNEJ) dan Universitas Muhammadiyah Jember (UNMUH).",
+        "url": "{{ url('/') }}",
+        "image": "{{ asset('assets/images/hero_scandinavian_room.jpg') }}",
+        "telephone": "+{{ preg_replace('/[^0-9]/', '', $setting->owner_phone ?? '6281234567890') }}",
+        "priceRange": "Rp 950.000 - Rp 1.700.000",
+        "currenciesAccepted": "IDR",
+        "paymentAccepted": "Cash, Bank Transfer, QRIS",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Jl. Kalimantan & Jl. Mastrip, Area Kampus UNEJ & UNMUH, Sumbersari",
+          "addressLocality": "Jember",
+          "addressRegion": "Jawa Timur",
+          "postalCode": "68121",
+          "addressCountry": "ID"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": -8.1724,
+          "longitude": 113.7007
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            "opens": "00:00",
+            "closes": "23:59"
+          }
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "148",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "amenityFeature": [
+          {
+            "@type": "LocationFeatureSpecification",
+            "name": "WiFi High Speed Fiber 100 Mbps",
+            "value": true
+          },
+          {
+            "@type": "LocationFeatureSpecification",
+            "name": "Kamar Mandi Dalam & Water Heater",
+            "value": true
+          },
+          {
+            "@type": "LocationFeatureSpecification",
+            "name": "Pendingin Udara Air Conditioner (AC)",
+            "value": true
+          },
+          {
+            "@type": "LocationFeatureSpecification",
+            "name": "Springbed Nyaman & Meja Belajar",
+            "value": true
+          },
+          {
+            "@type": "LocationFeatureSpecification",
+            "name": "Keamanan CCTV 24 Jam & Akses Mandiri",
+            "value": true
+          },
+          {
+            "@type": "LocationFeatureSpecification",
+            "name": "Parkir Motor & Mobil Luas Aman",
+            "value": true
+          }
+        ]
       },
       {
-        "@type": "LocationFeatureSpecification",
-        "name": "Kamar Mandi Dalam & Water Heater",
-        "value": true
+        "@type": "FAQPage",
+        "@id": "{{ url('/') }}#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Bagaimana cara mendapatkan info kost Jember dan survei kamar di SMART LIVING?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Anda dapat melihat ketersediaan kamar secara live di website SMART LIVING Kos Jember, kemudian klik tombol 'Jadwal Survey' atau 'Chat WhatsApp' untuk langsung terhubung dengan pengelola kos dan menentukan jadwal kunjungan lokasi."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Berapa tarif harga sewa kamar kos di Kos Jember SMART LIVING?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Harga sewa kamar Kos Jember di SMART LIVING mulai dari Rp 950.000 hingga Rp 1.700.000 per bulan dengan fasilitas all-in (WiFi 100 Mbps gratis, springbed, lemari pakaian, meja belajar, AC, dan kamar mandi dalam)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apakah lokasi Kos Jember SMART LIVING dekat dengan kampus UNEJ dan UNMUH?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sangat dekat. Unit Kos Jember SMART LIVING Cabang 1 dan Cabang 2 hanya berjarak 3-5 menit dari gerbang Universitas Jember (UNEJ), Universitas Muhammadiyah Jember (UNMUH), dan Politeknik Negeri Jember (Polije)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Fasilitas apa saja yang didapat penghuni Kos Jember SMART LIVING?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Fasilitas lengkap meliputi kamar full furnished (springbed, meja, lemari), AC dingin, kamar mandi dalam bersih, water heater, WiFi fiber 100 Mbps, dapur bersama, kulkas umum, CCTV 24 jam, dan parkir luas."
+            }
+          }
+        ]
       },
       {
-        "@type": "LocationFeatureSpecification",
-        "name": "Air Conditioner (AC)",
-        "value": true
-      },
-      {
-        "@type": "LocationFeatureSpecification",
-        "name": "Security CCTV 24 Jam & Smart Key",
-        "value": true
+        "@type": "BreadcrumbList",
+        "@id": "{{ url('/') }}#breadcrumb",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Beranda Kos Jember",
+            "item": "{{ url('/') }}"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Info Kost Jember",
+            "item": "{{ url('/') }}#kamar"
+          }
+        ]
       }
     ]
   }
   </script>
-
-  <title>{{ $setting->kos_name ?? 'Kos Mas Robi' }} — Hunian Kost Eksklusif & Modern</title>
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230a5661'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/></svg>">
 
   <!-- Google Fonts: Outfit & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,13 +195,125 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Luxury Real Estate Stylesheet -->
-  <link rel="stylesheet" href="{{ asset('css/landing.css') }}?v={{ file_exists(public_path('css/landing.css')) ? filemtime(public_path('css/landing.css')) : time() }}">
+  @php
+    $landingCssFile = file_exists(public_path('css/landing.min.css')) ? 'css/landing.min.css' : 'css/landing.css';
+  @endphp
+  <link rel="stylesheet" href="{{ asset($landingCssFile) }}?v={{ filemtime(public_path($landingCssFile)) }}">
+
+  <!-- Critical Anti-FOUC Intro Loader: Mencegah kedip / flash landing page saat pertama kali dibuka -->
+  <style>
+    .flutter-3d-intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999999;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      visibility: visible;
+    }
+    html.f3d-intro-skip #flutter3dIntroOverlay {
+      display: none !important;
+    }
+    html.f3d-intro-active body {
+      overflow: hidden !important;
+    }
+    html.f3d-intro-active .lr-navbar {
+      transform: translateY(-40px);
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+    html.f3d-intro-active .lr-hero-photo-bg img {
+      transform: scale(1.12) translateY(-10px);
+      filter: blur(10px) contrast(90%);
+    }
+    html.f3d-intro-active .lr-hero-title {
+      transform: perspective(900px) translateY(36px) translateZ(-40px) rotateX(10deg);
+      opacity: 0 !important;
+    }
+    html.f3d-intro-active .lr-hero-desc {
+      transform: translateY(28px);
+      opacity: 0 !important;
+    }
+    html.f3d-intro-active .lr-hero-cta-group {
+      transform: translateY(24px) scale(0.96);
+      opacity: 0 !important;
+    }
+  </style>
+  <script>
+    (function() {
+      try {
+        var mode = localStorage.getItem('kos_3d_flutter_mode');
+        var shown = sessionStorage.getItem('f3d_intro_shown');
+        if (mode === 'disabled' || shown === '1') {
+          document.documentElement.classList.add('f3d-intro-skip');
+        } else {
+          document.documentElement.classList.add('f3d-intro-active');
+        }
+      } catch(e) {}
+    })();
+  </script>
 </head>
 <body>
 
+  <!-- =========================================================================
+       FLUTTER INTRO ENTRY: LOGO RESMI DENGAN ANIMASI ULAR MENGGAMBAR GARIS PUTIH
+       ========================================================================= -->
+  <div id="flutter3dIntroOverlay" class="flutter-3d-intro-overlay">
+    <div class="f3d-intro-container" id="f3dIntroContainer">
+      <div class="f3d-ambient-aura" id="f3dAmbientAura"></div>
+
+      <!-- LOGO RESMI BADGE (SAMA PERSIS DENGAN GAMBAR USER) -->
+      <div class="f3d-logo-badge-wrap">
+        <div class="f3d-official-logo-badge" id="f3dOfficialLogoBadge">
+
+          <svg class="f3d-svg-canvas" viewBox="0 0 226 230" fill="none">
+            <defs>
+              <linearGradient id="landingSnakeGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#10b981" />
+                <stop offset="50%" stop-color="#2dd4bf" />
+                <stop offset="100%" stop-color="#34d399" />
+              </linearGradient>
+            </defs>
+
+            <!-- 1. Garis Putih Rumah (Awalnya Tidak Ada / 0, Muncul Mengikuti Ular Berjalan) -->
+            <path id="f3dPathHouseWhite" pathLength="1000" class="f3d-drawn-white" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke="#ffffff" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- 2. Animasi Ular Hijau Berjalan di Garis Rumah -->
+            <path id="f3dPathHouseSnake" class="f3d-snake-tracer" pathLength="1000" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke="url(#landingSnakeGreenGrad)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- 3. Garis Putih Pintu (Awalnya Tidak Ada / 0, Muncul Mengikuti Ular Berjalan) -->
+            <path id="f3dPathDoorWhite" pathLength="1000" class="f3d-drawn-white" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke="#ffffff" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" />
+
+            <!-- 4. Animasi Ular Hijau Berjalan di Garis Pintu -->
+            <path id="f3dPathDoorSnake" class="f3d-snake-tracer" pathLength="1000" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke="url(#landingSnakeGreenGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Inisialisasi awal sinkron SVG: Menjamin garis putih murni 0 saat logo pertama kali muncul -->
+  <script>
+    (function() {
+      try {
+        var wH = document.getElementById('f3dPathHouseWhite');
+        var sH = document.getElementById('f3dPathHouseSnake');
+        var wD = document.getElementById('f3dPathDoorWhite');
+        var sD = document.getElementById('f3dPathDoorSnake');
+        if (wH) { wH.style.strokeDasharray = '0 1000'; wH.style.strokeDashoffset = '0'; }
+        if (sH) { sH.style.strokeDasharray = '0 1000'; sH.style.strokeDashoffset = '0'; sH.style.opacity = '0'; }
+        if (wD) { wD.style.strokeDasharray = '0 1000'; wD.style.strokeDashoffset = '0'; }
+        if (sD) { sD.style.strokeDasharray = '0 1000'; sD.style.strokeDashoffset = '0'; }
+      } catch(e) {}
+    })();
+  </script>
+
   @php
     $landing = $setting->landing_content ?? [];
-    $heroImg = $landing['hero_image'] ?? 'assets/images/kos_exterior.jpg';
+    $heroImg = $landing['hero_image'] ?? 'assets/images/kos_exterior.webp';
     $rawOwnerPhone = $setting->owner_phone ?? '6281234567890';
     $cleanOwnerPhone = preg_replace('/[^0-9]/', '', $rawOwnerPhone);
     if (str_starts_with($cleanOwnerPhone, '0')) {
@@ -102,10 +321,10 @@
     }
     $rawSurveyTemplate = $setting->survey_form_template;
     $bentoGallery = $landing['bento_gallery'] ?? [
-        'assets/images/hero_scandinavian_room.jpg',
-        'assets/images/rooms/room_2.jpg',
-        'assets/images/rooms/room_3.jpg',
-        'assets/images/kos_exterior.jpg'
+        'assets/images/hero_scandinavian_room.webp',
+        'assets/images/rooms/room_2.webp',
+        'assets/images/rooms/room_3.webp',
+        'assets/images/kos_exterior.webp'
     ];
     $bentoFeatures = $landing['bento_features'] ?? [
         [
@@ -128,10 +347,7 @@
     <div class="lr-container lr-nav-inner">
       <a href="{{ route('home') }}" class="lr-brand">
         <div class="lr-brand-badge-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <path d="M9 21V12h6v9"/>
-          </svg>
+          <img src="{{ asset('assets/images/logo_kos_jember.png') }}" alt="{{ !empty($setting->kos_name) ? $setting->kos_name : 'Kos Jember' }}" class="lr-brand-img" width="42" height="42" fetchpriority="high">
         </div>
         <div class="lr-brand-title">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</div>
       </a>
@@ -162,9 +378,9 @@
             </a>
           @endif
         @else
-          <a href="{{ route('login') }}" class="lr-btn-pill-teal">
+          <a href="{{ route('login') }}" class="lr-btn-pill-teal" onclick="window.f3dNavigateToLogin(event, this.href)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-            <span class="lr-nav-btn-text-full">Login Penghuni</span>
+            <span class="lr-nav-btn-text-full">Login</span>
             <span class="lr-nav-btn-text-short">Login</span>
           </a>
         @endauth
@@ -181,7 +397,9 @@
     <div class="lr-hero-photo-bg">
       <img src="{{ asset($heroImg) }}"
            alt="Bangunan {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}"
-           onerror="this.src='{{ asset('assets/images/kos_exterior.jpg') }}'">
+           fetchpriority="high"
+           decoding="async"
+           onerror="this.src='{{ asset('assets/images/kos_exterior.webp') }}'">
     </div>
 
     <div class="lr-container lr-hero-grid">
@@ -211,13 +429,13 @@
   {{-- =========================================================================
        3. FLOATING DOUBLE-DECKER SEARCH CARD (OVERLAPPING HERO & LISTINGS)
        ========================================================================= --}}
-  <div class="lr-search-wrapper">
+  <div class="lr-search-wrapper" data-spatial-reveal="search-dock">
     <div class="lr-container">
       <div class="lr-search-card">
 
         <form action="{{ route('home') }}#kamar" method="GET" class="lr-search-left-inputs">
           {{-- Row 1: Tipe Kamar & Lantai --}}
-          <div class="lr-search-row">
+          <div class="lr-search-row" data-spatial-reveal="card-item" data-stagger="1">
             <div class="lr-search-input-pill">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               <input type="text" name="type" placeholder="Tipe Kamar (VIP, Deluxe, Standard)..." value="{{ request('type') != 'all' ? request('type') : '' }}">
@@ -234,7 +452,7 @@
           </div>
 
           {{-- Row 2: Fasilitas & Ketersediaan --}}
-          <div class="lr-search-row">
+          <div class="lr-search-row" data-spatial-reveal="card-item" data-stagger="2">
             <div class="lr-search-input-pill">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
               <input type="text" name="q" placeholder="Fasilitas (AC, Springbed, WiFi)..." value="{{ request('q') ?? '' }}">
@@ -252,7 +470,7 @@
         </form>
 
         {{-- Right Side Metric & Big Submit Pill --}}
-        <div class="lr-search-right-cta">
+        <div class="lr-search-right-cta" data-spatial-reveal="card-item" data-stagger="3">
           <div class="lr-metric-box">
             <div class="lr-metric-val">{{ $availableCount ?? 4 }}<span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">/{{ $totalRooms ?? 16 }}</span></div>
             <div class="lr-metric-lbl">Unit Siap Huni</div>
@@ -269,129 +487,149 @@
   </div>
 
   {{-- =========================================================================
-       4. FEATURED LISTINGS + TYPE (3 KARTU PERSIS TEMPLATE PADA BACKGROUND MINT)
+       4. FEATURED LISTINGS (KATALOG UNIT KAMAR KOS)
        ========================================================================= --}}
   <section class="lr-featured-section" id="kamar">
     <div class="lr-container">
 
-      <div class="lr-featured-header" style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-        <div>
-          <h2 class="lr-featured-title">
-            Featured.listings <span>+ Type</span>
-          </h2>
-          <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 6px;">
-            Pilihan unit kamar kos eksklusif di <strong>2 Titik Lokasi Strategis</strong> dengan kenyamanan maksimal dan fasilitas lengkap.
-          </p>
-        </div>
-
-        {{-- Quick Filter Pills --}}
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <a href="{{ route('home') }}#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ !request('type') || request('type') == 'all' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Semua Tipe</a>
-          <a href="{{ route('home') }}?type=VIP#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ request('type') == 'VIP' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">VIP AC</a>
-          <a href="{{ route('home') }}?type=Deluxe#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ request('type') == 'Deluxe' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Deluxe AC</a>
-          <a href="{{ route('home') }}?type=Standard#kamar" style="padding: 8px 18px; border-radius: var(--radius-full); font-size: 0.82rem; font-weight: 700; text-decoration: none; transition: all 0.2s ease; {{ request('type') == 'Standard' ? 'background: var(--teal-primary); color: #ffffff;' : 'background: #ffffff; color: var(--text-dark); border: 1px solid var(--border-subtle);' }}">Standard Fan</a>
-        </div>
-      </div>
-
-      {{-- 2 TITIK LOKASI SWITCHER BANNER --}}
+      {{-- 2 TITIK LOKASI SWITCHER BANNER (Client-side, No Reload) --}}
       @php
         $b1NameLanding = $setting->branches['lokasi_1']['name'] ?? 'Kos 1 (Kampus Utama)';
         $b2NameLanding = $setting->branches['lokasi_2']['name'] ?? 'Kos 2 (Ringroad Exclusive)';
       @endphp
-      <div style="margin: 20px 0 28px; display: flex; gap: 10px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 8px; border-radius: 16px;">
-        <a href="{{ route('home') }}#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ !request('location') || request('location') == 'all' ? 'background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: var(--teal-primary); border: 1px solid rgba(10,86,97,0.15);' }}">
-          Semua Cabang
-        </a>
-        <a href="{{ route('home') }}?location=Lokasi+1#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 1' ? 'background: #0a5661; color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);' : 'background: #ffffff; color: #0a5661; border: 1px solid rgba(10,86,97,0.15);' }}">
-          {{ $b1NameLanding }}
-        </a>
-        <a href="{{ route('home') }}?location=Lokasi+2#kamar" style="padding: 9px 20px; border-radius: 12px; font-size: 0.84rem; font-weight: 800; text-decoration: none; transition: all 0.2s; {{ request('location') == 'Lokasi 2' ? 'background: #0284c7; color: #ffffff; box-shadow: 0 2px 8px rgba(2,132,199,0.25);' : 'background: #ffffff; color: #0284c7; border: 1px solid rgba(2,132,199,0.15);' }}">
-          {{ $b2NameLanding }}
-        </a>
+      @php
+        $b1ActiveLanding = $setting->branches['lokasi_1']['is_active'] ?? true;
+        $b2ActiveLanding = $setting->branches['lokasi_2']['is_active'] ?? true;
+      @endphp
+      <div style="margin: 0 0 28px; display: flex; gap: 10px; flex-wrap: wrap; background: #f0fdfa; border: 1.5px solid #ccfbf1; padding: 8px; border-radius: 16px;" id="landingBranchFilters" data-spatial-reveal="section-header">
+        @if($b1ActiveLanding && $b2ActiveLanding)
+          <button type="button" class="lr-filter-pill-branch active" data-location="all" onclick="filterLandingRoomsLocation('all', this)">
+            Semua Cabang
+          </button>
+          <button type="button" class="lr-filter-pill-branch" data-location="Lokasi 1" onclick="filterLandingRoomsLocation('Lokasi 1', this)">
+            {{ $b1NameLanding }}
+          </button>
+          <button type="button" class="lr-filter-pill-branch" data-location="Lokasi 2" onclick="filterLandingRoomsLocation('Lokasi 2', this)">
+            {{ $b2NameLanding }}
+          </button>
+        @elseif($b1ActiveLanding)
+          <button type="button" class="lr-filter-pill-branch active" data-location="Lokasi 1" onclick="filterLandingRoomsLocation('Lokasi 1', this)">
+            {{ $b1NameLanding }}
+          </button>
+        @elseif($b2ActiveLanding)
+          <button type="button" class="lr-filter-pill-branch active" data-location="Lokasi 2" onclick="filterLandingRoomsLocation('Lokasi 2', this)">
+            {{ $b2NameLanding }}
+          </button>
+        @endif
       </div>
 
-      <div class="lr-featured-grid">
-        @forelse($allRooms as $room)
-          @php
-            $imgs = $room->images_list ?? [$room->image ?? 'assets/images/rooms/room_1.jpg'];
-            $mainImg = $imgs[0] ?? 'assets/images/rooms/room_1.jpg';
-            $isAvail = $room->status === 'available';
-            $isLoc2 = ($room->location ?? '') === 'Lokasi 2';
-          @endphp
-          <div class="lr-card-featured" style="border-top: 4px solid {{ $isLoc2 ? '#0284c7' : '#0a5661' }};">
-            <div class="lr-card-thumb-wrap" style="position: relative;">
-              <img src="{{ asset($mainImg) }}"
-                   alt="Kamar #{{ $room->number }}"
-                   class="lr-card-thumb"
-                   onerror="this.src='{{ asset('assets/images/room_sample.jpg') }}'">
+      {{-- 4.1 LOGIKA SLIDER (1 SLIDE = 6 KAMAR: 3 KAMAR LT. 1 + 3 KAMAR LT. 2) --}}
+      @php
+        $floor1Rooms = $allRooms->filter(fn($r) => (int)$r->floor === 1)->values();
+        $floor2Rooms = $allRooms->filter(fn($r) => (int)$r->floor === 2)->values();
 
-              <!-- Lokasi Badge -->
-              @if($isLoc2)
-                <span style="position: absolute; top: 12px; left: 12px; background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(6px); color: #7dd3fc; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; z-index: 2; border: 1.5px solid #0284c7; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                  {{ $b2NameLanding }}
-                </span>
-              @else
-                <span style="position: absolute; top: 12px; left: 12px; background: rgba(3, 35, 40, 0.9); backdrop-filter: blur(6px); color: #a7f3d0; font-size: 0.72rem; font-weight: 800; padding: 4px 12px; border-radius: 999px; z-index: 2; border: 1.5px solid #10b981; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                  {{ $b1NameLanding }}
-                </span>
-              @endif
+        $slides = [];
+        $maxSlides = max(
+          (int) ceil($floor1Rooms->count() / 3),
+          (int) ceil($floor2Rooms->count() / 3)
+        );
 
-              <span class="lr-pill-avail" style="{{ $isAvail ? 'background: #10b981;' : 'background: #64748b;' }}">
-                {{ $isAvail ? 'Siap Huni' : 'Terisi' }}
-              </span>
+        if ($maxSlides > 0) {
+          for ($i = 0; $i < $maxSlides; $i++) {
+            $sFloor1 = $floor1Rooms->slice($i * 3, 3)->values();
+            $sFloor2 = $floor2Rooms->slice($i * 3, 3)->values();
+            $slides[] = [
+              'floor1' => $sFloor1,
+              'floor2' => $sFloor2,
+            ];
+          }
+        } else {
+          $chunks = $allRooms->chunk(6);
+          foreach ($chunks as $chunk) {
+            $slides[] = [
+              'floor1' => $chunk->filter(fn($r) => (int)$r->floor === 1)->values(),
+              'floor2' => $chunk->filter(fn($r) => (int)$r->floor !== 1)->values(),
+            ];
+          }
+        }
+      @endphp
 
-              <span class="lr-pill-floor">
-                Lantai {{ $room->floor }}
-              </span>
-            </div>
-
-            <div class="lr-card-body">
-              <h3 class="lr-card-room-title">Kamar #{{ $room->number }} - {{ $room->type }}</h3>
-              <p class="lr-card-room-desc">
-                Dilengkapi springbed empuk, pendingin udara AC, meja belajar, lemari pakaian, dan kamar mandi pribadi bersih.
-              </p>
-
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
-                <span style="font-size: 0.72rem; background: var(--bg-surface); padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle); color: var(--text-muted); font-weight: 600;">Springbed</span>
-                <span style="font-size: 0.72rem; background: var(--bg-surface); padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle); color: var(--text-muted); font-weight: 600;">AC Dingin</span>
-                <span style="font-size: 0.72rem; background: var(--bg-surface); padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle); color: var(--text-muted); font-weight: 600;">KM Dalam</span>
-                <span style="font-size: 0.72rem; background: var(--bg-surface); padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--border-subtle); color: var(--text-muted); font-weight: 600;">WiFi 100M</span>
-              </div>
-
-              <div class="lr-card-footer">
-                <div class="lr-card-mini-meta">
-                  <div class="lr-mini-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/><path d="M9 21V12h6v9"/></svg></div>
-                  <div>
-                    <div class="lr-price-tag">Rp {{ number_format($room->price, 0, ',', '.') }}</div>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600;">per bulan (all-in)</span>
+      {{-- SLIDER VIEWPORT & TRACK --}}
+      <div class="lr-room-slider-wrapper">
+        <div class="lr-room-slider-viewport" id="lrRoomSliderViewport">
+          <div class="lr-room-slider-track" id="lrRoomSliderTrack">
+            @forelse($slides as $slideIdx => $slide)
+              <div class="lr-room-slide {{ $slideIdx === 0 ? 'active' : '' }}" data-slide-index="{{ $slideIdx }}">
+                
+                {{-- Row 1: 3 Kamar Lantai 1 --}}
+                @if($slide['floor1']->isNotEmpty())
+                  <div class="lr-slide-floor-row">
+                    <div class="lr-slide-floor-title" data-spatial-reveal="bento-text">
+                      <span class="lr-floor-tag floor-1">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Lantai 1
+                      </span>
+                    </div>
+                    <div class="lr-featured-grid">
+                      @foreach($slide['floor1'] as $roomIdx => $room)
+                        @include('landing._room_card', ['room' => $room, 'roomIdx' => $roomIdx])
+                      @endforeach
+                    </div>
                   </div>
-                </div>
+                @endif
 
-                <button type="button" class="lr-btn-book-round"
-                        onclick="openSurveyModal({ room: 'Kamar #{{ $room->number }} - {{ $room->type }} (Lantai {{ $room->floor }})', branch: '{{ $room->location ?? 'Lokasi 1' }}' })"
-                        title="Isi Formulir Survey & Booking">
-                  <span>Booking</span>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>
+                {{-- Row 2: 3 Kamar Lantai 2 --}}
+                @if($slide['floor2']->isNotEmpty())
+                  <div class="lr-slide-floor-row" style="{{ $slide['floor1']->isNotEmpty() ? 'margin-top: 26px;' : '' }}">
+                    <div class="lr-slide-floor-title" data-spatial-reveal="bento-text">
+                      <span class="lr-floor-tag floor-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                        Lantai 2
+                      </span>
+                    </div>
+                    <div class="lr-featured-grid">
+                      @foreach($slide['floor2'] as $roomIdx => $room)
+                        @include('landing._room_card', ['room' => $room, 'roomIdx' => $roomIdx])
+                      @endforeach
+                    </div>
+                  </div>
+                @endif
+
               </div>
-            </div>
+            @empty
+              <div style="width: 100%; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 20px; border: 1px dashed var(--border-subtle);">
+                <h4 style="font-size: 1.15rem; color: var(--text-dark); margin-bottom: 6px;">Unit Kamar Tidak Ditemukan</h4>
+                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">Silakan pilih filter lain atau hubungi pengelola untuk cek ketersediaan langsung.</p>
+                <a href="{{ route('home') }}#kamar" class="lr-btn-pill-teal" style="background: var(--teal-primary); display: inline-flex;">Tampilkan Semua Kamar</a>
+              </div>
+            @endforelse
           </div>
-        @empty
-          <div style="grid-column: span 3; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 20px; border: 1px dashed var(--border-subtle);">
-            <h4 style="font-size: 1.15rem; color: var(--text-dark); margin-bottom: 6px;">Unit Kamar Tidak Ditemukan</h4>
-            <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">Silakan pilih filter lain atau hubungi pengelola untuk cek ketersediaan langsung.</p>
-            <a href="{{ route('home') }}#kamar" class="lr-btn-pill-teal" style="background: var(--teal-primary); display: inline-flex;">Tampilkan Semua Kamar</a>
-          </div>
-        @endforelse
+        </div>
       </div>
 
-      {{-- Dots Indicator (Matching Reference) --}}
-      <div class="lr-dots-indicator">
-        <span class="lr-dot active"></span>
-        <span class="lr-dot"></span>
-        <span class="lr-dot"></span>
-        <span class="lr-dot"></span>
-        <span class="lr-dot"></span>
+      {{-- Bottom Navigation Bar: Dots Indicator di Antara Tombol Kiri dan Kanan --}}
+      <div class="lr-slider-bottom-bar" id="lrSliderBottomBar" data-spatial-reveal="section-header">
+        <div class="lr-slider-ctrl-group" id="lrSliderBottomCtrl" style="{{ count($slides) <= 1 ? 'display: none;' : '' }}">
+          <button type="button" class="lr-slider-btn prev" id="lrBtnRoomPrev" aria-label="Slide Sebelumnya" title="Slide Sebelumnya">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+
+          {{-- Dots Indicator berada tepat di antara tombol panah kiri dan tombol panah kanan --}}
+          <div class="lr-dots-indicator" id="lrRoomSliderDots" style="margin: 0; padding: 0 6px;">
+            @foreach($slides as $slideIdx => $slide)
+              <button type="button" class="lr-dot-btn {{ $slideIdx === 0 ? 'active' : '' }}"
+                      data-target-slide="{{ $slideIdx }}"
+                      aria-label="Beralih ke Slide {{ $slideIdx + 1 }}"
+                      title="Slide {{ $slideIdx + 1 }}">
+                <span class="lr-dot"></span>
+              </button>
+            @endforeach
+          </div>
+
+          <button type="button" class="lr-slider-btn next" id="lrBtnRoomNext" aria-label="Slide Selanjutnya" title="Slide Selanjutnya">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
       </div>
 
     </div>
@@ -405,7 +643,7 @@
 
       {{-- Bento Header: Two-tone Title on Left, Stacked Circular Pills on Right --}}
       <div class="lr-bento-header-grid">
-        <div>
+        <div data-spatial-reveal="bento-text">
           <h2 class="lr-two-tone-title">
             <span class="highlight-coral">{{ $landing['bento_tag'] ?? 'Kenyamanan Maksimal' }}</span><br>
             <span class="dark-teal">{{ $landing['bento_title'] ?? 'Untuk Istirahat & Produktivitas' }}</span>
@@ -417,7 +655,7 @@
 
         <div class="lr-feature-pill-stack">
           @foreach($bentoFeatures as $idx => $bf)
-            <div class="lr-feat-pill-item">
+            <div class="lr-feat-pill-item" data-spatial-reveal="pill-domino" data-stagger="{{ ($idx % 5) + 1 }}">
               <div class="lr-feat-circle-icon {{ $idx % 2 == 0 ? 'coral' : 'teal' }}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
@@ -434,7 +672,7 @@
       <div class="lr-gallery-grid">
 
         {{-- Card 1: Fast Racket / Highlight Feature Card --}}
-        <div class="lr-gallery-hero-card">
+        <div class="lr-gallery-hero-card" data-spatial-reveal="photo-depth" data-stagger="1">
           <div>
             <span style="font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--coral-light); font-weight: 800; display: block; margin-bottom: 8px;">
               {{ $landing['bento_card_tag'] ?? 'Fasilitas Unggulan' }}
@@ -453,29 +691,37 @@
 
         {{-- Card 2: 2 Stacked Photo Cards --}}
         <div class="lr-gallery-column">
-          <div class="lr-gallery-photo-card">
-            <img src="{{ asset($bentoGallery[0] ?? 'assets/images/hero_scandinavian_room.jpg') }}"
+          <div class="lr-gallery-photo-card" data-spatial-reveal="photo-depth" data-stagger="2">
+            <img src="{{ asset($bentoGallery[0] ?? 'assets/images/hero_scandinavian_room.webp') }}"
                  alt="Foto Galeri 1"
-                 onerror="this.src='{{ asset('assets/images/rooms/room_1.jpg') }}'">
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.src='{{ asset('assets/images/rooms/room_1.webp') }}'">
           </div>
-          <div class="lr-gallery-photo-card">
-            <img src="{{ asset($bentoGallery[1] ?? 'assets/images/rooms/room_2.jpg') }}"
+          <div class="lr-gallery-photo-card" data-spatial-reveal="photo-depth" data-stagger="3">
+            <img src="{{ asset($bentoGallery[1] ?? 'assets/images/rooms/room_2.webp') }}"
                  alt="Foto Galeri 2"
-                 onerror="this.src='{{ asset('assets/images/room_sample.jpg') }}'">
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.src='{{ asset('assets/images/room_sample.webp') }}'">
           </div>
         </div>
 
         {{-- Card 3: 2 Stacked Photo Cards --}}
         <div class="lr-gallery-column">
-          <div class="lr-gallery-photo-card">
-            <img src="{{ asset($bentoGallery[2] ?? 'assets/images/rooms/room_3.jpg') }}"
+          <div class="lr-gallery-photo-card" data-spatial-reveal="photo-depth" data-stagger="4">
+            <img src="{{ asset($bentoGallery[2] ?? 'assets/images/rooms/room_3.webp') }}"
                  alt="Foto Galeri 3"
-                 onerror="this.src='{{ asset('assets/images/rooms/room_1.jpg') }}'">
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.src='{{ asset('assets/images/rooms/room_1.webp') }}'">
           </div>
-          <div class="lr-gallery-photo-card">
-            <img src="{{ asset($bentoGallery[3] ?? 'assets/images/kos_exterior.jpg') }}"
+          <div class="lr-gallery-photo-card" data-spatial-reveal="photo-depth" data-stagger="5">
+            <img src="{{ asset($bentoGallery[3] ?? 'assets/images/kos_exterior.webp') }}"
                  alt="Foto Galeri 4"
-                 onerror="this.src='{{ asset('assets/images/hero_scandinavian_room.jpg') }}'">
+                 loading="lazy"
+                 decoding="async"
+                 onerror="this.src='{{ asset('assets/images/hero_scandinavian_room.webp') }}'">
           </div>
         </div>
 
@@ -492,23 +738,25 @@
 
       @php
         $allBranches = $setting->branches ?? [];
-        $b1 = $allBranches['lokasi_1'] ?? [
+        $defaultB1 = [
           'name' => 'Kos Mas Robi 1 - Kampus Utama',
           'tagline' => 'Hunian Tenang, Nyaman & 3 Menit ke Kampus Utama',
           'address' => $setting->kos_address ?? 'Jl. Pandega Marta No. 88, Caturtunggal, Depok, Sleman, D.I. Yogyakarta',
           'gmaps_url' => $setting->gmaps_url ?: 'https://maps.google.com/?q=Jl.+Pandega+Marta+No.88+Yogyakarta',
         ];
-        $b2 = $allBranches['lokasi_2'] ?? [
+        $defaultB2 = [
           'name' => 'Kos Mas Robi 2 - Ringroad Exclusive',
           'tagline' => 'Smart Living, Co-Working Space & Fasilitas Modern',
           'address' => 'Jl. Kaliurang KM 12, Sardonoharjo, Ngaglik, Sleman, D.I. Yogyakarta',
           'gmaps_url' => 'https://maps.google.com/?q=Jl.+Kaliurang+KM+12+Yogyakarta',
         ];
+        $b1 = array_merge($defaultB1, array_filter($allBranches['lokasi_1'] ?? [], fn($v) => !is_null($v) && $v !== ''));
+        $b2 = array_merge($defaultB2, array_filter($allBranches['lokasi_2'] ?? [], fn($v) => !is_null($v) && $v !== ''));
         $embedB1 = $setting->getBranchEmbedUrl('lokasi_1');
         $embedB2 = $setting->getBranchEmbedUrl('lokasi_2');
       @endphp
 
-      <div style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
+      <div data-spatial-reveal="section-header" style="margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
         <div>
           <span style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal-primary); background: #ffffff; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-teal-soft); display: inline-block; margin-bottom: 12px;">
             {{ $landing['location_tag'] ?? '2 TITIK LOKASI & PETA STRATEGIS' }}
@@ -522,20 +770,30 @@
         </div>
 
         {{-- Switcher Tab Peta Lokasi 1 & 2 --}}
-        <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 16px; border: 1.5px solid var(--border-subtle); box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
-          <button type="button" id="btnLandingLoc1" onclick="switchLandingMap(1)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
+        @if($b1ActiveLanding && $b2ActiveLanding)
+          <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 16px; border: 1.5px solid var(--border-subtle); box-shadow: 0 4px 14px rgba(0,0,0,0.04);">
+            <button type="button" id="btnLandingLoc1" onclick="switchLandingMap(1)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 800; cursor: pointer; transition: all 0.2s; background: var(--teal-primary); color: #ffffff; box-shadow: 0 2px 8px rgba(10,86,97,0.25);">
+              {{ $b1NameLanding }}
+            </button>
+            <button type="button" id="btnLandingLoc2" onclick="switchLandingMap(2)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-dark);">
+              {{ $b2NameLanding }}
+            </button>
+          </div>
+        @elseif($b1ActiveLanding)
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--teal-primary); background: #f0fdfa; padding: 8px 16px; border-radius: 12px; border: 1.5px solid #99f6e4;">
             {{ $b1NameLanding }}
-          </button>
-          <button type="button" id="btnLandingLoc2" onclick="switchLandingMap(2)" style="padding: 10px 20px; border-radius: 12px; border: none; font-size: 0.84rem; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-dark);">
+          </div>
+        @elseif($b2ActiveLanding)
+          <div style="font-size: 0.85rem; font-weight: 700; color: #0d9488; background: #f0fdfa; padding: 8px 16px; border-radius: 12px; border: 1.5px solid #99f6e4;">
             {{ $b2NameLanding }}
-          </button>
-        </div>
+          </div>
+        @endif
       </div>
 
       <div class="lr-location-grid">
 
         {{-- Left: Informasi Detail & 4 Editable POI Highlights --}}
-        <div class="lr-loc-card-left">
+        <div class="lr-loc-card-left" data-spatial-reveal="location-left">
           <div>
             <div class="lr-loc-header">
               <div class="lr-loc-pin-box">
@@ -549,8 +807,8 @@
 
             {{-- 4 POI Location Highlights --}}
             <div class="lr-poi-list">
-              @foreach($setting->location_highlights as $poi)
-                <div class="lr-poi-item">
+              @foreach($setting->location_highlights as $poiIdx => $poi)
+                <div class="lr-poi-item" data-spatial-reveal="poi-cascade" data-stagger="{{ ($poiIdx % 4) + 1 }}">
                   <span style="display:inline-flex;align-items:center;justify-content:center;color:var(--teal-primary);flex-shrink:0;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
                   <div>
                     <strong>{{ $poi['title'] ?? '' }}</strong>
@@ -573,7 +831,7 @@
         </div>
 
         {{-- Right: Interactive Google Maps Iframe Frame --}}
-        <div class="lr-map-card-right">
+        <div class="lr-map-card-right" data-spatial-reveal="location-right">
           <div class="lr-map-chrome-bar">
             <div class="lr-map-dots">
               <span class="lr-map-dot red"></span>
@@ -608,7 +866,7 @@
           label: 'maps.google.com/kos-mas-robi-cabang-2'
         };
 
-        window.currentLandingBranch = 'Lokasi 1';
+        window.currentLandingBranch = '{{ $b1ActiveLanding ? 'Lokasi 1' : ($b2ActiveLanding ? 'Lokasi 2' : 'Lokasi 1') }}';
         function switchLandingMap(branchNum) {
           var btn1 = document.getElementById('btnLandingLoc1');
           var btn2 = document.getElementById('btnLandingLoc2');
@@ -620,38 +878,49 @@
 
           if (branchNum === 2) {
             window.currentLandingBranch = 'Lokasi 2';
-            titleEl.textContent = branchData2.title;
-            addrEl.textContent = branchData2.address;
-            linkEl.href = branchData2.gmapsUrl;
-            frameEl.src = branchData2.embedUrl;
-            labelEl.textContent = branchData2.label;
+            if (titleEl) titleEl.textContent = branchData2.title;
+            if (addrEl) addrEl.textContent = branchData2.address;
+            if (linkEl) linkEl.href = branchData2.gmapsUrl;
+            if (frameEl) frameEl.src = branchData2.embedUrl;
+            if (labelEl) labelEl.textContent = branchData2.label;
 
-            btn2.style.background = '#0d9488';
-            btn2.style.color = '#ffffff';
-            btn2.style.boxShadow = '0 2px 8px rgba(13,148,136,0.25)';
-            btn1.style.background = 'transparent';
-            btn1.style.color = 'var(--text-dark)';
-            btn1.style.boxShadow = 'none';
+            if (btn2) {
+              btn2.style.background = '#0d9488';
+              btn2.style.color = '#ffffff';
+              btn2.style.boxShadow = '0 2px 8px rgba(13,148,136,0.25)';
+            }
+            if (btn1) {
+              btn1.style.background = 'transparent';
+              btn1.style.color = 'var(--text-dark)';
+              btn1.style.boxShadow = 'none';
+            }
           } else {
             window.currentLandingBranch = 'Lokasi 1';
-            titleEl.textContent = branchData1.title;
-            addrEl.textContent = branchData1.address;
-            linkEl.href = branchData1.gmapsUrl;
-            frameEl.src = branchData1.embedUrl;
-            labelEl.textContent = branchData1.label;
+            if (titleEl) titleEl.textContent = branchData1.title;
+            if (addrEl) addrEl.textContent = branchData1.address;
+            if (linkEl) linkEl.href = branchData1.gmapsUrl;
+            if (frameEl) frameEl.src = branchData1.embedUrl;
+            if (labelEl) labelEl.textContent = branchData1.label;
 
-            btn1.style.background = 'var(--teal-primary)';
-            btn1.style.color = '#ffffff';
-            btn1.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
-            btn2.style.background = 'transparent';
-            btn2.style.color = 'var(--text-dark)';
-            btn2.style.boxShadow = 'none';
+            if (btn1) {
+              btn1.style.background = 'var(--teal-primary)';
+              btn1.style.color = '#ffffff';
+              btn1.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+            }
+            if (btn2) {
+              btn2.style.background = 'transparent';
+              btn2.style.color = 'var(--text-dark)';
+              btn2.style.boxShadow = 'none';
+            }
           }
         }
-      </script>
 
-    </div>
-  </section>
+        @if(!$b1ActiveLanding && $b2ActiveLanding)
+          document.addEventListener('DOMContentLoaded', function() {
+            switchLandingMap(2);
+          });
+        @endif
+      </script>
 
     </div>
   </section>
@@ -661,7 +930,7 @@
        ========================================================================= --}}
   <section class="lr-quote-section" id="tentang">
     <div class="lr-container">
-      <div class="lr-quote-box">
+      <div class="lr-quote-box" data-spatial-reveal="quote-unfold">
         <div>
           <div class="lr-quote-avatar">{{ $landing['founder_avatar'] ?? 'MR' }}</div>
           <div class="lr-quote-name">{{ $landing['founder_name'] ?? ($setting->owner_name ?? 'Mas Robi') }}</div>
@@ -683,17 +952,20 @@
   <footer class="lr-footer" id="kontak">
     <div class="lr-container">
       <div class="lr-footer-grid">
-        <div class="lr-footer-brand">
-          <h4>{{ $setting->kos_name ?? 'Kos Mas Robi' }}</h4>
-          <p style="font-size: 0.88rem; line-height: 1.65; max-width: 440px; color: #94a3b8; margin-bottom: 18px;">
-            {{ $landing['footer_desc'] ?? 'Hunian kost eksklusif dengan fasilitas lengkap, kamar ber-AC, kamar mandi dalam, WiFi fiber cepat 100 Mbps, dan keamanan 24 jam di kawasan strategis.' }}
+        <div class="lr-footer-brand" data-spatial-reveal="footer-col" data-stagger="1">
+          <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 12px;">
+            <img src="{{ asset('assets/images/logo_kos_jember.png') }}" alt="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}" style="width: 38px; height: 38px; object-fit: contain; border-radius: 11px;">
+            <h4 style="margin: 0;">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }} — Kos Jember</h4>
+          </div>
+          <p style="font-size: 0.88rem; line-height: 1.65; max-width: 440px; color: #94a3b8; margin-bottom: 14px;">
+            {{ $landing['footer_desc'] ?? 'Pusat Info Kost Jember terbaik & eksklusif dengan fasilitas lengkap, kamar ber-AC, kamar mandi dalam, WiFi fiber cepat 100 Mbps, dan keamanan 24 jam di kawasan strategis dekat kampus UNEJ & UNMUH Jember.' }}
           </p>
           <div style="font-size: 0.84rem; color: #cbd5e1;">
-            {{ $setting->kos_address ?? 'Jl. Kaliurang KM 5, Gang Pandega Marta No. 18, Sleman, DI Yogyakarta' }}
+            {{ $setting->kos_address ?? 'Kawasan Kampus UNEJ & UNMUH, Sumbersari, Jember, Jawa Timur' }}
           </div>
         </div>
 
-        <div class="lr-footer-col">
+        <div class="lr-footer-col" data-spatial-reveal="footer-col" data-stagger="2">
           <h5>Navigasi Halaman</h5>
           <ul class="lr-footer-list">
             <li><a href="#beranda">Beranda Utama</a></li>
@@ -704,7 +976,7 @@
           </ul>
         </div>
 
-        <div class="lr-footer-col">
+        <div class="lr-footer-col" data-spatial-reveal="footer-col" data-stagger="3">
           <h5>Hubungi & Akses</h5>
           <ul class="lr-footer-list">
             <li>
@@ -712,19 +984,16 @@
                 WhatsApp: {{ $setting->owner_phone ?? '6281234567890' }}
               </a>
             </li>
-            <li><a href="{{ route('login') }}">Portal Login Anak Kos</a></li>
+            <li><a href="{{ route('login') }}" onclick="window.f3dNavigateToLogin(event, this.href)">Portal Login Anak Kos</a></li>
             <li><a href="{{ route('admin.dashboard') }}">Login Pengelola (Admin)</a></li>
             <li><a href="#beranda">Kembali ke Atas ↑</a></li>
           </ul>
         </div>
       </div>
 
-      <div class="lr-footer-bottom">
+      <div class="lr-footer-bottom" data-spatial-reveal="footer-col" data-stagger="4" style="justify-content: center; text-align: center;">
         <div>
           © {{ date('Y') }} {{ $setting->kos_name ?? 'Kos Mas Robi' }}. Seluruh hak cipta dilindungi undang-undang.
-        </div>
-        <div style="color: #64748b;">
-          Smart Kost Management System
         </div>
       </div>
     </div>
@@ -757,9 +1026,16 @@
         <!-- 1. DATA CALON PENGHUNI -->
         <div class="lr-survey-grid-2">
           <div class="lr-survey-form-group">
-            <label for="sf_name">Nama Lengkap Calon Penghuni</label>
+            <label for="sf_name">Nama Lengkap Calon Penghuni *</label>
             <input type="text" id="sf_name" class="lr-survey-input" placeholder="Tulis Nama Lengkap Anda" required oninput="renderSurveyPreview()">
           </div>
+          <div class="lr-survey-form-group">
+            <label for="sf_phone">Nomor WhatsApp Aktif *</label>
+            <input type="tel" id="sf_phone" class="lr-survey-input" placeholder="Contoh: 08123456789" required oninput="renderSurveyPreview()">
+          </div>
+        </div>
+
+        <div class="lr-survey-grid-2" style="margin-top: 10px;">
           <div class="lr-survey-form-group">
             <label for="sf_job">Pekerjaan / Status</label>
             <select id="sf_job" class="lr-survey-input" onchange="renderSurveyPreview()">
@@ -770,10 +1046,6 @@
               <option value="Umum">Umum / Lainnya</option>
             </select>
           </div>
-        </div>
-
-        <!-- 2. PILIHAN LOKASI & KAMAR -->
-        <div class="lr-survey-grid-2">
           <div class="lr-survey-form-group">
             <label for="sf_branch">Pilihan Lokasi Kost</label>
             <select id="sf_branch" class="lr-survey-input" onchange="renderSurveyPreview()">
@@ -781,10 +1053,12 @@
               <option value="{{ $b2['name'] ?? 'Lokasi 2' }}">{{ $b2['name'] ?? 'Lokasi 2 (Ringroad Exclusive)' }}</option>
             </select>
           </div>
-          <div class="lr-survey-form-group">
-            <label for="sf_room">Pilihan Kamar</label>
-            <input type="text" id="sf_room" class="lr-survey-input" placeholder="Contoh: Kamar 104 - Lantai 2" oninput="renderSurveyPreview()">
-          </div>
+        </div>
+
+        <!-- 2. PILIHAN KAMAR -->
+        <div class="lr-survey-form-group" style="margin-top: 10px;">
+          <label for="sf_room">Pilihan Kamar yang Diminati</label>
+          <input type="text" id="sf_room" class="lr-survey-input" placeholder="Contoh: Kamar 104 - Lantai 2" oninput="renderSurveyPreview()">
         </div>
 
         <!-- 3. RENCANA SURVEY KAMAR -->
@@ -836,6 +1110,58 @@
     </div>
   </div>
 
+  <!-- =========================================================================
+       MODAL: LIGHTBOX PREVIEW FOTO KAMAR & MANUAL SLIDE (LANDING PAGE)
+       ========================================================================= -->
+  <div class="lr-lightbox-backdrop" id="modalRoomLightbox" style="display: none;">
+    <div class="lr-lightbox-card" id="lrLightboxCard">
+      <!-- Close button -->
+      <button type="button" class="lr-lightbox-close" id="lrLightboxClose" onclick="window.closeRoomImageLightbox()" aria-label="Tutup">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <!-- Main Image Display with Next/Prev Buttons -->
+      <div class="lr-lightbox-image-wrap" id="lrLightboxImageWrap">
+        <img src="" id="lrLightboxImg" alt="Foto Kamar" class="lr-lightbox-img">
+        
+        <!-- Prev Button -->
+        <button type="button" class="lr-lightbox-arrow prev" id="lrLightboxPrev" aria-label="Foto Sebelumnya">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <!-- Next Button -->
+        <button type="button" class="lr-lightbox-arrow next" id="lrLightboxNext" aria-label="Foto Berikutnya">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+
+        <!-- Badges on top of image -->
+        <div class="lr-lightbox-badges">
+          <span class="lr-lightbox-badge-branch" id="lrLightboxBranch">KOS UNEJ</span>
+          <span class="lr-lightbox-badge-floor" id="lrLightboxFloor">Lantai 1</span>
+        </div>
+
+        <!-- Counter Badge bottom-right -->
+        <div class="lr-lightbox-counter" id="lrLightboxCounter">Foto 1 dari 3</div>
+      </div>
+
+      <!-- Bottom Meta & Dots -->
+      <div class="lr-lightbox-footer">
+        <div class="lr-lightbox-meta">
+          <div>
+            <h3 class="lr-lightbox-title" id="lrLightboxTitle">Kamar #101 - VIP AC</h3>
+            <div class="lr-lightbox-price" id="lrLightboxPrice">Rp 1.650.000 <span>/ bulan (all-in)</span></div>
+          </div>
+          <button type="button" class="lr-btn-book-round" id="lrLightboxBookBtn" style="padding: 10px 22px; font-weight: 800; border-radius: 999px;">
+            <span>Booking Sekarang</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <div class="lr-lightbox-dots" id="lrLightboxDots"></div>
+      </div>
+    </div>
+  </div>
+
 
   <script>
     // Survey Form Modal & WhatsApp Generator Logic
@@ -859,6 +1185,7 @@
 
     function getSurveyFormData() {
       var nameEl = document.getElementById('sf_name');
+      var phoneEl = document.getElementById('sf_phone');
       var jobEl = document.getElementById('sf_job');
       var branchEl = document.getElementById('sf_branch');
       var roomEl = document.getElementById('sf_room');
@@ -868,6 +1195,7 @@
 
       return {
         name: nameEl ? nameEl.value.trim() : '',
+        phone: phoneEl ? phoneEl.value.trim() : '',
         job: jobEl ? jobEl.value : 'Mahasiswa',
         branch: branchEl ? branchEl.value : 'Lokasi 1',
         room: roomEl ? roomEl.value.trim() : '',
@@ -967,9 +1295,59 @@
     window.submitSurveyToWhatsApp = function(e) {
       if (e) e.preventDefault();
       var data = getSurveyFormData();
+      if (!data.name) {
+        alert('Mohon tuliskan nama lengkap Anda terlebih dahulu.');
+        return;
+      }
       var msg = buildSurveyMessageText(data);
+      if (data.phone) {
+        msg += "\n• No. WhatsApp : " + data.phone;
+      }
       var waUrl = 'https://wa.me/' + window.kosWaPhone + '?text=' + encodeURIComponent(msg);
+
+      // Kirim data survey via AJAX ke server agar tercatat dan masuk notifikasi admin
+      try {
+        fetch('/api/survey/submit', {
+          method: 'POST',
+          keepalive: true,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            name: data.name,
+            phone: data.phone,
+            job: data.job,
+            branch: data.branch,
+            room: data.room,
+            date: data.date,
+            time: data.time,
+            method: data.method,
+            message: msg
+          })
+        }).catch(function(err) {
+          console.warn('Gagal mencatat notifikasi survei via AJAX:', err);
+        });
+      } catch (err) {
+        console.warn('Survey dispatch error:', err);
+      }
+
+      // Buka aplikasi WhatsApp
       window.open(waUrl, '_blank');
+
+      // Tampilkan feedback sukses di tombol modal & tutup
+      var btnSubmit = document.querySelector('#landingSurveyForm button[type="submit"]');
+      if (btnSubmit) {
+        var origHtml = btnSubmit.innerHTML;
+        btnSubmit.innerHTML = '<span>Terkirim ke Admin & Menuju WhatsApp...</span>';
+        btnSubmit.disabled = true;
+        setTimeout(function() {
+          btnSubmit.innerHTML = origHtml;
+          btnSubmit.disabled = false;
+          closeSurveyModal();
+        }, 1500);
+      }
     };
 
     window.copySurveyPreviewText = function() {
@@ -1057,6 +1435,1067 @@
       } else {
         updateNavOnScroll();
       }
+    })();
+  </script>
+
+  {{-- Slider & Client-side Filtering Script (Auto Slide, Zero-Reload Filter, Bottom Controls) --}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var track = document.getElementById('lrRoomSliderTrack');
+      var viewport = document.getElementById('lrRoomSliderViewport');
+      var dotsContainer = document.getElementById('lrRoomSliderDots');
+      var bottomCtrl = document.getElementById('lrSliderBottomCtrl');
+      var currentSlideNumEl = document.getElementById('lrCurrentSlideNum');
+      var totalSlidesNumEl = document.getElementById('lrTotalSlidesNum');
+      var btnPrev = document.getElementById('lrBtnRoomPrev');
+      var btnNext = document.getElementById('lrBtnRoomNext');
+
+      var currentIndex = 0;
+      var totalSlides = document.querySelectorAll('.lr-room-slide').length;
+      var autoSlideInterval = null;
+      var currentLandingLocation = 'all';
+      var currentLandingType = 'all';
+
+      // 1. COLLECT ALL ROOM CARD ELEMENTS AS PERSISTENT TEMPLATES
+      var allCardsData = [];
+      document.querySelectorAll('.lr-card-featured').forEach(function(card) {
+        allCardsData.push({
+          node: card.cloneNode(true),
+          location: card.getAttribute('data-location') || 'Lokasi 1',
+          type: card.getAttribute('data-type') || '',
+          floor: card.getAttribute('data-floor') || '1',
+          number: card.getAttribute('data-number') || ''
+        });
+      });
+
+      // 2. SLIDE UPDATE FUNCTION
+      function updateSlide(index) {
+        var slides = document.querySelectorAll('.lr-room-slide');
+        totalSlides = slides.length;
+        if (totalSlides === 0) return;
+
+        if (index < 0) index = 0;
+        if (index >= totalSlides) index = totalSlides - 1;
+        currentIndex = index;
+
+        if (track) {
+          track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+        }
+
+        slides.forEach(function(s, idx) {
+          s.classList.toggle('active', idx === currentIndex);
+        });
+
+        if (currentSlideNumEl) currentSlideNumEl.textContent = (currentIndex + 1);
+        if (totalSlidesNumEl) totalSlidesNumEl.textContent = totalSlides;
+
+        var dotBtns = document.querySelectorAll('#lrRoomSliderDots .lr-dot-btn');
+        dotBtns.forEach(function(dot, idx) {
+          dot.classList.toggle('active', idx === currentIndex);
+        });
+
+        var isFirst = (currentIndex === 0);
+        var isLast = (currentIndex === totalSlides - 1);
+        if (btnPrev) btnPrev.disabled = isFirst;
+        if (btnNext) btnNext.disabled = isLast;
+
+        // Picu animasi masuk spasial untuk kartu kamar pada slide aktif
+        var activeSlide = slides[currentIndex];
+        if (activeSlide) {
+          activeSlide.querySelectorAll('[data-spatial-reveal]').forEach(function(el) {
+            if (!el.classList.contains('lr-revealed')) {
+              el.classList.add('lr-revealed');
+              setTimeout(function() {
+                el.classList.add('lr-revealed-ready');
+              }, 1100);
+            }
+          });
+        }
+      }
+
+      // 3. AUTO SLIDE LOGIC (Otomatis Slide)
+      function startAutoSlide() {
+        stopAutoSlide();
+        if (totalSlides > 1) {
+          autoSlideInterval = setInterval(function() {
+            var nextIndex = (currentIndex + 1) % totalSlides;
+            updateSlide(nextIndex);
+          }, 4500);
+        }
+      }
+
+      function stopAutoSlide() {
+        if (autoSlideInterval) {
+          clearInterval(autoSlideInterval);
+          autoSlideInterval = null;
+        }
+      }
+
+      // Auto-slide continues seamlessly; pauses only on interactive bottom control hover
+      var bottomBar = document.getElementById('lrSliderBottomBar');
+      if (bottomBar) {
+        bottomBar.addEventListener('mouseenter', stopAutoSlide);
+        bottomBar.addEventListener('mouseleave', function() {
+          if (!isLightboxOpen) startAutoSlide();
+        });
+      }
+
+      // Button handlers
+      function goPrev() {
+        if (currentIndex > 0) {
+          updateSlide(currentIndex - 1);
+        }
+      }
+      function goNext() {
+        if (currentIndex < totalSlides - 1) {
+          updateSlide(currentIndex + 1);
+        }
+      }
+
+      if (btnPrev) btnPrev.addEventListener('click', function(e) { e.preventDefault(); goPrev(); });
+      if (btnNext) btnNext.addEventListener('click', function(e) { e.preventDefault(); goNext(); });
+
+      // Attach click to dots
+      function bindDots() {
+        document.querySelectorAll('#lrRoomSliderDots .lr-dot-btn').forEach(function(btn) {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var target = parseInt(this.getAttribute('data-target-slide'), 10);
+            if (!isNaN(target)) updateSlide(target);
+          });
+        });
+      }
+      bindDots();
+
+      // Touch swipe support for mobile
+      var touchStartX = 0;
+      var touchEndX = 0;
+      if (viewport) {
+        viewport.addEventListener('touchstart', function(e) {
+          touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        viewport.addEventListener('touchend', function(e) {
+          touchEndX = e.changedTouches[0].screenX;
+          var diff = touchStartX - touchEndX;
+          if (Math.abs(diff) > 40) {
+            if (diff > 0) {
+              goNext();
+            } else {
+              goPrev();
+            }
+          }
+        }, { passive: true });
+      }
+
+      // 4. CLIENT-SIDE ZERO-RELOAD FILTERING (Semua Cabang, KOS UNEJ, KOS UNMUH, & Tipe Kamar)
+      function rebuildLandingSlider() {
+        if (!track || allCardsData.length === 0) return;
+
+        // Filter cards matching location and type
+        var filtered = allCardsData.filter(function(item) {
+          var matchLoc = (currentLandingLocation === 'all' || item.location === currentLandingLocation);
+          var matchType = (currentLandingType === 'all' || item.type.toLowerCase().includes(currentLandingType.toLowerCase()));
+          return matchLoc && matchType;
+        });
+
+        // Split into floor 1 and floor 2
+        var f1 = filtered.filter(function(i) { return String(i.floor) === '1'; });
+        var f2 = filtered.filter(function(i) { return String(i.floor) === '2'; });
+        var f3 = filtered.filter(function(i) { return String(i.floor) === '3'; });
+
+        var maxSlides = Math.max(
+          Math.ceil(f1.length / 3),
+          Math.ceil(f2.length / 3),
+          Math.ceil(f3.length / 3),
+          1
+        );
+
+        track.innerHTML = '';
+        if (filtered.length === 0) {
+          track.innerHTML = `
+            <div style="width: 100%; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 20px; border: 1.5px dashed var(--border-subtle); margin: 10px;">
+              <h4 style="font-size: 1.15rem; color: var(--text-dark); margin-bottom: 6px;">Unit Kamar Tidak Ditemukan</h4>
+              <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">Silakan pilih cabang atau tipe kamar lain untuk melihat unit yang tersedia.</p>
+              <button type="button" class="lr-btn-pill-teal" onclick="window.resetLandingFilters()" style="background: var(--teal-primary); display: inline-flex; border: none; cursor: pointer; padding: 10px 22px; color: #fff; border-radius: 999px; font-weight: 700;">Tampilkan Semua Kamar</button>
+            </div>
+          `;
+          totalSlides = 1;
+          if (bottomCtrl) bottomCtrl.style.display = 'none';
+          if (dotsContainer) dotsContainer.innerHTML = '';
+          stopAutoSlide();
+          return;
+        }
+
+        // Build slide elements
+        for (var sIdx = 0; sIdx < maxSlides; sIdx++) {
+          var slideEl = document.createElement('div');
+          slideEl.className = 'lr-room-slide' + (sIdx === 0 ? ' active' : '');
+          slideEl.setAttribute('data-slide-index', sIdx);
+
+          var sF1 = f1.slice(sIdx * 3, (sIdx + 1) * 3);
+          var sF2 = f2.slice(sIdx * 3, (sIdx + 1) * 3);
+          var sF3 = f3.slice(sIdx * 3, (sIdx + 1) * 3);
+
+          if (sF1.length > 0) {
+            var f1Row = document.createElement('div');
+            f1Row.className = 'lr-slide-floor-row';
+            f1Row.innerHTML = `
+              <div class="lr-slide-floor-title">
+                <span class="lr-floor-tag floor-1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  Lantai 1
+                </span>
+              </div>
+            `;
+            var f1Grid = document.createElement('div');
+            f1Grid.className = 'lr-featured-grid';
+            sF1.forEach(function(item) { f1Grid.appendChild(item.node.cloneNode(true)); });
+            f1Row.appendChild(f1Grid);
+            slideEl.appendChild(f1Row);
+          }
+
+          if (sF2.length > 0) {
+            var f2Row = document.createElement('div');
+            f2Row.className = 'lr-slide-floor-row';
+            if (sF1.length > 0) f2Row.style.marginTop = '26px';
+            f2Row.innerHTML = `
+              <div class="lr-slide-floor-title">
+                <span class="lr-floor-tag floor-2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 6"/></svg>
+                  Lantai 2
+                </span>
+              </div>
+            `;
+            var f2Grid = document.createElement('div');
+            f2Grid.className = 'lr-featured-grid';
+            sF2.forEach(function(item) { f2Grid.appendChild(item.node.cloneNode(true)); });
+            f2Row.appendChild(f2Grid);
+            slideEl.appendChild(f2Row);
+          }
+
+          if (sF3.length > 0) {
+            var f3Row = document.createElement('div');
+            f3Row.className = 'lr-slide-floor-row';
+            if (sF1.length > 0 || sF2.length > 0) f3Row.style.marginTop = '26px';
+            f3Row.innerHTML = `
+              <div class="lr-slide-floor-title">
+                <span class="lr-floor-tag" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;">
+                  Lantai 3
+                </span>
+              </div>
+            `;
+            var f3Grid = document.createElement('div');
+            f3Grid.className = 'lr-featured-grid';
+            sF3.forEach(function(item) { f3Grid.appendChild(item.node.cloneNode(true)); });
+            f3Row.appendChild(f3Grid);
+            slideEl.appendChild(f3Row);
+          }
+
+          track.appendChild(slideEl);
+        }
+
+        totalSlides = maxSlides;
+
+        // Rebuild dots
+        if (dotsContainer) {
+          dotsContainer.innerHTML = '';
+          for (var dIdx = 0; dIdx < totalSlides; dIdx++) {
+            var dotBtn = document.createElement('button');
+            dotBtn.type = 'button';
+            dotBtn.className = 'lr-dot-btn' + (dIdx === 0 ? ' active' : '');
+            dotBtn.setAttribute('data-target-slide', dIdx);
+            dotBtn.setAttribute('aria-label', 'Beralih ke Slide ' + (dIdx + 1));
+            dotBtn.setAttribute('title', 'Slide ' + (dIdx + 1));
+            dotBtn.innerHTML = '<span class="lr-dot"></span>';
+            dotsContainer.appendChild(dotBtn);
+          }
+          bindDots();
+        }
+
+        // Bottom control visibility
+        if (bottomCtrl) {
+          bottomCtrl.style.display = totalSlides > 1 ? 'inline-flex' : 'none';
+        }
+        if (totalSlidesNumEl) totalSlidesNumEl.textContent = totalSlides;
+        if (currentSlideNumEl) currentSlideNumEl.textContent = '1';
+
+        // Reset slide position & start auto slide
+        updateSlide(0);
+        if (window.triggerSpatialReveals) {
+          window.triggerSpatialReveals();
+        }
+        startAutoSlide();
+      }
+
+      // Filter Handlers
+      window.filterLandingRoomsLocation = function(loc, btn) {
+        currentLandingLocation = loc;
+        document.querySelectorAll('#landingBranchFilters .lr-filter-pill-branch').forEach(function(b) {
+          b.classList.remove('active');
+          b.style.background = '#ffffff';
+          b.style.boxShadow = 'none';
+          if (b.getAttribute('data-location') === 'Lokasi 2') {
+            b.style.color = '#0284c7';
+            b.style.border = '1px solid rgba(2,132,199,0.15)';
+          } else {
+            b.style.color = '#0a5661';
+            b.style.border = '1px solid rgba(10,86,97,0.15)';
+          }
+        });
+
+        if (btn) {
+          btn.classList.add('active');
+          if (loc === 'Lokasi 2') {
+            btn.style.background = '#0284c7';
+            btn.style.color = '#ffffff';
+            btn.style.boxShadow = '0 2px 8px rgba(2,132,199,0.25)';
+            btn.style.border = 'none';
+          } else {
+            btn.style.background = 'var(--teal-primary)';
+            btn.style.color = '#ffffff';
+            btn.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+            btn.style.border = 'none';
+          }
+        }
+        rebuildLandingSlider();
+      };
+
+      window.filterLandingRoomsType = function(type, btn) {
+        currentLandingType = type;
+        document.querySelectorAll('#landingTypeFilters .lr-filter-pill-type').forEach(function(b) {
+          b.classList.remove('active');
+          b.style.background = '#ffffff';
+          b.style.color = 'var(--text-dark)';
+          b.style.border = '1px solid var(--border-subtle)';
+          b.style.boxShadow = 'none';
+        });
+
+        if (btn) {
+          btn.classList.add('active');
+          btn.style.background = 'var(--teal-primary)';
+          btn.style.color = '#ffffff';
+          btn.style.border = 'none';
+          btn.style.boxShadow = '0 2px 8px rgba(10,86,97,0.25)';
+        }
+        rebuildLandingSlider();
+      };
+
+      window.resetLandingFilters = function() {
+        var allLocBtn = document.querySelector('#landingBranchFilters .lr-filter-pill-branch[data-location="all"]');
+        var allTypeBtn = document.querySelector('#landingTypeFilters .lr-filter-pill-type[data-type="all"]');
+        if (allLocBtn) window.filterLandingRoomsLocation('all', allLocBtn);
+        if (allTypeBtn) window.filterLandingRoomsType('all', allTypeBtn);
+      };
+
+      // =========================================================================
+      // LIGHTBOX POPUP PREVIEW FOTO KAMAR & MANUAL SLIDER (LANDING PAGE)
+      // =========================================================================
+      var currentLightboxImages = [];
+      var currentLightboxIndex = 0;
+      var isLightboxOpen = false;
+      var lightboxLeaveTimer = null;
+
+      window.openRoomImageLightbox = function(el, evt) {
+        if (evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+        }
+        if (!el) return;
+
+        // Hentikan auto-slide slider utama saat popup terbuka
+        stopAutoSlide();
+
+        var roomNumber = el.getAttribute('data-room-number') || '';
+        var roomType = el.getAttribute('data-room-type') || '';
+        var roomFloor = el.getAttribute('data-room-floor') || '1';
+        var roomBranch = el.getAttribute('data-room-branch') || '';
+        var roomPrice = el.getAttribute('data-room-price') || '';
+        var imagesRaw = el.getAttribute('data-images') || '[]';
+        var images = [];
+        try {
+          images = JSON.parse(imagesRaw);
+        } catch (err) {
+          var sImg = el.querySelector('img')?.src;
+          images = sImg ? [sImg] : ['/assets/images/room_sample.jpg'];
+        }
+        if (!Array.isArray(images) || images.length === 0) {
+          var sImg2 = el.querySelector('img')?.src;
+          images = sImg2 ? [sImg2] : ['/assets/images/room_sample.jpg'];
+        }
+
+        var activeIdx = parseInt(el.getAttribute('data-active-index') || '0', 10);
+        currentLightboxImages = images;
+        currentLightboxIndex = (activeIdx >= 0 && activeIdx < images.length) ? activeIdx : 0;
+        currentLightboxActiveTrigger = el;
+        isLightboxOpen = true;
+
+        var titleEl = document.getElementById('lrLightboxTitle');
+        if (titleEl) titleEl.textContent = 'Kamar #' + roomNumber + ' - ' + roomType;
+        var branchEl = document.getElementById('lrLightboxBranch');
+        if (branchEl) branchEl.textContent = roomBranch;
+        var floorEl = document.getElementById('lrLightboxFloor');
+        if (floorEl) floorEl.textContent = 'Lantai ' + roomFloor;
+        var priceEl = document.getElementById('lrLightboxPrice');
+        if (priceEl) priceEl.innerHTML = roomPrice + ' <span>/ bulan (all-in)</span>';
+
+        var bookBtn = document.getElementById('lrLightboxBookBtn');
+        if (bookBtn) {
+          bookBtn.onclick = function() {
+            window.closeRoomImageLightbox();
+            if (typeof window.openSurveyModal === 'function') {
+              window.openSurveyModal({
+                room: 'Kamar #' + roomNumber + ' - ' + roomType + ' (Lantai ' + roomFloor + ')',
+                branch: roomBranch
+              });
+            }
+          };
+        }
+
+        renderLightboxSlide(currentLightboxIndex);
+
+        var modal = document.getElementById('modalRoomLightbox');
+        if (modal) {
+          modal.style.display = 'flex';
+          modal.offsetHeight; // force reflow
+          modal.classList.add('active');
+        }
+      };
+
+      function renderLightboxSlide(idx) {
+        if (!currentLightboxImages || currentLightboxImages.length === 0) return;
+        if (idx < 0) idx = currentLightboxImages.length - 1;
+        if (idx >= currentLightboxImages.length) idx = 0;
+        currentLightboxIndex = idx;
+
+        var imgEl = document.getElementById('lrLightboxImg');
+        if (imgEl) {
+          imgEl.style.opacity = '0.5';
+          imgEl.src = currentLightboxImages[currentLightboxIndex];
+          imgEl.onload = function() { imgEl.style.opacity = '1'; };
+        }
+
+        var counterEl = document.getElementById('lrLightboxCounter');
+        if (counterEl) {
+          counterEl.textContent = 'Foto ' + (currentLightboxIndex + 1) + ' dari ' + currentLightboxImages.length;
+        }
+
+        var dotsWrap = document.getElementById('lrLightboxDots');
+        if (dotsWrap) {
+          dotsWrap.innerHTML = '';
+          currentLightboxImages.forEach(function(src, dIdx) {
+            var dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'lr-lightbox-dot' + (dIdx === currentLightboxIndex ? ' active' : '');
+            dot.setAttribute('aria-label', 'Foto ' + (dIdx + 1));
+            dot.onclick = function(e) {
+              e.stopPropagation();
+              renderLightboxSlide(dIdx);
+            };
+            dotsWrap.appendChild(dot);
+          });
+        }
+      }
+
+      window.closeRoomImageLightbox = function() {
+        if (!isLightboxOpen) return;
+        isLightboxOpen = false;
+        if (lightboxLeaveTimer) {
+          clearTimeout(lightboxLeaveTimer);
+          lightboxLeaveTimer = null;
+        }
+
+        var modal = document.getElementById('modalRoomLightbox');
+        if (modal) {
+          modal.classList.remove('active');
+          setTimeout(function() {
+            modal.style.display = 'none';
+          }, 200);
+        }
+
+        if (currentLightboxActiveTrigger && typeof window.setCardThumbnailIndex === 'function') {
+          window.setCardThumbnailIndex(currentLightboxActiveTrigger, currentLightboxIndex);
+        }
+
+        // KEMBALI AUTO SLIDE SESUAI AWAL!
+        startAutoSlide();
+      };
+
+      // KELUAR DARI AREA GAMBAR (MOUSELEAVE) -> CLOSE POPUP & KEMBALI AUTO SLIDE
+      var lbCard = document.getElementById('lrLightboxCard');
+      if (lbCard) {
+        lbCard.addEventListener('mouseleave', function() {
+          lightboxLeaveTimer = setTimeout(function() {
+            window.closeRoomImageLightbox();
+          }, 200);
+        });
+
+        lbCard.addEventListener('mouseenter', function() {
+          if (lightboxLeaveTimer) {
+            clearTimeout(lightboxLeaveTimer);
+            lightboxLeaveTimer = null;
+          }
+        });
+      }
+
+      // KLIK DI LUAR AREA GAMBAR (BACKDROP CLICK) -> CLOSE POPUP & KEMBALI AUTO SLIDE
+      var lbBackdrop = document.getElementById('modalRoomLightbox');
+      if (lbBackdrop) {
+        lbBackdrop.addEventListener('click', function(e) {
+          if (e.target === lbBackdrop) {
+            window.closeRoomImageLightbox();
+          }
+        });
+      }
+
+      // TOMBOL MANUAL SLIDE (PREVIOUS & NEXT)
+      document.getElementById('lrLightboxPrev')?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        renderLightboxSlide(currentLightboxIndex - 1);
+      });
+      document.getElementById('lrLightboxNext')?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        renderLightboxSlide(currentLightboxIndex + 1);
+      });
+
+      // NAVIGASI KEYBOARD MANUAL SLIDE & ESC CLOSE
+      document.addEventListener('keydown', function(e) {
+        if (!isLightboxOpen) return;
+        if (e.key === 'ArrowLeft') {
+          renderLightboxSlide(currentLightboxIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+          renderLightboxSlide(currentLightboxIndex + 1);
+        } else if (e.key === 'Escape') {
+          window.closeRoomImageLightbox();
+        }
+      });
+
+      // TOUCH SWIPE PADA LAYAR SENTUH MOBILE
+      var lbTouchStartX = 0;
+      var lbTouchEndX = 0;
+      var lbImgWrap = document.getElementById('lrLightboxImageWrap');
+      if (lbImgWrap) {
+        lbImgWrap.addEventListener('touchstart', function(e) {
+          lbTouchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        lbImgWrap.addEventListener('touchend', function(e) {
+          lbTouchEndX = e.changedTouches[0].screenX;
+          var diff = lbTouchStartX - lbTouchEndX;
+          if (Math.abs(diff) > 35) {
+            if (diff > 0) {
+              renderLightboxSlide(currentLightboxIndex + 1);
+            } else {
+              renderLightboxSlide(currentLightboxIndex - 1);
+            }
+          }
+        }, { passive: true });
+      }
+
+      // =========================================================================
+      // MINI PHOTO SLIDER PADA KARTU KAMAR (SAAT DI KECILKAN / PADA CARD)
+      // =========================================================================
+      window.slideCardThumbnail = function(target, dir, e) {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        var wrap = (target && target.closest) ? target.closest('.lr-card-thumb-wrap') : target;
+        if (!wrap) return;
+        var slides = wrap.querySelectorAll('.lr-card-thumb-slide');
+        if (slides.length <= 1) return;
+        var cur = parseInt(wrap.getAttribute('data-active-index') || '0', 10);
+        var next = (cur + dir + slides.length) % slides.length;
+        window.setCardThumbnailIndex(wrap, next);
+      };
+
+      window.jumpCardThumbnail = function(target, idx, e) {
+        if (e) {
+          e.stopPropagation();
+          e.preventDefault();
+        }
+        var wrap = (target && target.closest) ? target.closest('.lr-card-thumb-wrap') : target;
+        if (!wrap) return;
+        window.setCardThumbnailIndex(wrap, idx);
+      };
+
+      window.setCardThumbnailIndex = function(wrap, idx) {
+        if (!wrap) return;
+        var slides = wrap.querySelectorAll('.lr-card-thumb-slide');
+        var dots = wrap.querySelectorAll('.lr-thumb-dot');
+        var counter = wrap.querySelector('.lr-thumb-counter');
+        if (slides.length === 0) return;
+        if (idx < 0) idx = slides.length - 1;
+        if (idx >= slides.length) idx = 0;
+
+        wrap.setAttribute('data-active-index', idx);
+        slides.forEach(function(s, i) {
+          s.classList.toggle('active', i === idx);
+        });
+        dots.forEach(function(d, i) {
+          d.classList.toggle('active', i === idx);
+        });
+        if (counter) {
+          counter.textContent = (idx + 1) + '/' + slides.length;
+        }
+      };
+
+      // TOUCH SWIPE PADA SETIAP FOTO KARTU (MOBILE / LAYAR KECIL / SAAT DIKECILKAN)
+      var cardTouchStartX = 0;
+      var cardTouchStartY = 0;
+      var currentTouchingCard = null;
+
+      document.addEventListener('touchstart', function(e) {
+        var wrap = e.target.closest('.lr-card-thumb-wrap');
+        if (wrap) {
+          currentTouchingCard = wrap;
+          cardTouchStartX = e.changedTouches[0].screenX;
+          cardTouchStartY = e.changedTouches[0].screenY;
+        } else {
+          currentTouchingCard = null;
+        }
+      }, { passive: true });
+
+      document.addEventListener('touchend', function(e) {
+        if (!currentTouchingCard) return;
+        var wrap = currentTouchingCard;
+        currentTouchingCard = null;
+        var endX = e.changedTouches[0].screenX;
+        var endY = e.changedTouches[0].screenY;
+        var diffX = cardTouchStartX - endX;
+        var diffY = Math.abs(cardTouchStartY - endY);
+
+        // Jika sapuan horizontal lebih dominan (>30px)
+        if (Math.abs(diffX) > 30 && Math.abs(diffX) > diffY) {
+          e.stopPropagation();
+          if (diffX > 0) {
+            window.slideCardThumbnail(wrap, 1, e);
+          } else {
+            window.slideCardThumbnail(wrap, -1, e);
+          }
+        }
+      }, { passive: true });
+
+      // EVENT DELEGATION GLOBAL UNTUK KLIK THUMBNAIL (MENCAKUP SEMUA KARTU AWAL MAUPUN HASIL FILTER)
+      document.addEventListener('click', function(e) {
+        var navBtn = e.target.closest('.lr-thumb-nav-btn');
+        var dotBtn = e.target.closest('.lr-thumb-dot') || e.target.closest('.lr-thumb-dots');
+        if (navBtn || dotBtn) {
+          return; // Abaikan navigasi foto kecil agar tidak membuka popup secara tidak sengaja
+        }
+        var thumb = e.target.closest('.lr-card-thumb-wrap');
+        if (thumb) {
+          e.preventDefault();
+          e.stopPropagation();
+          window.openRoomImageLightbox(thumb, e);
+        }
+      });
+
+      // Initial start
+      updateSlide(0);
+      startAutoSlide();
+    });
+  </script>
+
+  <script>
+    (function() {
+      var is3dActive = true;
+      var storedPref = localStorage.getItem('kos_3d_flutter_mode');
+      if (storedPref === 'disabled') {
+        is3dActive = false;
+      }
+
+      function apply3DState() {
+        if (is3dActive) {
+          document.body.classList.add('flutter-3d-enabled');
+        } else {
+          document.body.classList.remove('flutter-3d-enabled');
+          document.querySelectorAll('.lr-card-featured, .lr-search-card, .lr-loc-card-left, .lr-gallery-hero-card').forEach(function(c) {
+            c.style.transform = '';
+            c.classList.remove('is-tilting');
+          });
+        }
+      }
+
+      window.toggle3DFlutterMode = function() {
+        is3dActive = !is3dActive;
+        localStorage.setItem('kos_3d_flutter_mode', is3dActive ? 'enabled' : 'disabled');
+        apply3DState();
+        if (is3dActive) {
+          initAll3DTiltElements();
+        }
+      };
+
+      // Controller 3D Intro Splash Overlay & Ultra Smooth Page Transition
+      var introTimer = null;
+      var introAnimRaf = null;
+
+      function setSnakePathProgress(elWhite, elSnake, p, snakeLen) {
+        if (!elWhite || !elSnake) return;
+        var total = 1000;
+        var head = p * total;
+        var len = snakeLen || 140;
+        var tail = Math.max(0, head - len);
+
+        if (p <= 0) {
+          elWhite.style.strokeDasharray = '0 1000';
+          elWhite.style.strokeDashoffset = '0';
+          elSnake.style.strokeDasharray = '0 1000';
+          elSnake.style.strokeDashoffset = '0';
+          elSnake.style.opacity = '0';
+          return;
+        }
+
+        // 1. Garis putih muncul dari awal sampai kepala ular
+        elWhite.style.strokeDasharray = head + ' ' + total;
+        elWhite.style.strokeDashoffset = '0';
+
+        // 2. Badan ular berjalan di posisi terdepan
+        if (p >= 1) {
+          elSnake.style.opacity = '0';
+        } else {
+          elSnake.style.opacity = '1';
+          var body = head - tail;
+          elSnake.style.strokeDasharray = '0 ' + tail + ' ' + body + ' ' + total;
+          elSnake.style.strokeDashoffset = '0';
+        }
+      }
+
+      window.dismiss3dIntro = function(isManualSkip) {
+        if (introTimer) clearTimeout(introTimer);
+        if (introAnimRaf) cancelAnimationFrame(introAnimRaf);
+
+        var ov = document.getElementById('flutter3dIntroOverlay');
+        if (!ov) return;
+
+        ov.classList.add('smooth-exit');
+        document.documentElement.classList.remove('f3d-intro-active');
+        document.documentElement.classList.add('f3d-intro-skip');
+        document.body.classList.remove('intro-active');
+        document.body.classList.add('intro-complete');
+
+        try { sessionStorage.setItem('f3d_intro_shown', '1'); } catch(e) {}
+
+        // Mulai animasi masuk spasial untuk elemen di viewport saat intro memudar
+        setTimeout(function() {
+          if (window.triggerSpatialReveals) {
+            window.triggerSpatialReveals();
+          }
+        }, 180);
+
+        var delay = isManualSkip ? 400 : 950;
+        setTimeout(function() {
+          ov.style.display = 'none';
+        }, delay);
+      };
+
+      function startSnakeIntroSequence() {
+        if (introTimer) clearTimeout(introTimer);
+        if (introAnimRaf) cancelAnimationFrame(introAnimRaf);
+
+        var pWhiteHouse = document.getElementById('f3dPathHouseWhite');
+        var pSnakeHouse = document.getElementById('f3dPathHouseSnake');
+        var pWhiteDoor = document.getElementById('f3dPathDoorWhite');
+        var pSnakeDoor = document.getElementById('f3dPathDoorSnake');
+
+        // Reset total ke kondisi AWAL: HANYA LOGO TEAL POLOS TANPA GARIS PUTIH SAMA SEKALI
+        setSnakePathProgress(pWhiteHouse, pSnakeHouse, 0);
+        setSnakePathProgress(pWhiteDoor, pSnakeDoor, 0);
+
+        var tStart = performance.now();
+        var blankDelay = 600;     // Logo polos ditampilkan 600ms (agak lebih cepat dan responsif)
+        var houseDuration = 2250; // Ular menggambar kontur rumah (2.25s, proporsional dan mengalir luwes)
+        var doorDelay = 1550;     // Ular mulai menggambar pintu dalam (delay 1.55s)
+        var doorDuration = 1500;  // Durasi ular menggambar lengkungan pintu (1.5s)
+
+        function loop(now) {
+          var elapsed = now - tStart;
+
+          // Fase 1: Hanya logo teal yang muncul, garis putih masih 0
+          if (elapsed < blankDelay) {
+            setSnakePathProgress(pWhiteHouse, pSnakeHouse, 0);
+            setSnakePathProgress(pWhiteDoor, pSnakeDoor, 0);
+            introAnimRaf = requestAnimationFrame(loop);
+            return;
+          }
+
+          var tAnim = elapsed - blankDelay;
+
+          // Ular Rumah
+          var pHouse = Math.min(1, tAnim / houseDuration);
+          setSnakePathProgress(pWhiteHouse, pSnakeHouse, pHouse, 160);
+
+          // Ular Pintu Dalam
+          if (tAnim < (doorDelay - blankDelay)) {
+            setSnakePathProgress(pWhiteDoor, pSnakeDoor, 0);
+          } else {
+            var pDoor = Math.min(1, (tAnim - (doorDelay - blankDelay)) / doorDuration);
+            setSnakePathProgress(pWhiteDoor, pSnakeDoor, pDoor, 140);
+          }
+
+          // Cek kelanjutan animasi
+          var isHouseDone = (pHouse >= 1);
+          var isDoorDone = ((tAnim - (doorDelay - blankDelay)) >= doorDuration);
+
+          if (!isHouseDone || !isDoorDone) {
+            introAnimRaf = requestAnimationFrame(loop);
+          } else {
+            // Kedua garis putih telah digambar sempurna, ular memudar
+            setSnakePathProgress(pWhiteHouse, pSnakeHouse, 1);
+            setSnakePathProgress(pWhiteDoor, pSnakeDoor, 1);
+
+            // Picu kilau penyelesaian (Completion Burst & Ambient Aura)
+            var badgeEl = document.getElementById('f3dOfficialLogoBadge');
+            var containerEl = document.getElementById('f3dIntroContainer');
+            if (badgeEl) badgeEl.classList.add('logo-complete-burst');
+            if (containerEl) containerEl.classList.add('is-complete');
+
+            // Jeda 550ms untuk menampilkan logo utuh sebelum transisi portal sinematik ke landing page
+            introTimer = setTimeout(function() {
+              window.dismiss3dIntro(false);
+            }, 550);
+          }
+        }
+
+        introAnimRaf = requestAnimationFrame(loop);
+      }
+
+      window.replay3dIntro = function() {
+        var ov = document.getElementById('flutter3dIntroOverlay');
+        if (!ov) return;
+
+        var badgeEl = document.getElementById('f3dOfficialLogoBadge');
+        var containerEl = document.getElementById('f3dIntroContainer');
+        if (badgeEl) badgeEl.classList.remove('logo-complete-burst');
+        if (containerEl) containerEl.classList.remove('is-complete');
+
+        document.documentElement.classList.remove('f3d-intro-skip');
+        document.documentElement.classList.add('f3d-intro-active');
+        document.body.classList.add('intro-active');
+        document.body.classList.remove('intro-complete');
+        ov.classList.remove('smooth-exit');
+        ov.style.display = 'flex';
+
+        startSnakeIntroSequence();
+      };
+
+      function init3DIntro() {
+        var ov = document.getElementById('flutter3dIntroOverlay');
+        if (!ov) return;
+        var hasShown = false;
+        try {
+          hasShown = sessionStorage.getItem('f3d_intro_shown') === '1';
+        } catch(e) {}
+
+        if (!hasShown && is3dActive) {
+          document.documentElement.classList.remove('f3d-intro-skip');
+          document.documentElement.classList.add('f3d-intro-active');
+          document.body.classList.add('intro-active');
+          document.body.classList.remove('intro-complete');
+          ov.classList.remove('smooth-exit');
+          ov.style.display = 'flex';
+          startSnakeIntroSequence();
+        } else {
+          document.documentElement.classList.remove('f3d-intro-active');
+          document.documentElement.classList.add('f3d-intro-skip');
+          document.body.classList.add('intro-complete');
+          ov.style.display = 'none';
+          ov.classList.add('smooth-exit');
+        }
+
+        // Interaksi Gerak Mouse Halus pada Badge Logo saat Intro
+        var badge = document.getElementById('f3dOfficialLogoBadge');
+        if (badge && ov) {
+          ov.addEventListener('mousemove', function(e) {
+            if (!is3dActive || ov.classList.contains('smooth-exit')) return;
+            var xRatio = (e.clientX / window.innerWidth) - 0.5;
+            var yRatio = (e.clientY / window.innerHeight) - 0.5;
+            badge.style.transform = 'translateY(' + (yRatio * -10).toFixed(2) + 'px) rotateY(' + (xRatio * 18).toFixed(2) + 'deg) rotateX(' + (-yRatio * 18).toFixed(2) + 'deg)';
+          });
+
+          ov.addEventListener('mouseleave', function() {
+            badge.style.transform = '';
+          });
+        }
+      }
+
+      // Universal 3D Tilt Engine
+      function attach3DTilt(element, maxAngle, maxScale, translateZ, hasGlare) {
+        if (!element || element._has3dInit) return;
+        element._has3dInit = true;
+
+        // Glare kilat dinonaktifkan sesuai permintaan pengguna
+
+        var rafId = null;
+
+        function handleMove(clientX, clientY) {
+          if (!is3dActive) return;
+          var rect = element.getBoundingClientRect();
+          var x = clientX - rect.left;
+          var y = clientY - rect.top;
+
+          var xPct = Math.max(0, Math.min(1, x / rect.width));
+          var yPct = Math.max(0, Math.min(1, y / rect.height));
+
+          var rotateX = ((0.5 - yPct) * maxAngle).toFixed(2);
+          var rotateY = ((xPct - 0.5) * maxAngle).toFixed(2);
+
+          element.style.setProperty('--glare-x', (xPct * 100).toFixed(1) + '%');
+          element.style.setProperty('--glare-y', (yPct * 100).toFixed(1) + '%');
+
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(function() {
+            element.style.transform = 'perspective(1100px) rotateX(' + rotateX + 'deg) rotateY(' + rotateY + 'deg) scale3d(' + maxScale + ', ' + maxScale + ', ' + maxScale + ') translateZ(' + translateZ + 'px)';
+          });
+        }
+
+        element.addEventListener('mouseenter', function(e) {
+          if (!is3dActive) return;
+          element.classList.add('is-tilting');
+          handleMove(e.clientX, e.clientY);
+        });
+
+        element.addEventListener('mousemove', function(e) {
+          handleMove(e.clientX, e.clientY);
+        });
+
+        element.addEventListener('mouseleave', function() {
+          if (!is3dActive) return;
+          element.classList.remove('is-tilting');
+          if (rafId) cancelAnimationFrame(rafId);
+          element.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0px)';
+        });
+
+        element.addEventListener('touchstart', function(e) {
+          if (!is3dActive) return;
+          element.classList.add('is-tilting');
+          if (e.touches && e.touches[0]) {
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+
+        element.addEventListener('touchmove', function(e) {
+          if (!is3dActive) return;
+          if (e.touches && e.touches[0]) {
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }, { passive: true });
+
+        element.addEventListener('touchend', function() {
+          if (!is3dActive) return;
+          element.classList.remove('is-tilting');
+          element.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1) translateZ(0px)';
+        });
+      }
+
+      function initAll3DTiltElements() {
+        // 1. Room Cards
+        document.querySelectorAll('.lr-card-featured').forEach(function(card) {
+          attach3DTilt(card, 16, 1.025, 12, true);
+        });
+
+        // 2. Kotak Pencarian Kamar / Search Box
+        document.querySelectorAll('.lr-search-card').forEach(function(box) {
+          attach3DTilt(box, 6, 1.01, 15, false);
+        });
+
+        // 3. Bento Hero Card
+        document.querySelectorAll('.lr-gallery-hero-card').forEach(function(card) {
+          attach3DTilt(card, 8, 1.015, 14, false);
+        });
+
+        // 4. Kartu 2 Titik Cabang Lokasi
+        document.querySelectorAll('.lr-loc-card-left').forEach(function(card) {
+          attach3DTilt(card, 7, 1.01, 12, false);
+        });
+      }
+
+      // =========================================================================
+      // KINETIC PRISM SPATIAL REVEAL ENGINE
+      // Menjalankan animasi masuk spasial berdimensi 3D dan kilau prisma kristal
+      // saat pengunjung scroll masuk ke setiap fitur di landing page.
+      // =========================================================================
+      var spatialObserver = null;
+
+      function initKineticSpatialReveal() {
+        var elements = document.querySelectorAll('[data-spatial-reveal]');
+        if (!elements.length) return;
+
+        var prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+          elements.forEach(function(el) {
+            el.classList.add('lr-revealed');
+          });
+          return;
+        }
+
+        elements.forEach(function(el) {
+          if (!el.classList.contains('lr-revealed')) {
+            el.classList.add('lr-reveal-init');
+          }
+        });
+
+        if (!spatialObserver) {
+          spatialObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+              if (entry.isIntersecting) {
+                var el = entry.target;
+                el.classList.add('lr-revealed');
+                spatialObserver.unobserve(el);
+
+                setTimeout(function() {
+                  el.classList.add('lr-revealed-ready');
+                }, 1100);
+              }
+            });
+          }, {
+            root: null,
+            rootMargin: '0px 0px -40px 0px',
+            threshold: 0.08
+          });
+        }
+
+        elements.forEach(function(el) {
+          if (!el.classList.contains('lr-revealed')) {
+            spatialObserver.observe(el);
+          }
+        });
+      }
+
+      window.triggerSpatialReveals = function() {
+        initKineticSpatialReveal();
+      };
+
+      document.addEventListener('DOMContentLoaded', function() {
+        apply3DState();
+        init3DIntro();
+        initAll3DTiltElements();
+
+        var hasShown = false;
+        try { hasShown = sessionStorage.getItem('f3d_intro_shown') === '1'; } catch(e) {}
+        if (hasShown || !is3dActive) {
+          initKineticSpatialReveal();
+        }
+      });
+
+      // 3D Navigation Departure Transition to Login
+      window.f3dNavigateToLogin = function(e, url) {
+        if (e && e.preventDefault) e.preventDefault();
+        try {
+          sessionStorage.setItem('f3d_from_landing', '1');
+          sessionStorage.removeItem('f3d_login_shown');
+        } catch(err) {}
+        document.body.style.transition = 'opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1)';
+        document.body.style.opacity = '0';
+        document.body.style.transform = 'scale(0.98)';
+        setTimeout(function() {
+          window.location.href = url;
+        }, 220);
+      };
+
+      // Sinkronisasi bila slide room berganti
+      setInterval(function() {
+        if (is3dActive) initAll3DTiltElements();
+      }, 1500);
     })();
   </script>
 

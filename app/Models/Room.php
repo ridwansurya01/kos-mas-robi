@@ -58,11 +58,13 @@ class Room extends Model
                 return array_slice($filtered, 0, 3);
             }
         }
-        $main = $this->image ?: 'assets/images/room_sample.jpg';
+        $main = $this->image ?: (file_exists(public_path('assets/images/room_sample.webp')) ? 'assets/images/room_sample.webp' : 'assets/images/room_sample.jpg');
+        $img2 = file_exists(public_path('assets/images/rooms/room_2.webp')) ? 'assets/images/rooms/room_2.webp' : 'assets/images/rooms/room_2.jpg';
+        $img3 = file_exists(public_path('assets/images/rooms/room_3.webp')) ? 'assets/images/rooms/room_3.webp' : 'assets/images/rooms/room_3.jpg';
         return [
             $main,
-            'assets/images/rooms/room_2.jpg',
-            'assets/images/rooms/room_3.jpg',
+            $img2,
+            $img3,
         ];
     }
 

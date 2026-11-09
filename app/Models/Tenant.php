@@ -15,6 +15,7 @@ class Tenant extends Model
         'name',
         'phone',
         'id_card',
+        'id_card_photo',
         'start_date',
         'due_day',
         'rent_amount',

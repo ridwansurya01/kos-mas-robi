@@ -20,3 +20,7 @@ yarn-error.log
 
 /public/assets/images/proofs/
 /public/assets/images/avatars/
+/public/assets/images/id_cards/*
+!/public/assets/images/id_cards/.gitkeep
+/scratch/
+*.backup*

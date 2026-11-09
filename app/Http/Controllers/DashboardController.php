@@ -11,6 +11,7 @@ use App\Models\MaintenanceTicket;
 use App\Models\Setting;
 use App\Models\RoomTransfer;
 use App\Models\User;
+use App\Models\SurveyRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Artisan;
 
@@ -36,8 +37,11 @@ class DashboardController extends Controller
         ]);
 
         $rooms = Room::with('activeTenant')->orderBy('number')->get();
-        $this->ensureTwoBranchSampleData($rooms);
-        $rooms = Room::with('activeTenant')->orderBy('number')->get();
+        if (!cache()->has('kos_two_branch_seeded')) {
+            $this->ensureTwoBranchSampleData($rooms);
+            cache()->put('kos_two_branch_seeded', true, now()->addDays(7));
+        }
+
         $totalRooms = $rooms->count();
         $occupiedRooms = $rooms->whereIn('status', ['occupied', 'due'])->count();
         $availableRooms = $rooms->where('status', 'available')->count();
@@ -45,8 +49,13 @@ class DashboardController extends Controller
 
         $occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0;
 
-        $monthlyIncome = Finance::where('type', 'income')->sum('amount');
-        $totalExpense = Finance::where('type', 'expense')->sum('amount');
+        // Optimized single-load queries to minimize server TTFB
+        $allFinances = Finance::with('room')->orderBy('date', 'desc')->get();
+        $allMaintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
+        $allSurveys = SurveyRequest::orderBy('created_at', 'desc')->get();
+
+        $monthlyIncome = (float) $allFinances->where('type', 'income')->sum('amount');
+        $totalExpense = (float) $allFinances->where('type', 'expense')->sum('amount');
         $netCashflow = $monthlyIncome - $totalExpense;
         $dueAmount = $rooms->where('status', 'due')->sum('price');
 
@@ -66,15 +75,19 @@ class DashboardController extends Controller
         $loc2Due = $roomsLoc2->where('status', 'due')->count();
         $loc2OccupancyRate = $loc2Total > 0 ? round(($loc2Occupied / $loc2Total) * 100, 1) : 0;
 
-        // Analisis Keuangan Berdasarkan Tahun Otomatis
+        // Analisis Keuangan Berdasarkan Tahun Otomatis (Range Panjang 2020 s/d 2070+)
         $selectedYear = (int)$request->input('year', 2026);
         if ($selectedYear < 2020) {
             $selectedYear = 2026;
         }
-        $maxYear = max(2045, $selectedYear + 5);
-        $availableYears = range(2024, $maxYear);
+        $minYear = 2020;
+        $maxYear = max(2070, $selectedYear + 10);
+        $availableYears = range($minYear, $maxYear);
 
-        $allYearFinances = Finance::with('room')->whereYear('date', $selectedYear)->get();
+        $allYearFinances = $allFinances->filter(function($f) use ($selectedYear) {
+            if (empty($f->date)) return false;
+            return \Carbon\Carbon::parse($f->date)->year === $selectedYear;
+        });
         $hasDbRecords = $allYearFinances->count() > 0;
 
         $yearlyIncome = $hasDbRecords ? (int)$allYearFinances->where('type', 'income')->sum('amount') : 0;
@@ -105,15 +118,12 @@ class DashboardController extends Controller
             $chartNet[] = $inc - $exp;
         }
 
-        $activeTickets = MaintenanceTicket::where('status', '!=', 'done')->count();
+        $activeTickets = $allMaintenance->where('status', '!=', 'done')->count();
 
         $roomTransfers = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])
             ->orderBy('created_at', 'desc')
             ->get();
         $pendingTransfersCount = $roomTransfers->where('status', 'pending')->count();
-
-        $allFinances = Finance::with('room')->orderBy('date', 'desc')->get();
-        $allMaintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
 
         // Data Penagihan Sewa (Tagihan Terpisah)
         $billingList = $rooms->filter(function($r) {
@@ -124,7 +134,11 @@ class DashboardController extends Controller
         $allAdmins = User::where('role', 'admin')->orderBy('created_at', 'desc')->get();
         $totalAdminsCount = $allAdmins->count();
 
+        // Data Penghuni Kos Aktif (Terbaru di paling atas)
+        $allTenants = Tenant::with('room')->where('status', 'active')->orderBy('id', 'desc')->get();
+
         return view('dashboard', compact(
+            'allTenants',
             'allAdmins',
             'totalAdminsCount',
             'allFinances',
@@ -154,6 +168,7 @@ class DashboardController extends Controller
             'activeTickets',
             'roomTransfers',
             'pendingTransfersCount',
+            'allSurveys',
             'branches',
             'roomsLoc1',
             'roomsLoc2',
@@ -384,10 +399,12 @@ class DashboardController extends Controller
         $finances = Finance::with('room')->orderBy('date', 'desc')->get();
         $maintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
         $roomTransfers = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])->orderBy('created_at', 'desc')->get();
+        $tenants = Tenant::with('room')->where('status', 'active')->orderBy('id', 'desc')->get();
 
         return response()->json([
             'settings' => $setting,
             'rooms' => $rooms,
+            'tenants' => $tenants,
             'finances' => $finances,
             'maintenance' => $maintenance,
             'room_transfers' => $roomTransfers,
@@ -540,6 +557,93 @@ class DashboardController extends Controller
     }
 
     /**
+     * Delete a single room from system.
+     */
+    public function deleteRoom($id): JsonResponse
+    {
+        $room = Room::where('id', $id)->orWhere('number', $id)->first();
+        if (!$room) {
+            return response()->json(['success' => false, 'message' => 'Unit kamar tidak ditemukan.'], 404);
+        }
+
+        if ($room->activeTenant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamar #' . $room->number . ' masih dihuni oleh ' . $room->activeTenant->name . '. Silakan proses checkout penghuni terlebih dahulu sebelum menghapus kamar.'
+            ], 422);
+        }
+
+        $roomNumber = $room->number;
+        $roomFloor = (int)$room->floor;
+
+        // Nullify foreign key references safely
+        \App\Models\Tenant::where('room_id', $room->id)->update(['room_id' => null]);
+        \App\Models\Finance::where('room_id', $room->id)->update(['room_id' => null]);
+        \App\Models\MaintenanceTicket::where('room_id', $room->id)->update(['room_id' => null]);
+        \App\Models\RoomTransfer::where('current_room_id', $room->id)->update(['current_room_id' => null]);
+        \App\Models\RoomTransfer::where('target_room_id', $room->id)->update(['target_room_id' => null]);
+        \App\Models\User::where('room_id', $room->id)->update(['room_id' => null]);
+
+        $room->delete();
+
+        $remainingOnFloor = Room::where('floor', $roomFloor)->count();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Kamar #' . $roomNumber . ' berhasil dihapus dari sistem kos.',
+            'room_number' => $roomNumber,
+            'floor' => $roomFloor,
+            'remaining_on_floor' => $remainingOnFloor
+        ]);
+    }
+
+    /**
+     * Delete an entire floor and all rooms located on it.
+     */
+    public function deleteFloor(Request $request, $floor): JsonResponse
+    {
+        $floorNum = (int)$floor;
+        if ($floorNum <= 0) {
+            return response()->json(['success' => false, 'message' => 'Nomor tingkat lantai tidak valid.'], 422);
+        }
+
+        $rooms = Room::where('floor', $floorNum)->get();
+
+        $activeTenants = [];
+        foreach ($rooms as $room) {
+            if ($room->activeTenant) {
+                $activeTenants[] = '#' . $room->number . ' (' . $room->activeTenant->name . ')';
+            }
+        }
+
+        if (!empty($activeTenants)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lantai ' . $floorNum . ' tidak dapat dihapus karena masih ada penghuni aktif di kamar: ' . implode(', ', $activeTenants) . '. Silakan checkout penghuni terlebih dahulu.'
+            ], 422);
+        }
+
+        $deletedCount = 0;
+        foreach ($rooms as $room) {
+            \App\Models\Tenant::where('room_id', $room->id)->update(['room_id' => null]);
+            \App\Models\Finance::where('room_id', $room->id)->update(['room_id' => null]);
+            \App\Models\MaintenanceTicket::where('room_id', $room->id)->update(['room_id' => null]);
+            \App\Models\RoomTransfer::where('current_room_id', $room->id)->update(['current_room_id' => null]);
+            \App\Models\RoomTransfer::where('target_room_id', $room->id)->update(['target_room_id' => null]);
+            \App\Models\User::where('room_id', $room->id)->update(['room_id' => null]);
+            $room->delete();
+            $deletedCount++;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lantai ' . $floorNum . ' beserta ' . $deletedCount . ' unit kamar di dalamnya berhasil dihapus.',
+            'floor' => $floorNum,
+            'deleted_rooms_count' => $deletedCount
+        ]);
+    }
+
+    /**
      * Store new tenant, assign to room, and create login account.
      */
     public function saveTenant(Request $request): JsonResponse
@@ -547,7 +651,7 @@ class DashboardController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|max:255',
-            'phone' => 'required|string',
+            'phone' => 'nullable|string',
             'password' => 'nullable|string|min:6',
             'id_card' => 'nullable|string',
             'room_id' => 'required|exists:rooms,id',
@@ -557,9 +661,11 @@ class DashboardController extends Controller
             'emergency_contact' => 'nullable|string',
         ]);
 
+        $tenantPhone = !empty($validated['phone']) ? trim($validated['phone']) : '-';
+
         $tenantData = [
             'name' => $validated['name'],
-            'phone' => $validated['phone'],
+            'phone' => $tenantPhone,
             'id_card' => $validated['id_card'] ?? null,
             'room_id' => $validated['room_id'],
             'start_date' => $validated['start_date'],
@@ -583,23 +689,32 @@ class DashboardController extends Controller
 
         if ($user) {
             $user->name = $validated['name'];
-            $user->phone = $validated['phone'];
+            if (!empty($validated['phone']) && $validated['phone'] !== '-') {
+                $user->phone = $validated['phone'];
+            }
             $user->room_id = $validated['room_id'];
             $user->role = 'tenant';
             if (!empty($validated['password'])) {
                 $user->password = Hash::make($plainPassword);
             }
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_profile_completed')) {
+                $user->is_profile_completed = false;
+            }
             $user->save();
         } else {
-            $user = User::create([
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
-                'phone' => $validated['phone'],
+                'phone' => (!empty($validated['phone']) && $validated['phone'] !== '-') ? $validated['phone'] : null,
                 'password' => Hash::make($plainPassword),
                 'role' => 'tenant',
                 'room_id' => $validated['room_id'],
                 'branch_preference' => $room?->location ?? 'Lokasi 1',
-            ]);
+            ];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_profile_completed')) {
+                $userData['is_profile_completed'] = false;
+            }
+            $user = User::create($userData);
         }
 
         // Record initial rent payment
@@ -614,27 +729,21 @@ class DashboardController extends Controller
             'payment_method' => 'Transfer BCA',
         ]);
 
-        // Build WhatsApp credentials text
         $setting = Setting::first();
-        $cleanPhone = preg_replace('/[^0-9]/', '', $validated['phone']);
-        if (str_starts_with($cleanPhone, '0')) {
-            $cleanPhone = '62' . substr($cleanPhone, 1);
-        }
         $loginUrl = route('login');
-        $waCredsText = "Halo {$validated['name']}, akun portal anak kos Anda di " . ($setting->kos_name ?? 'Kos Mas Robi') . " telah berhasil dibuat oleh pengelola.\n\nBerikut rincian akun Anda:\n• Kamar: #{$room->number}\n• Email Login: {$validated['email']}\n• Password: {$plainPassword}\n• Link Login: {$loginUrl}\n\nSilakan login ke portal anak kos untuk melihat tagihan, konfirmasi pembayaran sewa, dan informasi fasilitas kos.";
-        $waCredsUrl = "https://wa.me/{$cleanPhone}?text=" . urlencode($waCredsText);
+        $roomInfo = 'Kamar #' . ($room?->number ?? '-') . ' (' . ($room?->location ?? 'Lokasi 1') . ')';
 
         return response()->json([
             'success' => true,
             'message' => 'Penghuni baru dan akun login berhasil didaftarkan!',
-            'tenant' => $tenant,
+            'tenant' => $tenant->load('room'),
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
                 'name' => $user->name,
                 'plain_password' => $plainPassword,
-                'wa_creds_url' => $waCredsUrl,
-                'wa_creds_text' => $waCredsText,
+                'room_info' => $roomInfo,
+                'login_url' => $loginUrl,
             ]
         ]);
     }
@@ -648,10 +757,246 @@ class DashboardController extends Controller
 
         Tenant::where('room_id', $room->id)->where('status', 'active')->update(['status' => 'inactive']);
 
+        // Disassociate any registered user account linked to this room
+        User::where('room_id', $room->id)->update(['room_id' => null]);
+
         $room->status = 'available';
+        $room->booked_by_user_id = null;
+        $room->booked_by_name = null;
+        $room->booked_by_phone = null;
         $room->save();
 
         return response()->json(['success' => true, 'message' => 'Kamar berhasil dikosongkan']);
+    }
+
+    /**
+     * Update payment due day for a tenant or room.
+     */
+    public function updateTenantDueDay(Request $request, $id): JsonResponse
+    {
+        $validated = $request->validate([
+            'due_day' => 'required|integer|min:1|max:31',
+        ]);
+
+        $dueDay = (int) $validated['due_day'];
+
+        // 1. Try finding by Tenant ID directly
+        $tenant = Tenant::find($id);
+
+        // 2. If not found, try finding by Room ID or Room number
+        if (!$tenant) {
+            $room = Room::where('id', $id)->orWhere('number', $id)->first();
+            if ($room) {
+                $tenant = $room->activeTenant;
+                if (!$tenant) {
+                    $tenant = $room->tenants()->where('status', 'active')->first();
+                }
+            }
+        }
+
+        if ($tenant) {
+            $tenant->due_day = $dueDay;
+            $tenant->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => "Tanggal jatuh tempo sewa untuk {$tenant->name} berhasil diubah ke tanggal {$dueDay} setiap bulan.",
+                'tenant' => $tenant,
+                'due_day' => $dueDay,
+            ]);
+        }
+
+        // 3. Fallback: If room exists without active tenant record yet, create an active tenant record
+        $room = Room::where('id', $id)->orWhere('number', $id)->first();
+        if ($room) {
+            $tenantName = $room->booked_by_name ?: ($room->tenant ?: ('Penghuni Kamar #' . $room->number));
+            $tenant = Tenant::create([
+                'name' => $tenantName,
+                'phone' => $room->booked_by_phone ?: ($room->phone ?: '-'),
+                'room_id' => $room->id,
+                'start_date' => now()->toDateString(),
+                'due_day' => $dueDay,
+                'rent_amount' => $room->price,
+                'status' => 'active',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Tanggal jatuh tempo sewa untuk {$tenant->name} berhasil diatur ke tanggal {$dueDay} setiap bulan.",
+                'tenant' => $tenant,
+                'due_day' => $dueDay,
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Data penghuni atau kamar tidak ditemukan.',
+        ], 404);
+    }
+
+    /**
+     * Get single tenant details for editing.
+     */
+    public function getTenant($id): JsonResponse
+    {
+        $tenant = Tenant::with('room')->find($id);
+        if (!$tenant) {
+            $room = Room::where('id', $id)->orWhere('number', $id)->first();
+            if ($room) {
+                $tenant = $room->activeTenant ?: $room->tenants()->where('status', 'active')->first();
+                if (!$tenant) {
+                    $tenantName = $room->booked_by_name ?: ($room->tenant ?: ('Penghuni Kamar #' . $room->number));
+                    $tenant = Tenant::create([
+                        'room_id' => $room->id,
+                        'name' => $tenantName,
+                        'phone' => $room->booked_by_phone ?: ($room->phone ?: '081234567890'),
+                        'start_date' => now()->toDateString(),
+                        'due_day' => $room->due_day ?? 1,
+                        'rent_amount' => $room->price ?? 1500000,
+                        'status' => 'active',
+                    ]);
+                }
+            }
+        }
+
+        if (!$tenant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data penghuni tidak ditemukan.',
+            ], 404);
+        }
+
+        // Find linked user login
+        $user = null;
+        if ($tenant->room_id) {
+            $user = User::where('room_id', $tenant->room_id)->where('role', 'tenant')->first();
+        }
+        if (!$user && $tenant->phone) {
+            $cleanPhone = preg_replace('/[^0-9]/', '', $tenant->phone);
+            if (strlen($cleanPhone) >= 8) {
+                $user = User::where('phone', 'like', '%' . substr($cleanPhone, -8))->where('role', 'tenant')->first();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'tenant' => [
+                'id' => $tenant->id,
+                'name' => $tenant->name,
+                'phone' => $tenant->phone,
+                'id_card' => $tenant->id_card,
+                'id_card_photo' => $tenant->id_card_photo ? asset($tenant->id_card_photo) : ($user?->id_card_photo ? asset($user->id_card_photo) : null),
+                'room_id' => $tenant->room_id,
+                'room_number' => $tenant->room?->number ?? '',
+                'start_date' => $tenant->start_date ? $tenant->start_date->format('Y-m-d') : '',
+                'due_day' => (int) ($tenant->due_day ?? 1),
+                'rent_amount' => (float) ($tenant->rent_amount ?? ($tenant->room?->price ?? 0)),
+                'emergency_contact' => $tenant->emergency_contact,
+                'status' => $tenant->status ?? 'active',
+                'user_email' => $user?->email ?? '',
+            ]
+        ]);
+    }
+
+    /**
+     * Update tenant data.
+     */
+    public function updateTenant(Request $request, $id): JsonResponse
+    {
+        $tenant = Tenant::with('room')->find($id);
+        if (!$tenant) {
+            $room = Room::where('id', $id)->orWhere('number', $id)->first();
+            if ($room) {
+                $tenant = $room->activeTenant ?: $room->tenants()->where('status', 'active')->first();
+            }
+        }
+
+        if (!$tenant) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data penghuni tidak ditemukan.',
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:30',
+            'id_card' => 'nullable|string|max:50',
+            'room_id' => 'required|exists:rooms,id',
+            'start_date' => 'required|date',
+            'due_day' => 'required|integer|min:1|max:31',
+            'rent_amount' => 'required|numeric|min:0',
+            'emergency_contact' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $oldRoomId = $tenant->room_id;
+        $newRoomId = (int) $validated['room_id'];
+
+        $tenant->name = $validated['name'];
+        $tenant->phone = $validated['phone'];
+        $tenant->id_card = $validated['id_card'] ?? null;
+        $tenant->room_id = $newRoomId;
+        $tenant->start_date = $validated['start_date'];
+        $tenant->due_day = (int) $validated['due_day'];
+        $tenant->rent_amount = $validated['rent_amount'];
+        $tenant->emergency_contact = $validated['emergency_contact'] ?? null;
+        $tenant->save();
+
+        // Handle room assignment if changed
+        if ($oldRoomId != $newRoomId) {
+            if ($oldRoomId) {
+                $oldRoom = Room::find($oldRoomId);
+                if ($oldRoom) {
+                    $hasOther = Tenant::where('room_id', $oldRoomId)->where('status', 'active')->where('id', '!=', $tenant->id)->exists();
+                    if (!$hasOther) {
+                        $oldRoom->status = 'available';
+                        $oldRoom->save();
+                    }
+                }
+            }
+            $newRoom = Room::find($newRoomId);
+            if ($newRoom) {
+                $newRoom->status = 'occupied';
+                $newRoom->save();
+            }
+        } else {
+            $curRoom = Room::find($newRoomId);
+            if ($curRoom && $curRoom->status === 'available') {
+                $curRoom->status = 'occupied';
+                $curRoom->save();
+            }
+        }
+
+        // Update associated user login if present
+        $user = null;
+        if (!empty($validated['email'])) {
+            $user = User::where('email', $validated['email'])->first();
+        }
+        if (!$user && $oldRoomId) {
+            $user = User::where('room_id', $oldRoomId)->where('role', 'tenant')->first();
+        }
+
+        if ($user) {
+            $user->name = $validated['name'];
+            $user->phone = $validated['phone'];
+            $user->room_id = $newRoomId;
+            if (!empty($validated['email'])) {
+                $user->email = $validated['email'];
+            }
+            if (!empty($validated['password'])) {
+                $user->password = Hash::make(trim($validated['password']));
+            }
+            $user->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Data penghuni {$tenant->name} berhasil diperbarui!",
+            'tenant' => $tenant->fresh(['room']),
+            'user' => $user ? ['id' => $user->id, 'email' => $user->email] : null,
+        ]);
     }
 
     /**
@@ -929,11 +1274,18 @@ class DashboardController extends Controller
      */
     public function saveSettings(Request $request): JsonResponse
     {
-        if (!auth()->check() || !auth()->user()->isOwner()) {
-            if ($request->hasAny(['kos_name', 'owner_name', 'owner_phone', 'branches', 'bank_name', 'bank_account', 'bank_holder'])) {
+        if (!auth()->check() || !auth()->user()->isStaffOrOwner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Anda tidak memiliki akses ke pengaturan kos.'
+            ], 403);
+        }
+
+        if (!auth()->user()->isOwner()) {
+            if ($request->hasAny(['kos_name', 'owner_name', 'owner_phone', 'bank_name', 'bank_account', 'bank_holder'])) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Akses ditolak: Hanya Role Owner yang berhak mengubah informasi profil properti dan akun pengelola.'
+                    'message' => 'Akses ditolak: Hanya Role Owner yang berhak mengubah informasi profil utama pemilik dan rekening bank.'
                 ], 403);
             }
         }
@@ -954,7 +1306,12 @@ class DashboardController extends Controller
             'payment_methods' => 'nullable',
             'wifi_list' => 'nullable',
             'survey_form_template' => 'nullable|string',
+            'branch1_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
+            'branch2_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:5120',
         ]);
+
+        $setting = Setting::first() ?? new Setting();
+        $existingBranches = $setting->branches ?? [];
 
         if ($request->has('branches')) {
             $branches = $request->input('branches');
@@ -974,6 +1331,64 @@ class DashboardController extends Controller
                         $branches[$k]['gmaps_embed'] = 'https://maps.google.com/maps?q=' . urlencode($addr) . '&t=&z=16&ie=UTF8&iwloc=&output=embed';
                     }
                 }
+
+                // Handle Branch 1 Profile Image
+                if ($request->hasFile('branch1_image')) {
+                    $file1 = $request->file('branch1_image');
+                    $name1 = 'branch_1_' . time() . '.' . $file1->getClientOriginalExtension();
+                    $targetDir = public_path('assets/images/branches');
+                    if (!file_exists($targetDir)) {
+                        mkdir($targetDir, 0755, true);
+                    }
+                    $file1->move($targetDir, $name1);
+                    if (!isset($branches['lokasi_1'])) {
+                        $branches['lokasi_1'] = [];
+                    }
+                    $branches['lokasi_1']['image'] = 'assets/images/branches/' . $name1;
+                } elseif ($request->filled('b1_image_url')) {
+                    if (!isset($branches['lokasi_1'])) {
+                        $branches['lokasi_1'] = [];
+                    }
+                    $branches['lokasi_1']['image'] = $request->input('b1_image_url');
+                } elseif (empty($branches['lokasi_1']['image']) && !empty($existingBranches['lokasi_1']['image'])) {
+                    $branches['lokasi_1']['image'] = $existingBranches['lokasi_1']['image'];
+                }
+
+                // Handle Branch 2 Profile Image
+                if ($request->hasFile('branch2_image')) {
+                    $file2 = $request->file('branch2_image');
+                    $name2 = 'branch_2_' . time() . '.' . $file2->getClientOriginalExtension();
+                    $targetDir = public_path('assets/images/branches');
+                    if (!file_exists($targetDir)) {
+                        mkdir($targetDir, 0755, true);
+                    }
+                    $file2->move($targetDir, $name2);
+                    if (!isset($branches['lokasi_2'])) {
+                        $branches['lokasi_2'] = [];
+                    }
+                    $branches['lokasi_2']['image'] = 'assets/images/branches/' . $name2;
+                } elseif ($request->filled('b2_image_url')) {
+                    if (!isset($branches['lokasi_2'])) {
+                        $branches['lokasi_2'] = [];
+                    }
+                    $branches['lokasi_2']['image'] = $request->input('b2_image_url');
+                } elseif (empty($branches['lokasi_2']['image']) && !empty($existingBranches['lokasi_2']['image'])) {
+                    $branches['lokasi_2']['image'] = $existingBranches['lokasi_2']['image'];
+                }
+
+                // Handle is_active visibility toggle
+                if ($request->has('b1_is_active')) {
+                    $branches['lokasi_1']['is_active'] = filter_var($request->input('b1_is_active'), FILTER_VALIDATE_BOOLEAN);
+                } elseif (isset($branches['lokasi_1']['is_active'])) {
+                    $branches['lokasi_1']['is_active'] = filter_var($branches['lokasi_1']['is_active'], FILTER_VALIDATE_BOOLEAN);
+                }
+
+                if ($request->has('b2_is_active')) {
+                    $branches['lokasi_2']['is_active'] = filter_var($request->input('b2_is_active'), FILTER_VALIDATE_BOOLEAN);
+                } elseif (isset($branches['lokasi_2']['is_active'])) {
+                    $branches['lokasi_2']['is_active'] = filter_var($branches['lokasi_2']['is_active'], FILTER_VALIDATE_BOOLEAN);
+                }
+
                 $validated['branches'] = $branches;
             }
         }
@@ -1145,6 +1560,67 @@ class DashboardController extends Controller
     }
 
     /**
+     * Save customized Login Page branding, headline, features, and notice contents.
+     */
+    public function saveLoginPage(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'brand_title' => 'nullable|string|max:120',
+            'headline' => 'nullable|string|max:255',
+            'desc' => 'nullable|string|max:500',
+            'feature_1' => 'nullable|string|max:150',
+            'feature_2' => 'nullable|string|max:150',
+            'feature_3' => 'nullable|string|max:150',
+            'notice_title' => 'nullable|string|max:120',
+            'notice_text' => 'nullable|string|max:500',
+            'notice_btn_text' => 'nullable|string|max:100',
+            'help_phone' => 'nullable|string|max:30',
+            'wa_help_message' => 'nullable|string|max:500',
+        ]);
+
+        $setting = Setting::first() ?? new Setting();
+        $landing = $setting->landing_content ?? [];
+        if (!is_array($landing)) {
+            $landing = [];
+        }
+
+        $features = [];
+        if (!empty($validated['feature_1'])) $features[] = trim($validated['feature_1']);
+        if (!empty($validated['feature_2'])) $features[] = trim($validated['feature_2']);
+        if (!empty($validated['feature_3'])) $features[] = trim($validated['feature_3']);
+
+        if (empty($features)) {
+            $features = [
+                'Akses Portal Layanan Penghuni 24 Jam',
+                'Konfirmasi Pembayaran & Kuitansi Digital',
+                'Smart Key Mandiri & CCTV Seluruh Lorong'
+            ];
+        }
+
+        $loginPageData = [
+            'brand_title' => !empty($validated['brand_title']) ? trim($validated['brand_title']) : ($setting->kos_name ?? 'SMART LIVING'),
+            'headline' => !empty($validated['headline']) ? trim($validated['headline']) : "Smart Living &\nKost Eksklusif",
+            'desc' => !empty($validated['desc']) ? trim($validated['desc']) : 'Sistem manajemen hunian modern, nyaman, full furnished, dan aman 24 jam di Sleman, DI Yogyakarta.',
+            'features' => $features,
+            'notice_title' => !empty($validated['notice_title']) ? trim($validated['notice_title']) : 'Belum Memiliki Akun?',
+            'notice_text' => !empty($validated['notice_text']) ? trim($validated['notice_text']) : 'Pembuatan akun baru hanya dilakukan langsung oleh Admin saat penempatan kamar.',
+            'notice_btn_text' => !empty($validated['notice_btn_text']) ? trim($validated['notice_btn_text']) : 'Hubungi Admin via WhatsApp',
+            'help_phone' => !empty($validated['help_phone']) ? trim($validated['help_phone']) : ($setting->owner_phone ?? '6281234567890'),
+            'wa_help_message' => !empty($validated['wa_help_message']) ? trim($validated['wa_help_message']) : ("Halo Admin " . ($setting->kos_name ?? 'Kos') . ", saya penghuni baru dan ingin dibuatkan akun login portal anak kos.")
+        ];
+
+        $landing['login_page'] = $loginPageData;
+        $setting->landing_content = $landing;
+        $setting->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengaturan tampilan Login Page berhasil disimpan!',
+            'login_content' => $loginPageData
+        ]);
+    }
+
+    /**
      * Export all data as JSON file download.
      */
     public function exportData()
@@ -1190,6 +1666,12 @@ class DashboardController extends Controller
 
         if ($validated['status'] === 'approved') {
             if ($transfer->target_room_id) {
+                if ($transfer->targetRoom && $transfer->targetRoom->status !== 'available') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Gagal menyetujui mutasi: Kamar tujuan #' . $transfer->targetRoom->number . ' saat ini berstatus ' . $transfer->targetRoom->status . ' (sedang tidak kosong/tersedia).',
+                    ], 422);
+                }
                 if ($transfer->currentRoom) {
                     $transfer->currentRoom->status = 'available';
                     $transfer->currentRoom->save();
@@ -1218,6 +1700,197 @@ class DashboardController extends Controller
             'success' => true,
             'message' => 'Status pengajuan pindah kamar berhasil diubah menjadi ' . ($transfer->status === 'approved' ? 'DISETUJUI' : 'DITOLAK'),
             'transfer' => $transfer->fresh(['user', 'tenant', 'currentRoom', 'targetRoom']),
+        ]);
+    }
+
+    /**
+     * Get live notifications data for AJAX polling (Admin & Owner Header).
+     */
+    public function getLiveNotifications(?Request $request = null): JsonResponse
+    {
+        $notifPendingTransfers = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $notifActiveTickets = MaintenanceTicket::with('room')
+            ->whereIn('status', ['pending', 'progress'])
+            ->orderBy('report_date', 'desc')
+            ->get();
+
+        $notifDueRooms = Room::with('activeTenant')
+            ->where('status', 'due')
+            ->orderBy('number')
+            ->get();
+
+        $notifSurveys = SurveyRequest::where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalCount = $notifPendingTransfers->count() + $notifActiveTickets->count() + $notifDueRooms->count() + $notifSurveys->count();
+
+        return response()->json([
+            'success' => true,
+            'totalCount' => $totalCount,
+            'counts' => [
+                'surveys' => $notifSurveys->count(),
+                'transfers' => $notifPendingTransfers->count(),
+                'complaints' => $notifActiveTickets->count(),
+                'billings' => $notifDueRooms->count(),
+            ],
+            'surveys' => $notifSurveys->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'name' => $s->name,
+                    'phone' => $s->phone ?? '-',
+                    'job' => $s->job ?? 'Calon Penghuni',
+                    'branch' => $s->branch ?? 'Lokasi 1',
+                    'room' => $s->room ?? 'Semua Tipe',
+                    'survey_date' => $s->survey_date ? $s->survey_date->format('d M Y') : 'Segera',
+                    'survey_time' => $s->survey_time ?? '14:00 WIB',
+                    'survey_method' => $s->survey_method ?? 'Datang Langsung',
+                    'status' => $s->status,
+                    'message' => $s->message,
+                    'time_ago' => $s->created_at ? $s->created_at->diffForHumans(null, true) : 'Baru',
+                ];
+            }),
+            'transfers' => $notifPendingTransfers->take(5)->map(function ($t) {
+                return [
+                    'id' => $t->id,
+                    'userName' => $t->user?->name ?? 'Penghuni',
+                    'currentRoom' => $t->currentRoom?->number ?? '-',
+                    'targetRoom' => $t->targetRoom?->number ?? '-',
+                    'reason' => \Illuminate\Support\Str::limit($t->reason ?? 'Permohonan mutasi', 45),
+                    'time_ago' => $t->created_at ? $t->created_at->diffForHumans(null, true) : 'Baru',
+                ];
+            }),
+            'complaints' => $notifActiveTickets->take(5)->map(function ($tk) {
+                return [
+                    'id' => $tk->id,
+                    'roomNumber' => $tk->room?->number ?? ($tk->room_number ?? '-'),
+                    'description' => \Illuminate\Support\Str::limit($tk->description, 55),
+                    'reportedBy' => $tk->tenant?->name ?? ($tk->reported_by ?? 'Penghuni'),
+                    'time_ago' => !empty($tk->report_date) ? \Carbon\Carbon::parse($tk->report_date)->diffForHumans(null, true) : 'Aktif',
+                ];
+            }),
+            'billings' => $notifDueRooms->take(5)->map(function ($r) {
+                return [
+                    'id' => $r->id,
+                    'number' => $r->number,
+                    'tenantName' => $r->activeTenant?->name ?? 'Penyewa',
+                    'price' => number_format($r->price ?? 0, 0, ',', '.'),
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Update status of incoming location survey request.
+     */
+    public function updateSurveyStatus(Request $request, $id): JsonResponse
+    {
+        $survey = SurveyRequest::findOrFail($id);
+        $status = $request->input('status', 'confirmed');
+        if (in_array($status, ['pending', 'confirmed', 'completed', 'cancelled'])) {
+            $survey->status = $status;
+        }
+        $survey->is_read = true;
+        if ($request->filled('admin_notes')) {
+            $survey->admin_notes = $request->input('admin_notes');
+        }
+        $survey->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status survei berhasil diperbarui.',
+            'survey' => $survey,
+        ]);
+    }
+
+    /**
+     * Delete location survey request.
+     */
+    public function deleteSurvey(Request $request, $id): JsonResponse
+    {
+        $survey = SurveyRequest::findOrFail($id);
+        $survey->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data survei lokasi berhasil dihapus.',
+        ]);
+    }
+
+    /**
+     * Add survey schedule to Calendar or generate Calendar Event Link.
+     * Prepared for external Google Calendar API / CalDAV integration.
+     */
+    public function addToCalendar(Request $request, $id): JsonResponse
+    {
+        $survey = SurveyRequest::findOrFail($id);
+
+        $setting = Setting::first();
+        $kosName = $setting->kos_name ?? 'Kos Mas Robi';
+        $kosAddress = $setting->kos_address ?? ($setting->address ?? '');
+
+        // Format tanggal & jam
+        $dateStr = $survey->survey_date ? $survey->survey_date->format('Y-m-d') : now()->addDay()->format('Y-m-d');
+        $timeStr = $survey->survey_time ?: '14:00';
+
+        try {
+            $startDateTime = \Carbon\Carbon::parse($dateStr . ' ' . $timeStr);
+        } catch (\Exception $e) {
+            $startDateTime = now()->addDay()->setTime(14, 0);
+        }
+        $endDateTime = (clone $startDateTime)->addHour();
+
+        $eventTitle = "Survei Kamar " . ($survey->room ?: 'Unit') . " - " . $survey->name . " (" . $kosName . ")";
+        $location = ($survey->branch ?: 'Kos Mas Robi') . ($kosAddress ? (', ' . $kosAddress) : '');
+        $description = "Jadwal Survei Lokasi Kamar Kos\n"
+            . "Nama Calon Penghuni: " . $survey->name . "\n"
+            . "Pekerjaan / Status: " . ($survey->job ?: '-') . "\n"
+            . "No. WhatsApp: " . ($survey->phone ?: '-') . "\n"
+            . "Cabang: " . ($survey->branch ?: '-') . "\n"
+            . "Unit Kamar: " . ($survey->room ?: '-') . "\n"
+            . "Metode Kunjungan: " . ($survey->survey_method ?: 'Datang Langsung') . "\n"
+            . "Catatan Calon Penghuni: " . ($survey->message ?: '-') . "\n\n"
+            . "Dikelola melalui Sistem Manajemen " . $kosName;
+
+        // =========================================================================
+        // TEMPAT MEMASANGKAN API KALENDER ANDA (GOOGLE CALENDAR API / MICROSOFT GRAPH / LAINNYA)
+        // =========================================================================
+        // Catatan Pengembang:
+        // Anda dapat menambahkan pemanggilan API Kalender eksternal di blok ini:
+        // Contoh:
+        // if (config('services.google.calendar_enabled')) {
+        //     // Panggil Google Calendar API Service di sini
+        // }
+        // =========================================================================
+
+        // Web Google Calendar URL Generator (Out-of-the-box working fallback)
+        $utcStart = (clone $startDateTime)->setTimezone('UTC')->format('Ymd\THis\Z');
+        $utcEnd = (clone $endDateTime)->setTimezone('UTC')->format('Ymd\THis\Z');
+
+        $googleCalendarUrl = "https://calendar.google.com/calendar/render?" . http_build_query([
+            'action' => 'TEMPLATE',
+            'text' => $eventTitle,
+            'dates' => $utcStart . '/' . $utcEnd,
+            'details' => $description,
+            'location' => $location,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Jadwal survei siap ditambahkan ke kalender.',
+            'event' => [
+                'id' => $survey->id,
+                'title' => $eventTitle,
+                'start' => $startDateTime->toIso8601String(),
+                'end' => $endDateTime->toIso8601String(),
+                'location' => $location,
+                'description' => $description,
+            ],
+            'calendar_url' => $googleCalendarUrl,
         ]);
     }
 
@@ -1294,14 +1967,14 @@ class DashboardController extends Controller
     }
 
     /**
-     * Simpan / Perbarui Akun Staf Admin (Khusus Role Owner)
+     * Simpan / Perbarui Akun Staf Admin (Khusus Role Pengelola: Owner & Admin)
      */
     public function saveAdmin(Request $request): JsonResponse
     {
-        if (!auth()->check() || !auth()->user()->isOwner()) {
+        if (!auth()->check() || !auth()->user()->isStaffOrOwner()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak: Hanya Owner yang berhak mengelola akun Admin.'
+                'message' => 'Akses ditolak: Hanya Pengelola yang berhak mengelola akun Admin.'
             ], 403);
         }
 
@@ -1382,14 +2055,14 @@ class DashboardController extends Controller
     }
 
     /**
-     * Ganti Penugasan Cabang Kos Admin Langsung dari Tabel (Khusus Role Owner)
+     * Ganti Penugasan Cabang Kos Admin Langsung dari Tabel (Khusus Role Pengelola: Owner & Admin)
      */
     public function updateAdminBranch(Request $request, $id): JsonResponse
     {
-        if (!auth()->check() || !auth()->user()->isOwner()) {
+        if (!auth()->check() || !auth()->user()->isStaffOrOwner()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak: Hanya Owner yang berhak mengganti penugasan cabang Admin.'
+                'message' => 'Akses ditolak: Hanya Pengelola yang berhak mengganti penugasan cabang Admin.'
             ], 403);
         }
 
@@ -1427,21 +2100,21 @@ class DashboardController extends Controller
     }
 
     /**
-     * Hapus Akun Staf Admin (Khusus Role Owner)
+     * Hapus Akun Staf Admin (Khusus Role Pengelola: Owner & Admin)
      */
     public function deleteAdmin(Request $request, $id): JsonResponse
     {
-        if (!auth()->check() || !auth()->user()->isOwner()) {
+        if (!auth()->check() || !auth()->user()->isStaffOrOwner()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak: Hanya Owner yang berhak mengelola akun Admin.'
+                'message' => 'Akses ditolak: Hanya Pengelola yang berhak mengelola akun Admin.'
             ], 403);
         }
 
         if ((int)$id === auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tidak dapat menghapus akun Owner yang sedang aktif.'
+                'message' => 'Tidak dapat menghapus akun Anda sendiri yang sedang aktif.'
             ], 422);
         }
 
@@ -1460,5 +2133,172 @@ class DashboardController extends Controller
             'success' => true,
             'message' => "Akun staf Admin '{$adminName}' berhasil dihapus."
         ]);
+    }
+
+    /**
+     * Simpan Pengaturan Integrasi Gmail SMTP
+     */
+    public function saveEmailSettings(Request $request): JsonResponse
+    {
+        if (!auth()->check() || !auth()->user()->isOwner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Hanya Owner yang berhak mengubah pengaturan Gmail dan notifikasi sistem.'
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'mail_username' => 'required|email',
+            'mail_password' => 'nullable|string',
+            'mail_from_name' => 'nullable|string|max:100',
+            'mail_from_address' => 'nullable|email',
+            'is_enabled' => 'nullable|boolean',
+        ]);
+
+        $setting = Setting::first() ?? new Setting();
+        $currentSettings = $setting->email_settings ?? [];
+
+        // Bersihkan password jika ada spasi (Google App Passwords memiliki spasi tiap 4 digit)
+        $rawPassword = $validated['mail_password'] ?? null;
+        if (!empty($rawPassword)) {
+            $rawPassword = str_replace(' ', '', $rawPassword);
+        } else {
+            $rawPassword = $currentSettings['mail_password'] ?? '';
+        }
+
+        $newSettings = [
+            'mail_mailer' => 'smtp',
+            'mail_host' => 'smtp.gmail.com',
+            'mail_port' => 587,
+            'mail_encryption' => 'tls',
+            'mail_username' => trim($validated['mail_username']),
+            'mail_password' => $rawPassword,
+            'mail_from_address' => trim($validated['mail_from_address'] ?? $validated['mail_username']),
+            'mail_from_name' => trim($validated['mail_from_name'] ?? ($setting->kos_name ?? 'Kos Mas Robi')),
+            'is_enabled' => $request->boolean('is_enabled', true),
+        ];
+
+        $setting->email_settings = $newSettings;
+        $setting->save();
+
+        // Update .env secara langsung agar seragam di semua environment
+        $this->syncMailEnv($newSettings);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengaturan akun Gmail berhasil disimpan.',
+            'email_settings' => [
+                'mail_username' => $newSettings['mail_username'],
+                'mail_from_address' => $newSettings['mail_from_address'],
+                'mail_from_name' => $newSettings['mail_from_name'],
+                'has_password' => !empty($newSettings['mail_password']),
+                'is_enabled' => $newSettings['is_enabled'],
+            ]
+        ]);
+    }
+
+    /**
+     * Kirim email uji coba untuk memverifikasi koneksi SMTP Gmail
+     */
+    public function testSendEmail(Request $request): JsonResponse
+    {
+        $request->validate([
+            'target_email' => 'required|email',
+            'mail_username' => 'nullable|email',
+            'mail_password' => 'nullable|string',
+        ]);
+
+        $setting = Setting::first();
+        $stored = $setting ? ($setting->email_settings ?? []) : [];
+
+        $username = trim($request->input('mail_username') ?: ($stored['mail_username'] ?? ''));
+        $rawPwd = $request->input('mail_password');
+        if (!empty($rawPwd)) {
+            $password = str_replace(' ', '', $rawPwd);
+        } else {
+            $password = $stored['mail_password'] ?? '';
+        }
+
+        if (empty($username) || empty($password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Alamat Gmail dan Sandi Aplikasi (App Password) wajib diisi terlebih dahulu.'
+            ], 422);
+        }
+
+        $fromAddress = $stored['mail_from_address'] ?? $username;
+        $fromName = $stored['mail_from_name'] ?? ($setting->kos_name ?? 'Kos Mas Robi');
+
+        // Terapkan konfigurasi sementara untuk pengujian
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.transport' => 'smtp',
+            'mail.mailers.smtp.host' => 'smtp.gmail.com',
+            'mail.mailers.smtp.port' => 587,
+            'mail.mailers.smtp.encryption' => 'tls',
+            'mail.mailers.smtp.username' => $username,
+            'mail.mailers.smtp.password' => $password,
+            'mail.from.address' => $fromAddress,
+            'mail.from.name' => $fromName,
+        ]);
+
+        try {
+            Mail::purge('smtp');
+            Mail::to($request->target_email)->send(new \App\Mail\TestConnectionMail($username, $request->target_email));
+
+            return response()->json([
+                'success' => true,
+                'message' => "Email uji coba berhasil dikirim ke {$request->target_email}. Silakan periksa kotak masuk atau folder spam Gmail Anda."
+            ]);
+        } catch (\Throwable $e) {
+            $msg = $e->getMessage();
+            Log::error('Gmail SMTP Test Error: ' . $msg);
+
+            $helpHint = 'Pastikan Anda menggunakan "Sandi Aplikasi" (App Password) 16 karakter dari Google Account (bukan password login biasa Gmail), dan pastikan Verifikasi 2 Langkah (2FA) di akun Google Anda telah aktif.';
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghubungkan ke Gmail SMTP: ' . $msg,
+                'hint' => $helpHint
+            ], 500);
+        }
+    }
+
+    /**
+     * Sinkronkan konfigurasi ke file .env
+     */
+    protected function syncMailEnv(array $settings): void
+    {
+        try {
+            $envPath = base_path('.env');
+            if (!file_exists($envPath) || !is_writable($envPath)) {
+                return;
+            }
+
+            $content = file_get_contents($envPath);
+
+            $pairs = [
+                'MAIL_MAILER' => 'smtp',
+                'MAIL_HOST' => 'smtp.gmail.com',
+                'MAIL_PORT' => '587',
+                'MAIL_USERNAME' => $settings['mail_username'] ?? '',
+                'MAIL_PASSWORD' => $settings['mail_password'] ?? '',
+                'MAIL_ENCRYPTION' => 'tls',
+                'MAIL_FROM_ADDRESS' => '"' . ($settings['mail_from_address'] ?? $settings['mail_username']) . '"',
+                'MAIL_FROM_NAME' => '"' . ($settings['mail_from_name'] ?? 'Kos Mas Robi') . '"',
+            ];
+
+            foreach ($pairs as $key => $val) {
+                if (preg_match("/^{$key}=.*/m", $content)) {
+                    $content = preg_replace("/^{$key}=.*/m", "{$key}={$val}", $content);
+                } else {
+                    $content .= "\n{$key}={$val}";
+                }
+            }
+
+            file_put_contents($envPath, $content);
+        } catch (\Throwable $e) {
+            Log::warning('Gagal menyinkronkan file .env: ' . $e->getMessage());
+        }
     }
 }

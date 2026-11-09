@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://kosjember.com/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://kosjember.com/assets/images/hero_scandinavian_room.jpg</image:loc>
+      <image:title>Info Kost Jember - SMART LIVING Kos Jember</image:title>
+      <image:caption>Sewa kamar kost eksklusif dan modern dekat kampus UNEJ dan UNMUH Jember</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://kosjember.com/login</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>
+

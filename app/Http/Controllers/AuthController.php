@@ -28,18 +28,41 @@ class AuthController extends Controller
     }
 
     /**
-     * Handle Login Submission.
+     * Handle Login Submission (supports email or phone number).
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
+        $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string',
         ]);
 
+        $loginInput = trim($request->input('email'));
+        $password = $request->input('password');
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        $isEmail = filter_var($loginInput, FILTER_VALIDATE_EMAIL);
+        $attempt = false;
+
+        if ($isEmail) {
+            $attempt = Auth::attempt(['email' => $loginInput, 'password' => $password], $remember);
+        } else {
+            // Attempt login via phone number
+            $cleanPhone = preg_replace('/[^0-9]/', '', $loginInput);
+            $user = User::where('phone', $loginInput)
+                ->when(!empty($cleanPhone), function ($q) use ($cleanPhone) {
+                    $q->orWhere('phone', $cleanPhone)
+                      ->orWhere('phone', 'like', '%' . substr($cleanPhone, -9));
+                })
+                ->first();
+
+            if ($user && Hash::check($password, $user->password)) {
+                Auth::login($user, $remember);
+                $attempt = true;
+            }
+        }
+
+        if ($attempt) {
             $request->session()->regenerate();
             $request->session()->forget('url.intended');
 
@@ -52,7 +75,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan tidak sesuai.',
+            'email' => 'Email/Nomor telepon atau kata sandi yang Anda masukkan tidak sesuai.',
         ])->onlyInput('email');
     }
 
@@ -120,8 +143,8 @@ class AuthController extends Controller
         Auth::login($user, true);
         request()->session()->regenerate();
 
-        if ($user->isOwner()) {
-            return redirect()->route('admin.dashboard')->with('success', 'Berhasil masuk dengan akun Google sebagai Admin.');
+        if ($user->isStaffOrOwner()) {
+            return redirect()->route('admin.dashboard')->with('success', 'Berhasil masuk dengan akun Google sebagai ' . ($user->isOwner() ? 'Owner' : 'Admin') . '.');
         }
 
         return redirect()->route('tenant.portal')->with('success', 'Berhasil masuk dengan akun Google, Selamat datang ' . $user->name . '!');
@@ -480,7 +503,7 @@ class AuthController extends Controller
                     'phone'        => $user->phone,
                     'start_date'   => now()->toDateString(),
                     'due_day'      => 1,
-                    'monthly_rent' => $assignedRoom->price,
+                    'rent_amount'  => $assignedRoom->price,
                     'status'       => 'active',
                 ]);
             }
@@ -497,8 +520,8 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        if ($user->isOwner()) {
-            return redirect()->route('admin.dashboard')->with('success', 'Akun Admin berhasil dibuat!');
+        if ($user->isStaffOrOwner()) {
+            return redirect()->route('admin.dashboard')->with('success', 'Akun ' . ($user->isOwner() ? 'Owner' : 'Admin') . ' berhasil dibuat!');
         }
 
         return redirect()->route('tenant.portal')->with('success', 'Akun Pelanggan berhasil dibuat! Selamat datang di Kos Mas Robi.');

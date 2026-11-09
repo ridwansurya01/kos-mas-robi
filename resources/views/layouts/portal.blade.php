@@ -8,9 +8,12 @@
   <meta name="theme-color" content="#0a5661">
   <title>@yield('title', 'Portal Anak Kos - SMART LIVING')</title>
 
-  <!-- Favicon -->
+  <!-- Favicon Sesuai Logo Landing Page -->
   <link rel="manifest" href="{{ asset('manifest.json') }}">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230a5661'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=3">
+  <link rel="alternate icon" type="image/png" href="{{ asset('favicon.png') }}?v=3">
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=3">
+  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=3">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">

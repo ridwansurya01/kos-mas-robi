@@ -347,13 +347,8 @@
 
     {{-- Brand Logo & Header (Compact) --}}
     <div style="text-align: center; margin-bottom: 14px;">
-      <a href="{{ route('home') }}" class="auth-logo-badge" title="Ke Beranda Kos Mas Robi">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <line x1="19" y1="8" x2="19" y2="14"/>
-          <line x1="22" y1="11" x2="16" y2="11"/>
-        </svg>
+      <a href="{{ route('home') }}" class="auth-logo-badge" title="Ke Beranda Kos Mas Robi" style="padding: 0; overflow: hidden; background: transparent; border: none; box-shadow: none;">
+        <img src="{{ asset('assets/images/logo_kos_jember.png') }}" alt="Logo" style="width: 54px; height: 54px; object-fit: contain; border-radius: 15px; box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
       </a>
       <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 2px; letter-spacing: -0.02em;">Daftar Akun Baru</h2>
       <p style="font-size: 0.78rem; color: #64748b; margin: 0;">Buat akun pelanggan Kos Mas Robi</p>
@@ -639,7 +634,7 @@
   // =========================================================================
   // DYNAMIC BRANCH & ROOM TYPE SELECTION
   // =========================================================================
-  var availableRoomsData = @json($availableRooms);
+  var availableRoomsData = @json($availableRooms ?? []);
   var currentSelectedBranch = "{{ old('branch_preference', 'Lokasi 1') }}";
   var oldRoomId = "{{ old('room_id', '') }}";
   var oldRoomType = "{{ old('room_type_preference', '') }}";

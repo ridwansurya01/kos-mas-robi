@@ -6,13 +6,24 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="description" content="Sistem Manajemen Kos Mas Robi - Aplikasi web responsif berbasis Laravel untuk kelola kamar, anak kos, tagihan, dan kuitansi otomatis.">
   <meta name="theme-color" content="#0a5661">
-  <title>@yield('title', 'Kos Mas Robi - Smart Kost Management')</title>
+  <title>@yield('title', (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') . ' — Kos Jember')</title>
   
-  <!-- Favicon & PWA -->
+  <!-- Preconnect External Fonts for Faster FCP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+
+  <!-- Favicon Sesuai Logo Landing Page -->
   <link rel="manifest" href="{{ asset('manifest.json') }}">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230a5661'><path d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/></svg>">
+  <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}?v=3">
+  <link rel="alternate icon" type="image/png" href="{{ asset('favicon.png') }}?v=3">
+  <link rel="shortcut icon" href="{{ asset('favicon.ico') }}?v=3">
+  <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}?v=3">
   
-  <link rel="stylesheet" href="{{ asset('css/style.css') }}?v={{ file_exists(public_path('css/style.css')) ? filemtime(public_path('css/style.css')) : time() }}">
+  @php
+    $cssFile = file_exists(public_path('css/style.min.css')) ? 'css/style.min.css' : 'css/style.css';
+  @endphp
+  <link rel="stylesheet" href="{{ asset($cssFile) }}?v={{ filemtime(public_path($cssFile)) }}">
 
   <script>
     // Early global alert override to intercept any browser alert before other scripts run
@@ -228,6 +239,9 @@
   <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
   <!-- JAVASCRIPT APPLICATION LOGIC -->
-  <script src="{{ asset('js/app.js') }}?v={{ file_exists(public_path('js/app.js')) ? filemtime(public_path('js/app.js')) : time() }}"></script>
+  @php
+    $jsFile = file_exists(public_path('js/app.min.js')) ? 'js/app.min.js' : 'js/app.js';
+  @endphp
+  <script src="{{ asset($jsFile) }}?v={{ filemtime(public_path($jsFile)) }}" defer></script>
 </body>
 </html>

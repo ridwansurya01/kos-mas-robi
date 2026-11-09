@@ -4,7 +4,359 @@
 
 @section('content')
 
+<style>
+  /* =========================================================================
+     WHITE BACKGROUND LOADING WITH SNAKE TRACER LOGO (LOGIN -> PENGHUNI KOST)
+     ========================================================================= */
+  body.f3d-tenant-active .tp-navbar,
+  body.f3d-tenant-active .tp-main {
+    opacity: 0;
+    transform: perspective(1400px) translateY(35px);
+    filter: blur(10px);
+    transition: none;
+  }
+
+  body.f3d-tenant-ready .tp-navbar,
+  body.f3d-tenant-ready .tp-main {
+    opacity: 1;
+    transform: perspective(1400px) translateY(0);
+    filter: blur(0px);
+    transition: 
+      transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.75s ease,
+      filter 0.75s ease;
+  }
+
+  .f3d-tenant-portal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999999;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    visibility: visible;
+    overflow: hidden;
+    cursor: default;
+    transition: 
+      opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+      filter 0.65s ease,
+      visibility 0.65s ease;
+  }
+
+  .f3d-tenant-loader-wrap {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    transition: transform 0.55s ease, opacity 0.55s ease;
+  }
+
+  .f3d-tenant-svg-box {
+    width: 165px;
+    height: 165px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+
+  .f3d-tenant-svg-canvas {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .f3d-tenant-faint-track {
+    stroke: rgba(10, 86, 97, 0.08);
+  }
+
+  .f3d-tenant-drawn-green {
+    stroke: #0a5661;
+  }
+
+  .f3d-tenant-snake-tracer {
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.75));
+  }
+
+  .f3d-tenant-loading-track {
+    width: 190px;
+    height: 3.5px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 0 auto 12px;
+  }
+
+  .f3d-tenant-loading-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #0a5661 0%, #10b981 100%);
+    border-radius: 999px;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+    transition: width 0.08s linear;
+  }
+
+  .f3d-tenant-loading-label {
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: #0a5661;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 0;
+  }
+
+  .f3d-tenant-portal-overlay.portal-exit {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: scale(1.04);
+    filter: blur(8px);
+  }
+
+  .f3d-tenant-portal-overlay.portal-exit .f3d-tenant-loader-wrap {
+    transform: scale(1.08);
+    opacity: 0;
+  }
+
+  /* =========================================================================
+     MANDATORY PROFILE COMPLETION MODAL GATE FOR NEW TENANTS
+     ========================================================================= */
+  body.tp-profile-locked .tp-navbar,
+  body.tp-profile-locked .tp-main {
+    filter: blur(8px) saturate(0.6) !important;
+    pointer-events: none !important;
+    user-select: none !important;
+  }
+
+  .tp-profile-gate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999990;
+    background: rgba(4, 30, 36, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+
+  .tp-profile-gate-overlay.gate-closed {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .tp-profile-gate-card {
+    background: #ffffff;
+    width: 100%;
+    max-width: 580px;
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(10, 86, 97, 0.12);
+    overflow: hidden;
+    position: relative;
+    animation: tpGateCardPop 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes tpGateCardPop {
+    from {
+      opacity: 0;
+      transform: scale(0.92) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .tp-profile-gate-header {
+    background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%);
+    padding: 24px 28px;
+    color: #ffffff;
+    position: relative;
+  }
+
+  .tp-profile-gate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+    color: #ccfbf1;
+  }
+
+  .tp-profile-gate-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+  }
+
+  .tp-profile-gate-sub {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+  }
+
+  .tp-profile-gate-body {
+    padding: 24px 28px;
+    background: #ffffff;
+  }
+
+  .tp-profile-gate-alert {
+    background: #fffbeb;
+    border: 1.5px solid #fef3c7;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    color: #92400e;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .tp-gate-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 580px) {
+    .tp-profile-gate-overlay {
+      padding: 10px 8px !important;
+    }
+    .tp-profile-gate-card {
+      max-width: 100% !important;
+      width: 100% !important;
+      border-radius: 20px !important;
+    }
+    .tp-profile-gate-header {
+      padding: 16px 16px !important;
+    }
+    .tp-profile-gate-body {
+      padding: 16px 14px !important;
+    }
+    .tp-gate-form-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+  }
+
+  .tp-gate-input-group {
+    margin-bottom: 16px;
+  }
+
+  .tp-gate-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .tp-gate-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    font-size: 0.88rem;
+    color: #0f172a;
+    transition: all 0.2s ease;
+    outline: none;
+    box-sizing: border-box;
+  }
+
+  .tp-gate-input:focus {
+    border-color: #0d9488;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  }
+
+  .tp-btn-gate-submit {
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #0a5661 0%, #0d9488 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(10, 86, 97, 0.35);
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .tp-btn-gate-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(10, 86, 97, 0.45);
+  }
+
+  .tp-btn-gate-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .tp-gate-dropzone {
+    border: 2px dashed #94a3b8;
+    background: #f8fafc;
+    border-radius: 14px;
+    transition: all 0.25s ease;
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .tp-gate-dropzone:hover {
+    border-color: #0d9488;
+    background: #f0fdfa;
+  }
+  .tp-gate-dropzone.has-error {
+    border-color: #ef4444;
+    background: #fef2f2;
+    animation: tpGateShake 0.4s ease;
+  }
+  @keyframes tpGateShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+</style>
+
   @php
+    $room = $room ?? ($tenant->room ?? null);
+    $hasActiveRoom = $hasActiveRoom ?? (!empty($tenant && $tenant->room_id && $room));
+    $dueDate = $dueDate ?? ($tenant && $tenant->due_day ? now()->setDay(min($tenant->due_day, 28)) : now()->addDays(30));
+    $allRooms = $allRooms ?? collect([]);
+    $branches = $branches ?? ($setting->branches ?? \App\Models\Setting::defaultBranches());
+    $isProfileComplete = $isProfileComplete ?? true;
     $hasRealAvatar = !empty($user->avatar) && !str_contains($user->avatar, 'tenant_avatar.jpg');
     $userInitial = strtoupper(substr($user->name ?? 'P', 0, 1));
     $isB2 = ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2';
@@ -15,14 +367,176 @@
     $branchMaps = $isB2 ? ($branches['lokasi_2']['gmaps_url'] ?? 'https://maps.google.com/?q=SMART+LIVING+Ringroad') : ($branches['lokasi_1']['gmaps_url'] ?? 'https://maps.google.com/?q=SMART+LIVING+Kampus');
   @endphp
 
+  {{-- WHITE BACKGROUND LOADING: MENUJU HALAMAN PENGHUNI KOST --}}
+  <div id="f3dTenantPortalOverlay" class="f3d-tenant-portal-overlay">
+    <div class="f3d-tenant-loader-wrap" id="f3dTenantLoaderWrap">
+      <div class="f3d-tenant-svg-box" id="f3dTenantSvgBox">
+        <svg class="f3d-tenant-svg-canvas" viewBox="0 0 224 232" fill="none">
+          <defs>
+            <linearGradient id="tenantSnakeGreenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#10b981" />
+              <stop offset="50%" stop-color="#34d399" />
+              <stop offset="100%" stop-color="#0a5661" />
+            </linearGradient>
+          </defs>
+
+          <!-- Garis Faint Panduan -->
+          <path class="f3d-tenant-faint-track" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+          <path class="f3d-tenant-faint-track" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" />
+
+          <!-- Garis Hijau Rumah & Ular -->
+          <path id="f3dTenantGreenHouse" class="f3d-tenant-drawn-green" pathLength="1000" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+          <path id="f3dTenantSnakeHouse" class="f3d-tenant-snake-tracer" pathLength="1000" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke="url(#tenantSnakeGreenGrad)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
+
+          <!-- Garis Hijau Pintu Dalam & Ular -->
+          <path id="f3dTenantGreenDoor" class="f3d-tenant-drawn-green" pathLength="1000" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" />
+          <path id="f3dTenantSnakeDoor" class="f3d-tenant-snake-tracer" pathLength="1000" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke="url(#tenantSnakeGreenGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+
+      <!-- Tampilan Loading Saja -->
+      <div class="f3d-tenant-loading-track">
+        <div class="f3d-tenant-loading-bar" id="f3dTenantProgressBar"></div>
+      </div>
+      <div class="f3d-tenant-loading-label">MENUJU HALAMAN PENGHUNI KOST...</div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      try {
+        var gH = document.getElementById('f3dTenantGreenHouse');
+        var sH = document.getElementById('f3dTenantSnakeHouse');
+        var gD = document.getElementById('f3dTenantGreenDoor');
+        var sD = document.getElementById('f3dTenantSnakeDoor');
+        if (gH) { gH.style.strokeDasharray = '0 1000'; gH.style.strokeDashoffset = '0'; }
+        if (sH) { sH.style.strokeDasharray = '0 1000'; sH.style.strokeDashoffset = '0'; }
+        if (gD) { gD.style.strokeDasharray = '0 1000'; gD.style.strokeDashoffset = '0'; }
+        if (sD) { sD.style.strokeDasharray = '0 1000'; sD.style.strokeDashoffset = '0'; }
+      } catch(e) {}
+    })();
+  </script>
+
+  @if(!($isProfileComplete ?? true))
+  <!-- =========================================================================
+       POP-UP WAJIB: LENGKAPI DATA DIRI PENGHUNI BARU (LOGIN PERTAMA KALI)
+       ========================================================================= -->
+  <div id="tpProfileGateModal" class="tp-profile-gate-overlay">
+    <div class="tp-profile-gate-card">
+      <div class="tp-profile-gate-header">
+        <div class="tp-profile-gate-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Aktivasi Akun & Data Diri Penghuni</span>
+        </div>
+        <h3 class="tp-profile-gate-title">Lengkapi Data Diri Anda</h3>
+        <p class="tp-profile-gate-sub">
+          Selamat datang di {{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}! Mohon lengkapi formulir identitas di bawah ini untuk mengaktifkan seluruh akses fitur portal hunian Anda.
+        </p>
+      </div>
+
+      <div class="tp-profile-gate-body">
+        <div class="tp-profile-gate-alert">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.2" style="flex-shrink:0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div>
+            <strong>Akses Fitur Lain Ditangguhkan Sementara</strong><br>
+            Seluruh fitur portal (konfirmasi pembayaran sewa, tiket keluhan/servis, dan permohonan kamar) terkunci dan akan aktif secara otomatis setelah Anda menyimpan data diri di bawah ini.
+          </div>
+        </div>
+
+        <form id="formCompleteProfileGate" onsubmit="submitCompleteProfileGate(event)">
+          <div class="tp-gate-input-group">
+            <label class="tp-gate-label" for="gateFullName">Nama Lengkap Anak Kos *</label>
+            <input type="text" id="gateFullName" name="name" class="tp-gate-input" value="{{ $user->name }}" required placeholder="Contoh: Muhammad Dimas Satria">
+          </div>
+
+          {{-- GAMBAR 1: No. WhatsApp & No. KTP / SIM / KTM / KTA --}}
+          <div class="tp-gate-form-row">
+            <div>
+              <label class="tp-gate-label" for="gatePhone">No. WhatsApp *</label>
+              <input type="tel" id="gatePhone" name="phone" class="tp-gate-input" value="{{ ($user->phone && $user->phone !== '-') ? $user->phone : '' }}" required placeholder="0812xxxxxxxx">
+            </div>
+            <div>
+              <label class="tp-gate-label" for="gateIdCard">No. KTP / SIM / KTM / KTA (Opsional)</label>
+              <input type="text" id="gateIdCard" name="id_card" class="tp-gate-input" value="{{ $tenant?->id_card ?? '' }}" placeholder="33xxxxxxxxxxxxxx / Nomor Identitas">
+            </div>
+          </div>
+
+          {{-- WAJIB KIRIM FOTO KTP / SIM / KTM / KTA --}}
+          <div class="tp-gate-input-group">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <label class="tp-gate-label" for="gateIdCardPhoto" style="margin-bottom: 0;">
+                Wajib Kirim Foto KTP / SIM / KTM / KTA *
+              </label>
+              <span style="font-size: 0.68rem; font-weight: 800; background: #fee2e2; color: #dc2626; padding: 2px 7px; border-radius: 999px;">Wajib Upload</span>
+            </div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 8px; line-height: 1.4;">
+              Lampirkan foto fisik asli kartu identitas Anda yang masih berlaku (KTP, SIM, Kartu Tanda Mahasiswa, atau KTA Dinas/Kerja).
+            </div>
+
+            <div class="tp-gate-dropzone" id="gateIdCardDropzone" onclick="document.getElementById('gateIdCardPhoto').click()">
+              <input type="file" id="gateIdCardPhoto" name="id_card_photo" accept="image/jpeg,image/png,image/jpg,image/webp" style="display: none;" onchange="handleGateIdCardPhotoChange(this)">
+              
+              <div id="gateIdCardUploadPrompt" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 14px; text-align: center; cursor: pointer;">
+                <div style="width: 46px; height: 46px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; border: 1px solid #bae6fd;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <rect x="3" y="4" width="18" height="16" rx="3"/>
+                    <circle cx="9" cy="10" r="2"/>
+                    <line x1="15" y1="8" x2="17" y2="8"/>
+                    <line x1="15" y1="12" x2="17" y2="12"/>
+                    <line x1="7" y1="16" x2="17" y2="16"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 0.88rem; color: #0f172a;">Pilih / Ambil Foto Kartu Identitas</div>
+                  <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">Ketuk untuk memilih foto dari galeri atau kamera HP (JPG, PNG, WEBP, Maks. 5 MB)</div>
+                </div>
+                <div style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 8px; background: #eff6ff; color: #1d4ed8; font-size: 0.74rem; font-weight: 700; border: 1.5px solid #bfdbfe; margin-top: 2px;">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <span>Unggah Foto KTP / SIM / KTM / KTA</span>
+                </div>
+              </div>
+
+              <div id="gateIdCardPreviewWrap" style="display: none; padding: 12px 16px; align-items: center; justify-content: space-between; gap: 12px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                  <img id="gateIdCardPreviewImg" src="" alt="Preview Identitas" style="width: 72px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #bbf7d0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); flex-shrink: 0;">
+                  <div style="min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                      <span style="font-size: 0.68rem; font-weight: 800; color: #15803d; background: #dcfce7; padding: 2px 7px; border-radius: 4px;">Foto Siap Dikirim</span>
+                    </div>
+                    <div id="gateIdCardFileName" style="font-size: 0.75rem; font-weight: 700; color: #0f172a; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">-</div>
+                    <div id="gateIdCardFileSize" style="font-size: 0.7rem; color: #64748b;">-</div>
+                  </div>
+                </div>
+                <button type="button" onclick="event.stopPropagation(); window.removeGateIdCardPhoto();" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 6px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; flex-shrink: 0;" title="Ganti Foto">
+                  Ganti
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {{-- GAMBAR 2: Kontak Darurat (Ortu / Wali / Saudara) --}}
+          <div class="tp-gate-input-group">
+            <label class="tp-gate-label" for="gateEmergencyContact">Kontak Darurat (Ortu / Wali / Saudara) *</label>
+            <input type="text" id="gateEmergencyContact" name="emergency_contact" class="tp-gate-input" value="{{ $tenant?->emergency_contact ?? '' }}" required placeholder="Contoh: Bpk. Joko (0813xxxxxxxx) - Orang Tua">
+          </div>
+
+          <div style="margin-top: 22px;">
+            <button type="submit" id="btnSubmitGateProfile" class="tp-btn-gate-submit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Simpan & Lengkapi Data Diri</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  @endif
+
   {{-- ======================================================= NAVBAR ======================================================= --}}
   <nav class="tp-navbar">
     <div class="tp-navbar-brand">
-      <div class="tp-brand-icon-box">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
-          <path d="M9 21V12h6v9"/>
-        </svg>
+      <div class="tp-brand-icon-box" style="padding: 0; overflow: hidden; background: transparent; border: none; box-shadow: none;">
+        <img src="{{ asset('assets/images/logo_kos_jember.png') }}" alt="{{ !empty($setting->kos_name) ? $setting->kos_name : 'Kos Jember' }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
       </div>
       <div>
         <div class="tp-brand-name">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</div>
@@ -39,7 +553,7 @@
       <button type="button" class="tp-tab-btn" id="tabBtnMyRoom" onclick="switchPortalTab('myroom')">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         <span>Kamarku</span>
-        @if($room)
+        @if($hasActiveRoom && $room)
           <span class="tp-tab-room-pill">#{{ $room->number }}</span>
         @endif
       </button>
@@ -118,22 +632,8 @@
 
         {{-- Left Content: Dynamic Typography from Admin Landing Page Settings --}}
         <div class="tp-hero-landing-content">
-          <div class="tp-hero-landing-tag">
-            <span>{{ $landing['bento_card_tag'] ?? 'Kos Eksklusif & Nyaman' }}</span>
-          </div>
           <h1 class="tp-hero-landing-title">{!! nl2br(e($heroTitle)) !!}</h1>
-          <p class="tp-hero-landing-desc">{{ $heroDesc }}</p>
-
-          <div class="tp-hero-landing-actions">
-            <button type="button" class="tp-btn-coral" onclick="document.getElementById('catalogRoomGrid')?.scrollIntoView({ behavior: 'smooth' })">
-              <span>{{ $heroBtnText }}</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </button>
-            <a href="#sectionBranchSelector" class="tp-btn-ghost-white">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              <span>Pilih Titik Lokasi</span>
-            </a>
-          </div>
+          <p class="tp-hero-landing-desc" style="margin-bottom: 0;">{{ $heroDesc }}</p>
         </div>
       </div>
 
@@ -239,12 +739,13 @@
           @php
             $isMyRoom = ($room && $room->id === $r->id);
             $rThumb = !empty($r->images_list[0]) ? asset($r->images_list[0]) : asset('assets/images/rooms/room_1.jpg');
-            $statusClass = $isMyRoom ? 'my-room' : ($r->status === 'available' ? 'available' : 'occupied');
-            $statusText = $isMyRoom ? 'Kamar Anda' : ($r->status === 'available' ? 'Tersedia' : 'Sudah Disewa');
+            $isOccupied = ($r->status !== 'available' || !empty($r->booked_by_user_id) || $r->activeTenant);
+            $statusClass = $isMyRoom ? 'my-room' : (!$isOccupied ? 'available' : 'occupied');
+            $statusText = $isMyRoom ? 'Kamar Anda' : (!$isOccupied ? 'Tersedia' : 'Sudah Disewa');
             $hasCustomInterior = $r->custom_interior_status && $r->custom_interior_status !== 'none';
           @endphp
           <div class="tp-room-card room-item"
-               data-status="{{ $r->status }}"
+               data-status="{{ $isOccupied ? 'occupied' : 'available' }}"
                data-floor="floor-{{ $r->floor }}"
                data-location="{{ ($r->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'lokasi_2' : 'lokasi_1' }}"
                onclick="{{ $isMyRoom ? "switchPortalTab('myroom')" : "handleRoomCardClick(" . $r->id . ")" }}">
@@ -291,9 +792,13 @@
                     <span>Kamarku</span>
                     <span>→</span>
                   </button>
+                @elseif($isOccupied)
+                  <button type="button" class="tp-room-card-action-btn is-occupied" onclick="event.stopPropagation(); handleRoomCardClick({{ $r->id }})" title="Kamar sudah terisi oleh penghuni lain">
+                    <span>Sudah Disewa</span>
+                  </button>
                 @else
                   <button type="button" class="tp-room-card-action-btn" onclick="event.stopPropagation(); handleRoomCardClick({{ $r->id }})">
-                    <span>Lihat & Custom</span>
+                    <span>Pesan Kamar</span>
                     <span>→</span>
                   </button>
                 @endif
@@ -334,9 +839,37 @@
         </div>
       </div>
 
+      {{-- 1.5 NOTIFICATION FOR UNREGISTERED / CHECKED-OUT TENANT --}}
+      @if(!$hasActiveRoom)
+        <div class="tp-inactive-tenant-banner">
+          <div class="tp-inactive-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <div class="tp-inactive-content">
+            <div class="tp-inactive-title">Status Akun: Belum Terdaftar di Kamar Aktif / Selesai Sewa</div>
+            <div class="tp-inactive-desc">
+              Akun Anda saat ini belum dikaitkan dengan unit kamar aktif oleh Pengelola. Fitur <strong>Lapor Keluhan</strong> dan <strong>Pindah Kamar</strong> hanya dapat digunakan oleh customer yang terdaftar aktif di kamar kos. Untuk menghubungkan akun atau mendaftar sewa kamar, hubungi Pengelola Mas Robi melalui WhatsApp.
+            </div>
+            <div class="tp-inactive-actions">
+              <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20ingin%20menghubungkan%20akun%20penghuni%20saya%20({{ urlencode($user->email) }})" target="_blank" class="tp-btn-inactive-wa">
+                Hubungi Pengelola via WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      @endif
+
       {{-- 2. SHOWCASE SECTION (Desktop: Left Gallery Slider, Right Room & Billing Card) --}}
       @php
-        $roomImages = $room->images_list ?? [
+        $roomImages = ($hasActiveRoom && $room) ? ($room->images_list ?? [
+          'assets/images/rooms/room_1.jpg',
+          'assets/images/rooms/room_2.jpg',
+          'assets/images/rooms/room_3.jpg',
+        ]) : [
           'assets/images/rooms/room_1.jpg',
           'assets/images/rooms/room_2.jpg',
           'assets/images/rooms/room_3.jpg',
@@ -358,7 +891,7 @@
           {{-- Top Badge: Counter Foto --}}
           <div class="tp-gallery-badge">
             <span class="tp-pulse-dot"></span>
-            <span id="heroSlideBadgeText">Foto 1/{{ count($roomImages) }}: Kamar #{{ $room->number ?? '102' }}</span>
+            <span id="heroSlideBadgeText">Foto 1/{{ count($roomImages) }}: {{ $hasActiveRoom && $room ? ('Kamar #' . $room->number) : 'Unit Kos Mas Robi' }}</span>
           </div>
 
           {{-- Bottom Overlay Info --}}
@@ -380,16 +913,27 @@
           <div class="tp-details-top">
             <div class="tp-details-header">
               <div>
-                <span class="tp-badge-category">Hunian Aktif Anda</span>
-                <h2 class="tp-details-title">Kamar #{{ $room->number ?? '102' }} • {{ $room->type ?? 'Deluxe AC' }}</h2>
-              </div>
-              <span class="tp-status-pill {{ ($room->status ?? '') === 'due' ? 'due' : 'paid' }}">
-                @if(($room->status ?? '') === 'due')
-                  Menunggu Bayar
+                @if($hasActiveRoom && $room)
+                  <span class="tp-badge-category">Hunian Aktif Anda</span>
+                  <h2 class="tp-details-title">Kamar #{{ $room->number }} • {{ $room->type ?? 'Deluxe AC' }}</h2>
                 @else
-                  ● Sewa Aktif
+                  <span class="tp-badge-category" style="background: #f1f5f9; color: #475569;">Status Akun</span>
+                  <h2 class="tp-details-title">Belum Terdaftar di Kamar Aktif</h2>
                 @endif
-              </span>
+              </div>
+              @if($hasActiveRoom && $room)
+                <span class="tp-status-pill {{ ($room->status ?? '') === 'due' ? 'due' : 'paid' }}">
+                  @if(($room->status ?? '') === 'due')
+                    Menunggu Bayar
+                  @else
+                    ● Sewa Aktif
+                  @endif
+                </span>
+              @else
+                <span class="tp-status-pill" style="background: #fef3c7; color: #b45309; border: 1.5px solid #fde68a;">
+                  Nonaktif / Belum Terkait
+                </span>
+              @endif
             </div>
 
             {{-- Location Strip --}}
@@ -408,25 +952,46 @@
 
             {{-- Pricing & Due Date Box --}}
             <div class="tp-price-banner">
-              <div class="tp-price-main">
-                <span class="tp-price-lbl">Tagihan Sewa Bulanan</span>
-                <div class="tp-price-val">
-                  Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}
-                  <span class="tp-price-cycle">/bulan</span>
+              @if($hasActiveRoom && $room)
+                <div class="tp-price-main">
+                  <span class="tp-price-lbl">Tagihan Sewa Bulanan</span>
+                  <div class="tp-price-val">
+                    Rp {{ number_format($room->price ?? 0, 0, ',', '.') }}
+                    <span class="tp-price-cycle">/bulan</span>
+                  </div>
                 </div>
-              </div>
-              <div class="tp-due-badge">
-                <span class="tp-due-lbl">Jatuh Tempo Sewa</span>
-                <span class="tp-due-date">{{ $dueDate->translatedFormat('d F Y') }}</span>
-              </div>
+                <div class="tp-due-badge">
+                  <span class="tp-due-lbl">Jatuh Tempo Sewa</span>
+                  <span class="tp-due-date">{{ $dueDate->translatedFormat('d F Y') }}</span>
+                </div>
+              @else
+                <div class="tp-price-main">
+                  <span class="tp-price-lbl">Pilihan Kamar Tersedia</span>
+                  <div class="tp-price-val" style="font-size: 1.15rem; color: #334155;">
+                    Mulai Rp 1.500.000
+                    <span class="tp-price-cycle">/bulan</span>
+                  </div>
+                </div>
+                <div class="tp-due-badge" style="background: #f8fafc; border-color: #e2e8f0;">
+                  <span class="tp-due-lbl">Status Kamar</span>
+                  <span class="tp-due-date" style="color: #64748b;">Lihat katalog di bawah</span>
+                </div>
+              @endif
             </div>
 
             {{-- Description --}}
             <div class="tp-desc-block">
-              <h4 class="tp-desc-heading">Spesifikasi & Kenyamanan Unit</h4>
-              <p class="tp-desc-body">
-                Unit kamar tipe {{ $room->type ?? 'Deluxe AC' }} di Lantai {{ $room->floor ?? '1' }} ({{ $branchName }}). Dilengkapi pendingin ruangan (AC), kamar mandi dalam pribadi, meja kerja ergonomis, lemari pakaian, serta koneksi internet WiFi cepat.
-              </p>
+              @if($hasActiveRoom && $room)
+                <h4 class="tp-desc-heading">Spesifikasi & Kenyamanan Unit</h4>
+                <p class="tp-desc-body">
+                  Unit kamar tipe {{ $room->type ?? 'Deluxe AC' }} di Lantai {{ $room->floor ?? '1' }} ({{ $branchName }}). Dilengkapi pendingin ruangan (AC), kamar mandi dalam pribadi, meja kerja ergonomis, lemari pakaian, serta koneksi internet WiFi cepat.
+                </p>
+              @else
+                <h4 class="tp-desc-heading">Kenyamanan Hunian {{ $setting->kos_name ?? 'Kos Mas Robi' }}</h4>
+                <p class="tp-desc-body">
+                  Akun Anda saat ini belum dikaitkan dengan unit kamar aktif atau masa sewa Anda telah selesai. Anda dapat meninjau ketersediaan kamar pada katalog interaktif di bawah atau menghubungi pengelola kos.
+                </p>
+              @endif
             </div>
 
             {{-- Facilities Quick Icons with Crisp SVGs --}}
@@ -486,7 +1051,7 @@
               <span class="tp-card-label">Status Fasilitas Kamar</span>
               <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">Indikator performa fasilitas unit hunian Anda</div>
             </div>
-            <span class="tp-badge blue">Kamar #{{ $room->number ?? '102' }}</span>
+            <span class="tp-badge blue">Kamar #{{ $hasActiveRoom && $room ? $room->number : '-' }}</span>
           </div>
           <div class="tp-metrics-grid">
             <div class="tp-metric-box">
@@ -531,7 +1096,7 @@
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
               <div>
-                <div class="tp-roominfo-val">Kamar #{{ $room->number ?? '102' }} (Lt. {{ $room->floor ?? '1' }})</div>
+                <div class="tp-roominfo-val">{{ $hasActiveRoom && $room ? ('Kamar #' . $room->number . ' (Lt. ' . $room->floor . ')') : 'Belum Ditentukan' }}</div>
                 <div class="tp-roominfo-key">Unit & Lantai Kamar</div>
               </div>
             </div>
@@ -540,7 +1105,7 @@
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
               </div>
               <div>
-                <div class="tp-roominfo-val">{{ $dueDate->format('d M Y') }}</div>
+                <div class="tp-roominfo-val">{{ $hasActiveRoom ? $dueDate->format('d M Y') : '-' }}</div>
                 <div class="tp-roominfo-key">Jatuh Tempo Berikutnya</div>
               </div>
             </div>
@@ -549,7 +1114,7 @@
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               </div>
               <div>
-                <div class="tp-roominfo-val">Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}</div>
+                <div class="tp-roominfo-val">{{ $hasActiveRoom && $room ? ('Rp ' . number_format($room->price ?? 0, 0, ',', '.')) : '-' }}</div>
                 <div class="tp-roominfo-key">Tarif Sewa / Bulan</div>
               </div>
             </div>
@@ -558,7 +1123,7 @@
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
               <div>
-                <div class="tp-roominfo-val green">{{ ($room->status ?? '') === 'due' ? 'Menunggu Bayar' : 'Lunas & Aktif' }}</div>
+                <div class="tp-roominfo-val {{ $hasActiveRoom ? 'green' : '' }}">{{ $hasActiveRoom ? (($room->status ?? '') === 'due' ? 'Menunggu Bayar' : 'Lunas & Aktif') : 'Nonaktif / Selesai Sewa' }}</div>
                 <div class="tp-roominfo-key">Status Pembayaran</div>
               </div>
             </div>
@@ -577,17 +1142,32 @@
         </div>
         <div class="tp-quick-grid">
 
-          <button type="button" class="tp-quick-tile" id="btnOpenComplaint">
+          <button type="button" class="tp-quick-tile {{ !$hasActiveRoom ? 'tp-quick-locked' : '' }}" id="btnOpenComplaint"
+                  data-has-active-room="{{ $hasActiveRoom ? '1' : '0' }}">
             <div class="tp-quick-ico purple">
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
               </svg>
             </div>
             <div>
-              <div class="tp-quick-ttl">Lapor Keluhan</div>
-              <div class="tp-quick-desc">Laporkan kendala AC, air, lampu, atau perbaikan fasilitas kamar</div>
+              <div class="tp-quick-ttl" style="display: flex; align-items: center; gap: 6px;">
+                <span>Lapor Keluhan</span>
+                @if(!$hasActiveRoom)
+                  <span class="tp-pill-locked">Terkunci</span>
+                @endif
+              </div>
+              <div class="tp-quick-desc">
+                @if($hasActiveRoom)
+                  Laporkan kendala AC, air, lampu, atau perbaikan fasilitas kamar
+                @else
+                  Khusus customer yang terdaftar aktif di unit kamar
+                @endif
+              </div>
             </div>
-            <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Buat Laporan</span><span class="tp-quick-arrow">→</span></div>
+            <div class="tp-quick-footer">
+              <span class="tp-quick-cta-lbl">{{ $hasActiveRoom ? 'Buat Laporan' : 'Khusus Penghuni' }}</span>
+              <span class="tp-quick-arrow">{{ $hasActiveRoom ? '→' : '[Terkunci]' }}</span>
+            </div>
           </button>
 
           <button type="button" class="tp-quick-tile" id="btnOpenReceipts">
@@ -605,7 +1185,8 @@
             <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Lihat Kuitansi</span><span class="tp-quick-arrow">→</span></div>
           </button>
 
-          <button type="button" class="tp-quick-tile" id="btnOpenRoomTransfer">
+          <button type="button" class="tp-quick-tile {{ !$hasActiveRoom ? 'tp-quick-locked' : '' }}" id="btnOpenRoomTransfer"
+                  data-has-active-room="{{ $hasActiveRoom ? '1' : '0' }}">
             <div class="tp-quick-ico blue">
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
                 <path d="M16 3h5v5"/>
@@ -616,10 +1197,24 @@
               </svg>
             </div>
             <div>
-              <div class="tp-quick-ttl">Pindah Kamar</div>
-              <div class="tp-quick-desc">Ajukan perpindahan unit kamar atau pindah lintas cabang kos</div>
+              <div class="tp-quick-ttl" style="display: flex; align-items: center; gap: 6px;">
+                <span>Pindah Kamar</span>
+                @if(!$hasActiveRoom)
+                  <span class="tp-pill-locked">Terkunci</span>
+                @endif
+              </div>
+              <div class="tp-quick-desc">
+                @if($hasActiveRoom)
+                  Ajukan perpindahan unit kamar atau pindah lintas cabang kos
+                @else
+                  Khusus customer yang terdaftar aktif di unit kamar
+                @endif
+              </div>
             </div>
-            <div class="tp-quick-footer"><span class="tp-quick-cta-lbl">Ajukan Pindah</span><span class="tp-quick-arrow">→</span></div>
+            <div class="tp-quick-footer">
+              <span class="tp-quick-cta-lbl">{{ $hasActiveRoom ? 'Ajukan Pindah' : 'Khusus Penghuni' }}</span>
+              <span class="tp-quick-arrow">{{ $hasActiveRoom ? '→' : '[Terkunci]' }}</span>
+            </div>
           </button>
 
           <button type="button" class="tp-quick-tile" onclick="document.getElementById('modalRules')?.classList.add('open')">
@@ -722,6 +1317,18 @@
         <div id="mCustomExistingNotes" style="margin-top: 4px; font-size: 0.78rem; color: #64748b; font-style: italic;"></div>
       </div>
 
+      <!-- Notice jika kamar sudah terisi / disewa orang lain -->
+      <div id="mCustomOccupiedNotice" style="display: none; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 16px; padding: 20px; text-align: center;">
+        <div style="width: 46px; height: 46px; border-radius: 50%; background: #fee2e2; color: #e11d48; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <h4 style="font-size: 0.98rem; font-weight: 800; color: #9f1239; margin-bottom: 6px;">Kamar Sudah Terisi / Disewa</h4>
+        <p style="font-size: 0.84rem; color: #be123c; margin: 0 0 16px; line-height: 1.5; max-width: 480px; margin-left: auto; margin-right: auto;">
+          Unit kamar ini saat ini telah ditempati oleh penghuni lain atau sudah dibooking. Kamar tidak dapat dipesan kembali. Silakan pilih unit kamar yang berstatus <strong>Kosong / Tersedia</strong> di katalog.
+        </p>
+        <button type="button" class="btn-secondary" data-close-modal="modalRoomDetailCustom" style="padding: 7px 18px; font-size: 0.82rem; border-radius: 8px;">Tutup & Cari Kamar Tersedia</button>
+      </div>
+
       <!-- Custom Interior Request Form -->
       <form id="formCustomInterior" method="POST" action="">
         @csrf
@@ -782,7 +1389,13 @@
     <div class="modal-hdr">
       <div>
         <h3 class="modal-title">Lapor Keluhan / Kendala Fasilitas</h3>
-        <p class="modal-subtitle">Kamar #{{ $room->number ?? '102' }} — Pengelola akan segera merespons</p>
+        <p class="modal-subtitle">
+          @if($hasActiveRoom && $room)
+            Kamar #{{ $room->number }} — Pengelola akan segera merespons
+          @else
+            Akses Terbatas — Khusus Penghuni Aktif
+          @endif
+        </p>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalComplaint" aria-label="Tutup Modal">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -790,27 +1403,54 @@
         </svg>
       </button>
     </div>
-    <form action="{{ route('tenant.complaint.submit') }}" method="POST" id="formComplaint">
-      @csrf
-      <div class="modal-body">
-        <input type="hidden" name="priority" id="complaintPriority" value="Normal">
-        <div class="form-group" style="margin-bottom: 0;">
-          <label for="complaintIssue" class="form-label" style="font-weight: 700; margin-bottom: 8px; font-size: 0.92rem;">
-            Tuliskan Keluhan / Kendala Fasilitas Kamar Anda *
-          </label>
-          <textarea id="complaintIssue" name="issue_description" class="form-control" rows="6"
-            placeholder="Tuliskan kendala Anda secara lengkap di sini (contoh: AC tidak dingin sejak kemarin malam, lampu kamar mandi padam, atau kran air bocor)..."
-            required style="resize: vertical; font-size: 0.92rem; border-radius: 12px;"></textarea>
-          <div style="font-size: 0.76rem; color: #64748b; margin-top: 6px;">
-            Laporan Anda akan langsung diterima pengelola kos dan segera ditindaklanjuti.
-          </div>
+    @if(!$hasActiveRoom)
+      <div class="modal-body" style="padding: 24px; text-align: center;">
+        <div style="width: 54px; height: 54px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Akses Layanan Terbatas</h4>
+        <p style="font-size: 0.88rem; color: #64748b; line-height: 1.55; max-width: 420px; margin: 0 auto 20px;">
+          Fitur <strong>Lapor Keluhan & Servis</strong> hanya dapat digunakan oleh customer yang terdaftar aktif di unit kamar kos. Akun Anda saat ini belum dikaitkan dengan unit kamar aktif atau masa sewa telah selesai.
+        </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; text-align: left; font-size: 0.82rem; color: #475569; margin-bottom: 20px;">
+          <div style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">Informasi Akun Anda:</div>
+          <div>- Nama: <strong>{{ $user->name }}</strong></div>
+          <div>- Email: <strong>{{ $user->email }}</strong></div>
+          <div>- Status Kamar: <span style="color: #dc2626; font-weight: 700;">Belum terdaftar di kamar aktif</span></div>
+        </div>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="btn-secondary" data-close-modal="modalComplaint">Tutup</button>
+          <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20ingin%20menghubungkan%20akun%20penghuni%20saya%20({{ urlencode($user->email) }})" target="_blank" class="btn-primary" style="text-decoration: none;">
+            Hubungi Pengelola via WhatsApp
+          </a>
         </div>
       </div>
-      <div class="modal-ftr">
-        <button type="button" class="btn-secondary" data-close-modal="modalComplaint">Batal</button>
-        <button type="submit" class="btn-primary">Kirim Laporan ke Admin</button>
-      </div>
-    </form>
+    @else
+      <form action="{{ route('tenant.complaint.submit') }}" method="POST" id="formComplaint">
+        @csrf
+        <div class="modal-body">
+          <input type="hidden" name="priority" id="complaintPriority" value="Normal">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="complaintIssue" class="form-label" style="font-weight: 700; margin-bottom: 8px; font-size: 0.92rem;">
+              Tuliskan Keluhan / Kendala Fasilitas Kamar Anda *
+            </label>
+            <textarea id="complaintIssue" name="issue_description" class="form-control" rows="6"
+              placeholder="Tuliskan kendala Anda secara lengkap di sini (contoh: AC tidak dingin sejak kemarin malam, lampu kamar mandi padam, atau kran air bocor)..."
+              required style="resize: vertical; font-size: 0.92rem; border-radius: 12px;"></textarea>
+            <div style="font-size: 0.76rem; color: #64748b; margin-top: 6px;">
+              Laporan Anda akan langsung diterima pengelola kos dan segera ditindaklanjuti.
+            </div>
+          </div>
+        </div>
+        <div class="modal-ftr">
+          <button type="button" class="btn-secondary" data-close-modal="modalComplaint">Batal</button>
+          <button type="submit" class="btn-primary">Kirim Laporan ke Admin</button>
+        </div>
+      </form>
+    @endif
   </div>
 </div>
 
@@ -829,7 +1469,7 @@
         </div>
         <div>
           <h3 class="modal-title">Kuitansi Pembayaran & Riwayat</h3>
-          <p class="modal-subtitle">Bukti resmi transaksi sewa Kamar #{{ $room->number ?? '102' }} yang telah divalidasi sistem</p>
+          <p class="modal-subtitle">Bukti resmi transaksi sewa {{ $hasActiveRoom && $room ? ('Kamar #' . $room->number) : 'Hunian' }} yang telah divalidasi sistem</p>
         </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalReceipts" aria-label="Tutup Modal">
@@ -1096,105 +1736,126 @@
       </button>
     </div>
     <div class="modal-body" style="display: flex; flex-direction: column; gap: 14px; max-height: 70vh; overflow-y: auto;">
-      @php
-        $myBranchLoc = ($room->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'Lokasi 2' : 'Lokasi 1';
-        $activeWifis = $setting->active_wifi_list ?? [];
-        if (empty($activeWifis)) {
-            $activeWifis = [
-                ['name' => 'KOS_MAS_ROBI_1_5G', 'location' => 'Lokasi 1', 'modem' => 'Modem Fiber Utama (Lantai 1)', 'password' => 'kostnyaman2026', 'speed' => '100 Mbps Dual-Band'],
-                ['name' => 'ROBI_EXCLUSIVE_2_ULTRA5G', 'location' => 'Lokasi 2', 'modem' => 'Router Mesh WiFi 6 (Ringroad)', 'password' => 'ringroadvip2026', 'speed' => '300 Mbps Mesh WiFi 6'],
-            ];
-        }
-      @endphp
-
-      <div class="tp-wifi-status-card" style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 10px 14px; border-radius: 12px; flex-wrap: wrap; gap: 8px;">
-        <span class="tp-wifi-status-text" style="color: #166534; font-weight: 700; font-size: 0.8rem;">● Status Jaringan: Aktif & Stabil ({{ $myBranchLoc === 'Lokasi 2' ? $b2NamePortal : $b1NamePortal }})</span>
-        <span class="tp-badge green" style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.74rem; padding: 3px 8px; border-radius: 6px;">{{ $myBranchLoc === 'Lokasi 2' ? 'Dedicated 300 Mbps' : 'Fiber 100 Mbps' }}</span>
-      </div>
-
-      {{-- Switcher Lokasi WiFi di Portal Pelanggan --}}
-      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('all', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #0a5661; background: #0a5661; color: #fff; cursor: pointer;">Semua Cabang</button>
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 1', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">{{ $b1NamePortal }}</button>
-        <button type="button" class="tp-wf-filter-btn" onclick="filterPortalWifi('Lokasi 2', this)" style="flex: 1; padding: 7px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; border: 1.5px solid #cbd5e1; background: #f8fafc; color: #334155; cursor: pointer;">{{ $b2NamePortal }}</button>
-      </div>
-
-      <div style="display: flex; flex-direction: column; gap: 12px;" id="portalWifiCardList">
-        @foreach($activeWifis as $idx => $wf)
-          @php
-            $wfLoc = $wf['location'] ?? 'Lokasi 1';
-            $isWfLoc2 = $wfLoc === 'Lokasi 2';
-            $wfSpeed = $wf['speed'] ?? ($isWfLoc2 ? '300 Mbps Mesh WiFi 6' : '100 Mbps Dual-Band');
-          @endphp
-          <div class="portal-wf-card" data-location="{{ $wfLoc }}" style="background: #ffffff; border: 1.5px solid {{ $wfLoc === $myBranchLoc ? '#0d9488' : '#e2e8f0' }}; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="width: 36px; height: 36px; border-radius: 10px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; border: 1px solid {{ $isWfLoc2 ? '#5eead4' : '#86efac' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-                </div>
-                <div>
-                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    <span style="font-size: 0.66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }};">
-                      {{ $isWfLoc2 ? '' . $b2NamePortal : '' . $b1NamePortal }}
-                    </span>
-                    <span style="font-size: 0.66rem; font-weight: 700; color: #64748b;">• {{ $wfSpeed }}</span>
-                  </div>
-                  <div style="font-size: 0.96rem; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-top: 2px;">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
-                </div>
-              </div>
-              <button type="button" class="tp-btn-copy" onclick="copyText('{{ $wf['name'] ?? '' }}', this)" title="Salin Nama WiFi" style="background: #f8fafc; border: 1.5px solid #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
-                Salin SSID
-              </button>
-            </div>
-
-            {{-- Info Modem --}}
-            <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: {{ !empty($wf['password']) ? '8px' : '0' }};">
-              <div style="font-size: 0.76rem; color: #475569;">
-                <strong style="color: #1e293b;">Modem:</strong> {{ $wf['modem'] ?? 'Modem Utama Kos' }}
-              </div>
-            </div>
-
-            @if(!empty($wf['password']))
-              {{-- Info Password (Opsional jika ada) --}}
-              <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 6px; border-top: 1px dashed #e2e8f0; font-size: 0.78rem;">
-                <div style="color: #64748b;">
-                  <span>Sandi: </span>
-                  <code style="font-family: monospace; font-size: 0.84rem; font-weight: 700; color: #0f172a; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{{ $wf['password'] }}</code>
-                </div>
-                <button type="button" onclick="copyText('{{ $wf['password'] }}', this)" style="background: transparent; border: none; color: #0a5661; font-weight: 700; font-size: 0.74rem; cursor: pointer; padding: 2px 6px; border-radius: 4px;">
-                  Salin Sandi
-                </button>
-              </div>
-            @endif
+      @if(!$hasActiveRoom || !$room)
+        <div style="text-align: center; padding: 36px 20px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 16px;">
+          <div style="width: 52px; height: 52px; border-radius: 50%; background: #e2e8f0; color: #475569; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
           </div>
-        @endforeach
-      </div>
+          <h4 style="font-size: 1.05rem; font-weight: 800; color: #1e293b; margin-bottom: 6px;">Akses WiFi Terkunci</h4>
+          <p style="font-size: 0.84rem; color: #64748b; line-height: 1.5; margin: 0 auto; max-width: 360px;">
+            Informasi nama koneksi dan kata sandi WiFi kos hanya dapat diakses oleh penghuni yang terdaftar aktif menempati unit kamar.
+          </p>
+        </div>
+      @else
+        @php
+          $tenantBranchLoc = ($room->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'Lokasi 2' : 'Lokasi 1';
+          $isWfLoc2 = $tenantBranchLoc === 'Lokasi 2';
+          $currentBranchName = $isWfLoc2 ? $b2NamePortal : $b1NamePortal;
+          $branchWifis = $setting->getActiveWifiForLocation($tenantBranchLoc);
+        @endphp
 
-      <script>
-        function filterPortalWifi(loc, btn) {
-          document.querySelectorAll('.tp-wf-filter-btn').forEach(function(b) {
-            b.style.background = '#f8fafc';
-            b.style.color = '#334155';
-            b.style.borderColor = '#cbd5e1';
-          });
-          if (btn) {
-            btn.style.background = '#0a5661';
-            btn.style.color = '#ffffff';
-            btn.style.borderColor = '#0a5661';
-          }
-          document.querySelectorAll('#portalWifiCardList .portal-wf-card').forEach(function(c) {
-            var cLoc = c.getAttribute('data-location') || 'Lokasi 1';
-            c.style.display = (loc === 'all' || cLoc === loc) ? 'block' : 'none';
-          });
-        }
-      </script>
+        <div class="tp-wifi-status-card" style="display: flex; justify-content: space-between; align-items: center; background: #f0fdf4; border: 1.5px solid #bbf7d0; padding: 12px 16px; border-radius: 14px; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="width: 8px; height: 8px; border-radius: 50%; background: #16a34a; display: inline-block;"></span>
+            <span class="tp-wifi-status-text" style="color: #166534; font-weight: 800; font-size: 0.82rem;">WiFi Cabang: {{ $currentBranchName }} (Kamar #{{ $room->number }})</span>
+          </div>
+          <span class="tp-badge green" style="background: #dcfce7; color: #15803d; font-weight: 800; font-size: 0.74rem; padding: 3px 10px; border-radius: 999px;">{{ count($branchWifis) }} Jaringan Tersedia</span>
+        </div>
+
+        @if(empty($branchWifis))
+          <div style="text-align: center; padding: 30px 18px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 14px;">
+            <div style="color: #64748b; font-size: 0.9rem; font-weight: 700;">Tidak Ada Jaringan Ditayangkan</div>
+            <p style="color: #94a3b8; font-size: 0.8rem; margin: 6px 0 0;">Seluruh jaringan WiFi untuk cabang {{ $currentBranchName }} saat ini sedang dinonaktifkan atau disembunyikan oleh pengelola.</p>
+          </div>
+        @else
+          <div style="display: flex; flex-direction: column; gap: 12px;" id="portalWifiCardList">
+            @foreach($branchWifis as $idx => $wf)
+              @php
+                $wfSpeed = $wf['speed'] ?? ($isWfLoc2 ? '300 Mbps Mesh WiFi 6' : '100 Mbps Dual-Band');
+                $cardId = 'wf_portal_' . $idx;
+              @endphp
+              <div class="portal-wf-card" style="background: #ffffff; border: 1.5px solid #0d9488; border-radius: 14px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 38px; height: 38px; border-radius: 10px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; border: 1px solid {{ $isWfLoc2 ? '#5eead4' : '#86efac' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }}; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                    </div>
+                    <div>
+                      <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                        <span style="font-size: 0.66rem; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: {{ $isWfLoc2 ? '#ccfbf1' : '#dcfce7' }}; color: {{ $isWfLoc2 ? '#0a5661' : '#059669' }};">
+                          {{ $currentBranchName }}
+                        </span>
+                        <span style="font-size: 0.66rem; font-weight: 700; color: #64748b;">• {{ $wfSpeed }}</span>
+                      </div>
+                      <div style="font-size: 0.96rem; font-weight: 800; color: #0f172a; letter-spacing: -0.2px; margin-top: 2px;">{{ $wf['name'] ?? 'KOS_MAS_ROBI' }}</div>
+                    </div>
+                  </div>
+                  <button type="button" class="tp-btn-copy" onclick="copyText('{{ $wf['name'] ?? '' }}', this)" title="Salin SSID" style="background: #f8fafc; border: 1.5px solid #cbd5e1; padding: 5px 10px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                    Salin SSID
+                  </button>
+                </div>
+
+                {{-- Info Modem --}}
+                <div style="background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 7px 10px; display: flex; align-items: center; gap: 8px; margin-bottom: {{ !empty($wf['password']) ? '8px' : '0' }};">
+                  <div style="font-size: 0.76rem; color: #475569;">
+                    <strong style="color: #1e293b;">Modem:</strong> {{ $wf['modem'] ?? 'Modem Utama Kos' }}
+                  </div>
+                </div>
+
+                @if(!empty($wf['password']))
+                  {{-- Info Password dengan Fitur Tampilkan / Sembunyikan Sandi --}}
+                  <div id="{{ $cardId }}" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 0.78rem; gap: 8px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="color: #64748b; font-size: 0.74rem; font-weight: 700;">Sandi:</span>
+                      <span class="portal-wf-pass-masked" style="font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #0f172a; letter-spacing: 2px;">••••••••</span>
+                      <code class="portal-wf-pass-plain" style="display: none; font-family: monospace; font-size: 0.85rem; font-weight: 800; color: #0a5661; background: #ccfbf1; padding: 2px 8px; border-radius: 4px;">{{ $wf['password'] }}</code>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      <button type="button" class="btn-toggle-portal-pass" onclick="togglePortalWifiPass('{{ $cardId }}', this)" style="background: #ffffff; border: 1px solid #cbd5e1; color: #0a5661; font-weight: 700; font-size: 0.72rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;">
+                        Tampilkan
+                      </button>
+                      <button type="button" onclick="copyText('{{ $wf['password'] }}', this)" style="background: #0a5661; border: 1px solid #0a5661; color: #ffffff; font-weight: 700; font-size: 0.72rem; cursor: pointer; padding: 4px 10px; border-radius: 6px;">
+                        Salin Sandi
+                      </button>
+                    </div>
+                  </div>
+                @endif
+              </div>
+            @endforeach
+          </div>
+        @endif
+      @endif
 
       <div style="font-size: 0.76rem; color: #64748b; line-height: 1.5; background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0;">
-        <strong>Tips Koneksi:</strong> Hubungkan perangkat Anda ke WiFi modem terdekat di lantai atau area Anda untuk mendapatkan sinyal terbaik dan terkuat.
+        <strong>Tips Koneksi:</strong> Hubungkan perangkat Anda ke WiFi modem terdekat di lantai Anda untuk mendapatkan sinyal terbaik dan terkuat.
       </div>
     </div>
     <div class="modal-ftr">
       <button type="button" class="btn-primary" data-close-modal="modalWifi" style="width: 100%;">Tutup</button>
+    </div>
+
+    <script>
+      function togglePortalWifiPass(containerId, btn) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var masked = container.querySelector('.portal-wf-pass-masked');
+        var plain = container.querySelector('.portal-wf-pass-plain');
+        if (plain.style.display === 'none' || !plain.style.display) {
+          plain.style.display = 'inline-block';
+          masked.style.display = 'none';
+          btn.textContent = 'Sembunyikan';
+          btn.style.background = '#e2e8f0';
+        } else {
+          plain.style.display = 'none';
+          masked.style.display = 'inline-block';
+          btn.textContent = 'Tampilkan';
+          btn.style.background = '#ffffff';
+        }
+      }
+    </script>
     </div>
   </div>
 </div>
@@ -1266,7 +1927,13 @@
         </div>
         <div>
           <h3 class="modal-title">Pengajuan Pindah Kamar</h3>
-          <p class="modal-subtitle">Pilih kamar tujuan dan ajukan permohonan pindah unit ke pengelola</p>
+          <p class="modal-subtitle">
+            @if($hasActiveRoom && $room)
+              Pilih kamar tujuan dan ajukan permohonan pindah unit ke pengelola
+            @else
+              Akses Terbatas — Khusus Penghuni Aktif
+            @endif
+          </p>
         </div>
       </div>
       <button type="button" class="modal-close" data-close-modal="modalRoomTransfer" aria-label="Tutup Modal">
@@ -1275,84 +1942,144 @@
         </svg>
       </button>
     </div>
-    <form action="{{ route('tenant.room.transfer') }}" method="POST">
-      @csrf
-      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
-        
-        {{-- Kamar Saat Ini --}}
-        <div style="background: var(--tp-blue-soft); border: 1.5px solid var(--tp-blue-border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
-          <div>
-            <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase;">Kamar Anda Saat Ini:</div>
-            <div style="font-size: 1rem; font-weight: 800; color: #1e3a8a;">Kamar #{{ $room->number ?? '102' }} — {{ $room->type ?? 'Deluxe AC' }}</div>
-            <div style="font-size: 0.78rem; color: #3b82f6;">Lantai {{ $room->floor ?? '1' }} • Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</div>
-          </div>
-          <span class="tp-badge green">Aktif</span>
+    @if(!$hasActiveRoom)
+      <div class="modal-body" style="padding: 24px; text-align: center;">
+        <div style="width: 54px; height: 54px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
         </div>
-
-        {{-- Dropdown Pilih Kamar Tujuan --}}
-        <div class="form-group">
-          <label for="transferTargetRoom" class="form-label">Pilih Kamar Tujuan yang Diinginkan *</label>
-          <select name="target_room_id" id="transferTargetRoom" class="form-control" required style="font-weight: 600;">
-            <option value="">-- Pilih Kamar Tujuan --</option>
-            @foreach($allRooms as $r)
-              @if($r->id != ($room->id ?? 0))
-                <option value="{{ $r->id }}">
-                  [{{ ($r->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'Cabang 2 - Ringroad' : 'Cabang 1 - Kampus' }}] Kamar #{{ $r->number }} (Lt {{ $r->floor }}) — {{ $r->type }} — Rp {{ number_format($r->price, 0, ',', '.') }}/bln {{ $r->status === 'available' ? '【Tersedia/Kosong】' : '【' . ucfirst($r->status) . '】' }}
-                </option>
-              @endif
-            @endforeach
-          </select>
-          <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;">Pilih unit kamar yang masih kosong atau ingin Anda pesan untuk periode selanjutnya.</div>
+        <h4 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Akses Pindah Kamar Terkunci</h4>
+        <p style="font-size: 0.88rem; color: #64748b; line-height: 1.55; max-width: 440px; margin: 0 auto 20px;">
+          Pengajuan <strong>Pindah Kamar</strong> hanya dapat diproses untuk customer yang sedang menempati unit kamar kos secara aktif. Akun Anda saat ini belum terdaftar di unit kamar kos atau masa sewa telah selesai.
+        </p>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; text-align: left; font-size: 0.82rem; color: #475569; margin-bottom: 20px;">
+          <div style="font-weight: 700; color: #1e293b; margin-bottom: 4px;">Informasi Status Akun:</div>
+          <div>- Nama: <strong>{{ $user->name }}</strong></div>
+          <div>- Email: <strong>{{ $user->email }}</strong></div>
+          <div>- Status Kamar: <span style="color: #dc2626; font-weight: 700;">Belum terdaftar di unit kamar aktif</span></div>
+          <div style="margin-top: 6px; color: #64748b;">Untuk menyewa kamar baru, Anda dapat melihat pilihan kamar di katalog atau menghubungi pengelola.</div>
         </div>
-
-        {{-- Tanggal Rencana Pindah --}}
-        <div class="form-group">
-          <label for="transferPreferredDate" class="form-label">Rencana Tanggal Pindah *</label>
-          <input type="date" name="preferred_date" id="transferPreferredDate" class="form-control" value="{{ date('Y-m-d', strtotime('+7 days')) }}" required>
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button type="button" class="btn-secondary" data-close-modal="modalRoomTransfer">Tutup</button>
+          <a href="https://wa.me/{{ $setting->owner_phone ?? '6281234567890' }}?text=Halo%20Admin%20Kos%20Mas%20Robi,%20saya%20tertarik%20untuk%20menyewa%20kamar%20kos" target="_blank" class="btn-primary" style="text-decoration: none;">
+            Tanya Sewa Kamar via WhatsApp
+          </a>
         </div>
-
-        {{-- Alasan Pindah Kamar --}}
-        <div class="form-group">
-          <label for="transferReason" class="form-label">Alasan Pengajuan Pindah Kamar *</label>
-          <textarea name="reason" id="transferReason" class="form-control" rows="3" placeholder="Contoh: Ingin pindah ke lantai 1 karena lebih dekat parkir / ingin upgrade ke tipe kamar yang lebih luas..." required></textarea>
-        </div>
-
-        {{-- Riwayat Pengajuan Sebelumnya (Jika Ada) --}}
-        @if(isset($myTransfers) && count($myTransfers) > 0)
-          <div style="border-top: 1px solid var(--tp-border); padding-top: 12px;">
-            <div style="font-size: 0.82rem; font-weight: 700; color: var(--tp-text-primary); margin-bottom: 8px;">Riwayat Pengajuan Anda:</div>
-            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;">
-              @foreach($myTransfers as $tr)
-                <div style="background: var(--tp-bg-surface); border: 1px solid var(--tp-border); border-radius: 10px; padding: 10px 12px; font-size: 0.78rem;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-weight: 700;">Ke Kamar #{{ $tr->targetRoom?->number ?? '-' }} ({{ $tr->targetRoom?->type ?? '-' }})</span>
-                    @if($tr->status === 'pending')
-                      <span class="tp-transfer-status-badge pending">Menunggu Peninjauan</span>
-                    @elseif($tr->status === 'approved')
-                      <span class="tp-transfer-status-badge approved">Disetujui Pengelola</span>
-                    @else
-                      <span class="tp-transfer-status-badge rejected">Ditolak</span>
-                    @endif
-                  </div>
-                  <div style="color: var(--tp-text-secondary); margin-bottom: 2px;">Alasan: {{ $tr->reason }}</div>
-                  @if($tr->admin_note)
-                    <div style="font-weight: 600; color: #1d4ed8; margin-top: 4px;">Catatan Pengelola: {{ $tr->admin_note }}</div>
-                  @endif
-                  <div style="font-size: 0.7rem; color: var(--tp-text-muted); margin-top: 4px;">{{ $tr->created_at->format('d M Y, H:i') }} WIB</div>
-                </div>
-              @endforeach
+      </div>
+    @else
+      <form action="{{ route('tenant.room.transfer') }}" method="POST">
+        @csrf
+        <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px;">
+          
+          {{-- Kamar Saat Ini --}}
+          <div style="background: var(--tp-blue-soft); border: 1.5px solid var(--tp-blue-border); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase;">Kamar Anda Saat Ini:</div>
+              <div style="font-size: 1rem; font-weight: 800; color: #1e3a8a;">Kamar #{{ $room->number }} — {{ $room->type ?? 'Deluxe AC' }}</div>
+              <div style="font-size: 0.78rem; color: #3b82f6;">Lantai {{ $room->floor ?? '1' }} • Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</div>
             </div>
+            <span class="tp-badge green">Aktif</span>
           </div>
-        @endif
 
-      </div>
-      <div class="modal-ftr">
-        <button type="button" class="btn-secondary" data-close-modal="modalRoomTransfer">Batal</button>
-        <button type="submit" class="btn-primary" style="background: #0d9488; border-color: #0d9488;">
-          Kirim Pengajuan Pindah
-        </button>
-      </div>
-    </form>
+          @php
+            $availableTransferRooms = $allRooms->filter(function($r) use ($room) {
+              if ($room && $r->id == $room->id) return false;
+              // Hanya kamar yang berstatus available
+              if ($r->status !== 'available') return false;
+              // Tidak memiliki tenant aktif
+              if ($r->activeTenant) return false;
+              // Belum dibooking oleh orang lain
+              if (!empty($r->booked_by_user_id)) return false;
+              return true;
+            });
+          @endphp
+
+          @if($availableTransferRooms->count() > 0)
+            {{-- Dropdown Pilih Kamar Tujuan (Hanya Kamar Kosong & Belum Disewa/Dibooking) --}}
+            <div class="form-group">
+              <label for="transferTargetRoom" class="form-label">Pilih Kamar Tujuan yang Kosong & Tersedia *</label>
+              <select name="target_room_id" id="transferTargetRoom" class="form-control" required style="font-weight: 600;">
+                <option value="">-- Pilih Kamar Kosong ({{ $availableTransferRooms->count() }} Pilihan Tersedia) --</option>
+                @foreach($availableTransferRooms as $r)
+                  <option value="{{ $r->id }}">
+                    [{{ ($r->location ?? 'Lokasi 1') === 'Lokasi 2' ? 'Cabang 2 - Ringroad' : 'Cabang 1 - Kampus' }}] Kamar #{{ $r->number }} (Lt {{ $r->floor }}) — {{ $r->type }} — Rp {{ number_format($r->price, 0, ',', '.') }}/bln
+                  </option>
+                @endforeach
+              </select>
+              <div style="font-size: 0.72rem; color: #0f766e; margin-top: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span>Hanya kamar yang berstatus kosong, belum disewa, dan belum dibooking yang dapat dipilih.</span>
+              </div>
+            </div>
+
+            {{-- Tanggal Rencana Pindah --}}
+            <div class="form-group">
+              <label for="transferPreferredDate" class="form-label">Rencana Tanggal Pindah *</label>
+              <input type="date" name="preferred_date" id="transferPreferredDate" class="form-control" value="{{ date('Y-m-d', strtotime('+7 days')) }}" required>
+            </div>
+
+            {{-- Alasan Pindah Kamar --}}
+            <div class="form-group">
+              <label for="transferReason" class="form-label">Alasan Pengajuan Pindah Kamar *</label>
+              <textarea name="reason" id="transferReason" class="form-control" rows="3" placeholder="Contoh: Ingin pindah ke lantai 1 karena lebih dekat parkir / ingin upgrade ke tipe kamar yang lebih luas..." required></textarea>
+            </div>
+          @else
+            <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 14px; padding: 18px; text-align: center; margin: 4px 0 10px;">
+              <div style="width: 44px; height: 44px; border-radius: 50%; background: #fee2e2; color: #e11d48; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              </div>
+              <h4 style="font-size: 0.95rem; font-weight: 800; color: #9f1239; margin-bottom: 6px;">Tidak Ada Kamar Kosong yang Tersedia</h4>
+              <p style="font-size: 0.82rem; color: #be123c; margin: 0; line-height: 1.5;">
+                Saat ini semua unit kamar lainnya sedang terisi penuh atau sudah disewa oleh orang lain. Pindah kamar hanya dapat diajukan ke kamar kosong yang tersedia. Silakan cek berkala atau hubungi pengelola.
+              </p>
+            </div>
+          @endif
+
+          {{-- Riwayat Pengajuan Sebelumnya (Jika Ada) --}}
+          @if(isset($myTransfers) && count($myTransfers) > 0)
+            <div style="border-top: 1px solid var(--tp-border); padding-top: 12px;">
+              <div style="font-size: 0.82rem; font-weight: 700; color: var(--tp-text-primary); margin-bottom: 8px;">Riwayat Pengajuan Anda:</div>
+              <div style="display: flex; flex-direction: column; gap: 8px; max-height: 160px; overflow-y: auto;">
+                @foreach($myTransfers as $tr)
+                  <div style="background: var(--tp-bg-surface); border: 1px solid var(--tp-border); border-radius: 10px; padding: 10px 12px; font-size: 0.78rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <span style="font-weight: 700;">Ke Kamar #{{ $tr->targetRoom?->number ?? '-' }} ({{ $tr->targetRoom?->type ?? '-' }})</span>
+                      @if($tr->status === 'pending')
+                        <span class="tp-transfer-status-badge pending">Menunggu Peninjauan</span>
+                      @elseif($tr->status === 'approved')
+                        <span class="tp-transfer-status-badge approved">Disetujui Pengelola</span>
+                      @else
+                        <span class="tp-transfer-status-badge rejected">Ditolak</span>
+                      @endif
+                    </div>
+                    <div style="color: var(--tp-text-secondary); margin-bottom: 2px;">Alasan: {{ $tr->reason }}</div>
+                    @if($tr->admin_note)
+                      <div style="font-weight: 600; color: #1d4ed8; margin-top: 4px;">Catatan Pengelola: {{ $tr->admin_note }}</div>
+                    @endif
+                    <div style="font-size: 0.7rem; color: var(--tp-text-muted); margin-top: 4px;">{{ $tr->created_at->format('d M Y, H:i') }} WIB</div>
+                  </div>
+                @endforeach
+              </div>
+            </div>
+          @endif
+
+        </div>
+        <div class="modal-ftr">
+          <button type="button" class="btn-secondary" data-close-modal="modalRoomTransfer">Batal</button>
+          @if($availableTransferRooms->count() > 0)
+            <button type="submit" class="btn-primary" style="background: #0d9488; border-color: #0d9488;">
+              Kirim Pengajuan Pindah
+            </button>
+          @else
+            <button type="button" class="btn-secondary" disabled style="opacity: 0.6; cursor: not-allowed; background: #e2e8f0; color: #64748b; border-color: #cbd5e1;">
+              Kamar Kosong Belum Tersedia
+            </button>
+          @endif
+        </div>
+      </form>
+    @endif
   </div>
 </div>
 
@@ -1453,15 +2180,67 @@
               <span class="form-label-hint">Nomor aktif pengelola</span>
             </label>
             <input type="tel" id="profilePhone" name="phone" class="form-control"
-                   value="{{ old('phone', $user->phone) }}" required placeholder="Contoh: 081234567890">
+                   value="{{ old('phone', ($user->phone && $user->phone !== '-') ? $user->phone : '') }}" required placeholder="Contoh: 081234567890">
+          </div>
+
+          {{-- 6. No. KTP / SIM / KTM / KTA --}}
+          <div class="form-group">
+            <label for="profileIdCard" class="form-label">
+              <span>No. KTP / SIM / KTM / KTA</span>
+              <span class="form-label-hint">Nomor identitas diri</span>
+            </label>
+            <input type="text" id="profileIdCard" name="id_card" class="form-control"
+                   value="{{ old('id_card', $tenant?->id_card) }}" placeholder="33xxxxxxxxxxxxxx / Nomor Identitas">
+          </div>
+
+          {{-- Foto KTP / SIM / KTM / KTA --}}
+          <div class="form-group tp-grid-col-2">
+            <label class="form-label" for="profileIdCardPhoto">
+              <span>Foto KTP / SIM / KTM / KTA (Kartu Identitas) *</span>
+              <span class="form-label-hint">Wajib melampirkan foto kartu identitas aktif</span>
+            </label>
+            @php
+              $currentIdCardPhoto = $user->id_card_photo ?: ($tenant?->id_card_photo ?? null);
+            @endphp
+            <div style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+              @if($currentIdCardPhoto)
+                <div style="position: relative;">
+                  <a href="{{ asset($currentIdCardPhoto) }}" target="_blank" title="Klik untuk memperbesar foto kartu identitas">
+                    <img src="{{ asset($currentIdCardPhoto) }}" alt="Foto Identitas" style="width: 105px; height: 70px; object-fit: cover; border-radius: 10px; border: 1.5px solid #0d9488; box-shadow: 0 4px 10px rgba(0,0,0,0.08);">
+                  </a>
+                  <span style="display: block; font-size: 0.68rem; font-weight: 700; color: #0d9488; margin-top: 4px; text-align: center;">Terlampir</span>
+                </div>
+              @endif
+              <div style="flex: 1; min-width: 220px;">
+                <input type="file" id="profileIdCardPhoto" name="id_card_photo" class="form-control" accept="image/jpeg,image/png,image/jpg,image/webp">
+                <span style="font-size: 0.72rem; color: #64748b; margin-top: 4px; display: block;">
+                  {{ $currentIdCardPhoto ? 'Pilih file baru jika ingin mengganti foto kartu identitas Anda.' : 'Pilih foto fisik KTP, SIM, KTM Mahasiswa, atau KTA Dinas (Maks. 5 MB).' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {{-- 7. Kontak Darurat (Ortu / Wali / Saudara) --}}
+          <div class="form-group tp-grid-col-2">
+            <label for="profileEmergencyContact" class="form-label">
+              <span>Kontak Darurat (Ortu / Wali / Saudara) *</span>
+              <span class="form-label-hint">Nama & No. HP keluarga</span>
+            </label>
+            <input type="text" id="profileEmergencyContact" name="emergency_contact" class="form-control"
+                   value="{{ old('emergency_contact', $tenant?->emergency_contact) }}" placeholder="Contoh: Bpk. Joko (0813xxxxxxxx) - Orang Tua">
           </div>
 
           {{-- Info Hunian Saat Ini (Read-only badge info) --}}
           <div class="tp-profile-room-box tp-grid-col-2">
             <div class="tp-profile-room-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
             <div class="tp-profile-room-details">
-              <strong>Kamar Saat Ini: #{{ $room->number ?? '102' }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2 (Ringroad)' : 'Cabang 1 (Kampus)' }}</strong>
-              <p>{{ $tenantBranch['name'] ?? (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
+              @if($hasActiveRoom && $room)
+                <strong>Kamar Saat Ini: #{{ $room->number }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2 (Ringroad)' : 'Cabang 1 (Kampus)' }}</strong>
+                <p>{{ $tenantBranch['name'] ?? (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
+              @else
+                <strong>Status Hunian: Belum Terdaftar di Kamar Aktif / Selesai Sewa</strong>
+                <p>Akun Anda belum dikaitkan dengan unit hunian aktif oleh Pengelola. Hubungi admin untuk pendaftaran atau aktivasi sewa kamar.</p>
+              @endif
             </div>
           </div>
 
@@ -1614,6 +2393,7 @@
    SMART LIVING — Portal JS (AJAX + Animations + Auto-slide)
    ============================================================ */
 
+window.currentUserId = {{ (int) $user->id }};
 window.catalogRoomsData = @json($allRooms);
 
 function handleRoomCardClick(roomId) {
@@ -1707,11 +2487,16 @@ document.addEventListener('click', function(e) {
     });
   });
 
-  // Close on data-close-modal buttons
-  document.querySelectorAll('[data-close-modal]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.getElementById(btn.dataset.closeModal)?.classList.remove('open');
-    });
+  // Close on data-close-modal buttons (direct and delegated for resilience)
+  document.addEventListener('click', function(e) {
+    var closeBtn = e.target.closest('[data-close-modal]');
+    if (closeBtn) {
+      var modalId = closeBtn.getAttribute('data-close-modal') || closeBtn.dataset.closeModal;
+      if (modalId) {
+        var m = document.getElementById(modalId);
+        if (m) m.classList.remove('open');
+      }
+    }
   });
 
   // ESC key closes modal
@@ -1726,7 +2511,7 @@ document.addEventListener('click', function(e) {
     var bgSlides  = document.querySelectorAll('.tp-hero-bg-slide');
     var dots      = document.querySelectorAll('.tp-overlay-dot');
     var badgeText = document.getElementById('heroSlideBadgeText');
-    var roomNum   = '{{ $room->number ?? "102" }}';
+    var roomNum   = '{{ $hasActiveRoom && $room ? $room->number : "" }}';
     var slideLabels = [
       'Foto 1/3: Kamar Tidur Utama',
       'Foto 2/3: Meja Kerja & AC',
@@ -1741,7 +2526,7 @@ document.addEventListener('click', function(e) {
       bgSlides.forEach(function(el, idx) { el.classList.toggle('active', idx === currentIndex); });
       dots.forEach(function(el, idx)     { el.classList.toggle('active', idx === currentIndex); });
       if (badgeText) {
-        badgeText.textContent = slideLabels[currentIndex] || ('Foto ' + (currentIndex+1) + '/' + totalSlides + ': Kamar #' + roomNum);
+        badgeText.textContent = slideLabels[currentIndex] || ('Foto ' + (currentIndex+1) + '/' + totalSlides + (roomNum ? (': Kamar #' + roomNum) : ''));
       }
     }
 
@@ -2383,13 +3168,27 @@ function openRoomCustomModal(room) {
   updateModalRoomSlideUI(room.number);
   startModalRoomAutoSlide();
 
+  var currentUserId = window.currentUserId || {{ (int) $user->id }};
+  var isOccupiedRoom = (room.status !== 'available' || (room.booked_by_user_id && room.booked_by_user_id != currentUserId) || room.active_tenant);
+
   var statusTag = document.getElementById('mCustomRoomStatusTag');
   if (statusTag) {
-    if (room.status === 'available') {
-      statusTag.innerHTML = '<span class="tp-pill paid" style="font-size:0.75rem;padding:4px 12px;">Tersedia (Bisa Booking)</span>';
+    if (!isOccupiedRoom) {
+      statusTag.innerHTML = '<span class="tp-pill paid" style="font-size:0.75rem;padding:4px 12px;background:#10b981;color:#ffffff;font-weight:700;">Tersedia (Bisa Booking)</span>';
     } else {
-      statusTag.innerHTML = '<span class="tp-pill" style="font-size:0.75rem;padding:4px 12px;background:#64748b;color:#ffffff;">Sudah Disewa</span>';
+      statusTag.innerHTML = '<span class="tp-pill" style="font-size:0.75rem;padding:4px 12px;background:#ef4444;color:#ffffff;font-weight:700;">Sudah Terisi (Tidak Bisa Dipesan)</span>';
     }
+  }
+
+  // Tampilkan form pemesanan hanya jika kamar kosong & belum disewa
+  var formCustomInterior = document.getElementById('formCustomInterior');
+  var occupiedNotice = document.getElementById('mCustomOccupiedNotice');
+  if (isOccupiedRoom) {
+    if (formCustomInterior) formCustomInterior.style.display = 'none';
+    if (occupiedNotice) occupiedNotice.style.display = 'block';
+  } else {
+    if (formCustomInterior) formCustomInterior.style.display = 'block';
+    if (occupiedNotice) occupiedNotice.style.display = 'none';
   }
 
   // Facilities
@@ -2908,6 +3707,301 @@ function copyText(text, btnElement) {
     prompt('Salin teks berikut:', text);
   }
 }
+
+// =========================================================================
+// WHITE BACKGROUND SNAKE TRACER LOADING (LOGIN -> PENGHUNI KOST)
+// =========================================================================
+(function() {
+  var overlay = document.getElementById('f3dTenantPortalOverlay');
+  var bar = document.getElementById('f3dTenantProgressBar');
+  var gHouse = document.getElementById('f3dTenantGreenHouse');
+  var sHouse = document.getElementById('f3dTenantSnakeHouse');
+  var gDoor = document.getElementById('f3dTenantGreenDoor');
+  var sDoor = document.getElementById('f3dTenantSnakeDoor');
+  var portalTimer = null;
+  var animRaf = null;
+
+  function setSnakePath(baseEl, snakeEl, progress, snakeLen) {
+    if (!baseEl || !snakeEl) return;
+    var total = 1000;
+    snakeLen = snakeLen || 160;
+    var head = progress * total;
+    var tail = Math.max(0, head - snakeLen);
+
+    if (progress <= 0) {
+      baseEl.style.strokeDasharray = '0 1000';
+      baseEl.style.strokeDashoffset = '0';
+      snakeEl.style.strokeDasharray = '0 1000';
+      snakeEl.style.strokeDashoffset = '0';
+      snakeEl.style.opacity = '0';
+      return;
+    }
+
+    baseEl.style.strokeDasharray = head.toFixed(2) + ' ' + total;
+    baseEl.style.strokeDashoffset = '0';
+
+    if (progress >= 1) {
+      snakeEl.style.opacity = '0';
+    } else {
+      snakeEl.style.opacity = '1';
+      var bodyLen = head - tail;
+      snakeEl.style.strokeDasharray = '0 ' + tail.toFixed(2) + ' ' + bodyLen.toFixed(2) + ' ' + total;
+      snakeEl.style.strokeDashoffset = '0';
+    }
+  }
+
+  window.dismissTenant3dPortal = function(isManualSkip) {
+    if (portalTimer) clearTimeout(portalTimer);
+    if (animRaf) cancelAnimationFrame(animRaf);
+    if (!overlay) return;
+
+    if (isManualSkip) {
+      setSnakePath(gHouse, sHouse, 1);
+      setSnakePath(gDoor, sDoor, 1);
+      if (bar) bar.style.width = '100%';
+    }
+
+    overlay.classList.add('portal-exit');
+    document.body.classList.remove('f3d-tenant-active');
+    document.body.classList.add('f3d-tenant-ready');
+
+    var delay = isManualSkip ? 250 : 650;
+    setTimeout(function() {
+      overlay.style.display = 'none';
+    }, delay);
+
+    try {
+      sessionStorage.removeItem('f3d_from_login');
+      sessionStorage.removeItem('f3d_from_login_portal');
+    } catch(e) {}
+  };
+
+  function startSnakeLoadingAnimation() {
+    setSnakePath(gHouse, sHouse, 0);
+    setSnakePath(gDoor, sDoor, 0);
+    if (bar) bar.style.width = '0%';
+
+    var startTime = performance.now();
+    var houseDuration = 1150;
+    var doorDelay = 380;
+    var doorDuration = 820;
+    var totalDuration = 1450;
+
+    function step(now) {
+      var elapsed = now - startTime;
+
+      var pHouse = Math.min(1, elapsed / houseDuration);
+      setSnakePath(gHouse, sHouse, pHouse, 150);
+
+      if (elapsed < doorDelay) {
+        setSnakePath(gDoor, sDoor, 0);
+      } else {
+        var pDoor = Math.min(1, (elapsed - doorDelay) / doorDuration);
+        setSnakePath(gDoor, sDoor, pDoor, 130);
+      }
+
+      var pBar = Math.min(1, elapsed / totalDuration);
+      if (bar) bar.style.width = (pBar * 100).toFixed(1) + '%';
+
+      if (elapsed < totalDuration) {
+        animRaf = requestAnimationFrame(step);
+      } else {
+        setSnakePath(gHouse, sHouse, 1);
+        setSnakePath(gDoor, sDoor, 1);
+        if (bar) bar.style.width = '100%';
+
+        portalTimer = setTimeout(function() {
+          window.dismissTenant3dPortal(false);
+        }, 300);
+      }
+    }
+
+    animRaf = requestAnimationFrame(step);
+  }
+
+  window.replayTenantSnakeAnimation = function() {
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    overlay.classList.remove('portal-exit');
+    document.body.classList.remove('f3d-tenant-ready');
+    document.body.classList.add('f3d-tenant-active');
+    startSnakeLoadingAnimation();
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var fromLogin = false;
+    try {
+      fromLogin = sessionStorage.getItem('f3d_from_login') === '1' || sessionStorage.getItem('f3d_from_login_portal') === '1';
+    } catch(e) {}
+
+    // HANYA jalankan jika datang dari login
+    if (!fromLogin) {
+      if (overlay) overlay.style.display = 'none';
+      document.body.classList.remove('f3d-tenant-active');
+      document.body.classList.add('f3d-tenant-ready');
+      return;
+    }
+
+    document.body.classList.add('f3d-tenant-active');
+    startSnakeLoadingAnimation();
+    try {
+      sessionStorage.removeItem('f3d_from_login');
+      sessionStorage.removeItem('f3d_from_login_portal');
+    } catch(e) {}
+  });
+})();
+
+// =========================================================================
+// HANDLER: LENGKAPI DATA DIRI PENGHUNI BARU (GATE POP-UP)
+// =========================================================================
+@if(!($isProfileComplete ?? true))
+document.addEventListener('DOMContentLoaded', function() {
+  document.body.classList.add('tp-profile-locked');
+});
+
+window.handleGateIdCardPhotoChange = function(input) {
+  var dropzone = document.getElementById('gateIdCardDropzone');
+  if (dropzone) dropzone.classList.remove('has-error');
+  if (input.files && input.files[0]) {
+    var file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran foto kartu identitas terlalu besar. Maksimal 5 MB.');
+      input.value = '';
+      return;
+    }
+    var prompt = document.getElementById('gateIdCardUploadPrompt');
+    var wrap = document.getElementById('gateIdCardPreviewWrap');
+    var img = document.getElementById('gateIdCardPreviewImg');
+    var nameEl = document.getElementById('gateIdCardFileName');
+    var sizeEl = document.getElementById('gateIdCardFileSize');
+
+    if (nameEl) nameEl.textContent = file.name;
+    if (sizeEl) sizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      if (img) img.src = e.target.result;
+      if (prompt) prompt.style.display = 'none';
+      if (wrap) wrap.style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+window.removeGateIdCardPhoto = function() {
+  var input = document.getElementById('gateIdCardPhoto');
+  if (input) input.value = '';
+  var prompt = document.getElementById('gateIdCardUploadPrompt');
+  var wrap = document.getElementById('gateIdCardPreviewWrap');
+  var img = document.getElementById('gateIdCardPreviewImg');
+  if (img) img.src = '';
+  if (prompt) prompt.style.display = 'flex';
+  if (wrap) wrap.style.display = 'none';
+};
+
+function submitCompleteProfileGate(e) {
+  e.preventDefault();
+  var form = document.getElementById('formCompleteProfileGate');
+  var btn = document.getElementById('btnSubmitGateProfile');
+  var name = document.getElementById('gateFullName').value.trim();
+  var phone = document.getElementById('gatePhone').value.trim();
+  var idCard = document.getElementById('gateIdCard').value.trim();
+  var emergency = document.getElementById('gateEmergencyContact').value.trim();
+  var photoInput = document.getElementById('gateIdCardPhoto');
+  var dropzone = document.getElementById('gateIdCardDropzone');
+
+  if (!name || !phone || !emergency) {
+    alert('Nama lengkap, nomor WhatsApp, dan kontak darurat wajib diisi.');
+    return;
+  }
+
+  var hasFile = photoInput && photoInput.files && photoInput.files.length > 0;
+  var hasExistingPhoto = @json(!empty($user->id_card_photo) || (!empty($tenant) && !empty($tenant->id_card_photo)));
+
+  if (!hasFile && !hasExistingPhoto) {
+    if (dropzone) {
+      dropzone.classList.add('has-error');
+      dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    alert('Wajib melampirkan foto kartu identitas (KTP / SIM / KTM / KTA).');
+    return;
+  }
+
+  var formData = new FormData();
+  formData.append('name', name);
+  formData.append('phone', phone);
+  formData.append('id_card', idCard);
+  formData.append('emergency_contact', emergency);
+  if (hasFile) {
+    formData.append('id_card_photo', photoInput.files[0]);
+  }
+
+  var origHtml = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span>Menyimpan Data Diri & Foto Identitas...</span>';
+
+  fetch('{{ route("tenant.profile.complete") }}', {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    },
+    body: formData
+  })
+  .then(function(res) {
+    return res.json().then(function(data) {
+      return { ok: res.ok, status: res.status, data: data };
+    });
+  })
+  .then(function(result) {
+    if (result.ok && result.data && result.data.success) {
+      var overlay = document.getElementById('tpProfileGateModal');
+      if (overlay) {
+        overlay.classList.add('gate-closed');
+        setTimeout(function() {
+          overlay.style.display = 'none';
+        }, 400);
+      }
+      document.body.classList.remove('tp-profile-locked');
+
+      // Update in DOM
+      var pName = document.getElementById('profileName');
+      var pPhone = document.getElementById('profilePhone');
+      var pIdCard = document.getElementById('profileIdCard');
+      if (pName) pName.value = name;
+      if (pPhone) pPhone.value = phone;
+      if (pIdCard) pIdCard.value = idCard;
+
+      var navName = document.querySelector('.tp-user-name');
+      if (navName) navName.textContent = name;
+
+      var welcomeName = document.querySelector('.tp-welcome-title strong');
+      if (welcomeName) welcomeName.textContent = name;
+
+      if (typeof showPortalToast === 'function') {
+        showPortalToast(result.data.message || 'Data diri dan foto kartu identitas berhasil disimpan! Seluruh fitur portal kini aktif.', 'success');
+      } else {
+        alert(result.data.message || 'Data diri dan foto kartu identitas berhasil disimpan! Seluruh fitur portal kini telah aktif.');
+      }
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
+      var msg = (result.data && result.data.message) ? result.data.message : 'Gagal menyimpan data diri. Pastikan seluruh kolom diisi dengan benar.';
+      if (result.data && result.data.errors) {
+        var errList = Object.values(result.data.errors).flat();
+        if (errList.length) msg = errList[0];
+      }
+      alert(msg);
+    }
+  })
+  .catch(function(err) {
+    console.error(err);
+    alert('Terjadi kendala koneksi saat menyimpan data diri.');
+    btn.disabled = false;
+    btn.innerHTML = origHtml;
+  });
+}
+@endif
 </script>
 
 @endsection
