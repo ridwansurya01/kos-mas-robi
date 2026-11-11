@@ -123,6 +123,10 @@
     font-weight: 400;
   }
 
+  .login-promo-chars-wrap {
+    display: none;
+  }
+
   /* Form Right Section */
   .login-form-panel {
     display: flex;
@@ -421,37 +425,81 @@
   /* Responsive Design */
   @media (max-width: 900px) {
     .login-viewport-wrapper {
-      padding: 16px 12px;
+      padding: 20px 16px 40px;
       background: #ffffff !important;
+      align-items: flex-start;
     }
     .login-split-card {
       grid-template-columns: 1fr;
       border-radius: 0;
-      gap: 16px;
+      gap: 28px;
       padding: 0;
-      max-width: 440px;
+      max-width: 420px;
+      width: 100%;
       box-shadow: none !important;
       border: none !important;
     }
     .login-promo-panel {
-      min-height: 280px;
-      padding: 32px 24px 180px;
-      border-radius: 24px;
-      background-position: center bottom;
-      background-size: contain;
+      min-height: auto;
+      padding: 28px 22px 0;
+      border-radius: 26px;
+      background-image: none !important;
+      background: #033f3c linear-gradient(160deg, #023633 0%, #033f3c 55%, #054c42 100%) !important;
+      box-shadow: 0 16px 36px -10px rgba(3, 63, 60, 0.28);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
     .login-promo-headline {
-      font-size: 24px;
+      font-size: 21px;
+      line-height: 1.24;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .login-promo-curve {
+      width: 92px;
+      height: 10px;
+      margin: 4px 0 10px;
+      display: block;
     }
     .login-promo-desc {
-      font-size: 12.5px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.88);
+      margin: 0;
+      max-width: 290px;
+    }
+    .login-promo-chars-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      margin-top: 18px;
+      line-height: 0;
+      width: 100%;
+    }
+    .login-promo-chars-img {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: 165px;
+      object-fit: contain;
+      object-position: bottom center;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
     }
     .login-form-panel {
-      padding: 10px 0;
+      padding: 0;
       border-radius: 0;
       background: transparent;
       box-shadow: none !important;
       border: none !important;
+      width: 100%;
+    }
+    .login-form-content {
+      max-width: 100%;
+      width: 100%;
     }
   }
 
@@ -615,6 +663,13 @@
         <p class="login-promo-desc">
           {{ $loginContent['promo_desc'] ?? 'Simplify your e-commerce management with our user-friendly admin dashboard.' }}
         </p>
+      </div>
+
+      {{-- Mobile-Only Character Illustration (Responsive, sharp, and perfectly proportioned) --}}
+      <div class="login-promo-chars-wrap">
+        <img src="{{ asset('assets/images/landing/characters_bottom.webp') }}" 
+             alt="Ilustrasi SMART LIVING" 
+             class="login-promo-chars-img">
       </div>
     </div>
 
