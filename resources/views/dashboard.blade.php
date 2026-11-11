@@ -4988,7 +4988,7 @@
                 </div>
 
                 <!-- PREVIEW CONTAINER CARD (SCALEABLE MOCKUP) -->
-                <div style="max-width: 820px; margin: 0 auto; background: #ffffff; border-radius: 28px; padding: 14px; box-shadow: 0 16px 40px -10px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div style="max-width: 820px; margin: 0 auto; background: #ffffff; border-radius: 0; padding: 10px; box-shadow: none; border: none; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                   
                   <!-- Left Promo Mockup -->
                   <div style="background-color: #033f3c; background-image: url('{{ asset('assets/images/landing/login_left_card_clean.webp') }}?v={{ file_exists(public_path('assets/images/landing/login_left_card_clean.webp')) ? filemtime(public_path('assets/images/landing/login_left_card_clean.webp')) : time() }}'); background-repeat: no-repeat; background-size: cover; background-position: center bottom; border-radius: 20px; padding: 28px 24px 180px; position: relative; overflow: hidden; min-height: 380px;">
