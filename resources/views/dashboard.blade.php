@@ -4991,7 +4991,7 @@
                 <div style="max-width: 820px; margin: 0 auto; background: #ffffff; border-radius: 28px; padding: 14px; box-shadow: 0 16px 40px -10px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                   
                   <!-- Left Promo Mockup -->
-                  <div style="background-color: #033f3c; background-image: url('{{ asset('assets/images/landing/login_left_card_clean.webp') }}'); background-repeat: no-repeat; background-size: cover; background-position: center bottom; border-radius: 20px; padding: 28px 24px 180px; position: relative; overflow: hidden; min-height: 380px;">
+                  <div style="background-color: #033f3c; background-image: url('{{ asset('assets/images/landing/login_left_card_clean.webp') }}?v={{ file_exists(public_path('assets/images/landing/login_left_card_clean.webp')) ? filemtime(public_path('assets/images/landing/login_left_card_clean.webp')) : time() }}'); background-repeat: no-repeat; background-size: cover; background-position: center bottom; border-radius: 20px; padding: 28px 24px 180px; position: relative; overflow: hidden; min-height: 380px;">
                     <div style="position: relative; z-index: 2;">
                       <div id="prevPromoHeadline" style="font-family: 'Outfit', sans-serif; font-size: 19px; font-weight: 800; color: #ffffff; line-height: 1.22; margin-bottom: 4px; white-space: pre-line;">
                         {{ $loginContent['promo_headline'] ?? "Simplify\nmanagement with\nour dashboard." }}

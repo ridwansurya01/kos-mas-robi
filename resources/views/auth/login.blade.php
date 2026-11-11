@@ -29,7 +29,7 @@
     z-index: 999999999 !important;
   }
   html.f3d-login-intro-active body {
-    background: #f3f6f6 !important;
+    background: #ffffff !important;
   }
 
   :root {
@@ -50,7 +50,7 @@
     padding: 0;
     min-height: 100vh;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #f1f5f5;
+    background: #ffffff !important;
     color: #111827;
   }
 
@@ -62,7 +62,7 @@
     align-items: center;
     justify-content: center;
     padding: 32px 20px;
-    background: #f1f5f5;
+    background: #ffffff !important;
   }
 
   /* Two-Column Split Container */
@@ -76,7 +76,7 @@
     display: grid;
     grid-template-columns: 1.05fr 0.95fr;
     gap: 20px;
-    box-shadow: 0 24px 60px -12px rgba(3, 63, 60, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
     position: relative;
     z-index: 10;
   }
@@ -84,7 +84,7 @@
   /* Promotional Left Section */
   .login-promo-panel {
     background-color: #033f3c;
-    background-image: url('{{ asset("assets/images/landing/login_left_card_clean.webp") }}');
+    background-image: url('{{ asset("assets/images/landing/login_left_card_clean.webp") }}?v={{ file_exists(public_path("assets/images/landing/login_left_card_clean.webp")) ? filemtime(public_path("assets/images/landing/login_left_card_clean.webp")) : time() }}');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center bottom;
