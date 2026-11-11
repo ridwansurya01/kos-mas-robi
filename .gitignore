@@ -23,4 +23,5 @@ yarn-error.log
 /public/assets/images/id_cards/*
 !/public/assets/images/id_cards/.gitkeep
 /scratch/
+/database/backups/
 *.backup*

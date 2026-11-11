@@ -564,7 +564,7 @@
                 {{-- Row 1: 3 Kamar Lantai 1 --}}
                 @if($slide['floor1']->isNotEmpty())
                   <div class="lr-slide-floor-row">
-                    <div class="lr-slide-floor-title" data-spatial-reveal="bento-text">
+                    <div class="lr-slide-floor-title">
                       <span class="lr-floor-tag floor-1">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                         Lantai 1
@@ -581,7 +581,7 @@
                 {{-- Row 2: 3 Kamar Lantai 2 --}}
                 @if($slide['floor2']->isNotEmpty())
                   <div class="lr-slide-floor-row" style="{{ $slide['floor1']->isNotEmpty() ? 'margin-top: 26px;' : '' }}">
-                    <div class="lr-slide-floor-title" data-spatial-reveal="bento-text">
+                    <div class="lr-slide-floor-title">
                       <span class="lr-floor-tag floor-2">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                         Lantai 2
@@ -643,19 +643,22 @@
 
       {{-- Bento Header: Two-tone Title on Left, Stacked Circular Pills on Right --}}
       <div class="lr-bento-header-grid">
-        <div data-spatial-reveal="bento-text">
-          <h2 class="lr-two-tone-title">
-            <span class="highlight-coral">{{ $landing['bento_tag'] ?? 'Kenyamanan Maksimal' }}</span><br>
+        <div class="lr-bento-header-left">
+          <div class="lr-bento-tag-badge" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(235, 110, 75, 0.1); color: var(--coral-primary); font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 14px; border-radius: 999px; margin-bottom: 14px; border: 1px solid rgba(235, 110, 75, 0.22);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>{{ $landing['bento_tag'] ?? 'Kenyamanan Maksimal' }}</span>
+          </div>
+          <h2 class="lr-two-tone-title" style="margin: 0 0 14px; font-size: clamp(1.85rem, 3.2vw, 2.5rem); font-weight: 900; line-height: 1.25; letter-spacing: -0.02em;">
             <span class="dark-teal">{{ $landing['bento_title'] ?? 'Untuk Istirahat & Produktivitas' }}</span>
           </h2>
-          <p class="lr-bento-header-desc">
+          <p class="lr-bento-header-desc" style="margin: 0; font-size: 0.95rem; line-height: 1.68; color: var(--text-muted); max-width: 540px;">
             {{ $landing['bento_desc'] ?? 'Setiap jengkal hunian kami rancang dengan seksama untuk memastikan penghuni mendapatkan istirahat berkualitas dan fokus maksimal dalam menuntut ilmu maupun berkarier.' }}
           </p>
         </div>
 
         <div class="lr-feature-pill-stack">
           @foreach($bentoFeatures as $idx => $bf)
-            <div class="lr-feat-pill-item" data-spatial-reveal="pill-domino" data-stagger="{{ ($idx % 5) + 1 }}">
+            <div class="lr-feat-pill-item">
               <div class="lr-feat-circle-icon {{ $idx % 2 == 0 ? 'coral' : 'teal' }}">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"/></svg>
               </div>

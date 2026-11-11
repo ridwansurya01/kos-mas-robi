@@ -594,8 +594,21 @@ class Setting extends Model
     {
         $default = [
             'brand_title' => $this->kos_name ?? 'SMART LIVING',
-            'headline' => "Smart Living &\nKost Eksklusif",
-            'desc' => 'Sistem manajemen hunian modern, nyaman, full furnished, dan aman 24 jam di Sleman, DI Yogyakarta.',
+            'brand_logo_url' => null,
+            'brand_logo_size' => '48',
+            'promo_headline' => "Simplify\nmanagement with\nour dashboard.",
+            'promo_desc' => 'Simplify your e-commerce management with our user-friendly admin dashboard.',
+            'promo_badge' => 'Exclusive Management',
+            'form_title' => 'SMART LIVING',
+            'form_subtitle' => 'Please login to your account',
+            'placeholder_email' => 'Email address',
+            'placeholder_password' => 'Password',
+            'forgot_password_text' => 'Forgot password?',
+            'btn_login_text' => 'Login',
+            'divider_text' => 'Or Login with',
+            'back_home_text' => 'Kembali Ke Beranda',
+            'headline' => "Simplify\nmanagement with\nour dashboard.",
+            'desc' => 'Simplify your e-commerce management with our user-friendly admin dashboard.',
             'features' => [
                 'Akses Portal Layanan Penghuni 24 Jam',
                 'Konfirmasi Pembayaran & Kuitansi Digital',

@@ -5,23 +5,7 @@
 @section('content')
 @php
   $setting = rescue(fn() => \App\Models\Setting::first(), null);
-  $landing = $setting ? ($setting->landing_content ?? []) : [];
   $loginContent = $setting ? $setting->getLoginPageContent() : [];
-
-  // Sinkronisasi dinamis gambar latar dengan Gambar Utama Landing Page
-  $rawHeroImg = $landing['hero_image'] ?? 'assets/images/landing/hero_corridor_teal.webp';
-  if (!empty($rawHeroImg) && (str_starts_with($rawHeroImg, 'http://') || str_starts_with($rawHeroImg, 'https://'))) {
-      $loginHeroImageUrl = $rawHeroImg;
-  } elseif (!empty($rawHeroImg)) {
-      $loginHeroImageUrl = asset(ltrim($rawHeroImg, '/'));
-  } else {
-      $loginHeroImageUrl = asset('assets/images/landing/hero_corridor_teal.webp');
-  }
-
-  // Jika menggunakan gambar koridor bawaan desain, gunakan backdrop master bersih 100%
-  $isCustomHero = !empty($rawHeroImg) && !str_contains($rawHeroImg, 'hero_corridor_teal') && !str_contains($rawHeroImg, 'kos_exterior');
-  $desktopLoginBgUrl = $isCustomHero ? $loginHeroImageUrl : asset('assets/images/landing/login_desktop_master_clean.webp');
-
   $hasLoginErrors = (isset($errors) && $errors->any()) || !empty(old('email'));
 @endphp
 
@@ -36,6 +20,7 @@
     } catch(e) {}
   })();
 </script>
+
 <style>
   html.f3d-login-intro-active #f3dLoginPortalOverlay {
     display: flex !important;
@@ -44,196 +29,258 @@
     z-index: 999999999 !important;
   }
   html.f3d-login-intro-active body {
-    background: #ffffff !important;
+    background: #f3f6f6 !important;
   }
 
   :root {
-    --login-primary: #235352;
-    --login-primary-hover: #1b4241;
-    --login-accent: #0d9488;
+    --login-primary: #033f3c;
+    --login-primary-hover: #022f2d;
     --login-text-dark: #111827;
-    --login-text-label: #374151;
-    --login-text-muted: #4b5563;
-    --login-border: #9ca3af;
-    --login-border-focus: #235352;
+    --login-text-muted: #6b7280;
+    --login-border: #e5e7eb;
+    --login-border-focus: #033f3c;
   }
 
-  /* Reset Viewport */
+  * {
+    box-sizing: border-box;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    height: 100%;
+    min-height: 100vh;
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #ffffff;
-    overflow: hidden;
+    background: #f1f5f5;
+    color: #111827;
   }
 
-  /* Shared Form Styles */
-  .login-back-btn {
-    position: absolute;
-    top: 26px;
-    left: 28px;
-    z-index: 50;
-    display: inline-flex;
+  /* Main Viewport Container */
+  .login-viewport-wrapper {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1.5px solid rgba(209, 213, 219, 0.85);
-    border-radius: 9999px;
-    color: #374151;
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    justify-content: center;
+    padding: 32px 20px;
+    background: #f1f5f5;
   }
 
-  .login-back-btn:hover {
+  /* Two-Column Split Container */
+  .login-split-card {
+    width: 100%;
+    max-width: 1040px;
+    min-height: 620px;
     background: #ffffff;
-    color: var(--login-primary);
-    border-color: var(--login-primary);
-    transform: translateX(-2px);
-    box-shadow: 0 6px 18px rgba(35, 83, 82, 0.15);
+    border-radius: 36px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 20px;
+    box-shadow: 0 24px 60px -12px rgba(3, 63, 60, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.04);
+    position: relative;
+    z-index: 10;
   }
 
-  .login-back-btn svg {
-    transition: transform 0.2s ease;
+  /* Promotional Left Section */
+  .login-promo-panel {
+    background-color: #033f3c;
+    background-image: url('{{ asset("assets/images/landing/login_left_card_clean.webp") }}');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center bottom;
+    border-radius: 28px;
+    padding: 48px 42px 260px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 580px;
   }
 
-  .login-back-btn:hover svg {
-    transform: translateX(-3px);
+  .login-promo-headline {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    font-size: clamp(28px, 2.7vw, 36px);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    margin: 0;
   }
 
-  .login-brand-header {
+  .login-promo-curve {
+    display: block;
+    margin: 6px 0 14px;
+  }
+
+  .login-promo-desc {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin: 0;
+    max-width: 320px;
+    font-weight: 400;
+  }
+
+  /* Form Right Section */
+  .login-form-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 28px;
+    background: #ffffff;
+    border-radius: 28px;
+  }
+
+  .login-form-content {
+    width: 100%;
+    max-width: 370px;
+  }
+
+  .login-brand-badge {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    margin-bottom: 22px;
+    margin-bottom: 26px;
   }
 
-  .login-brand-link {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    text-decoration: none;
-    transition: transform 0.2s ease;
-  }
-
-  .login-brand-link:hover {
-    transform: translateY(-1px);
-  }
-
-  .login-brand-logo-img {
+  .login-logo-sq {
     width: 48px;
     height: 48px;
-    object-fit: contain;
-    border-radius: 13px;
-    box-shadow: 0 6px 16px rgba(35, 83, 82, 0.22);
-    margin-bottom: 8px;
+    border-radius: 14px;
+    background: #033f3c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(3, 63, 60, 0.18);
     transition: transform 0.2s ease;
   }
 
-  .login-brand-link:hover .login-brand-logo-img {
-    transform: scale(1.05);
+  .login-logo-sq:hover {
+    transform: scale(1.04);
   }
 
   .login-brand-title {
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
-    font-size: 21px;
+    font-size: 19px;
     font-weight: 800;
-    color: var(--login-text-dark);
-    letter-spacing: -0.015em;
-    margin: 0;
-    line-height: 1.2;
-    text-align: center;
-  }
-
-  .login-brand-subtitle {
-    font-size: 11px;
-    font-weight: 700;
-    color: #0d9488;
+    color: #111827;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    margin-top: 3px;
-  }
-
-  .login-form-title {
-    font-size: 27px;
-    font-weight: 800;
-    color: var(--login-text-dark);
-    margin: 0 0 24px;
-    letter-spacing: -0.01em;
-    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    margin: 14px 0 4px;
     text-align: center;
   }
 
-  .login-field-group {
-    margin-bottom: 14px;
+  .login-form-subtitle {
+    font-size: 13px;
+    color: var(--login-text-muted);
+    margin: 0;
+    text-align: center;
+    font-weight: 500;
+  }
+
+  /* Alert Messages */
+  .login-alert-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 16px;
     text-align: left;
   }
 
-  .login-field-label {
-    display: block;
-    font-size: 12px;
+  .login-alert-info {
+    background: #f0fdfa;
+    color: #0d9488;
+    border: 1px solid #99f6e4;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12.5px;
     font-weight: 600;
-    color: var(--login-text-label);
-    margin-bottom: 6px;
-    padding-left: 20px;
+    margin-bottom: 16px;
+    text-align: left;
   }
 
-  .login-input-pill {
+  .login-auth-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: #166534;
+    margin-bottom: 16px;
     width: 100%;
-    height: 44px;
-    border-radius: 9999px;
+  }
+
+  /* Input Fields */
+  .login-input-wrap {
+    position: relative;
+    margin-bottom: 14px;
+    width: 100%;
+  }
+
+  .login-input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .login-text-input {
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
     border: 1.5px solid var(--login-border);
     background: #ffffff;
-    padding: 0 20px;
-    font-size: 14px;
+    padding: 0 16px 0 46px;
+    font-size: 13.5px;
     color: var(--login-text-dark);
     outline: none;
-    box-sizing: border-box;
     transition: all 0.2s ease;
     font-family: inherit;
     -webkit-appearance: none;
   }
 
-  /* Suppress Chrome autofill blue styling */
-  input:-webkit-autofill,
-  input:-webkit-autofill:hover, 
-  input:-webkit-autofill:focus, 
-  input:-webkit-autofill:active {
+  .login-text-input.has-pwd-toggle {
+    padding-right: 46px;
+  }
+
+  .login-text-input:focus {
+    border-color: var(--login-border-focus);
+    box-shadow: 0 0 0 3px rgba(3, 63, 60, 0.12);
+  }
+
+  /* Suppress Chrome autofill background */
+  .login-text-input:-webkit-autofill,
+  .login-text-input:-webkit-autofill:hover, 
+  .login-text-input:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
     -webkit-text-fill-color: var(--login-text-dark) !important;
     transition: background-color 5000s ease-in-out 0s;
   }
 
-  .login-input-pill:focus {
-    border-color: var(--login-border-focus);
-    box-shadow: 0 0 0 3px rgba(35, 83, 82, 0.16);
-  }
-
-  .login-pwd-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-  }
-
-  .login-pwd-wrapper .login-input-pill {
-    padding-right: 46px;
-  }
-
   .login-pwd-toggle {
     position: absolute;
     right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
-    color: #6b7280;
+    color: #9ca3af;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -242,15 +289,39 @@
     border-radius: 50%;
     transition: color 0.15s ease;
   }
+
   .login-pwd-toggle:hover {
     color: #111827;
   }
 
-  .login-submit-btn {
+  /* Forgot Password Link */
+  .login-forgot-wrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+    margin-bottom: 20px;
     width: 100%;
-    height: 44px;
-    border-radius: 9999px;
-    background: var(--login-primary);
+  }
+
+  .login-forgot-link {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #033f3c;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .login-forgot-link:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+  }
+
+  /* Login Submit Button */
+  .login-btn-primary {
+    width: 100%;
+    height: 48px;
+    border-radius: 14px;
+    background: #033f3c;
     color: #ffffff;
     font-size: 14.5px;
     font-weight: 700;
@@ -261,25 +332,26 @@
     justify-content: center;
     transition: all 0.2s ease;
     font-family: inherit;
-    margin-top: 6px;
-    box-shadow: 0 4px 12px rgba(35, 83, 82, 0.22);
+    box-shadow: 0 4px 14px rgba(3, 63, 60, 0.18);
   }
 
-  .login-submit-btn:hover {
-    background: var(--login-primary-hover);
+  .login-btn-primary:hover {
+    background: #022f2d;
+    box-shadow: 0 6px 18px rgba(3, 63, 60, 0.25);
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(35, 83, 82, 0.3);
   }
 
-  .login-submit-btn:active {
+  .login-btn-primary:active {
     transform: translateY(1px);
   }
 
-  .login-divider {
+  /* Divider */
+  .login-divider-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin: 18px 0 16px;
+    width: 100%;
   }
 
   .login-divider-line {
@@ -288,400 +360,184 @@
     background: var(--login-border);
   }
 
-  .login-divider-text {
+  .login-divider-label {
     font-size: 12px;
     color: var(--login-text-muted);
     font-weight: 500;
   }
 
-  .login-google-btn {
+  /* Google Button */
+  .login-btn-google {
     width: 100%;
-    height: 44px;
-    border-radius: 9999px;
-    border: 1.5px solid #d1d5db;
+    height: 48px;
+    border-radius: 14px;
     background: #ffffff;
+    border: 1.5px solid var(--login-border);
+    color: #1f2937;
+    font-size: 14px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    font-size: 13.5px;
-    font-weight: 700;
-    color: #1f2937;
     text-decoration: none;
-    box-sizing: border-box;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    margin-bottom: 18px;
-    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
   }
 
-  .login-google-btn:hover {
-    background: #f8fafc;
-    border-color: var(--login-primary);
-    color: #0a5661;
-    transform: translateY(-1.5px);
-    box-shadow: 0 6px 16px rgba(35, 83, 82, 0.12);
+  .login-btn-google:hover {
+    background: #fafafa;
+    border-color: #d1d5db;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-1px);
   }
 
-  .login-google-btn:active {
-    transform: translateY(1px);
-  }
-
-  .login-google-btn .login-google-icon {
-    flex-shrink: 0;
-    transition: transform 0.2s ease;
-  }
-
-  .login-google-btn:hover .login-google-icon {
-    transform: scale(1.08);
-  }
-
-  .login-forgot-link {
-    display: block;
-    text-align: center;
-    color: var(--login-accent);
-    font-size: 12.5px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.15s ease;
-    cursor: pointer;
-  }
-
-  .login-forgot-link:hover {
-    text-decoration: underline;
-  }
-
+  /* Back to Home Link */
   .login-back-home-wrap {
-    margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin-top: 22px;
+    text-align: center;
+    width: 100%;
   }
 
   .login-back-home-link {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 7px 16px;
-    font-family: 'Outfit', sans-serif;
-    font-size: 12px;
+    gap: 6px;
+    font-size: 13px;
     font-weight: 600;
-    color: #0a5661;
-    background: rgba(10, 86, 97, 0.05);
-    border: 1px solid rgba(10, 86, 97, 0.12);
-    border-radius: 9999px;
+    color: #033f3c;
     text-decoration: none;
-    cursor: pointer;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.15s ease;
   }
 
   .login-back-home-link:hover {
-    background: rgba(10, 86, 97, 0.1);
-    color: #063c44;
-    border-color: rgba(10, 86, 97, 0.24);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(10, 86, 97, 0.08);
+    text-decoration: underline;
+    opacity: 0.85;
   }
 
-  .login-back-home-link svg {
-    transition: transform 0.2s ease;
-  }
-
-  .login-back-home-link:hover svg {
-    transform: translateX(-3px);
-  }
-
-  .login-alert-error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    color: #dc2626;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 12px;
-    margin-bottom: 14px;
-    font-weight: 600;
-    text-align: left;
-  }
-
-  .login-alert-info {
-    background: #f0fdfa;
-    border: 1px solid #99f6e4;
-    color: #0f766e;
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 12px;
-    margin-bottom: 14px;
-    font-weight: 600;
-    text-align: left;
-  }
-
-  .login-auth-banner {
-    background: linear-gradient(135deg, #f0fdfa 0%, #ecfeff 100%);
-    border: 1.5px solid #99f6e4;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    flex-wrap: wrap;
-    font-size: 0.74rem;
-    font-weight: 700;
-    color: #0a5661;
-  }
-
-  /* =========================================================================
-     LOADING INTRO OVERLAY (SNAKE TRACER LOGO ON PURE WHITE)
-     ========================================================================= */
-  .f3d-dash-portal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999999999;
-    background: #ffffff;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 1;
-    visibility: visible;
-    overflow: hidden;
-    cursor: default;
-    transition: 
-      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-      filter 0.7s ease,
-      visibility 0.7s ease;
-  }
-  html.f3d-login-intro-active .f3d-dash-portal-overlay {
-    display: flex !important;
-  }
-
-  .f3d-dash-loader-wrap {
-    position: relative;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-    transition: transform 0.55s ease, opacity 0.55s ease;
-  }
-
-  .f3d-dash-svg-box {
-    width: 165px;
-    height: 165px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-  }
-
-  .f3d-dash-svg-canvas {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-  }
-
-  .f3d-dash-faint-track {
-    stroke: rgba(10, 86, 97, 0.08);
-  }
-
-  .f3d-dash-drawn-green {
-    stroke: #0a5661;
-  }
-
-  .f3d-dash-snake-tracer {
-    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.75));
-  }
-
-  .f3d-dash-loading-track {
-    width: 190px;
-    height: 3.5px;
-    background: #e2e8f0;
-    border-radius: 999px;
-    overflow: hidden;
-    margin: 0 auto 12px;
-  }
-
-  .f3d-dash-loading-bar {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, #0a5661 0%, #10b981 100%);
-    border-radius: 999px;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-    transition: width 0.08s linear;
-  }
-
-  .f3d-dash-loading-label {
-    font-family: 'Outfit', sans-serif;
-    font-size: 0.84rem;
-    font-weight: 700;
-    color: #0a5661;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 0;
-  }
-
-  .f3d-dash-portal-overlay.portal-exit {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: scale(1.04);
-    filter: blur(8px);
-  }
-
-  .f3d-dash-portal-overlay.portal-exit .f3d-dash-loader-wrap {
-    transform: scale(1.08);
-    opacity: 0;
-  }
-
-  /* =========================================================================
-     TAMPILAN 1: LAPTOP, KOMPUTER, TABLET (100% IDENTIK MASTER REFERENCE)
-     ========================================================================= */
-  @media (min-width: 768px) {
-    .view-mobile {
-      display: none !important;
+  /* Responsive Design */
+  @media (max-width: 900px) {
+    .login-viewport-wrapper {
+      padding: 16px 12px;
     }
-
-    .view-desktop {
-      display: flex !important;
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background-color: #ffffff;
-      background-image: url('{{ $desktopLoginBgUrl }}');
-      background-size: 100% 100%;
-      background-position: center;
-      background-repeat: no-repeat;
-      align-items: center;
+    .login-split-card {
+      grid-template-columns: 1fr;
+      border-radius: 28px;
+      gap: 16px;
+      padding: 14px;
+      max-width: 480px;
     }
-
-    .desktop-form-box {
-      position: absolute;
-      left: calc((91 / 941) * 100vw);
-      top: 50%;
-      transform: translateY(-50%);
-      width: min(290px, 30vw);
-      box-sizing: border-box;
-      z-index: 10;
+    .login-promo-panel {
+      min-height: 280px;
+      padding: 32px 24px 180px;
+      border-radius: 22px;
+      background-position: center bottom;
+      background-size: contain;
+    }
+    .login-promo-headline {
+      font-size: 24px;
+    }
+    .login-promo-desc {
+      font-size: 12.5px;
+    }
+    .login-form-panel {
+      padding: 18px 12px;
+      border-radius: 22px;
     }
   }
 
-  /* =========================================================================
-     TAMPILAN 2: HP / SMARTPHONE / IPHONE (100% SESUAI CONTOH KEDUA)
-     ========================================================================= */
-  @media (max-width: 767.98px) {
-    .view-desktop {
-      display: none !important;
-    }
-
-    .login-back-btn {
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      padding: 7px 14px;
-      font-size: 12px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-    }
-
-    .view-mobile {
-      display: flex !important;
-      position: relative;
-      min-height: 100vh;
-      min-height: 100dvh;
-      width: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      background-image: url('{{ $desktopLoginBgUrl }}');
-      background-size: cover;
-      background-position: 68% top;
-      background-repeat: no-repeat;
-      align-items: center;
-      justify-content: center;
-      padding: 68px 16px 36px;
-      box-sizing: border-box;
-    }
-
-    /* Mobile Floating Frosted Glass Card */
-    .mobile-floating-card {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 340px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: 36px;
-      border: 1.5px solid rgba(255, 255, 255, 0.85);
-      padding: 34px 22px 28px;
-      box-sizing: border-box;
-      box-shadow: 
-        0 24px 60px -10px rgba(0, 0, 0, 0.35),
-        inset 0 1px 2px rgba(255, 255, 255, 0.95);
-      text-align: center;
-    }
-
-    .mobile-floating-card .login-form-title {
-      font-size: 26px;
-      font-weight: 800;
-      color: #111827;
-      margin-bottom: 22px;
-      letter-spacing: -0.01em;
-      font-family: 'Outfit', sans-serif;
-      text-align: center;
-    }
-
-    .mobile-floating-card .login-field-group {
-      margin-bottom: 14px;
-      text-align: left;
-    }
-
-    .mobile-floating-card .login-field-label {
-      display: block;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 5px;
-      padding-left: 20px;
-    }
-
-    .mobile-floating-card .login-input-pill {
-      background: rgba(255, 255, 255, 0.95);
-    }
-  }
-
-  /* Modal Lupa Password Pop-up */
+  /* Modal Reset Password Styling */
   .fp-modal-backdrop {
     position: fixed;
-    inset: 0;
-    z-index: 999999;
-    background: rgba(3, 35, 40, 0.78);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
     display: none;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 20px;
   }
+
   .fp-modal-card {
-    position: relative;
+    background: #ffffff;
+    border-radius: 24px;
     width: 100%;
     max-width: 420px;
-    background: #ffffff;
-    border-radius: 28px;
-    padding: 32px 26px;
-    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.35);
-    border: 1.5px solid rgba(13, 148, 136, 0.25);
-    text-align: center;
-    box-sizing: border-box;
+    padding: 28px 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     animation: fpPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
   @keyframes fpPopIn {
     0% { opacity: 0; transform: scale(0.92) translateY(12px); }
     100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* Flutter 3D Intro Overlay */
+  .f3d-dash-portal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+  .f3d-dash-loader-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .f3d-dash-svg-box {
+    width: 140px;
+    height: 140px;
+  }
+  .f3d-dash-svg-canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .f3d-dash-faint-track {
+    stroke: rgba(16, 185, 129, 0.15);
+    fill: none;
+  }
+  .f3d-dash-drawn-green {
+    stroke: #0a5661;
+    fill: none;
+    stroke-dasharray: 0 1000;
+  }
+  .f3d-dash-snake-tracer {
+    fill: none;
+    stroke-dasharray: 0 1000;
+  }
+  .f3d-dash-loading-track {
+    width: 160px;
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .f3d-dash-loading-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #0a5661);
+    border-radius: 999px;
+  }
+  .f3d-dash-loading-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+    color: #64748b;
   }
 </style>
 
@@ -700,27 +556,24 @@
           </linearGradient>
         </defs>
 
-        <!-- Garis Faint Panduan -->
         <path class="f3d-dash-faint-track" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
         <path class="f3d-dash-faint-track" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" />
 
-        <!-- Garis Hijau Rumah & Ular -->
         <path id="f3dLoginGreenHouse" class="f3d-dash-drawn-green" pathLength="1000" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
         <path id="f3dLoginSnakeHouse" class="f3d-dash-snake-tracer" pathLength="1000" d="M 65 167 L 65 102 L 113 65 L 159 102 L 159 167 L 65 167 Z" stroke="url(#loginSnakeGreenGrad)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round" />
 
-        <!-- Garis Hijau Pintu Dalam & Ular -->
         <path id="f3dLoginGreenDoor" class="f3d-dash-drawn-green" pathLength="1000" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" />
         <path id="f3dLoginSnakeDoor" class="f3d-dash-snake-tracer" pathLength="1000" d="M 96.5 167 L 96.5 118 C 96.5 110 102 106 113 106 C 124 106 129.5 110 129.5 118 L 129.5 167" stroke="url(#loginSnakeGreenGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </div>
 
-    <!-- Tampilan Loading Saja -->
     <div class="f3d-dash-loading-track">
       <div class="f3d-dash-loading-bar" id="f3dLoginProgressBar"></div>
     </div>
     <div class="f3d-dash-loading-label">MEMUAT HALAMAN LOGIN...</div>
   </div>
 </div>
+
 <script>
   if (document.documentElement.classList.contains('f3d-login-intro-active')) {
     var overlay = document.getElementById('f3dLoginPortalOverlay');
@@ -733,194 +586,160 @@
 </script>
 
 {{-- =========================================================================
-     TAMPILAN 1: LAPTOP, KOMPUTER, TABLET (100% PERSIS CONTOH MASTER REFERENCE)
+     HALAMAN LOGIN UTAMA: SPLIT SCREEN MODERN SESUAI DESAIN REFERENSI
      ========================================================================= --}}
-<div class="view-desktop">
-  <div class="desktop-form-box">
+<div class="login-viewport-wrapper">
+  <div class="login-split-card">
 
-      @auth
-      <div class="login-auth-banner">
-        <span>Sudah masuk: <strong>{{ Auth::user()->name }}</strong></span>
-        <a href="{{ Auth::user()->isStaffOrOwner() ? route('admin.dashboard') : route('tenant.portal') }}" style="color: #0a5661; text-decoration: underline;">Dashboard &rarr;</a>
+    {{-- BAGIAN KIRI: PROMOTIONAL SECTION --}}
+    <div class="login-promo-panel">
+      <div style="position: relative; z-index: 2;">
+        <h2 class="login-promo-headline">
+          {!! nl2br(e($loginContent['promo_headline'] ?? "Simplify\nmanagement with\nour dashboard.")) !!}
+        </h2>
+        
+        {{-- Garis Lengkung Hijau Dekoratif --}}
+        <svg class="login-promo-curve" width="118" height="12" viewBox="0 0 118 12" fill="none">
+          <path d="M3 4C35 12 83 12 115 4" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+
+        <p class="login-promo-desc">
+          {{ $loginContent['promo_desc'] ?? 'Simplify your e-commerce management with our user-friendly admin dashboard.' }}
+        </p>
       </div>
-      @endauth
+    </div>
 
-      <div class="login-brand-header">
-        <a href="{{ route('home') }}" class="login-brand-link" title="Kembali ke Beranda">
-          <img src="{{ asset('assets/images/logo_kos_jember.png') }}" 
-               alt="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}" 
-               class="login-brand-logo-img" 
-               width="48" 
-               height="48">
-          <h1 class="login-brand-title">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</h1>
-        </a>
-      </div>
+    {{-- BAGIAN KANAN: FORM LOGIN --}}
+    <div class="login-form-panel">
+      <div class="login-form-content">
 
-      @if ($errors->any())
-        <div class="login-alert-error">{{ $errors->first() }}</div>
-      @endif
+        @auth
+        <div class="login-auth-banner">
+          <span>Sudah masuk: <strong>{{ Auth::user()->name }}</strong></span>
+          <a href="{{ Auth::user()->isStaffOrOwner() ? route('admin.dashboard') : route('tenant.portal') }}" style="color: #033f3c; font-weight: 700; text-decoration: underline;">Dashboard &rarr;</a>
+        </div>
+        @endauth
 
-      @if (session('info'))
-        <div class="login-alert-info">{{ session('info') }}</div>
-      @endif
-
-      <form action="{{ route('login.post') }}" method="POST" onsubmit="onLoginSubmit()">
-        @csrf
-
-        {{-- Email --}}
-        <div class="login-field-group">
-          <label for="desktopLoginEmail" class="login-field-label">Login email</label>
-          <input type="text" 
-                 id="desktopLoginEmail" 
-                 name="email" 
-                 class="login-input-pill" 
-                 value="{{ old('email') }}" 
-                 required 
-                 autofocus>
+        {{-- 1 & 2 & 3: Logo, Nama Brand, Supporting Text --}}
+        <div class="login-brand-badge">
+          <a href="{{ route('home') }}" style="text-decoration: none; display: flex; flex-direction: column; align-items: center;" title="Kembali ke Beranda">
+            @if (!empty($loginContent['brand_logo_url']))
+              <img src="{{ asset($loginContent['brand_logo_url']) }}" 
+                   alt="{{ $loginContent['brand_title'] ?? 'SMART LIVING' }}" 
+                   class="login-logo-sq" 
+                   style="width: {{ $loginContent['brand_logo_size'] ?? 48 }}px; height: {{ $loginContent['brand_logo_size'] ?? 48 }}px; object-fit: contain; background: transparent; box-shadow: none;">
+            @else
+              <div class="login-logo-sq" style="width: {{ $loginContent['brand_logo_size'] ?? 48 }}px; height: {{ $loginContent['brand_logo_size'] ?? 48 }}px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+                  <path d="M9 21V12h6v9"/>
+                </svg>
+              </div>
+            @endif
+            <h1 class="login-brand-title">{{ $loginContent['brand_title'] ?? 'SMART LIVING' }}</h1>
+          </a>
+          <p class="login-form-subtitle">{{ $loginContent['form_subtitle'] ?? 'Please login to your account' }}</p>
         </div>
 
-        {{-- Password --}}
-        <div class="login-field-group">
-          <label for="desktopLoginPwd" class="login-field-label">Password</label>
-          <div class="login-pwd-wrapper">
+        @if (isset($errors) && $errors->any())
+          <div class="login-alert-error">{{ $errors->first() }}</div>
+        @endif
+
+        @if (session('info'))
+          <div class="login-alert-info">{{ session('info') }}</div>
+        @endif
+
+        {{-- Form Login Utama --}}
+        <form action="{{ route('login.post') }}" method="POST" onsubmit="onLoginSubmit()">
+          @csrf
+
+          {{-- 4: Input Email Address dengan Ikon Email --}}
+          <div class="login-input-wrap">
+            <span class="login-input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </span>
+            <input type="text" 
+                   id="loginEmailInput" 
+                   name="email" 
+                   class="login-text-input" 
+                   placeholder="{{ $loginContent['placeholder_email'] ?? 'Email address' }}" 
+                   value="{{ old('email') }}" 
+                   required 
+                   autofocus>
+          </div>
+
+          {{-- 5: Input Password dengan Ikon Gembok & Show/Hide Password --}}
+          <div class="login-input-wrap">
+            <span class="login-input-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </span>
             <input type="password" 
-                   id="desktopLoginPwd" 
+                   id="loginPasswordInput" 
                    name="password" 
-                   class="login-input-pill" 
+                   class="login-text-input has-pwd-toggle" 
+                   placeholder="{{ $loginContent['placeholder_password'] ?? 'Password' }}" 
                    required>
-            <button type="button" class="login-pwd-toggle" onclick="togglePasswordVisibility('desktopLoginPwd', this)" title="Lihat Kata Sandi">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
+            <button type="button" class="login-pwd-toggle" onclick="togglePasswordVisibility('loginPasswordInput', this)" title="Lihat Kata Sandi" aria-label="Lihat Kata Sandi">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
               </svg>
             </button>
           </div>
-        </div>
 
-        <button type="submit" class="login-submit-btn">Log in</button>
+          {{-- 6: Link Forgot password? --}}
+          <div class="login-forgot-wrap">
+            <a href="{{ route('password.request') }}" onclick="openForgotPwdModal(event)" class="login-forgot-link">
+              {{ $loginContent['forgot_password_text'] ?? 'Forgot password?' }}
+            </a>
+          </div>
 
-        <div class="login-divider">
-          <div class="login-divider-line"></div>
-          <span class="login-divider-text">or log in with</span>
-          <div class="login-divider-line"></div>
-        </div>
+          {{-- 7: Tombol Login Hijau Tua --}}
+          <button type="submit" class="login-btn-primary">
+            {{ $loginContent['btn_login_text'] ?? 'Login' }}
+          </button>
 
-        <a href="{{ route('auth.google') }}" class="login-google-btn" title="Masuk dengan Google" aria-label="Masuk dengan Google">
-          <svg class="login-google-icon" width="20" height="20" viewBox="0 0 24 24">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-          </svg>
-          <span>Masuk dengan Google</span>
-        </a>
+          {{-- 8: Tulisan Pemisah Or Login with --}}
+          <div class="login-divider-row">
+            <div class="login-divider-line"></div>
+            <span class="login-divider-label">{{ $loginContent['divider_text'] ?? 'Or Login with' }}</span>
+            <div class="login-divider-line"></div>
+          </div>
 
-        <a href="{{ route('password.request') }}" onclick="openForgotPwdModal(event)" class="login-forgot-link">Forgot login or password?</a>
-
-        <div class="login-back-home-wrap">
-          <a href="{{ route('home') }}" class="login-back-home-link" title="Kembali ke Beranda">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="19" y1="12" x2="5" y2="12"></line>
-              <polyline points="12 19 5 12 12 5"></polyline>
+          {{-- 9: Tombol Login Menggunakan Google Saja --}}
+          <a href="{{ route('auth.google') }}" class="login-btn-google" title="Masuk dengan Google" aria-label="Masuk dengan Google">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
             </svg>
-            <span>Kembali ke Beranda</span>
+            <span>Google</span>
           </a>
-        </div>
-      </form>
-  </div>
-</div>
 
-{{-- =========================================================================
-     TAMPILAN 2: HP / SMARTPHONE / IPHONE (100% SESUAI CONTOH KEDUA)
-     ========================================================================= --}}
-<div class="view-mobile">
-  <div class="mobile-floating-card">
-    <div class="login-brand-header">
-      <a href="{{ route('home') }}" class="login-brand-link" title="Kembali ke Beranda">
-        <img src="{{ asset('assets/images/logo_kos_jember.png') }}" 
-             alt="{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}" 
-             class="login-brand-logo-img" 
-             width="48" 
-             height="48">
-        <h1 class="login-brand-title">{{ !empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING' }}</h1>
-      </a>
+          {{-- 10: Link Kembali Ke Beranda di Paling Bawah --}}
+          <div class="login-back-home-wrap">
+            <a href="{{ route('home') }}" class="login-back-home-link" title="Kembali Ke Beranda">
+              <span>{{ $loginContent['back_home_text'] ?? 'Kembali Ke Beranda' }}</span>
+            </a>
+          </div>
+
+        </form>
+
+      </div>
     </div>
 
-    @if ($errors->any())
-      <div class="login-alert-error">{{ $errors->first() }}</div>
-    @endif
-
-    @if (session('info'))
-      <div class="login-alert-info">{{ session('info') }}</div>
-    @endif
-
-    <form action="{{ route('login.post') }}" method="POST" onsubmit="onLoginSubmit()">
-      @csrf
-
-      {{-- Email --}}
-      <div class="login-field-group">
-        <label for="mobileLoginEmail" class="login-field-label">Login email</label>
-        <input type="text" 
-               id="mobileLoginEmail" 
-               name="email" 
-               class="login-input-pill" 
-               value="{{ old('email') }}" 
-               required>
-      </div>
-
-      {{-- Password --}}
-      <div class="login-field-group">
-        <label for="mobileLoginPwd" class="login-field-label">Password</label>
-        <div class="login-pwd-wrapper">
-          <input type="password" 
-                 id="mobileLoginPwd" 
-                 name="password" 
-                 class="login-input-pill" 
-                 required>
-          <button type="button" class="login-pwd-toggle" onclick="togglePasswordVisibility('mobileLoginPwd', this)" title="Lihat Kata Sandi">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <button type="submit" class="login-submit-btn">Log in</button>
-
-      <div class="login-divider">
-        <div class="login-divider-line"></div>
-        <span class="login-divider-text">or log in with</span>
-        <div class="login-divider-line"></div>
-      </div>
-
-      <a href="{{ route('auth.google') }}" class="login-google-btn" title="Masuk dengan Google" aria-label="Masuk dengan Google">
-        <svg class="login-google-icon" width="20" height="20" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-        </svg>
-        <span>Masuk dengan Google</span>
-      </a>
-
-      <a href="{{ route('password.request') }}" onclick="openForgotPwdModal(event)" class="login-forgot-link">Forgot login or password?</a>
-
-      <div class="login-back-home-wrap">
-        <a href="{{ route('home') }}" class="login-back-home-link" title="Kembali ke Beranda">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>Kembali ke Beranda</span>
-        </a>
-      </div>
-    </form>
   </div>
 </div>
 
 {{-- =========================================================================
-     MODAL POPUP: LUPA PASSWORD / RESET VIA OTP GMAIL
+     MODAL POPUP: RESET PASSWORD VIA OTP GMAIL
      ========================================================================= --}}
 <div id="modalForgotPasswordLogin" class="fp-modal-backdrop" onclick="if(event.target===this) closeForgotPwdModal()">
   <div class="fp-modal-card">
@@ -938,13 +757,13 @@
       </p>
       <div style="margin-bottom: 16px; text-align: left;">
         <label for="modalFpEmailInput" style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px;">Alamat Gmail Terdaftar</label>
-        <input type="email" id="modalFpEmailInput" class="login-input-pill" placeholder="contoh: nama@gmail.com" required style="border-radius: 14px; font-size: 13.5px;">
+        <input type="email" id="modalFpEmailInput" class="login-text-input" placeholder="contoh: nama@gmail.com" required style="padding-left: 16px;">
       </div>
-      <button type="button" id="btnModalFpSendOtp" onclick="modalFpSendOtp()" class="login-submit-btn" style="border-radius: 14px; font-size: 13.5px;">
+      <button type="button" id="btnModalFpSendOtp" onclick="modalFpSendOtp()" class="login-btn-primary">
         Kirim Kode OTP ke Gmail
       </button>
-      <div style="margin-top: 14px;">
-        <a href="{{ route('password.request') }}" style="font-size: 12px; color: #0d9488; text-decoration: underline;">Buka Halaman Reset Lengkap &rarr;</a>
+      <div style="margin-top: 14px; text-align: center;">
+        <a href="{{ route('password.request') }}" style="font-size: 12px; color: #033f3c; text-decoration: underline; font-weight: 600;">Buka Halaman Reset Lengkap &rarr;</a>
       </div>
     </div>
 
@@ -955,22 +774,22 @@
       </p>
       <div style="margin-bottom: 12px; text-align: left;">
         <label for="modalFpOtpInput" style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Kode OTP (6 Digit)</label>
-        <input type="text" id="modalFpOtpInput" class="login-input-pill" maxlength="6" placeholder="123456" style="border-radius: 14px; text-align: center; font-size: 18px; font-weight: 700; letter-spacing: 4px;">
+        <input type="text" id="modalFpOtpInput" class="login-text-input" maxlength="6" placeholder="123456" style="text-align: center; font-size: 18px; font-weight: 700; letter-spacing: 4px; padding-left: 16px;">
       </div>
       <div style="margin-bottom: 12px; text-align: left;">
         <label for="modalFpNewPwd" style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Password Baru</label>
-        <input type="password" id="modalFpNewPwd" class="login-input-pill" placeholder="Minimal 6 karakter" style="border-radius: 14px; font-size: 13.5px;">
+        <input type="password" id="modalFpNewPwd" class="login-text-input" placeholder="Minimal 6 karakter" style="padding-left: 16px;">
       </div>
       <div style="margin-bottom: 16px; text-align: left;">
         <label for="modalFpConfirmPwd" style="display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px;">Konfirmasi Password Baru</label>
-        <input type="password" id="modalFpConfirmPwd" class="login-input-pill" placeholder="Ketik ulang password baru" style="border-radius: 14px; font-size: 13.5px;">
+        <input type="password" id="modalFpConfirmPwd" class="login-text-input" placeholder="Ketik ulang password baru" style="padding-left: 16px;">
       </div>
-      <button type="button" id="btnModalFpSave" onclick="modalFpResetPassword()" class="login-submit-btn" style="border-radius: 14px; font-size: 13.5px;">
+      <button type="button" id="btnModalFpSave" onclick="modalFpResetPassword()" class="login-btn-primary">
         Simpan Password & Masuk
       </button>
       <div style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
         <button type="button" onclick="modalFpBackToEmail()" style="background: none; border: none; color: #64748b; cursor: pointer; text-decoration: underline;">Ubah Email</button>
-        <button type="button" id="btnModalFpResend" onclick="modalFpResendOtp()" style="background: none; border: none; color: #0d9488; cursor: pointer; font-weight: 600;">Kirim Ulang OTP</button>
+        <button type="button" id="btnModalFpResend" onclick="modalFpResendOtp()" style="background: none; border: none; color: #033f3c; cursor: pointer; font-weight: 600;">Kirim Ulang OTP</button>
       </div>
     </div>
   </div>
@@ -986,21 +805,20 @@
     var icon = toggleBtn.querySelector('svg');
     if (icon) {
       if (isPwd) {
-        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
-      } else {
         icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
+      } else {
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>';
       }
     }
   }
 
-  // 1. TRIGGER ROLE INTRO LOADING PADA SUBMIT FORM
   function onLoginSubmit() {
     try {
       sessionStorage.setItem('f3d_from_login', '1');
     } catch(e) {}
   }
 
-  // 2. LOADING INTRO DARI LANDING PAGE KE LOGIN (SNAKE TRACER LOGO)
+  // INTRO OVERLAY DARI LANDING PAGE
   (function() {
     var overlay = document.getElementById('f3dLoginPortalOverlay');
     var bar = document.getElementById('f3dLoginProgressBar');
@@ -1008,7 +826,6 @@
     var sHouse = document.getElementById('f3dLoginSnakeHouse');
     var gDoor = document.getElementById('f3dLoginGreenDoor');
     var sDoor = document.getElementById('f3dLoginSnakeDoor');
-    var portalTimer = null;
     var animRaf = null;
 
     function setSnakePath(baseEl, snakeEl, progress, snakeLen) {
@@ -1040,113 +857,75 @@
       }
     }
 
-    function dismissLoginPortal() {
-      if (portalTimer) clearTimeout(portalTimer);
-      if (animRaf) cancelAnimationFrame(animRaf);
-      if (!overlay) return;
+    var fromLanding = false;
+    try {
+      fromLanding = sessionStorage.getItem('f3d_from_landing') === '1';
+    } catch(e) {}
 
-      setSnakePath(gHouse, sHouse, 1);
-      setSnakePath(gDoor, sDoor, 1);
-      if (bar) bar.style.width = '100%';
+    var hasLoginError = {{ $hasLoginErrors ? 'true' : 'false' }};
 
-      overlay.classList.add('portal-exit');
-      setTimeout(function() {
-        overlay.style.display = 'none';
-        document.documentElement.classList.remove('f3d-login-intro-active');
-      }, 700);
+    if (fromLanding && !hasLoginError && overlay) {
+      overlay.style.display = 'flex';
+      overlay.style.opacity = '1';
+      overlay.style.visibility = 'visible';
 
-      try {
-        sessionStorage.removeItem('f3d_from_landing');
-      } catch(e) {}
-    }
+      var startTime = null;
+      var animDuration = 1800; // durasi smooth intro
 
-    function startLoginSnakeAnimation() {
-      setSnakePath(gHouse, sHouse, 0);
-      setSnakePath(gDoor, sDoor, 0);
-      if (bar) bar.style.width = '0%';
+      function stepAnim(timestamp) {
+        if (!startTime) startTime = timestamp;
+        var elapsed = timestamp - startTime;
+        var p = Math.min(1, elapsed / animDuration);
+        var ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
 
-      var startTime = performance.now();
-      var houseDuration = 1800;
-      var doorDelay = 600;
-      var doorDuration = 1200;
-      var totalDuration = 2300;
+        if (bar) bar.style.width = Math.round(p * 100) + '%';
+        setSnakePath(gHouse, sHouse, ease, 180);
+        setSnakePath(gDoor, sDoor, ease, 140);
 
-      function step(now) {
-        var elapsed = now - startTime;
-
-        var pHouse = Math.min(1, elapsed / houseDuration);
-        setSnakePath(gHouse, sHouse, pHouse, 150);
-
-        if (elapsed < doorDelay) {
-          setSnakePath(gDoor, sDoor, 0);
+        if (p < 1) {
+          animRaf = requestAnimationFrame(stepAnim);
         } else {
-          var pDoor = Math.min(1, (elapsed - doorDelay) / doorDuration);
-          setSnakePath(gDoor, sDoor, pDoor, 130);
-        }
-
-        var pBar = Math.min(1, elapsed / totalDuration);
-        if (bar) bar.style.width = (pBar * 100).toFixed(1) + '%';
-
-        if (elapsed < totalDuration) {
-          animRaf = requestAnimationFrame(step);
-        } else {
-          setSnakePath(gHouse, sHouse, 1);
-          setSnakePath(gDoor, sDoor, 1);
-          if (bar) bar.style.width = '100%';
-
-          portalTimer = setTimeout(function() {
-            dismissLoginPortal();
+          try {
+            sessionStorage.removeItem('f3d_from_landing');
+          } catch(e) {}
+          overlay.style.opacity = '0';
+          setTimeout(function() {
+            overlay.style.display = 'none';
+            overlay.style.visibility = 'hidden';
+            document.documentElement.classList.remove('f3d-login-intro-active');
           }, 350);
         }
       }
 
-      animRaf = requestAnimationFrame(step);
-    }
-
-    function initIntro() {
-      var fromLanding = false;
-      try {
-        fromLanding = sessionStorage.getItem('f3d_from_landing') === '1';
-      } catch(e) {}
-
-      var hasError = {{ $hasLoginErrors ? 'true' : 'false' }};
-      if (fromLanding && !hasError && overlay) {
-        overlay.style.display = 'flex';
-        overlay.style.opacity = '1';
-        overlay.style.visibility = 'visible';
-        startLoginSnakeAnimation();
-      } else if (overlay) {
-        overlay.style.display = 'none';
-        document.documentElement.classList.remove('f3d-login-intro-active');
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initIntro);
-    } else {
-      initIntro();
+      animRaf = requestAnimationFrame(stepAnim);
+    } else if (overlay) {
+      overlay.style.display = 'none';
+      overlay.style.visibility = 'hidden';
+      document.documentElement.classList.remove('f3d-login-intro-active');
     }
   })();
 
-  // 3. MODAL LUPA PASSWORD (AJAX OTP FLOW)
+  // MODAL FORGOT PASSWORD LOGIC
+  var _fpSavedEmail = '';
+
   function openForgotPwdModal(e) {
-    if (e && e.preventDefault) e.preventDefault();
+    if (e) e.preventDefault();
     var modal = document.getElementById('modalForgotPasswordLogin');
-    if (modal) {
-      modal.style.display = 'flex';
-      var emailVal = document.getElementById('desktopLoginEmail')?.value || document.getElementById('mobileLoginEmail')?.value || '';
-      if (emailVal && emailVal.includes('@')) {
-        document.getElementById('modalFpEmailInput').value = emailVal;
-      }
+    if (!modal) return;
+    var loginEmailVal = document.getElementById('loginEmailInput')?.value.trim();
+    if (loginEmailVal && loginEmailVal.includes('@')) {
+      document.getElementById('modalFpEmailInput').value = loginEmailVal;
     }
+    document.getElementById('modalFpStepEmail').style.display = 'block';
+    document.getElementById('modalFpStepOtp').style.display = 'none';
+    document.getElementById('modalFpAlert').style.display = 'none';
+    modal.style.display = 'flex';
   }
 
   function closeForgotPwdModal() {
     var modal = document.getElementById('modalForgotPasswordLogin');
     if (modal) modal.style.display = 'none';
   }
-
-  var _fpSavedEmail = '';
 
   function showFpAlert(msg, isSuccess) {
     var el = document.getElementById('modalFpAlert');
@@ -1258,9 +1037,8 @@
         showFpAlert(data.message || 'Password berhasil diperbarui!', true);
         setTimeout(function() {
           closeForgotPwdModal();
-          // Masukkan email dan password ke form
-          var emailEl = document.getElementById('desktopLoginEmail') || document.getElementById('mobileLoginEmail');
-          var pwdEl = document.getElementById('desktopLoginPwd') || document.getElementById('mobileLoginPwd');
+          var emailEl = document.getElementById('loginEmailInput');
+          var pwdEl = document.getElementById('loginPasswordInput');
           if (emailEl) emailEl.value = _fpSavedEmail;
           if (pwdEl) pwdEl.value = pwd;
         }, 1200);

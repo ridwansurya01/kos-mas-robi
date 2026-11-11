@@ -1564,13 +1564,42 @@ class DashboardController extends Controller
      */
     public function saveLoginPage(Request $request): JsonResponse
     {
+        $setting = Setting::first() ?? new Setting();
+        $landing = $setting->landing_content ?? [];
+        if (!is_array($landing)) {
+            $landing = [];
+        }
+
+        // Handle Reset to Default Action
+        if ($request->input('action') === 'reset' || $request->boolean('is_reset')) {
+            unset($landing['login_page']);
+            $setting->landing_content = $landing;
+            $setting->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pengaturan halaman login berhasil dikembalikan ke standar bawaan!',
+                'login_content' => $setting->fresh()->getLoginPageContent()
+            ]);
+        }
+
         $validated = $request->validate([
-            'brand_title' => 'nullable|string|max:120',
+            'promo_headline' => 'required|string|max:255',
+            'promo_desc' => 'required|string|max:500',
+            'promo_badge' => 'nullable|string|max:100',
+            'brand_title' => 'required|string|max:120',
+            'brand_logo_size' => 'nullable|string|max:10',
+            'brand_logo' => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:4096',
+            'form_title' => 'nullable|string|max:120',
+            'form_subtitle' => 'required|string|max:150',
+            'placeholder_email' => 'required|string|max:100',
+            'placeholder_password' => 'required|string|max:100',
+            'forgot_password_text' => 'required|string|max:100',
+            'btn_login_text' => 'required|string|max:100',
+            'divider_text' => 'required|string|max:100',
+            'back_home_text' => 'required|string|max:100',
             'headline' => 'nullable|string|max:255',
             'desc' => 'nullable|string|max:500',
-            'feature_1' => 'nullable|string|max:150',
-            'feature_2' => 'nullable|string|max:150',
-            'feature_3' => 'nullable|string|max:150',
             'notice_title' => 'nullable|string|max:120',
             'notice_text' => 'nullable|string|max:500',
             'notice_btn_text' => 'nullable|string|max:100',
@@ -1578,30 +1607,36 @@ class DashboardController extends Controller
             'wa_help_message' => 'nullable|string|max:500',
         ]);
 
-        $setting = Setting::first() ?? new Setting();
-        $landing = $setting->landing_content ?? [];
-        if (!is_array($landing)) {
-            $landing = [];
-        }
-
-        $features = [];
-        if (!empty($validated['feature_1'])) $features[] = trim($validated['feature_1']);
-        if (!empty($validated['feature_2'])) $features[] = trim($validated['feature_2']);
-        if (!empty($validated['feature_3'])) $features[] = trim($validated['feature_3']);
-
-        if (empty($features)) {
-            $features = [
-                'Akses Portal Layanan Penghuni 24 Jam',
-                'Konfirmasi Pembayaran & Kuitansi Digital',
-                'Smart Key Mandiri & CCTV Seluruh Lorong'
-            ];
+        $existingLogo = $landing['login_page']['brand_logo_url'] ?? null;
+        if ($request->hasFile('brand_logo')) {
+            $file = $request->file('brand_logo');
+            $filename = 'login_brand_logo_' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/images/landing'), $filename);
+            $logoUrl = 'assets/images/landing/' . $filename;
+        } elseif ($request->boolean('remove_logo')) {
+            $logoUrl = null;
+        } else {
+            $logoUrl = $existingLogo;
         }
 
         $loginPageData = [
-            'brand_title' => !empty($validated['brand_title']) ? trim($validated['brand_title']) : ($setting->kos_name ?? 'SMART LIVING'),
-            'headline' => !empty($validated['headline']) ? trim($validated['headline']) : "Smart Living &\nKost Eksklusif",
-            'desc' => !empty($validated['desc']) ? trim($validated['desc']) : 'Sistem manajemen hunian modern, nyaman, full furnished, dan aman 24 jam di Sleman, DI Yogyakarta.',
-            'features' => $features,
+            'brand_title' => trim($validated['brand_title']),
+            'brand_logo_url' => $logoUrl,
+            'brand_logo_size' => !empty($validated['brand_logo_size']) ? trim($validated['brand_logo_size']) : '48',
+            'promo_headline' => trim($validated['promo_headline']),
+            'promo_desc' => trim($validated['promo_desc']),
+            'promo_badge' => !empty($validated['promo_badge']) ? trim($validated['promo_badge']) : 'Exclusive Management',
+            'form_title' => !empty($validated['form_title']) ? trim($validated['form_title']) : trim($validated['brand_title']),
+            'form_subtitle' => trim($validated['form_subtitle']),
+            'placeholder_email' => trim($validated['placeholder_email']),
+            'placeholder_password' => trim($validated['placeholder_password']),
+            'forgot_password_text' => trim($validated['forgot_password_text']),
+            'btn_login_text' => trim($validated['btn_login_text']),
+            'divider_text' => trim($validated['divider_text']),
+            'back_home_text' => trim($validated['back_home_text']),
+            // Backward compatibility
+            'headline' => trim($validated['promo_headline']),
+            'desc' => trim($validated['promo_desc']),
             'notice_title' => !empty($validated['notice_title']) ? trim($validated['notice_title']) : 'Belum Memiliki Akun?',
             'notice_text' => !empty($validated['notice_text']) ? trim($validated['notice_text']) : 'Pembuatan akun baru hanya dilakukan langsung oleh Admin saat penempatan kamar.',
             'notice_btn_text' => !empty($validated['notice_btn_text']) ? trim($validated['notice_btn_text']) : 'Hubungi Admin via WhatsApp',

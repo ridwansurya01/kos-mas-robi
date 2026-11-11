@@ -3065,16 +3065,14 @@ body.flutter-3d-enabled .lr-loc-map-wrap {
 
 /* 3. Fitur Fasilitas: Bento Text Mask Reveal */
 [data-spatial-reveal="bento-text"].lr-reveal-init {
-  opacity: 0;
-  transform: translateY(30px);
-  filter: blur(6px);
-  clip-path: inset(0 0 100% 0);
+  opacity: 0.9;
+  transform: translateY(14px);
+  filter: none;
 }
 [data-spatial-reveal="bento-text"].lr-revealed {
   opacity: 1;
   transform: translateY(0);
-  filter: blur(0px);
-  clip-path: inset(0 0 0% 0);
+  filter: none;
 }
 
 /* 4. Fitur Fasilitas: Domino Slide Stack Pills */

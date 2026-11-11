@@ -1508,89 +1508,228 @@
       }
     };
 
-    // 7.1 PENGATURAN LOGIN PAGE (LIVE PREVIEW & SUBMISSION)
-    window.updateLoginPreview = function() {
-      var brand = document.getElementById('lp_brand_title');
-      var headline = document.getElementById('lp_headline');
-      var desc = document.getElementById('lp_desc');
-      var f1 = document.getElementById('lp_feature_1');
-      var f2 = document.getElementById('lp_feature_2');
-      var f3 = document.getElementById('lp_feature_3');
-      var nTitle = document.getElementById('lp_notice_title');
-      var nText = document.getElementById('lp_notice_text');
-      var nBtn = document.getElementById('lp_notice_btn_text');
+    // Helper Toast Notification Universal
+    if (!window.showToast) {
+      window.showToast = function(msg, type) {
+        var toast = document.createElement('div');
+        toast.className = 'toast-notification ' + (type || 'info');
+        toast.textContent = msg;
+        toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:999999;padding:12px 22px;border-radius:14px;font-size:13.5px;font-weight:700;box-shadow:0 12px 32px rgba(0,0,0,0.18);transition:all 0.3s cubic-bezier(0.16,1,0.3,1);transform:translateY(24px);opacity:0;';
+        if (type === 'success') {
+          toast.style.background = '#033f3c';
+          toast.style.color = '#ffffff';
+          toast.style.border = '1px solid #10b981';
+        } else if (type === 'error') {
+          toast.style.background = '#dc2626';
+          toast.style.color = '#ffffff';
+        } else {
+          toast.style.background = '#1e293b';
+          toast.style.color = '#ffffff';
+        }
+        document.body.appendChild(toast);
+        setTimeout(function() {
+          toast.style.transform = 'translateY(0)';
+          toast.style.opacity = '1';
+        }, 20);
+        setTimeout(function() {
+          toast.style.transform = 'translateY(24px)';
+          toast.style.opacity = '0';
+          setTimeout(function() { toast.remove(); }, 350);
+        }, 3600);
+      };
+    }
 
-      var pBrand = document.getElementById('prevBrandTitle');
-      var pHead = document.getElementById('prevHeadline');
-      var pDesc = document.getElementById('prevDesc');
-      var pF1 = document.getElementById('prevFeat1');
-      var pF2 = document.getElementById('prevFeat2');
-      var pF3 = document.getElementById('prevFeat3');
-      var pNTitle = document.getElementById('prevNoticeTitle');
-      var pNText = document.getElementById('prevNoticeText');
-      var pNBtn = document.getElementById('prevNoticeBtnText');
+    // 7.1 PENGATURAN LANDING PAGE & HALAMAN LOGIN (LIVE PREVIEW, LOGO, & SUBMISSION)
+    window.updateLiveLoginPreview = function() {
+      var pHead = document.getElementById('lp_promo_headline');
+      var pDesc = document.getElementById('lp_promo_desc');
+      var bTitle = document.getElementById('lp_brand_title');
+      var fSub = document.getElementById('lp_form_subtitle');
+      var phEmail = document.getElementById('lp_placeholder_email');
+      var phPwd = document.getElementById('lp_placeholder_password');
+      var fPwd = document.getElementById('lp_forgot_password_text');
+      var bLogin = document.getElementById('lp_btn_login_text');
+      var divText = document.getElementById('lp_divider_text');
+      var bHome = document.getElementById('lp_back_home_text');
+      var logoSize = document.getElementById('lp_brand_logo_size');
 
-      if (pBrand && brand) pBrand.textContent = brand.value || 'SMART LIVING';
-      if (pHead && headline) pHead.innerHTML = (headline.value || 'Smart Living & Kost Eksklusif').replace(/\n/g, '<br>');
-      if (pDesc && desc) pDesc.textContent = desc.value || '';
-      if (pF1 && f1) pF1.textContent = f1.value || '';
-      if (pF2 && f2) pF2.textContent = f2.value || '';
-      if (pF3 && f3) pF3.textContent = f3.value || '';
-      if (pNTitle && nTitle) pNTitle.textContent = nTitle.value || 'Belum Memiliki Akun?';
-      if (pNText && nText) pNText.textContent = nText.value || '';
-      if (pNBtn && nBtn) pNBtn.textContent = nBtn.value || 'Hubungi Admin via WhatsApp';
+      var prevHead = document.getElementById('prevPromoHeadline');
+      var prevDesc = document.getElementById('prevPromoDesc');
+      var prevTitle = document.getElementById('prevBrandTitle');
+      var prevSub = document.getElementById('prevFormSubtitle');
+      var prevEmail = document.getElementById('prevPlaceholderEmail');
+      var prevPwd = document.getElementById('prevPlaceholderPassword');
+      var prevForgot = document.getElementById('prevForgotText');
+      var prevBtn = document.getElementById('prevBtnLogin');
+      var prevDiv = document.getElementById('prevDividerText');
+      var prevHome = document.getElementById('prevBackHomeText');
+      var prevLogoWrap = document.getElementById('prevLogoWrap');
+
+      if (prevHead && pHead) prevHead.textContent = pHead.value || "Simplify\nmanagement with\nour dashboard.";
+      if (prevDesc && pDesc) prevDesc.textContent = pDesc.value || 'Simplify your e-commerce management with our user-friendly admin dashboard.';
+      if (prevTitle && bTitle) prevTitle.textContent = bTitle.value || 'SMART LIVING';
+      if (prevSub && fSub) prevSub.textContent = fSub.value || 'Please login to your account';
+      if (prevEmail && phEmail) prevEmail.textContent = phEmail.value || 'Email address';
+      if (prevPwd && phPwd) prevPwd.textContent = phPwd.value || 'Password';
+      if (prevForgot && fPwd) prevForgot.textContent = fPwd.value || 'Forgot password?';
+      if (prevBtn && bLogin) prevBtn.textContent = bLogin.value || 'Login';
+      if (prevDiv && divText) prevDiv.textContent = divText.value || 'Or Login with';
+      if (prevHome && bHome) prevHome.textContent = bHome.value || 'Kembali Ke Beranda';
+
+      if (prevLogoWrap && logoSize) {
+        var sz = parseInt(logoSize.value, 10) || 48;
+        prevLogoWrap.style.width = sz + 'px';
+        prevLogoWrap.style.height = sz + 'px';
+      }
     };
 
-    window.resetLoginPageDefaults = function() {
-      if (!confirm('Kembalikan seluruh teks Login Page ke template standar sistem?')) return;
-      var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
-      setVal('lp_brand_title', 'SMART LIVING');
-      setVal('lp_headline', "Smart Living &\nKost Eksklusif");
-      setVal('lp_desc', 'Sistem manajemen hunian modern, nyaman, full furnished, dan aman 24 jam di Sleman, DI Yogyakarta.');
-      setVal('lp_feature_1', 'Akses Portal Layanan Penghuni 24 Jam');
-      setVal('lp_feature_2', 'Konfirmasi Pembayaran & Kuitansi Digital');
-      setVal('lp_feature_3', 'Smart Key Mandiri & CCTV Seluruh Lorong');
-      setVal('lp_notice_title', 'Belum Memiliki Akun?');
-      setVal('lp_notice_text', 'Pembuatan akun baru hanya dilakukan langsung oleh Admin saat penempatan kamar.');
-      setVal('lp_notice_btn_text', 'Hubungi Admin via WhatsApp');
-      window.updateLoginPreview();
+    window.previewLoginBrandLogo = function(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var formImg = document.getElementById('lpBrandLogoPreviewImg');
+          var formIcon = document.getElementById('lpBrandLogoDefaultIcon');
+          var prevImg = document.getElementById('prevLogoImg');
+          var prevIcon = document.getElementById('prevLogoIcon');
+          var removeInput = document.getElementById('lp_remove_logo');
+
+          if (formImg) {
+            formImg.src = e.target.result;
+            formImg.style.display = 'block';
+          }
+          if (formIcon) formIcon.style.display = 'none';
+          if (prevImg) {
+            prevImg.src = e.target.result;
+            prevImg.style.display = 'block';
+          }
+          if (prevIcon) prevIcon.style.display = 'none';
+          if (removeInput) removeInput.value = '0';
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    };
+
+    window.removeCustomLoginLogo = function() {
+      if (!confirm('Hapus logo kustom dan gunakan icon standar SMART LIVING?')) return;
+      var fileInput = document.getElementById('lp_brand_logo');
+      var removeInput = document.getElementById('lp_remove_logo');
+      var formImg = document.getElementById('lpBrandLogoPreviewImg');
+      var formIcon = document.getElementById('lpBrandLogoDefaultIcon');
+      var prevImg = document.getElementById('prevLogoImg');
+      var prevIcon = document.getElementById('prevLogoIcon');
+
+      if (fileInput) fileInput.value = '';
+      if (removeInput) removeInput.value = '1';
+      if (formImg) {
+        formImg.src = '';
+        formImg.style.display = 'none';
+      }
+      if (formIcon) formIcon.style.display = 'block';
+      if (prevImg) {
+        prevImg.src = '';
+        prevImg.style.display = 'none';
+      }
+      if (prevIcon) prevIcon.style.display = 'block';
+    };
+
+    window.resetLoginPageSettings = function() {
+      if (!confirm('Kembalikan seluruh teks, logo, dan formulir Login Page ke pengaturan default bawaan sistem?')) return;
+      var btn = document.getElementById('btnResetLoginPage');
+      if (btn) btn.disabled = true;
+
+      fetch('/api/settings/login-page', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ action: 'reset' })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success && data.login_content) {
+          var lc = data.login_content;
+          var setVal = function(id, val) { var el = document.getElementById(id); if (el) el.value = val; };
+          setVal('lp_promo_headline', lc.promo_headline || "Simplify\nmanagement with\nour dashboard.");
+          setVal('lp_promo_desc', lc.promo_desc || 'Simplify your e-commerce management with our user-friendly admin dashboard.');
+          setVal('lp_promo_badge', lc.promo_badge || 'Exclusive Management');
+          setVal('lp_brand_title', lc.brand_title || 'SMART LIVING');
+          setVal('lp_form_subtitle', lc.form_subtitle || 'Please login to your account');
+          setVal('lp_placeholder_email', lc.placeholder_email || 'Email address');
+          setVal('lp_placeholder_password', lc.placeholder_password || 'Password');
+          setVal('lp_forgot_password_text', lc.forgot_password_text || 'Forgot password?');
+          setVal('lp_btn_login_text', lc.btn_login_text || 'Login');
+          setVal('lp_divider_text', lc.divider_text || 'Or Login with');
+          setVal('lp_back_home_text', lc.back_home_text || 'Kembali Ke Beranda');
+          setVal('lp_brand_logo_size', lc.brand_logo_size || 48);
+          setVal('lp_brand_logo_size_slider', lc.brand_logo_size || 48);
+
+          var formImg = document.getElementById('lpBrandLogoPreviewImg');
+          var formIcon = document.getElementById('lpBrandLogoDefaultIcon');
+          var prevImg = document.getElementById('prevLogoImg');
+          var prevIcon = document.getElementById('prevLogoIcon');
+          if (formImg) formImg.style.display = 'none';
+          if (formIcon) formIcon.style.display = 'block';
+          if (prevImg) prevImg.style.display = 'none';
+          if (prevIcon) prevIcon.style.display = 'block';
+
+          window.updateLiveLoginPreview();
+          if (typeof window.showToast === 'function') {
+            window.showToast(data.message || 'Pengaturan berhasil dikembalikan ke standar!', 'success');
+          }
+        } else {
+          alert(data.message || 'Gagal mereset pengaturan.');
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        alert('Terjadi kesalahan koneksi.');
+      })
+      .finally(function() {
+        if (btn) btn.disabled = false;
+      });
     };
 
     document.addEventListener('DOMContentLoaded', function() {
-      var loginForm = document.getElementById('loginPageEditorForm');
-      if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
+      // Bind live preview on input in login editor
+      var loginEditor = document.getElementById('loginPageEditorForm');
+      if (loginEditor) {
+        loginEditor.querySelectorAll('input, textarea').forEach(function(input) {
+          input.addEventListener('input', window.updateLiveLoginPreview);
+        });
+
+        loginEditor.addEventListener('submit', function(e) {
           e.preventDefault();
           var btn = document.getElementById('btnSaveLoginPage');
-          var btnBottom = document.getElementById('btnSaveLoginPageBottom');
           var statusEl = document.getElementById('loginPageSaveStatus');
           if (btn) btn.disabled = true;
-          if (btnBottom) btnBottom.disabled = true;
           if (statusEl) {
-            statusEl.textContent = 'Menyimpan...';
-            statusEl.style.color = '#0a5661';
+            statusEl.textContent = 'Menyimpan perubahan...';
+            statusEl.style.color = '#033f3c';
           }
 
-          var formData = new FormData(loginForm);
+          var formData = new FormData(loginEditor);
           fetch('/api/settings/login-page', {
             method: 'POST',
             headers: {
-              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+              'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+              'Accept': 'application/json'
             },
             body: formData
           })
           .then(function(res) { return res.json(); })
           .then(function(data) {
             if (data.success) {
-              if (typeof showToast === 'function') {
-                showToast(data.message || 'Pengaturan tampilan Login Page berhasil disimpan!', 'success');
+              if (typeof window.showToast === 'function') {
+                window.showToast(data.message || 'Pengaturan Landing Page berhasil disimpan!', 'success');
               } else {
-                alert(data.message || 'Pengaturan Login Page berhasil disimpan!');
+                alert(data.message || 'Pengaturan Landing Page berhasil disimpan!');
               }
               if (statusEl) {
-                statusEl.textContent = 'Tersimpan!';
+                statusEl.textContent = 'Berhasil disimpan!';
                 statusEl.style.color = '#10b981';
-                setTimeout(function() { statusEl.textContent = ''; }, 3000);
+                setTimeout(function() { statusEl.textContent = ''; }, 3500);
               }
             } else {
               alert(data.message || 'Gagal menyimpan pengaturan');
@@ -1604,7 +1743,6 @@
           })
           .finally(function() {
             if (btn) btn.disabled = false;
-            if (btnBottom) btnBottom.disabled = false;
           });
         });
       }
@@ -4652,7 +4790,7 @@
         <div style="margin-bottom: 26px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px;">
           <div class="settings-segmented-nav" id="settingsSubTabNav" style="display: flex; gap: 4px; background: transparent; padding: 0; border-radius: 0;">
             <button type="button" class="settings-nav-btn btn-settings-subtab active" data-subtab="subtab-landing" onclick="switchSettingsSubtab('subtab-landing', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
-              <span>Landing Page</span>
+              <span>Pengaturan Landing Page</span>
             </button>
             <button type="button" class="settings-nav-btn btn-settings-subtab" data-subtab="subtab-location" onclick="switchSettingsSubtab('subtab-location', this)" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 12px; font-weight: 700; font-size: 0.84rem; transition: all 0.2s;">
               <span>Titik Lokasi</span>
@@ -4671,6 +4809,7 @@
 
         @php
           $lc = $setting->landing_content ?? [];
+          $loginContent = $setting ? $setting->getLoginPageContent() : [];
           $bGallery = $lc['bento_gallery'] ?? [
               'assets/images/hero_scandinavian_room.webp',
               'assets/images/rooms/room_2.webp',
@@ -4680,9 +4819,292 @@
         @endphp
 
         <!-- =========================================================================
-             SUBTAB 1: KELOLA TAMPILAN & FOTO LANDING PAGE
+             SUBTAB 1: PENGATURAN LANDING PAGE & HALAMAN LOGIN
              ========================================================================= -->
         <div class="settings-subtab-pane active" id="subtab-landing">
+
+          <!-- =====================================================================
+               CARD UTAMA: PENGATURAN KONTEN HALAMAN LOGIN & BRANDING SMART LIVING
+               ===================================================================== -->
+          <div class="settings-modern-card" style="margin-bottom: 24px; border: 1.5px solid rgba(3, 63, 60, 0.2); box-shadow: 0 12px 36px -10px rgba(3, 63, 60, 0.1);">
+            <div class="settings-card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 18px; margin-bottom: 22px;">
+              <div class="settings-card-title-group">
+                <div class="settings-card-icon-badge" style="background: rgba(3, 63, 60, 0.12); color: #033f3c;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="settings-card-title" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary);">Pengaturan Konten Halaman Login & Branding</h3>
+                  <div class="settings-card-subtitle">Ubah seluruh teks promosi, nama brand, logo, serta formulir login secara dinamis dan real-time</div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <span style="font-size: 0.74rem; background: rgba(3, 63, 60, 0.08); color: #033f3c; padding: 5px 12px; border-radius: 9999px; font-weight: 700; border: 1px solid rgba(3, 63, 60, 0.15);">Tersinkronisasi Database</span>
+                <a href="{{ route('login') }}" target="_blank" class="btn-secondary" style="font-size: 0.76rem; padding: 5px 12px; border-radius: 9999px; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                  <span>Buka Login ↗</span>
+                </a>
+              </div>
+            </div>
+
+            <form id="loginPageEditorForm" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 24px;">
+              @csrf
+
+              <!-- SECTION A: PENGATURAN PROMOTIONAL SECTION (BAGIAN KIRI) -->
+              <div style="background: var(--bg-hover, rgba(0,0,0,0.02)); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #033f3c; color: #fff; font-weight: 800; font-size: 0.8rem;">A</span>
+                  <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Pengaturan Promotional Section (Panel Kiri Hijau)</h4>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px;">
+                  <div class="form-group">
+                    <label for="lp_promo_headline" style="font-weight: 700; font-size: 0.85rem;">Headline Utama Promosi (Gunakan Enter untuk Baris Baru)</label>
+                    <textarea id="lp_promo_headline" name="promo_headline" class="form-control" rows="3" required placeholder="Simplify&#10;management with&#10;our dashboard." style="font-weight: 700; font-size: 0.95rem;">{{ $loginContent['promo_headline'] ?? "Simplify\nmanagement with\nour dashboard." }}</textarea>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px; display: block;">Tulisan judul tebal berwarna putih dengan lengkung hijau di panel kiri.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_promo_desc" style="font-weight: 700; font-size: 0.85rem;">Supporting Text (Deskripsi Pendukung)</label>
+                    <textarea id="lp_promo_desc" name="promo_desc" class="form-control" rows="3" required placeholder="Simplify your e-commerce management with our user-friendly admin dashboard.">{{ $loginContent['promo_desc'] ?? 'Simplify your e-commerce management with our user-friendly admin dashboard.' }}</textarea>
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px; display: block;">Deskripsi penjelasan di bawah headline utama panel kiri.</span>
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 14px;">
+                  <label for="lp_promo_badge" style="font-weight: 700; font-size: 0.85rem;">Teks Tambahan / Badge Kategori (Opsional)</label>
+                  <input type="text" id="lp_promo_badge" name="promo_badge" class="form-control" value="{{ $loginContent['promo_badge'] ?? 'Exclusive Management' }}" placeholder="Exclusive Management">
+                </div>
+              </div>
+
+              <!-- SECTION B: PENGATURAN BRANDING & LOGO -->
+              <div style="background: var(--bg-hover, rgba(0,0,0,0.02)); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #033f3c; color: #fff; font-weight: 800; font-size: 0.8rem;">B</span>
+                  <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Pengaturan Branding & Logo SMART LIVING</h4>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; align-items: start;">
+                  <div class="form-group">
+                    <label for="lp_brand_title" style="font-weight: 700; font-size: 0.85rem;">Nama Brand / Judul Brand</label>
+                    <input type="text" id="lp_brand_title" name="brand_title" class="form-control" value="{{ $loginContent['brand_title'] ?? 'SMART LIVING' }}" required placeholder="SMART LIVING" style="font-weight: 800; letter-spacing: 0.5px;">
+                    <span style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 4px; display: block;">Ditampilkan dengan huruf kapital di atas formulir login.</span>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_brand_logo_size" style="font-weight: 700; font-size: 0.85rem;">Ukuran Tampilan Logo (px)</label>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <input type="range" id="lp_brand_logo_size_slider" min="32" max="72" step="2" value="{{ $loginContent['brand_logo_size'] ?? 48 }}" style="flex: 1;" oninput="document.getElementById('lp_brand_logo_size').value = this.value; updateLiveLoginPreview();">
+                      <input type="number" id="lp_brand_logo_size" name="brand_logo_size" class="form-control" value="{{ $loginContent['brand_logo_size'] ?? 48 }}" min="32" max="72" style="width: 75px; text-align: center; font-weight: 700;" oninput="document.getElementById('lp_brand_logo_size_slider').value = this.value; updateLiveLoginPreview();">
+                    </div>
+                  </div>
+
+                  <!-- Upload Logo Box -->
+                  <div class="form-group">
+                    <label style="font-weight: 700; font-size: 0.85rem;">Upload Logo SMART LIVING</label>
+                    <div style="display: flex; align-items: center; gap: 14px;">
+                      <div id="lpBrandLogoPreviewWrap" style="width: 52px; height: 52px; border-radius: 14px; background: #033f3c; display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; border: 1px solid var(--border-color);">
+                        @if (!empty($loginContent['brand_logo_url']))
+                          <img id="lpBrandLogoPreviewImg" src="{{ asset($loginContent['brand_logo_url']) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                          <svg id="lpBrandLogoDefaultIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+                            <path d="M9 21V12h6v9"/>
+                          </svg>
+                        @else
+                          <svg id="lpBrandLogoDefaultIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+                            <path d="M9 21V12h6v9"/>
+                          </svg>
+                          <img id="lpBrandLogoPreviewImg" src="" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; display: none;">
+                        @endif
+                      </div>
+                      <div style="flex: 1;">
+                        <input type="file" id="lp_brand_logo" name="brand_logo" accept="image/*" class="form-control" style="font-size: 0.78rem; padding: 6px 10px;" onchange="previewLoginBrandLogo(this)">
+                        <input type="hidden" id="lp_remove_logo" name="remove_logo" value="0">
+                        @if (!empty($loginContent['brand_logo_url']))
+                          <button type="button" onclick="removeCustomLoginLogo()" style="margin-top: 6px; background: none; border: none; font-size: 0.74rem; color: #dc2626; cursor: pointer; text-decoration: underline; padding: 0;">
+                            Hapus logo kustom (Gunakan icon rumah hijau standar)
+                          </button>
+                        @endif
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION C: PENGATURAN FORMULIR HALAMAN LOGIN -->
+              <div style="background: var(--bg-hover, rgba(0,0,0,0.02)); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                  <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 8px; background: #033f3c; color: #fff; font-weight: 800; font-size: 0.8rem;">C</span>
+                  <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Pengaturan Teks Formulir Login (Panel Kanan)</h4>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  <div class="form-group">
+                    <label for="lp_form_subtitle" style="font-weight: 700; font-size: 0.85rem;">Subtitle / Petunjuk Login</label>
+                    <input type="text" id="lp_form_subtitle" name="form_subtitle" class="form-control" value="{{ $loginContent['form_subtitle'] ?? 'Please login to your account' }}" required placeholder="Please login to your account">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_placeholder_email" style="font-weight: 700; font-size: 0.85rem;">Placeholder Kolom Email</label>
+                    <input type="text" id="lp_placeholder_email" name="placeholder_email" class="form-control" value="{{ $loginContent['placeholder_email'] ?? 'Email address' }}" required placeholder="Email address">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_placeholder_password" style="font-weight: 700; font-size: 0.85rem;">Placeholder Kolom Password</label>
+                    <input type="text" id="lp_placeholder_password" name="placeholder_password" class="form-control" value="{{ $loginContent['placeholder_password'] ?? 'Password' }}" required placeholder="Password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_forgot_password_text" style="font-weight: 700; font-size: 0.85rem;">Tulisan Link Forgot Password</label>
+                    <input type="text" id="lp_forgot_password_text" name="forgot_password_text" class="form-control" value="{{ $loginContent['forgot_password_text'] ?? 'Forgot password?' }}" required placeholder="Forgot password?">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_btn_login_text" style="font-weight: 700; font-size: 0.85rem;">Tulisan Tombol Utama Login</label>
+                    <input type="text" id="lp_btn_login_text" name="btn_login_text" class="form-control" value="{{ $loginContent['btn_login_text'] ?? 'Login' }}" required placeholder="Login">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lp_divider_text" style="font-weight: 700; font-size: 0.85rem;">Tulisan Pemisah (Or Login with)</label>
+                    <input type="text" id="lp_divider_text" name="divider_text" class="form-control" value="{{ $loginContent['divider_text'] ?? 'Or Login with' }}" required placeholder="Or Login with">
+                  </div>
+
+                  <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="lp_back_home_text" style="font-weight: 700; font-size: 0.85rem;">Tulisan Link Kembali ke Beranda</label>
+                    <input type="text" id="lp_back_home_text" name="back_home_text" class="form-control" value="{{ $loginContent['back_home_text'] ?? 'Kembali Ke Beranda' }}" required placeholder="Kembali Ke Beranda">
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION D: PRATINJAU INTERAKTIF (LIVE PREVIEW) REAL-TIME -->
+              <div style="background: #f8fafc; border: 1.5px dashed var(--border-color); border-radius: 20px; padding: 22px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #10b981; animation: pulse 1.8s infinite;"></span>
+                    <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Pratinjau Interaktif Real-time (Live Preview)</h4>
+                  </div>
+                  <span style="font-size: 0.74rem; color: var(--text-secondary); background: #ffffff; padding: 4px 10px; border-radius: 9999px; border: 1px solid var(--border-color);">Tampilan akan otomatis berubah saat Anda mengetik di formulir atas</span>
+                </div>
+
+                <!-- PREVIEW CONTAINER CARD (SCALEABLE MOCKUP) -->
+                <div style="max-width: 820px; margin: 0 auto; background: #ffffff; border-radius: 28px; padding: 14px; box-shadow: 0 16px 40px -10px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  
+                  <!-- Left Promo Mockup -->
+                  <div style="background-color: #033f3c; background-image: url('{{ asset('assets/images/landing/login_left_card_clean.webp') }}'); background-repeat: no-repeat; background-size: cover; background-position: center bottom; border-radius: 20px; padding: 28px 24px 180px; position: relative; overflow: hidden; min-height: 380px;">
+                    <div style="position: relative; z-index: 2;">
+                      <div id="prevPromoHeadline" style="font-family: 'Outfit', sans-serif; font-size: 19px; font-weight: 800; color: #ffffff; line-height: 1.22; margin-bottom: 4px; white-space: pre-line;">
+                        {{ $loginContent['promo_headline'] ?? "Simplify\nmanagement with\nour dashboard." }}
+                      </div>
+                      <svg width="80" height="10" viewBox="0 0 118 12" fill="none" style="display: block; margin: 4px 0 10px;">
+                        <path d="M3 4C35 12 83 12 115 4" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+                      </svg>
+                      <div id="prevPromoDesc" style="color: rgba(255, 255, 255, 0.85); font-size: 11px; line-height: 1.5; max-width: 240px;">
+                        {{ $loginContent['promo_desc'] ?? 'Simplify your e-commerce management with our user-friendly admin dashboard.' }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Right Form Mockup -->
+                  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 12px;">
+                    <div style="width: 100%; max-width: 270px; display: flex; flex-direction: column; align-items: center;">
+                      
+                      <!-- Logo preview -->
+                      <div id="prevLogoWrap" style="width: {{ $loginContent['brand_logo_size'] ?? 48 }}px; height: {{ $loginContent['brand_logo_size'] ?? 48 }}px; border-radius: 12px; background: #033f3c; display: flex; align-items: center; justify-content: center; color: #ffffff; margin-bottom: 8px;">
+                        @if (!empty($loginContent['brand_logo_url']))
+                          <img id="prevLogoImg" src="{{ asset($loginContent['brand_logo_url']) }}" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                          <svg id="prevLogoIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" style="display: none;">
+                            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+                            <path d="M9 21V12h6v9"/>
+                          </svg>
+                        @else
+                          <svg id="prevLogoIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2">
+                            <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 20V9.5z"/>
+                            <path d="M9 21V12h6v9"/>
+                          </svg>
+                          <img id="prevLogoImg" src="" alt="Logo" style="width: 100%; height: 100%; object-fit: contain; display: none;">
+                        @endif
+                      </div>
+
+                      <div id="prevBrandTitle" style="font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: #111827; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px;">
+                        {{ $loginContent['brand_title'] ?? 'SMART LIVING' }}
+                      </div>
+                      <div id="prevFormSubtitle" style="font-size: 10px; color: #6b7280; margin-bottom: 16px;">
+                        {{ $loginContent['form_subtitle'] ?? 'Please login to your account' }}
+                      </div>
+
+                      <!-- Mock Email -->
+                      <div style="width: 100%; height: 36px; border-radius: 10px; border: 1.5px solid #e5e7eb; padding: 0 10px; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; background: #fff;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        <span id="prevPlaceholderEmail" style="font-size: 10.5px; color: #9ca3af;">{{ $loginContent['placeholder_email'] ?? 'Email address' }}</span>
+                      </div>
+
+                      <!-- Mock Password -->
+                      <div style="width: 100%; height: 36px; border-radius: 10px; border: 1.5px solid #e5e7eb; padding: 0 10px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; background: #fff;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                          <span id="prevPlaceholderPassword" style="font-size: 10.5px; color: #9ca3af;">{{ $loginContent['placeholder_password'] ?? 'Password' }}</span>
+                        </div>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.8"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                      </div>
+
+                      <!-- Mock Forgot -->
+                      <div style="width: 100%; text-align: right; margin-bottom: 12px;">
+                        <span id="prevForgotText" style="font-size: 9.5px; font-weight: 600; color: #033f3c;">{{ $loginContent['forgot_password_text'] ?? 'Forgot password?' }}</span>
+                      </div>
+
+                      <!-- Mock Submit -->
+                      <div style="width: 100%; height: 36px; border-radius: 10px; background: #033f3c; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+                        <span id="prevBtnLogin">{{ $loginContent['btn_login_text'] ?? 'Login' }}</span>
+                      </div>
+
+                      <!-- Mock Divider -->
+                      <div style="width: 100%; display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                        <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
+                        <span id="prevDividerText" style="font-size: 9px; color: #9ca3af;">{{ $loginContent['divider_text'] ?? 'Or Login with' }}</span>
+                        <div style="flex: 1; height: 1px; background: #e5e7eb;"></div>
+                      </div>
+
+                      <!-- Mock Google -->
+                      <div style="width: 100%; height: 36px; border-radius: 10px; border: 1.5px solid #e5e7eb; background: #fff; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 700; color: #1f2937; margin-bottom: 12px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+                        <span>Google</span>
+                      </div>
+
+                      <!-- Mock Back Home -->
+                      <span id="prevBackHomeText" style="font-size: 10px; font-weight: 600; color: #033f3c;">
+                        {{ $loginContent['back_home_text'] ?? 'Kembali Ke Beranda' }}
+                      </span>
+
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- ACTION BAR BUTTONS -->
+              <div style="display: flex; gap: 14px; align-items: center; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border-color); flex-wrap: wrap;">
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                  <button type="submit" id="btnSaveLoginPage" class="btn-primary" style="padding: 12px 28px; font-size: 0.92rem; font-weight: 800; display: inline-flex; align-items: center; gap: 8px; border-radius: 12px; background: #033f3c; border-color: #033f3c; box-shadow: 0 4px 14px rgba(3, 63, 60, 0.25);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    <span>Simpan Perubahan Landing Page</span>
+                  </button>
+
+                  <button type="button" id="btnResetLoginPage" onclick="resetLoginPageSettings()" class="btn-secondary" style="padding: 12px 20px; font-size: 0.88rem; font-weight: 700; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px;" title="Kembalikan semua teks ke bawaan standar">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                    <span>Reset ke Pengaturan Default</span>
+                  </button>
+                </div>
+
+                <div id="loginPageSaveStatus" style="font-size: 0.85rem; font-weight: 700; color: #10b981;"></div>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- =====================================================================
+               CARD KEDUA: KELOLA TAMPILAN BERANDA UTAMA (HERO, BENTO, FOTO & FOOTER)
+               ===================================================================== -->
           <form id="landingPageEditorForm" style="display: flex; flex-direction: column; gap: 24px;" enctype="multipart/form-data">
 
             <!-- 1. HERO SECTION CARD -->
