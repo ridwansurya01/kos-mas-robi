@@ -123,10 +123,6 @@
     font-weight: 400;
   }
 
-  .login-promo-chars-wrap {
-    display: none;
-  }
-
   /* Form Right Section */
   .login-form-panel {
     display: flex;
@@ -422,84 +418,95 @@
     opacity: 0.85;
   }
 
-  /* Responsive Design */
+  /* Responsive Design - Mobile Optimized (<900px) */
   @media (max-width: 900px) {
     .login-viewport-wrapper {
-      padding: 20px 16px 40px;
+      padding: 32px 20px 48px;
       background: #ffffff !important;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
     .login-split-card {
-      grid-template-columns: 1fr;
-      border-radius: 0;
-      gap: 28px;
-      padding: 0;
-      max-width: 420px;
-      width: 100%;
-      box-shadow: none !important;
-      border: none !important;
-    }
-    .login-promo-panel {
-      min-height: auto;
-      padding: 28px 22px 0;
-      border-radius: 26px;
-      background-image: none !important;
-      background: #033f3c linear-gradient(160deg, #023633 0%, #033f3c 55%, #054c42 100%) !important;
-      box-shadow: 0 16px 36px -10px rgba(3, 63, 60, 0.28);
-      position: relative;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-    }
-    .login-promo-headline {
-      font-size: 21px;
-      line-height: 1.24;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      margin: 0;
-    }
-    .login-promo-curve {
-      width: 92px;
-      height: 10px;
-      margin: 4px 0 10px;
-      display: block;
-    }
-    .login-promo-desc {
-      font-size: 12px;
-      line-height: 1.5;
-      color: rgba(255, 255, 255, 0.88);
-      margin: 0;
-      max-width: 290px;
-    }
-    .login-promo-chars-wrap {
-      display: flex;
+      align-items: center;
       justify-content: center;
-      align-items: flex-end;
-      margin-top: 18px;
-      line-height: 0;
+      max-width: 390px;
       width: 100%;
-    }
-    .login-promo-chars-img {
-      display: block;
-      width: auto;
-      max-width: 100%;
-      height: 165px;
-      object-fit: contain;
-      object-position: bottom center;
-      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
-    }
-    .login-form-panel {
+      margin: 0 auto;
       padding: 0;
-      border-radius: 0;
-      background: transparent;
+      gap: 0;
       box-shadow: none !important;
       border: none !important;
+      background: transparent !important;
+    }
+    /* Sembunyikan panel promosi di mobile agar tampilan bersih, fokus, dan tidak bertumpuk */
+    .login-promo-panel {
+      display: none !important;
+    }
+    .login-form-panel {
       width: 100%;
+      max-width: 100%;
+      padding: 0;
+      margin: 0;
+      border-radius: 0;
+      background: transparent !important;
+      box-shadow: none !important;
+      border: none !important;
     }
     .login-form-content {
-      max-width: 100%;
       width: 100%;
+      max-width: 100%;
+    }
+    .login-brand-badge {
+      margin-bottom: 26px;
+    }
+    .login-logo-sq {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(3, 63, 60, 0.16);
+    }
+    .login-brand-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      margin: 14px 0 4px;
+    }
+    .login-form-subtitle {
+      font-size: 13.5px;
+      color: var(--login-text-muted);
+    }
+    .login-input-wrap {
+      margin-bottom: 14px;
+    }
+    .login-text-input {
+      height: 48px;
+      font-size: 14px;
+      border-radius: 14px;
+    }
+    .login-btn-primary {
+      height: 48px;
+      font-size: 14.5px;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+    .login-divider-row {
+      margin: 20px 0 16px;
+    }
+    .login-btn-google {
+      height: 48px;
+      font-size: 14px;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+    .login-back-home-wrap {
+      margin-top: 24px;
+    }
+    .login-back-home-link {
+      font-size: 13.5px;
+      font-weight: 600;
     }
   }
 
@@ -663,13 +670,6 @@
         <p class="login-promo-desc">
           {{ $loginContent['promo_desc'] ?? 'Simplify your e-commerce management with our user-friendly admin dashboard.' }}
         </p>
-      </div>
-
-      {{-- Mobile-Only Character Illustration (Responsive, sharp, and perfectly proportioned) --}}
-      <div class="login-promo-chars-wrap">
-        <img src="{{ asset('assets/images/landing/characters_bottom.webp') }}" 
-             alt="Ilustrasi SMART LIVING" 
-             class="login-promo-chars-img">
       </div>
     </div>
 
