@@ -746,7 +746,7 @@
 
       <!-- Room Catalog Grid -->
       <div class="tp-catalog-grid" id="catalogRoomGrid">
-        @foreach($allRooms as $r)
+        @forelse($allRooms as $r)
           @php
             $isMyRoom = ($room && $room->id === $r->id);
             $rThumb = !empty($r->images_list[0]) ? asset($r->images_list[0]) : asset('assets/images/rooms/room_1.jpg');
@@ -816,7 +816,15 @@
               </div>
             </div>
           </div>
-        @endforeach
+        @empty
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px 20px; background: #ffffff; border-radius: 16px; border: 1.5px dashed #cbd5e1;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: #f0fdfa; display: inline-flex; align-items: center; justify-content: center; color: #0a5661; margin-bottom: 12px;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div style="font-size: 1rem; font-weight: 800; color: #1e293b; margin-bottom: 4px;">Belum Ada Unit Kamar Terdaftar</div>
+            <p style="font-size: 0.84rem; color: #64748b; margin: 0;">Pengelola kos belum mendaftarkan unit kamar ke dalam sistem.</p>
+          </div>
+        @endforelse
       </div>
 
     </div>
@@ -1006,16 +1014,25 @@
                   <span class="tp-due-date">{{ $dueDate->translatedFormat('d F Y') }}</span>
                 </div>
               @else
+                @php
+                  $minPrice = $allRooms->min('price');
+                @endphp
                 <div class="tp-price-main">
                   <span class="tp-price-lbl">Pilihan Kamar Tersedia</span>
                   <div class="tp-price-val" style="font-size: 1.15rem; color: #334155;">
-                    Mulai Rp 1.500.000
-                    <span class="tp-price-cycle">/bulan</span>
+                    @if($minPrice)
+                      Mulai Rp {{ number_format($minPrice, 0, ',', '.') }}
+                      <span class="tp-price-cycle">/bulan</span>
+                    @else
+                      Hubungi Pengelola
+                    @endif
                   </div>
                 </div>
                 <div class="tp-due-badge" style="background: #f8fafc; border-color: #e2e8f0;">
                   <span class="tp-due-lbl">Status Kamar</span>
-                  <span class="tp-due-date" style="color: #64748b;">Lihat katalog di bawah</span>
+                  <span class="tp-due-date" style="color: #64748b;">
+                    {{ $allRooms->isNotEmpty() ? 'Lihat katalog di bawah' : 'Belum ada kamar aktif' }}
+                  </span>
                 </div>
               @endif
             </div>

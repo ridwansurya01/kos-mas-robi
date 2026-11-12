@@ -472,7 +472,7 @@
         {{-- Right Side Metric & Big Submit Pill --}}
         <div class="lr-search-right-cta" data-spatial-reveal="card-item" data-stagger="3">
           <div class="lr-metric-box">
-            <div class="lr-metric-val">{{ $availableCount ?? 4 }}<span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">/{{ $totalRooms ?? 16 }}</span></div>
+            <div class="lr-metric-val">{{ $availableCount }}<span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">/{{ $totalRooms }}</span></div>
             <div class="lr-metric-lbl">Unit Siap Huni</div>
           </div>
 
@@ -597,10 +597,15 @@
 
               </div>
             @empty
-              <div style="width: 100%; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 20px; border: 1px dashed var(--border-subtle);">
-                <h4 style="font-size: 1.15rem; color: var(--text-dark); margin-bottom: 6px;">Unit Kamar Tidak Ditemukan</h4>
-                <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">Silakan pilih filter lain atau hubungi pengelola untuk cek ketersediaan langsung.</p>
-                <a href="{{ route('home') }}#kamar" class="lr-btn-pill-teal" style="background: var(--teal-primary); display: inline-flex;">Tampilkan Semua Kamar</a>
+              <div style="width: 100%; text-align: center; padding: 60px 20px; background: #ffffff; border-radius: 24px; border: 1.5px dashed #cbd5e1; max-width: 580px; margin: 20px auto;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: #f0fdfa; display: inline-flex; align-items: center; justify-content: center; color: #0a5661; margin-bottom: 14px;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <h4 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">Daftar Kamar Belum Tersedia</h4>
+                <p style="font-size: 0.88rem; color: #64748b; margin-bottom: 20px; line-height: 1.5;">Unit kamar sedang dalam proses pembaruan oleh pengelola. Hubungi kami melalui WhatsApp untuk informasi sewa dan ketersediaan unit terbaru.</p>
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $setting->owner_phone ?? '6281234567890') }}?text=Halo%20Pengelola%20Kos,%20saya%20ingin%20menanyakan%20ketersediaan%20kamar" target="_blank" class="lr-btn-pill-teal" style="background: #0a5661; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; border-radius: 999px; font-weight: 700; font-size: 0.88rem;">
+                  Hubungi Pengelola Kos
+                </a>
               </div>
             @endforelse
           </div>

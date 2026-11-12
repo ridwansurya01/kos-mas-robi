@@ -2792,14 +2792,26 @@
                   </td>
                 </tr>
               @empty
-                <tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">Tidak ditemukan kamar yang sesuai</td></tr>
+                <tr>
+                  <td colspan="8" style="text-align:center;padding:48px 20px;color:var(--text-muted);">
+                    <div style="width: 52px; height: 52px; margin: 0 auto 12px; border-radius: 50%; background: #f0fdfa; display: flex; align-items: center; justify-content: center; color: #0a5661;">
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <div style="font-weight: 800; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 4px;">Daftar Kamar Kos Kosong</div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0 auto 16px; max-width: 460px;">Belum ada data unit kamar yang terdaftar. Anda dapat menambahkan unit kamar baru sesuai dengan kapasitas kos yang sebenarnya.</p>
+                    <button type="button" class="btn-primary-action" onclick="document.getElementById('btnAddNewRoom')?.click()" style="margin: 0 auto; display: inline-flex;">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                      <span>Tambah Kamar Pertama</span>
+                    </button>
+                  </td>
+                </tr>
               @endforelse
             </tbody>
           </table>
 
           <!-- Mobile Card View -->
           <div class="mobile-card-list" id="roomsMobileCardList">
-            @foreach($rooms as $room)
+            @forelse($rooms as $room)
               @php
                 $isLoc2 = ($room->location ?? '') === 'Lokasi 2';
                 $tName = $room->activeTenant ? $room->activeTenant->name : ($room->tenant ?: ($room->booked_by_name ?: ($room->status === 'occupied' || $room->status === 'due' ? ('Penghuni #' . $room->number) : null)));
@@ -2858,7 +2870,13 @@
                   <button type="button" style="padding:6px 12px;font-size:0.8rem;font-weight:700;border-radius:8px;background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;cursor:pointer;" onclick="window.confirmDeleteRoom('{{ $room->id }}', '{{ $room->number }}')">Hapus</button>
                 </div>
               </div>
-            @endforeach
+            @empty
+              <div style="text-align:center;padding:36px 16px;background:var(--bg-card);border-radius:14px;border:1.5px dashed var(--border-subtle);margin-top:12px;">
+                <div style="font-weight:800;font-size:0.95rem;color:var(--text-primary);margin-bottom:4px;">Daftar Kamar Kos Kosong</div>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin:0 0 14px 0;">Belum ada data unit kamar yang terdaftar.</p>
+                <button type="button" class="btn-primary-action" onclick="document.getElementById('btnAddNewRoom')?.click()" style="margin:0 auto;display:inline-flex;">+ Tambah Kamar</button>
+              </div>
+            @endforelse
           </div>
         </div>
       </div>
@@ -3446,7 +3464,10 @@
               </tr>
               @empty
               <tr>
-                <td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data unit kamar.</td>
+                <td colspan="7" style="text-align: center; padding: 36px 20px; color: var(--text-muted);">
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 4px;">Belum Ada Data Tagihan Sewa</div>
+                  <p style="font-size: 0.82rem; margin: 0;">Unit kamar belum tersedia. Tagihan sewa akan otomatis tampil saat unit kamar dan penghuni telah didaftarkan.</p>
+                </td>
               </tr>
               @endforelse
             </tbody>

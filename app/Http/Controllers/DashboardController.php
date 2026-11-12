@@ -37,11 +37,6 @@ class DashboardController extends Controller
         ]);
 
         $rooms = Room::with('activeTenant')->orderBy('number')->get();
-        if (!cache()->has('kos_two_branch_seeded')) {
-            $this->ensureTwoBranchSampleData($rooms);
-            cache()->put('kos_two_branch_seeded', true, now()->addDays(7));
-        }
-
         $totalRooms = $rooms->count();
         $occupiedRooms = $rooms->whereIn('status', ['occupied', 'due'])->count();
         $availableRooms = $rooms->where('status', 'available')->count();
@@ -210,184 +205,11 @@ class DashboardController extends Controller
     }
 
     /**
-     * Ensure both Kos locations (Lokasi 1 & Lokasi 2) have rich, realistic sample data
-     * for Maintenance Tickets, Room Transfers, and Finances so neither Kos branch is empty.
+     * Deprecated: sample data auto-injection disabled so room list remains clean.
      */
     private function ensureTwoBranchSampleData($rooms): void
     {
-        try {
-            $loc1Rooms = $rooms->filter(fn($r) => ($r->location ?? 'Lokasi 1') === 'Lokasi 1')->values();
-            $loc2Rooms = $rooms->filter(fn($r) => ($r->location ?? '') === 'Lokasi 2')->values();
-            $loc2RoomIds = $loc2Rooms->pluck('id')->all();
-
-            // 1. Ensure Maintenance Tickets exist for Lokasi 2 (and Lokasi 1)
-            if (!empty($loc2RoomIds)) {
-                $loc2TicketsCount = MaintenanceTicket::whereIn('room_id', $loc2RoomIds)->count();
-                if ($loc2TicketsCount === 0) {
-                    $r202 = $loc2Rooms->firstWhere('number', '202') ?? $loc2Rooms->first();
-                    $r205 = $loc2Rooms->firstWhere('number', '205') ?? ($loc2Rooms->get(1) ?? $r202);
-                    $r207 = $loc2Rooms->firstWhere('number', '207') ?? ($loc2Rooms->get(2) ?? $r202);
-
-                    if ($r202) {
-                        MaintenanceTicket::create([
-                            'ticket_code' => 'MNT-202',
-                            'room_id' => $r202->id,
-                            'reporter_name' => $r202->activeTenant->name ?? 'Nadia Putri (Cabang 2)',
-                            'issue_description' => '[Cabang 2 Ringroad] Indikator baterai Smart Digital Door Lock mulai lemah, mohon penggantian baterai Alkaline.',
-                            'report_date' => now()->subDays(1)->toDateString(),
-                            'priority' => 'Mendesak',
-                            'status' => 'pending',
-                        ]);
-                    }
-                    if ($r205) {
-                        MaintenanceTicket::create([
-                            'ticket_code' => 'MNT-205',
-                            'room_id' => $r205->id,
-                            'reporter_name' => $r205->activeTenant->name ?? 'Rizky Pratama (Cabang 2)',
-                            'issue_description' => '[Cabang 2 Ringroad] Lampu LED Warm White di area Balkon Pribadi sedikit berkedip saat malam hari.',
-                            'report_date' => now()->subDays(2)->toDateString(),
-                            'priority' => 'Normal',
-                            'status' => 'progress',
-                        ]);
-                    }
-                    if ($r207) {
-                        MaintenanceTicket::create([
-                            'ticket_code' => 'MNT-207',
-                            'room_id' => $r207->id,
-                            'reporter_name' => $r207->activeTenant->name ?? 'Kevin Wijaya (Cabang 2)',
-                            'issue_description' => '[Cabang 2 Ringroad] Pembersihan berkala filter AC Inverter & sinkronisasi koneksi WiFi Smart Android TV.',
-                            'report_date' => now()->subDays(4)->toDateString(),
-                            'priority' => 'Rendah',
-                            'status' => 'done',
-                        ]);
-                    }
-                }
-            }
-
-            // 2. Ensure Room Transfers exist for both Lokasi 1 and Lokasi 2
-            if (RoomTransfer::count() < 3 && $loc1Rooms->count() >= 2 && $loc2Rooms->count() >= 2) {
-                $r104 = $loc1Rooms->firstWhere('number', '104') ?? $loc1Rooms->first();
-                $r101 = $loc1Rooms->firstWhere('number', '101') ?? $loc1Rooms->last();
-                $r106 = $loc1Rooms->firstWhere('number', '106') ?? $loc1Rooms->get(1);
-
-                $r203 = $loc2Rooms->firstWhere('number', '203') ?? $loc2Rooms->first();
-                $r206 = $loc2Rooms->firstWhere('number', '206') ?? $loc2Rooms->last();
-                $r204 = $loc2Rooms->firstWhere('number', '204') ?? $loc2Rooms->get(1);
-
-                if (RoomTransfer::where('current_room_id', $r104->id)->count() === 0) {
-                    RoomTransfer::create([
-                        'tenant_id' => $r104->activeTenant->id ?? null,
-                        'current_room_id' => $r104->id,
-                        'target_room_id' => $r101->id,
-                        'reason' => '[Internal Cabang 1 - Kampus Utama] Ingin pindah ke kamar VIP AC Lantai 1 agar lebih dekat area parkir motor dan gerbang utama.',
-                        'preferred_date' => now()->addDays(5)->toDateString(),
-                        'status' => 'pending',
-                        'admin_note' => 'Menunggu verifikasi ketersediaan unit #101 akhir pekan ini.',
-                    ]);
-                }
-
-                if (RoomTransfer::where('current_room_id', $r203->id)->count() === 0) {
-                    RoomTransfer::create([
-                        'tenant_id' => $r203->activeTenant->id ?? null,
-                        'current_room_id' => $r203->id,
-                        'target_room_id' => $r206->id,
-                        'reason' => '[Internal Cabang 2 - Ringroad Exclusive] Upgrade ke unit Executive Suite Balkon Lantai 2 yang langsung menghadap Co-Working Space & taman.',
-                        'preferred_date' => now()->addDays(3)->toDateString(),
-                        'status' => 'pending',
-                        'admin_note' => 'Kamar #206 siap huni, jadwal serah terima kartu Smart Lock hari Jumat.',
-                    ]);
-                }
-
-                if ($r106 && $r204 && RoomTransfer::where('current_room_id', $r106->id)->count() === 0) {
-                    RoomTransfer::create([
-                        'tenant_id' => $r106->activeTenant->id ?? null,
-                        'current_room_id' => $r106->id,
-                        'target_room_id' => $r204->id,
-                        'reason' => '[Pindah Lintas Cabang: Kos 1 → Kos 2] Pindah lokasi riset & magang ke kawasan Kaliurang KM 12 sehingga mengajukan pindah ke Cabang 2 Ringroad Exclusive.',
-                        'preferred_date' => now()->subDays(2)->toDateString(),
-                        'status' => 'approved',
-                        'admin_note' => 'Disetujui Mas Robi. Penyesuaian deposit & akses Smart Lock Cabang 2 selesai.',
-                    ]);
-                }
-            }
-
-            // 3. Ensure Finances exist for Lokasi 2 (in addition to Lokasi 1)
-            if (!empty($loc2RoomIds)) {
-                $loc2FinCount = Finance::whereIn('room_id', $loc2RoomIds)->count();
-                if ($loc2FinCount === 0) {
-                    $r201 = $loc2Rooms->firstWhere('number', '201') ?? $loc2Rooms->first();
-                    $r202 = $loc2Rooms->firstWhere('number', '202') ?? ($loc2Rooms->get(1) ?? $r201);
-                    $r203 = $loc2Rooms->firstWhere('number', '203') ?? ($loc2Rooms->get(2) ?? $r201);
-                    $r205 = $loc2Rooms->firstWhere('number', '205') ?? ($loc2Rooms->get(3) ?? $r201);
-
-                    if ($r201) {
-                        Finance::create([
-                            'transaction_code' => 'KMR2-INC-201',
-                            'room_id' => $r201->id,
-                            'date' => now()->subDays(1)->toDateString(),
-                            'type' => 'income',
-                            'category' => 'Sewa Kamar (Cabang 2)',
-                            'amount' => $r201->price ?: 2150000,
-                            'description' => 'Pembayaran Sewa Kamar #201 (Executive Suite Balkon - Lokasi 2 Ringroad)',
-                            'payment_method' => 'Transfer BCA',
-                            'timezone' => 'WIB',
-                        ]);
-                    }
-                    if ($r202) {
-                        Finance::create([
-                            'transaction_code' => 'KMR2-INC-202',
-                            'room_id' => $r202->id,
-                            'date' => now()->subDays(2)->toDateString(),
-                            'type' => 'income',
-                            'category' => 'Sewa Kamar (Cabang 2)',
-                            'amount' => $r202->price ?: 2150000,
-                            'description' => 'Pembayaran Sewa Kamar #202 (Executive Suite Balkon - Lokasi 2 Ringroad)',
-                            'payment_method' => 'Transfer QRIS',
-                            'timezone' => 'WIB',
-                        ]);
-                    }
-                    if ($r203) {
-                        Finance::create([
-                            'transaction_code' => 'KMR2-INC-203',
-                            'room_id' => $r203->id,
-                            'date' => now()->subDays(3)->toDateString(),
-                            'type' => 'income',
-                            'category' => 'Sewa Kamar (Cabang 2)',
-                            'amount' => $r203->price ?: 1950000,
-                            'description' => 'Pembayaran Sewa Kamar #203 (Superior AC Plus - Lokasi 2 Ringroad)',
-                            'payment_method' => 'Transfer Mandiri',
-                            'timezone' => 'WIB',
-                        ]);
-                    }
-                    if ($r205) {
-                        Finance::create([
-                            'transaction_code' => 'KMR2-EXP-WF2',
-                            'room_id' => $r205->id,
-                            'date' => now()->subDays(4)->toDateString(),
-                            'type' => 'expense',
-                            'category' => 'Internet & Smart Lock (Cabang 2)',
-                            'amount' => 850000,
-                            'description' => 'Langganan WiFi Dedicated 300 Mbps & Cloud Smart Lock - Lokasi 2 Ringroad Exclusive',
-                            'payment_method' => 'Transfer BCA',
-                            'timezone' => 'WIB',
-                        ]);
-                        Finance::create([
-                            'transaction_code' => 'KMR2-EXP-CW2',
-                            'room_id' => $r205->id,
-                            'date' => now()->subDays(5)->toDateString(),
-                            'type' => 'expense',
-                            'category' => 'Kebersihan & Co-Working (Cabang 2)',
-                            'amount' => 950000,
-                            'description' => 'Housekeeping Mingguan, Kopi Pantry & Perawatan Mini Gym - Lokasi 2 Ringroad Exclusive',
-                            'payment_method' => 'Tunai / Cash',
-                            'timezone' => 'WIB',
-                        ]);
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            // Silently ignore if table not migrated yet
-        }
+        return;
     }
 
     /**
@@ -397,7 +219,6 @@ class DashboardController extends Controller
     {
         $setting = Setting::first();
         $rooms = Room::with('activeTenant')->orderBy('number')->get();
-        $this->ensureTwoBranchSampleData($rooms);
         $finances = Finance::with('room')->orderBy('date', 'desc')->get();
         $maintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
         $roomTransfers = RoomTransfer::with(['user', 'tenant', 'currentRoom', 'targetRoom'])->orderBy('created_at', 'desc')->get();
