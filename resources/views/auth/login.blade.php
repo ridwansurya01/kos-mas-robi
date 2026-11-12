@@ -333,19 +333,69 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     font-family: inherit;
     box-shadow: 0 4px 14px rgba(3, 63, 60, 0.18);
+    position: relative;
+    overflow: hidden;
   }
 
-  .login-btn-primary:hover {
+  .login-btn-primary:hover:not(.is-submitting) {
     background: #022f2d;
     box-shadow: 0 6px 18px rgba(3, 63, 60, 0.25);
     transform: translateY(-1px);
   }
 
-  .login-btn-primary:active {
+  .login-btn-primary:active:not(.is-submitting) {
     transform: translateY(1px);
+  }
+
+  /* Animasi Loading Modern pada Tombol Login */
+  .login-btn-primary .login-btn-loader {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .login-btn-primary.is-submitting {
+    background: #022f2d !important;
+    box-shadow: 0 4px 14px rgba(2, 47, 45, 0.28) !important;
+    cursor: wait !important;
+    pointer-events: none;
+  }
+
+  .login-btn-primary.is-submitting .login-btn-label {
+    display: none !important;
+  }
+
+  .login-btn-primary.is-submitting .login-btn-loader {
+    display: inline-flex !important;
+  }
+
+  .login-spinner {
+    width: 19px;
+    height: 19px;
+    animation: loginSpinnerRotate 0.75s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes loginSpinnerRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .login-loader-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    animation: loginLoaderPulse 1.2s ease-in-out infinite alternate;
+  }
+
+  @keyframes loginLoaderPulse {
+    0% { opacity: 0.82; }
+    100% { opacity: 1; }
   }
 
   /* Divider */
@@ -421,9 +471,9 @@
   /* Responsive Design - Mobile Optimized (<900px) */
   @media (max-width: 900px) {
     .login-viewport-wrapper {
-      padding: 32px 20px 48px;
+      padding: 24px 16px 48px;
       background: #ffffff !important;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       min-height: 100vh;
     }
@@ -431,19 +481,49 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      max-width: 390px;
+      justify-content: flex-start;
+      max-width: 420px;
       width: 100%;
       margin: 0 auto;
       padding: 0;
-      gap: 0;
+      gap: 28px;
       box-shadow: none !important;
       border: none !important;
       background: transparent !important;
     }
-    /* Sembunyikan panel promosi di mobile agar tampilan bersih, fokus, dan tidak bertumpuk */
+    /* Panel Promosi Gambar 2 Tampil Rapi & Proporsional di Tampilan HP */
     .login-promo-panel {
-      display: none !important;
+      display: flex !important;
+      width: 100%;
+      max-width: 100%;
+      min-height: clamp(390px, 92vw, 470px);
+      border-radius: 26px;
+      padding: clamp(28px, 6vw, 36px) clamp(22px, 5vw, 32px) clamp(210px, 52vw, 255px);
+      background-color: #033f3c;
+      background-image: url('{{ asset("assets/images/landing/login_left_card_clean.webp") }}?v={{ file_exists(public_path("assets/images/landing/login_left_card_clean.webp")) ? filemtime(public_path("assets/images/landing/login_left_card_clean.webp")) : time() }}');
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center bottom;
+      box-shadow: 0 12px 36px -8px rgba(3, 63, 60, 0.22);
+      position: relative;
+      overflow: hidden;
+      margin: 0 auto;
+      flex-shrink: 0;
+    }
+    .login-promo-headline {
+      font-size: clamp(21px, 5.5vw, 25px);
+      line-height: 1.2;
+    }
+    .login-promo-curve {
+      width: 95px;
+      height: 10px;
+      margin: 4px 0 10px;
+    }
+    .login-promo-desc {
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 290px;
+      color: rgba(255, 255, 255, 0.9);
     }
     .login-form-panel {
       width: 100%;
@@ -460,22 +540,22 @@
       max-width: 100%;
     }
     .login-brand-badge {
-      margin-bottom: 26px;
+      margin-bottom: 24px;
     }
     .login-logo-sq {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      box-shadow: 0 6px 18px rgba(3, 63, 60, 0.16);
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(3, 63, 60, 0.16);
     }
     .login-brand-title {
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 800;
       letter-spacing: 0.04em;
-      margin: 14px 0 4px;
+      margin: 12px 0 4px;
     }
     .login-form-subtitle {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--login-text-muted);
     }
     .login-input-wrap {
@@ -483,7 +563,7 @@
     }
     .login-text-input {
       height: 48px;
-      font-size: 14px;
+      font-size: 13.5px;
       border-radius: 14px;
     }
     .login-btn-primary {
@@ -493,7 +573,7 @@
       font-weight: 700;
     }
     .login-divider-row {
-      margin: 20px 0 16px;
+      margin: 18px 0 16px;
     }
     .login-btn-google {
       height: 48px;
@@ -502,10 +582,10 @@
       font-weight: 700;
     }
     .login-back-home-wrap {
-      margin-top: 24px;
+      margin-top: 22px;
     }
     .login-back-home-link {
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 600;
     }
   }
@@ -714,7 +794,7 @@
         @endif
 
         {{-- Form Login Utama --}}
-        <form action="{{ route('login.post') }}" method="POST" onsubmit="onLoginSubmit()">
+        <form action="{{ route('login.post') }}" method="POST" id="formLoginManual" onsubmit="return onLoginSubmit(event)">
           @csrf
 
           {{-- 4: Input Email Address dengan Ikon Email --}}
@@ -764,9 +844,16 @@
             </a>
           </div>
 
-          {{-- 7: Tombol Login Hijau Tua --}}
-          <button type="submit" class="login-btn-primary">
-            {{ $loginContent['btn_login_text'] ?? 'Login' }}
+          {{-- 7: Tombol Login Hijau Tua dengan Animasi Loading Modern --}}
+          <button type="submit" class="login-btn-primary" id="btnLoginSubmit">
+            <span class="login-btn-label">{{ $loginContent['btn_login_text'] ?? 'Login' }}</span>
+            <span class="login-btn-loader" aria-hidden="true">
+              <svg class="login-spinner" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.25)" stroke-width="3"></circle>
+                <path d="M12 3a9 9 0 0 1 9 9" stroke="#ffffff" stroke-width="3" stroke-linecap="round"></path>
+              </svg>
+              <span class="login-loader-text">Memproses...</span>
+            </span>
           </button>
 
           {{-- 8: Tulisan Pemisah Or Login with --}}
@@ -931,10 +1018,23 @@
     }
   }
 
-  function onLoginSubmit() {
+  function onLoginSubmit(event) {
+    var form = document.getElementById('formLoginManual');
+    if (form && typeof form.checkValidity === 'function' && !form.checkValidity()) {
+      return true;
+    }
+
+    var btn = document.getElementById('btnLoginSubmit');
+    if (btn) {
+      btn.classList.add('is-submitting');
+      btn.style.pointerEvents = 'none';
+    }
+
     try {
       sessionStorage.setItem('f3d_from_login', '1');
     } catch(e) {}
+
+    return true;
   }
 
   // INTRO OVERLAY DARI LANDING PAGE
