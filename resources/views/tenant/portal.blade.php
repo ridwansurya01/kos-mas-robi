@@ -520,10 +520,19 @@
             <input type="text" id="gateEmergencyContact" name="emergency_contact" class="tp-gate-input" value="{{ $tenant?->emergency_contact ?? '' }}" required placeholder="Contoh: Bpk. Joko (0813xxxxxxxx) - Orang Tua">
           </div>
 
-          <div style="margin-top: 22px;">
+          <div style="margin-top: 22px; display: flex; flex-direction: column; gap: 10px;">
             <button type="submit" id="btnSubmitGateProfile" class="tp-btn-gate-submit">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
               <span>Simpan & Lengkapi Data Diri</span>
+            </button>
+            <button type="button" id="btnGateSaveWithGoogle" onclick="submitGateWithGoogle(event)" style="width: 100%; height: 46px; border-radius: 12px; background: #ffffff; border: 1.5px solid #033f3c; color: #033f3c; font-size: 0.86rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.04);">
+              <svg width="18" height="18" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+              </svg>
+              <span>Simpan Data & Hubungkan Akun Google</span>
             </button>
           </div>
         </form>
@@ -2244,6 +2253,56 @@
             </div>
           </div>
 
+          {{-- Integrasi Akun Google Penghuni (Simpan dengan Google) --}}
+          <div class="tp-grid-col-2" style="background: {{ !empty($user->google_id) ? '#f0fdf4' : '#ffffff' }}; border: 1.5px solid {{ !empty($user->google_id) ? '#86efac' : '#e2e8f0' }}; border-radius: 16px; padding: 16px; margin-top: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: #ffffff; border: 1.5px solid {{ !empty($user->google_id) ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); flex-shrink: 0;">
+                  <svg width="22" height="22" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <strong style="color: #0f172a; font-size: 0.92rem;">Login dengan Akun Google</strong>
+                    @if(!empty($user->google_id))
+                      <span style="font-size: 0.7rem; font-weight: 800; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 999px; border: 1px solid #86efac; display: inline-flex; align-items: center; gap: 4px;">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>Akun Google Terhubung</span>
+                      </span>
+                    @else
+                      <span style="font-size: 0.7rem; font-weight: 800; background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 999px; border: 1px solid #fde68a;">
+                        Belum Terhubung
+                      </span>
+                    @endif
+                  </div>
+                  <p style="margin: 3px 0 0; font-size: 0.78rem; color: #64748b; line-height: 1.45;">
+                    @if(!empty($user->google_id))
+                      Akun Google Anda telah tersimpan dan terhubung. Anda dapat langsung login melalui tombol Google di halaman login tanpa perlu kata sandi.
+                    @else
+                      Tautkan akun Google Anda di sini agar dapat langsung login menggunakan akun Google di halaman login SMART LIVING.
+                    @endif
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <button type="button" onclick="saveProfileAndConnectGoogle()" id="btnCardSaveWithGoogle" style="background: #ffffff; border: 1.5px solid {{ !empty($user->google_id) ? '#86efac' : '#033f3c' }}; color: #033f3c; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); transition: all 0.2s;">
+                  <svg width="15" height="15" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                  </svg>
+                  <span>{{ !empty($user->google_id) ? 'Perbarui Akun Google' : 'Simpan dengan Google' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
           {{-- Keamanan & Password --}}
           <div class="tp-grid-col-2" style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-top: 6px;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
@@ -2360,9 +2419,22 @@
         </div>
 
       </div>
-      <div class="modal-ftr">
+      <div class="modal-ftr" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
         <button type="button" class="btn-secondary" data-close-modal="modalProfile">Batal</button>
-        <button type="submit" class="btn-primary">Simpan Perubahan Profil</button>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button type="button" id="btnSaveWithGoogle" onclick="saveProfileAndConnectGoogle()" style="background: #ffffff; border: 1.5px solid #033f3c; color: #033f3c; padding: 9px 16px; border-radius: 12px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(3, 63, 60, 0.08); transition: all 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+              <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+            </svg>
+            <span>Simpan dengan Google</span>
+          </button>
+          <button type="submit" class="btn-primary" style="background: #033f3c; color: #ffffff; padding: 10px 18px; border-radius: 12px; font-weight: 700; font-size: 0.82rem; border: none; cursor: pointer;">
+            Simpan Perubahan Profil
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -2680,6 +2752,53 @@ document.addEventListener('click', function(e) {
     .catch(function() { showPortalToast('Terjadi kesalahan jaringan, coba lagi.', 'error'); })
     .finally(function() { btn.disabled = false; btn.textContent = orig; });
   });
+
+  // ─── SIMPAN DENGAN GOOGLE (HUBUNGKAN AKUN GOOGLE DARI PROFIL) ─────────
+  window.saveProfileAndConnectGoogle = function() {
+    var form = document.getElementById('formProfile');
+    if (!form) {
+      window.location.href = "{{ route('tenant.google.connect') }}";
+      return;
+    }
+
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+
+    var btn1 = document.getElementById('btnSaveWithGoogle');
+    var btn2 = document.getElementById('btnCardSaveWithGoogle');
+    var orig1 = btn1 ? btn1.innerHTML : '';
+    var orig2 = btn2 ? btn2.innerHTML : '';
+
+    if (btn1) { btn1.disabled = true; btn1.innerHTML = '<span class="tp-spinner"></span> Menyimpan...'; }
+    if (btn2) { btn2.disabled = true; btn2.innerHTML = '<span class="tp-spinner"></span> Menyimpan...'; }
+
+    fetch(form.action, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') || {}).content || '{{ csrf_token() }}'
+      },
+      body: new FormData(form)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data && data.success) {
+        if (btn1) btn1.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
+        if (btn2) btn2.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
+        window.location.href = "{{ route('tenant.google.connect') }}";
+      } else {
+        if (btn1) { btn1.disabled = false; btn1.innerHTML = orig1; }
+        if (btn2) { btn2.disabled = false; btn2.innerHTML = orig2; }
+        showPortalToast((data && data.message) ? data.message : 'Gagal menyimpan profil sebelum menghubungkan Google.', 'error');
+      }
+    })
+    .catch(function(err) {
+      console.warn('Profile save before google redirect caught:', err);
+      window.location.href = "{{ route('tenant.google.connect') }}";
+    });
+  };
 
   // ─── ALUR GANTI PASSWORD VIA VERIFIKASI OTP GMAIL ───────────────────
   var otpTimerInterval = null;
@@ -4001,6 +4120,91 @@ function submitCompleteProfileGate(e) {
     btn.innerHTML = origHtml;
   });
 }
+
+function submitGateWithGoogle(e) {
+  if (e) e.preventDefault();
+  var form = document.getElementById('formCompleteProfileGate');
+  var name = document.getElementById('gateFullName').value.trim();
+  var phone = document.getElementById('gatePhone').value.trim();
+  var idCard = document.getElementById('gateIdCard').value.trim();
+  var emergency = document.getElementById('gateEmergencyContact').value.trim();
+  var photoInput = document.getElementById('gateIdCardPhoto');
+  var dropzone = document.getElementById('gateIdCardDropzone');
+  var btnGoogle = document.getElementById('btnGateSaveWithGoogle');
+
+  if (!name || !phone || !emergency) {
+    alert('Nama lengkap, nomor WhatsApp, dan kontak darurat wajib diisi.');
+    return;
+  }
+
+  var hasFile = photoInput && photoInput.files && photoInput.files.length > 0;
+  var hasExistingPhoto = @json(!empty($user->id_card_photo) || (!empty($tenant) && !empty($tenant->id_card_photo)));
+
+  if (!hasFile && !hasExistingPhoto) {
+    if (dropzone) {
+      dropzone.classList.add('has-error');
+      dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    alert('Wajib melampirkan foto kartu identitas (KTP / SIM / KTM / KTA).');
+    return;
+  }
+
+  var formData = new FormData();
+  formData.append('name', name);
+  formData.append('phone', phone);
+  formData.append('id_card', idCard);
+  formData.append('emergency_contact', emergency);
+  if (hasFile) {
+    formData.append('id_card_photo', photoInput.files[0]);
+  }
+
+  var orig = btnGoogle ? btnGoogle.innerHTML : '';
+  if (btnGoogle) {
+    btnGoogle.disabled = true;
+    btnGoogle.innerHTML = '<span class="tp-spinner"></span> Menyimpan data...';
+  }
+
+  fetch('{{ route("tenant.profile.complete") }}', {
+    method: 'POST',
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-TOKEN': '{{ csrf_token() }}'
+    },
+    body: formData
+  })
+  .then(function(res) {
+    return res.json().then(function(data) {
+      return { ok: res.ok, status: res.status, data: data };
+    });
+  })
+  .then(function(result) {
+    if (result.ok && result.data && result.data.success) {
+      if (btnGoogle) btnGoogle.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
+      window.location.href = "{{ route('tenant.google.connect') }}";
+    } else {
+      if (btnGoogle) { btnGoogle.disabled = false; btnGoogle.innerHTML = orig; }
+      var msg = (result.data && result.data.message) ? result.data.message : 'Gagal menyimpan data diri.';
+      if (result.data && result.data.errors) {
+        var errList = Object.values(result.data.errors).flat();
+        if (errList.length) msg = errList[0];
+      }
+      alert(msg);
+    }
+  })
+  .catch(function(err) {
+    console.error(err);
+    window.location.href = "{{ route('tenant.google.connect') }}";
+  });
+}
+@endif
+
+@if(session('open_profile_modal'))
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    var modal = document.getElementById('modalProfile');
+    if (modal) modal.classList.add('open');
+  }, 450);
+});
 @endif
 </script>
 

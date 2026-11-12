@@ -391,6 +391,9 @@ class TenantPortalController extends Controller
         $user->origin_address = $validated['origin_address'];
         $user->email = $validated['email'];
         $user->phone = $validated['phone'];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_profile_completed')) {
+            $user->is_profile_completed = true;
+        }
         $user->save();
 
         // Also sync name, phone, id_card & emergency_contact to active tenant record if exists

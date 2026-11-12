@@ -803,6 +803,61 @@
 </div>
 
 {{-- =========================================================================
+     MODAL POPUP: DITOLAK KARENA TIDAK TERDAFTAR SEBAGAI ANAK KOS
+     ========================================================================= --}}
+@if(session('google_not_registered_popup'))
+<div id="modalGoogleNotRegistered" class="fp-modal-backdrop" style="display: flex;" onclick="if(event.target===this) closeGoogleNotRegisteredModal()">
+  <div class="fp-modal-card" style="max-width: 440px; text-align: center; padding: 32px 24px;">
+    {{-- Warning / Denied Icon --}}
+    <div style="width: 64px; height: 64px; border-radius: 50%; background: #fef2f2; border: 2px solid #fecaca; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 18px; color: #dc2626; box-shadow: 0 4px 14px rgba(220, 38, 38, 0.12);">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+    </div>
+
+    {{-- Title & Message --}}
+    <h3 style="margin: 0 0 12px; font-size: 1.25rem; font-weight: 800; color: #111827; font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;">
+      Akses Masuk Ditolak
+    </h3>
+
+    <div style="background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
+      <p style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #be123c; line-height: 1.45;">
+        {{ session('google_rejected_message') ?? 'Anda tidak dapat login karena tidak terdaftar sebagai anak kos.' }}
+      </p>
+    </div>
+
+    <p style="font-size: 0.82rem; color: #4b5563; line-height: 1.55; margin-bottom: 22px; text-align: left;">
+      Akun Google <strong style="color: #111827;">{{ session('google_rejected_email') }}</strong> belum terdaftar atau belum ditautkan sebagai anak kos di SMART LIVING.
+      <br><br>
+      <strong>Alur pendaftaran anak kos:</strong>
+      <br>
+      1. Akun didaftarkan langsung oleh Admin / Pengelola kos saat penempatan kamar.
+      <br>
+      2. Masuk pertama kali menggunakan email & kata sandi yang telah didaftarkan Admin.
+      <br>
+      3. Lengkapi formulir data diri di portal dan tekan <strong>"Simpan dengan Google"</strong> agar akun Google Anda terhubung untuk login selanjutnya.
+    </p>
+
+    <button type="button" onclick="closeGoogleNotRegisteredModal()" class="login-btn-primary" style="width: 100%; height: 46px; font-size: 14px; font-weight: 700; cursor: pointer;">
+      Mengerti & Tutup
+    </button>
+  </div>
+</div>
+
+<script>
+  function closeGoogleNotRegisteredModal() {
+    var m = document.getElementById('modalGoogleNotRegistered');
+    if (m) m.style.display = 'none';
+  }
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeGoogleNotRegisteredModal();
+  });
+</script>
+@endif
+
+{{-- =========================================================================
      MODAL POPUP: RESET PASSWORD VIA OTP GMAIL
      ========================================================================= --}}
 <div id="modalForgotPasswordLogin" class="fp-modal-backdrop" onclick="if(event.target===this) closeForgotPwdModal()">

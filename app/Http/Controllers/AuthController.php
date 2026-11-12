@@ -80,15 +80,45 @@ class AuthController extends Controller
     }
 
     /**
-     * Redirect to Google OAuth.
+     * Redirect to Google OAuth (from login page).
      */
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
         if (empty(config('services.google.client_id')) || config('services.google.client_id') === 'YOUR_GOOGLE_CLIENT_ID') {
             return redirect()->route('login')->withErrors([
                 'email' => 'Fitur Google Login siap digunakan! Untuk menghubungkan ke Google Cloud Console, tambahkan GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET pada file .env Anda.'
             ]);
         }
+
+        if ($request->query('intent') === 'connect' && Auth::check()) {
+            session([
+                'google_oauth_intent' => 'connect',
+                'google_connect_user_id' => Auth::id()
+            ]);
+        } else {
+            session()->forget(['google_oauth_intent', 'google_connect_user_id']);
+        }
+
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Connect Google account for currently logged-in tenant ("Simpan dengan Google").
+     */
+    public function connectGoogle(Request $request)
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        if (empty(config('services.google.client_id')) || config('services.google.client_id') === 'YOUR_GOOGLE_CLIENT_ID') {
+            return redirect()->route('tenant.portal')->with('error', 'Google Client ID belum dikonfigurasi pada file .env.');
+        }
+
+        session([
+            'google_oauth_intent' => 'connect',
+            'google_connect_user_id' => Auth::id()
+        ]);
 
         return Socialite::driver('google')->redirect();
     }
@@ -101,53 +131,88 @@ class AuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
         } catch (\Exception $e) {
-            return redirect()->route('login')->withErrors(['email' => 'Login dengan Google gagal. Silakan coba lagi.']);
+            return redirect()->route('login')->withErrors(['email' => 'Autentikasi Google dibatalkan atau gagal. Silakan coba lagi.']);
         }
 
-        // Find or create user
-        $user = User::where('google_id', $googleUser->getId())
-                    ->orWhere('email', $googleUser->getEmail())
-                    ->first();
+        $intent = session('google_oauth_intent');
+        $connectUserId = session('google_connect_user_id');
+        session()->forget(['google_oauth_intent', 'google_connect_user_id']);
 
-        if ($user) {
-            // Update google info if not set
-            if (!$user->google_id) {
-                $user->update([
+        // ── ALUR 1: SIMPAN / HUBUNGKAN AKUN GOOGLE DARI PROFIL ANAK KOS ──
+        if ($intent === 'connect' || (Auth::check() && $connectUserId)) {
+            $currentUser = Auth::user() ?: User::find($connectUserId);
+
+            if (!$currentUser) {
+                return redirect()->route('login')->withErrors(['email' => 'Sesi login telah berakhir. Silakan login kembali.']);
+            }
+
+            // Pastikan akun Google ini belum ditautkan ke akun user lain
+            $otherUser = User::where('google_id', $googleUser->getId())
+                ->where('id', '!=', $currentUser->id)
+                ->first();
+
+            if ($otherUser) {
+                $targetRoute = $currentUser->isStaffOrOwner() ? 'admin.dashboard' : 'tenant.portal';
+                return redirect()->route($targetRoute)->with('error', 'Akun Google (' . $googleUser->getEmail() . ') sudah terhubung dengan akun lain.');
+            }
+
+            // Simpan Google ID dan token ke akun penghuni
+            $currentUser->google_id = $googleUser->getId();
+            $currentUser->google_token = $googleUser->token;
+            if (!empty($googleUser->getAvatar())) {
+                $currentUser->google_avatar = $googleUser->getAvatar();
+                if (empty($currentUser->avatar) || str_contains($currentUser->avatar, 'tenant_avatar.jpg')) {
+                    $currentUser->avatar = $googleUser->getAvatar();
+                }
+            }
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'is_profile_completed')) {
+                $currentUser->is_profile_completed = true;
+            }
+            $currentUser->save();
+
+            $targetRoute = $currentUser->isStaffOrOwner() ? 'admin.dashboard' : 'tenant.portal';
+            return redirect()->route($targetRoute)
+                ->with('success', 'Akun Google (' . $googleUser->getEmail() . ') berhasil disimpan dan dihubungkan! Sekarang Anda dapat masuk menggunakan tombol Google di halaman login.')
+                ->with('open_profile_modal', true);
+        }
+
+        // ── ALUR 2: LOGIN DENGAN GOOGLE DI HALAMAN LOGIN (/login) ──
+        // Hanya anak kos yang SUDAH menyimpan/menautkan Google ID yang dapat masuk
+        $user = User::where('google_id', $googleUser->getId())->first();
+
+        // Jika belum ada dengan google_id, periksa apakah email ini adalah akun Admin/Owner terdaftar
+        if (!$user) {
+            $staff = User::where('email', $googleUser->getEmail())
+                ->whereIn('role', ['admin', 'owner'])
+                ->first();
+            if ($staff) {
+                $staff->update([
                     'google_id'     => $googleUser->getId(),
                     'google_token'  => $googleUser->token,
                     'google_avatar' => $googleUser->getAvatar(),
                 ]);
-            }
-        } else {
-            // Create new tenant account from Google
-            $user = User::create([
-                'name'          => $googleUser->getName(),
-                'email'         => $googleUser->getEmail(),
-                'google_id'     => $googleUser->getId(),
-                'google_token'  => $googleUser->token,
-                'google_avatar' => $googleUser->getAvatar(),
-                'role'          => 'tenant',
-                'phone'         => '',
-                'avatar'        => $googleUser->getAvatar() ?? 'assets/images/tenant_avatar.jpg',
-                'password'      => null,
-            ]);
-
-            // Welcome email
-            try {
-                Mail::to($user->email)->send(new \App\Mail\WelcomeTenantMail($user));
-            } catch (\Exception $e) {
-                Log::warning('Welcome email (Google) failed: ' . $e->getMessage());
+                $user = $staff;
             }
         }
 
+        // JIKA BUKAN ADMIN/OWNER DAN BELUM PERNAH SIMPAN DENGAN GOOGLE SEBAGAI ANAK KOS:
+        // TOLAK LOGIN, JANGAN BUAT AKUN BARU, DAN TAMPILKAN POPUP SESUAI PERMINTAAN USER!
+        if (!$user) {
+            return redirect()->route('login')
+                ->with('google_not_registered_popup', true)
+                ->with('google_rejected_email', $googleUser->getEmail())
+                ->with('google_rejected_message', 'Anda tidak dapat login karena tidak terdaftar sebagai anak kos.');
+        }
+
+        // Login user yang sah
         Auth::login($user, true);
         request()->session()->regenerate();
 
         if ($user->isStaffOrOwner()) {
-            return redirect()->route('admin.dashboard')->with('success', 'Berhasil masuk dengan akun Google sebagai ' . ($user->isOwner() ? 'Owner' : 'Admin') . '.');
+            return redirect()->route('admin.dashboard')->with('success', 'Selamat datang kembali, ' . $user->name . '! Masuk sebagai ' . ($user->isOwner() ? 'Owner' : 'Admin') . '.');
         }
 
-        return redirect()->route('tenant.portal')->with('success', 'Berhasil masuk dengan akun Google, Selamat datang ' . $user->name . '!');
+        return redirect()->route('tenant.portal')->with('success', 'Selamat datang kembali, ' . $user->name . '! Berhasil masuk dengan Akun Google.');
     }
 
     /**

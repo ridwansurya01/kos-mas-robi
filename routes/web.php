@@ -62,6 +62,7 @@ Route::post('/register', function () {
 // ─── Google OAuth ───
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+Route::get('/tenant/connect-google', [AuthController::class, 'connectGoogle'])->name('tenant.google.connect')->middleware('auth');
 
 // ─── Forgot / Reset Password ───
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
