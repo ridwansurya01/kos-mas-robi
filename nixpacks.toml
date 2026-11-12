@@ -1,0 +1,13 @@
+[phases.setup]
+nixPkgs = [
+    "php83",
+    "php83Packages.composer",
+    "nodejs_20"
+]
+
+[phases.build]
+cmds = [
+    "mkdir -p /app/node_modules/.cache",
+    "npm install",
+    "composer install --optimize-autoloader --no-scripts --no-interaction"
+]
