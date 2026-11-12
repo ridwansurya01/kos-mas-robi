@@ -40,6 +40,18 @@ class TenantPortalController extends Controller
         // Get Room info for this tenant
         $room = $user->room;
         $tenant = $room ? ($room->activeTenant ?? Tenant::where('room_id', $room->id)->where('status', 'active')->first()) : null;
+        if (!$tenant && !empty($user->room_id)) {
+            $tenant = Tenant::where('room_id', $user->room_id)->where('status', 'active')->first() ?? Tenant::where('room_id', $user->room_id)->first();
+        }
+        if (!$tenant && !empty($user->phone)) {
+            $cleanPhone = preg_replace('/[^0-9]/', '', $user->phone);
+            if (strlen($cleanPhone) >= 8) {
+                $tenant = Tenant::where('phone', 'like', '%' . substr($cleanPhone, -8))->first();
+            }
+        }
+        if (!$tenant && !empty($user->name)) {
+            $tenant = Tenant::where('name', $user->name)->first();
+        }
 
         // Customer is considered actively registered in a room if:
         // 1. $user->room_id is not empty
@@ -53,6 +65,26 @@ class TenantPortalController extends Controller
                 $hasActiveRoom = true;
             }
         }
+
+        // Sinkronisasi nominal tagihan sewa dengan Admin & Owner
+        $monthlyRent = (float) (($tenant && $tenant->rent_amount > 0) ? $tenant->rent_amount : ($room->price ?? 0));
+
+        // Hitung total cicilan masuk pada bulan berjalan untuk unit kamar ini (sinkron dengan tagihan di Admin/Owner)
+        $nowMonth = now()->month;
+        $nowYear = now()->year;
+        $paidThisMonth = ($room && $hasActiveRoom)
+            ? (float) Finance::where('room_id', $room->id)
+                ->where('type', 'income')
+                ->whereMonth('date', $nowMonth)
+                ->whereYear('date', $nowYear)
+                ->sum('amount')
+            : 0;
+
+        $remainingBill = max(0, $monthlyRent - $paidThisMonth);
+        $isPartialInstallment = ($paidThisMonth > 0 && $remainingBill > 0);
+        $isPaidThisMonth = ($room && $room->status === 'occupied' && ($paidThisMonth >= $monthlyRent || $room->status !== 'due'));
+        $isDue = ($room && $room->status === 'due') || (!$isPaidThisMonth && $remainingBill > 0);
+        $currentBillAmount = $isPaidThisMonth ? 0 : ($remainingBill > 0 ? $remainingBill : $monthlyRent);
 
         $setting = Setting::first() ?? new Setting();
 
@@ -150,7 +182,14 @@ class TenantPortalController extends Controller
             'myTransfers',
             'greeting',
             'hasActiveRoom',
-            'isProfileComplete'
+            'isProfileComplete',
+            'monthlyRent',
+            'paidThisMonth',
+            'remainingBill',
+            'isPartialInstallment',
+            'isPaidThisMonth',
+            'isDue',
+            'currentBillAmount'
         ));
     }
 

@@ -1128,6 +1128,14 @@ img { max-width: 100%; display: block; }
   color: var(--tp-green-text);
 }
 
+.tp-roominfo-val.orange {
+  color: #d97706;
+}
+
+.tp-roominfo-val.red {
+  color: #dc2626;
+}
+
 .tp-roominfo-key {
   font-size: 0.72rem;
   color: var(--tp-text-muted);

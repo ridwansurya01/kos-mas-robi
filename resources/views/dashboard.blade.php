@@ -2930,7 +2930,7 @@
                   $roomObj = $tItem->room;
                   $rNum = $roomObj ? $roomObj->number : '-';
                   $rFloor = $roomObj ? ($roomObj->floor ?? 1) : 1;
-                  $rPrice = $roomObj ? $roomObj->price : ($tItem->rent_amount ?? 0);
+                  $rPrice = (float) (($tItem && $tItem->rent_amount > 0) ? $tItem->rent_amount : ($roomObj ? $roomObj->price : 0));
                   $rType = $roomObj ? ($roomObj->type ?? '-') : '-';
                   $rLoc = $roomObj ? ($roomObj->location ?? 'Lokasi 1') : 'Lokasi 1';
                   $isDue = $roomObj ? ($roomObj->status === 'due') : false;
@@ -3057,7 +3057,7 @@
                 $tDue = $tItem->due_day ?? 1;
                 $roomObj = $tItem->room;
                 $rNum = $roomObj ? $roomObj->number : '-';
-                $rPrice = $roomObj ? $roomObj->price : ($tItem->rent_amount ?? 0);
+                $rPrice = (float) (($tItem && $tItem->rent_amount > 0) ? $tItem->rent_amount : ($roomObj ? $roomObj->price : 0));
                 $rType = $roomObj ? ($roomObj->type ?? '-') : '-';
                 $rLoc = $roomObj ? ($roomObj->location ?? 'Lokasi 1') : 'Lokasi 1';
                 $isDue = $roomObj ? ($roomObj->status === 'due') : false;
@@ -3305,7 +3305,7 @@
               @forelse($rooms as $r)
               @php
                 $t = $r->activeTenant;
-                $rRentPrice = (float) $r->price;
+                $rRentPrice = (float) (($t && $t->rent_amount > 0) ? $t->rent_amount : ($r->price ?? 0));
 
                 // Hitung total cicilan masuk pada bulan berjalan untuk unit kamar ini
                 $rIncomeThisMonth = ($allFinances ?? collect())->filter(function($f) use ($r, $nowMonthNum, $nowYearNum) {

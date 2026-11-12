@@ -964,12 +964,42 @@
             {{-- Pricing & Due Date Box --}}
             <div class="tp-price-banner">
               @if($hasActiveRoom && $room)
+                @php
+                  $vMonthlyRent = (float) ($monthlyRent ?? (($tenant && $tenant->rent_amount > 0) ? $tenant->rent_amount : ($room->price ?? 0)));
+                  $vRemainingBill = isset($remainingBill) ? (float) $remainingBill : $vMonthlyRent;
+                  $vPaidThisMonth = isset($paidThisMonth) ? (float) $paidThisMonth : 0;
+                  $vIsPartial = $isPartialInstallment ?? ($vPaidThisMonth > 0 && $vRemainingBill > 0);
+                  $vIsPaid = $isPaidThisMonth ?? ($vPaidThisMonth >= $vMonthlyRent);
+                  $vIsDue = $isDue ?? ($room->status === 'due');
+                @endphp
                 <div class="tp-price-main">
-                  <span class="tp-price-lbl">Tagihan Sewa Bulanan</span>
-                  <div class="tp-price-val">
-                    Rp {{ number_format($room->price ?? 0, 0, ',', '.') }}
-                    <span class="tp-price-cycle">/bulan</span>
-                  </div>
+                  @if($vIsPartial)
+                    <span class="tp-price-lbl" style="color: #d97706; font-weight: 700;">Sisa Tagihan Periode Ini</span>
+                    <div class="tp-price-val" style="color: #b45309;">
+                      Rp {{ number_format($vRemainingBill, 0, ',', '.') }}
+                      <span class="tp-price-cycle" style="display: block; font-size: 0.72rem; font-weight: 600; color: #78350f; margin-top: 2px;">
+                        Terbayar Rp {{ number_format($vPaidThisMonth, 0, ',', '.') }} dari Rp {{ number_format($vMonthlyRent, 0, ',', '.') }}
+                      </span>
+                    </div>
+                  @elseif($vIsPaid)
+                    <span class="tp-price-lbl" style="color: #059669; font-weight: 700;">Tagihan Periode Ini: Lunas</span>
+                    <div class="tp-price-val" style="color: #065f46;">
+                      Rp {{ number_format($vMonthlyRent, 0, ',', '.') }}
+                      <span class="tp-price-cycle">/bulan</span>
+                    </div>
+                  @elseif($vIsDue)
+                    <span class="tp-price-lbl" style="color: #dc2626; font-weight: 700;">Tagihan Jatuh Tempo (Menunggu Bayar)</span>
+                    <div class="tp-price-val" style="color: #b91c1c;">
+                      Rp {{ number_format($vRemainingBill > 0 ? $vRemainingBill : $vMonthlyRent, 0, ',', '.') }}
+                      <span class="tp-price-cycle">/bulan</span>
+                    </div>
+                  @else
+                    <span class="tp-price-lbl">Tagihan Sewa Bulanan</span>
+                    <div class="tp-price-val">
+                      Rp {{ number_format($vMonthlyRent, 0, ',', '.') }}
+                      <span class="tp-price-cycle">/bulan</span>
+                    </div>
+                  @endif
                 </div>
                 <div class="tp-due-badge">
                   <span class="tp-due-lbl">Jatuh Tempo Sewa</span>
@@ -1125,17 +1155,27 @@
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               </div>
               <div>
-                <div class="tp-roominfo-val">{{ $hasActiveRoom && $room ? ('Rp ' . number_format($room->price ?? 0, 0, ',', '.')) : '-' }}</div>
+                <div class="tp-roominfo-val">{{ $hasActiveRoom && $room ? ('Rp ' . number_format($monthlyRent ?? (($tenant && $tenant->rent_amount > 0) ? $tenant->rent_amount : ($room->price ?? 0)), 0, ',', '.')) : '-' }}</div>
                 <div class="tp-roominfo-key">Tarif Sewa / Bulan</div>
               </div>
             </div>
             <div class="tp-roominfo-item">
-              <div class="tp-roominfo-ico" style="background: #ecfdf5; color: #059669;">
+              <div class="tp-roominfo-ico" style="background: {{ ($isPartialInstallment ?? false) ? '#fef3c7' : (($isDue ?? false) ? '#fee2e2' : '#ecfdf5') }}; color: {{ ($isPartialInstallment ?? false) ? '#d97706' : (($isDue ?? false) ? '#dc2626' : '#059669') }};">
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
               <div>
-                <div class="tp-roominfo-val {{ $hasActiveRoom ? 'green' : '' }}">{{ $hasActiveRoom ? (($room->status ?? '') === 'due' ? 'Menunggu Bayar' : 'Lunas & Aktif') : 'Nonaktif / Selesai Sewa' }}</div>
-                <div class="tp-roominfo-key">Status Pembayaran</div>
+                <div class="tp-roominfo-val {{ !$hasActiveRoom ? '' : (($isDue ?? false) ? 'red' : (($isPartialInstallment ?? false) ? 'orange' : 'green')) }}">
+                  @if(!$hasActiveRoom)
+                    Nonaktif / Selesai Sewa
+                  @elseif($isPartialInstallment ?? false)
+                    Cicilan (Sisa Rp {{ number_format($remainingBill ?? 0, 0, ',', '.') }})
+                  @elseif($isDue ?? false)
+                    Menunggu Bayar (Rp {{ number_format(($remainingBill ?? 0) > 0 ? $remainingBill : ($monthlyRent ?? ($room->price ?? 0)), 0, ',', '.') }})
+                  @else
+                    Lunas &amp; Aktif
+                  @endif
+                </div>
+                <div class="tp-roominfo-key">Status Tagihan Periode Ini</div>
               </div>
             </div>
           </div>
@@ -1491,6 +1531,44 @@
     </div>
 
     <div class="modal-body tp-receipts-modal-body">
+      @if($hasActiveRoom && $room)
+        {{-- Status Rincian Tagihan Sewa (Sinkron dengan Admin & Owner) --}}
+        @php
+          $mRent = (float) ($monthlyRent ?? (($tenant && $tenant->rent_amount > 0) ? $tenant->rent_amount : ($room->price ?? 0)));
+          $mPaid = isset($paidThisMonth) ? (float) $paidThisMonth : 0;
+          $mRem = isset($remainingBill) ? (float) $remainingBill : max(0, $mRent - $mPaid);
+          $mIsPartial = $isPartialInstallment ?? ($mPaid > 0 && $mRem > 0);
+          $mIsPaid = $isPaidThisMonth ?? ($mPaid >= $mRent);
+          $mIsDue = $isDue ?? ($room->status === 'due');
+        @endphp
+        <div style="background: {{ $mIsPaid ? '#f0fdf4' : ($mIsPartial ? '#fffbeb' : '#fef2f2') }}; border: 1.5px solid {{ $mIsPaid ? '#bbf7d0' : ($mIsPartial ? '#fde68a' : '#fecaca') }}; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <div style="font-size: 0.74rem; font-weight: 800; color: {{ $mIsPaid ? '#166534' : ($mIsPartial ? '#92400e' : '#991b1b') }}; text-transform: uppercase; letter-spacing: 0.5px;">
+              Status Tagihan Periode {{ now()->translatedFormat('F Y') }}
+            </div>
+            <div style="font-size: 1.15rem; font-weight: 900; color: #0f172a; margin-top: 3px;">
+              @if($mIsPaid)
+                Lunas (Rp {{ number_format($mRent, 0, ',', '.') }})
+              @elseif($mIsPartial)
+                Sisa Tagihan: Rp {{ number_format($mRem, 0, ',', '.') }}
+                <span style="font-size: 0.8rem; font-weight: 600; color: #64748b; margin-left: 4px;">(Terbayar Rp {{ number_format($mPaid, 0, ',', '.') }} dari Rp {{ number_format($mRent, 0, ',', '.') }})</span>
+              @else
+                Menunggu Bayar: Rp {{ number_format($mRem > 0 ? $mRem : $mRent, 0, ',', '.') }}
+              @endif
+            </div>
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+              Unit: Kamar #{{ $room->number }} &bull; Jatuh tempo tiap tanggal {{ $dueDate->format('d') }}
+            </div>
+          </div>
+          <div>
+            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 800; padding: 6px 14px; border-radius: 999px; background: {{ $mIsPaid ? '#dcfce7' : ($mIsPartial ? '#fef3c7' : '#fee2e2') }}; color: {{ $mIsPaid ? '#15803d' : ($mIsPartial ? '#b45309' : '#b91c1c') }};">
+              <span style="width: 7px; height: 7px; border-radius: 50%; background: currentColor;"></span>
+              {{ $mIsPaid ? 'Lunas Bulan Ini' : ($mIsPartial ? 'Cicilan Berjalan' : 'Menunggu Bayar') }}
+            </span>
+          </div>
+        </div>
+      @endif
+
       @if($recentPayments->isNotEmpty())
         {{-- Summary Banner Bar --}}
         <div class="tp-receipt-summary-bar">
@@ -1989,7 +2067,7 @@
             <div>
               <div style="font-size: 0.72rem; font-weight: 700; color: #1d4ed8; text-transform: uppercase;">Kamar Anda Saat Ini:</div>
               <div style="font-size: 1rem; font-weight: 800; color: #1e3a8a;">Kamar #{{ $room->number }} — {{ $room->type ?? 'Deluxe AC' }}</div>
-              <div style="font-size: 0.78rem; color: #3b82f6;">Lantai {{ $room->floor ?? '1' }} • Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</div>
+              <div style="font-size: 0.78rem; color: #3b82f6;">Lantai {{ $room->floor ?? '1' }} • Rp {{ number_format($monthlyRent ?? (($tenant && $tenant->rent_amount > 0) ? $tenant->rent_amount : ($room->price ?? 1500000)), 0, ',', '.') }}/bulan</div>
             </div>
             <span class="tp-badge green">Aktif</span>
           </div>
@@ -2247,7 +2325,7 @@
             <div class="tp-profile-room-details">
               @if($hasActiveRoom && $room)
                 <strong>Kamar Saat Ini: #{{ $room->number }} ({{ $room->type ?? 'Deluxe AC' }}) • {{ ($tenantBranchKey ?? 'lokasi_1') === 'lokasi_2' ? 'Cabang 2 (Ringroad)' : 'Cabang 1 (Kampus)' }}</strong>
-                <p>{{ $tenantBranch['name'] ?? (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($room->price ?? 1500000, 0, ',', '.') }}/bulan</p>
+                <p>{{ $tenantBranch['name'] ?? (!empty($setting->kos_name) ? $setting->kos_name : 'SMART LIVING') }} • Lantai {{ $room->floor ?? '1' }} • Status Sewa: Aktif Menghuni • Biaya: Rp {{ number_format($monthlyRent ?? (($tenant && $tenant->rent_amount > 0) ? $tenant->rent_amount : ($room->price ?? 1500000)), 0, ',', '.') }}/bulan</p>
               @else
                 <strong>Status Hunian: Belum Terdaftar di Kamar Aktif / Selesai Sewa</strong>
                 <p>Akun Anda belum dikaitkan dengan unit hunian aktif oleh Pengelola. Hubungi admin untuk pendaftaran atau aktivasi sewa kamar.</p>

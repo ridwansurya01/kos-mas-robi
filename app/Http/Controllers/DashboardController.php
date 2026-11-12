@@ -57,7 +57,9 @@ class DashboardController extends Controller
         $monthlyIncome = (float) $allFinances->where('type', 'income')->sum('amount');
         $totalExpense = (float) $allFinances->where('type', 'expense')->sum('amount');
         $netCashflow = $monthlyIncome - $totalExpense;
-        $dueAmount = $rooms->where('status', 'due')->sum('price');
+        $dueAmount = (float) $rooms->where('status', 'due')->sum(function($r) {
+            return ($r->activeTenant && $r->activeTenant->rent_amount > 0) ? $r->activeTenant->rent_amount : ($r->price ?? 0);
+        });
 
         $branches = $setting->branches;
         $roomsLoc1 = $rooms->filter(fn($r) => ($r->location ?? 'Lokasi 1') === 'Lokasi 1');
@@ -490,7 +492,14 @@ class DashboardController extends Controller
 
         if (!empty($validated['id'])) {
             $room = Room::findOrFail($validated['id']);
+            $oldPrice = (float) $room->price;
+            $newPrice = (float) $validated['price'];
             $room->update($validated);
+            if ($oldPrice !== $newPrice && $room->activeTenant) {
+                if (empty($room->activeTenant->rent_amount) || (float)$room->activeTenant->rent_amount === $oldPrice) {
+                    $room->activeTenant->update(['rent_amount' => $newPrice]);
+                }
+            }
         } else {
             if (empty($validated['image'])) {
                 $validated['image'] = 'assets/images/rooms/room_1.jpg';
