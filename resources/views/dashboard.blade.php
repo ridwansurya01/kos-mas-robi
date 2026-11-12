@@ -8385,10 +8385,11 @@
 
       try {
         var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
-        var res = await fetch('/floors/' + encodeURIComponent(floorVal) + '/delete', {
+        var res = await fetch('/api/floors/' + encodeURIComponent(floorVal) + '/delete', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken
           }
         });
@@ -8446,35 +8447,43 @@
       var rowText = (row ? row.textContent : '').toLowerCase();
       var isOccupied = rowText.includes('terisi') || rowText.includes('jatuh tempo');
 
+      var force = false;
       if (isOccupied) {
-        if (window.showModernAlert) {
-          window.showModernAlert('Kamar #' + roomNumber + ' saat ini masih berpenghuni aktif. Silakan lakukan proses checkout penghuni terlebih dahulu sebelum menghapus unit kamar ini.', 'warning', 'Kamar Masih Dihuni');
-        } else {
-          alert('Kamar #' + roomNumber + ' saat ini masih berpenghuni aktif.');
-        }
-        return;
+        var confirmedOccupied = await window.showModernConfirm(
+          'Kamar #' + roomNumber + ' saat ini tercatat masih berpenghuni aktif.\n\nApakah Anda yakin ingin tetap menghapus unit kamar ini? Data penghuni terkait di kamar ini akan otomatis di-checkout dan dilepaskan dari unit kamar.',
+          {
+            title: 'Hapus Kamar Berpenghuni #' + roomNumber,
+            okText: 'Tetap Hapus & Lepaskan Penghuni',
+            cancelText: 'Batalkan',
+            danger: true
+          }
+        );
+        if (!confirmedOccupied) return;
+        force = true;
+      } else {
+        var confirmed = await window.showModernConfirm(
+          'Apakah Anda yakin ingin menghapus Kamar #' + roomNumber + ' dari daftar kamar kos?\n\nUnit kamar ini akan dihapus permanen dari sistem.',
+          {
+            title: 'Hapus Unit Kamar #' + roomNumber,
+            okText: 'Ya, Hapus Kamar',
+            cancelText: 'Batalkan',
+            danger: true
+          }
+        );
+        if (!confirmed) return;
       }
-
-      var confirmed = await window.showModernConfirm(
-        'Apakah Anda yakin ingin menghapus Kamar #' + roomNumber + ' dari daftar kamar kos?\n\nUnit kamar ini akan dihapus permanen dari sistem.',
-        {
-          title: 'Hapus Unit Kamar #' + roomNumber,
-          okText: 'Ya, Hapus Kamar',
-          cancelText: 'Batalkan',
-          danger: true
-        }
-      );
-      if (!confirmed) return;
 
       try {
         var csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         var targetId = id || roomNumber;
-        var res = await fetch('/rooms/' + encodeURIComponent(targetId) + '/delete', {
+        var res = await fetch('/api/rooms/' + encodeURIComponent(targetId) + '/delete', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': csrfToken
-          }
+          },
+          body: JSON.stringify({ force: force })
         });
         var data = await res.json();
         if (!res.ok || !data.success) {
@@ -8488,6 +8497,9 @@
 
         // Hapus elemen dari DOM
         if (row) row.remove();
+        document.querySelectorAll('#roomsMasterTableBody .room-master-row[data-number="' + String(roomNumber).toLowerCase() + '"]').forEach(function(el) {
+          el.remove();
+        });
         document.querySelectorAll('#roomsMobileCardList .mobile-data-card').forEach(function(card) {
           var s = card.getAttribute('data-search') || '';
           if (s.includes('kamar #' + String(roomNumber).toLowerCase()) || s.startsWith(String(roomNumber).toLowerCase() + ' ')) {

@@ -559,25 +559,38 @@ class DashboardController extends Controller
     /**
      * Delete a single room from system.
      */
-    public function deleteRoom($id): JsonResponse
+    public function deleteRoom($id, Request $request = null): JsonResponse
     {
+        $req = $request ?: request();
         $room = Room::where('id', $id)->orWhere('number', $id)->first();
         if (!$room) {
             return response()->json(['success' => false, 'message' => 'Unit kamar tidak ditemukan.'], 404);
         }
 
-        if ($room->activeTenant) {
+        $force = $req->boolean('force') || $req->input('force') == 1 || $req->input('force') === 'true' || $req->input('force') === true;
+
+        if ($room->activeTenant && !$force) {
             return response()->json([
                 'success' => false,
-                'message' => 'Kamar #' . $room->number . ' masih dihuni oleh ' . $room->activeTenant->name . '. Silakan proses checkout penghuni terlebih dahulu sebelum menghapus kamar.'
+                'has_active_tenant' => true,
+                'tenant_name' => $room->activeTenant->name,
+                'message' => 'Kamar #' . $room->number . ' masih dihuni oleh ' . $room->activeTenant->name . '. Silakan konfirmasi untuk tetap menghapus unit kamar dan melepaskan penghuni terkait.'
             ], 422);
         }
 
         $roomNumber = $room->number;
         $roomFloor = (int)$room->floor;
 
-        // Nullify foreign key references safely
-        \App\Models\Tenant::where('room_id', $room->id)->update(['room_id' => null]);
+        // Nullify or checkout foreign key references safely
+        if ($room->activeTenant) {
+            \App\Models\Tenant::where('room_id', $room->id)->update([
+                'room_id' => null,
+                'status' => 'checked_out'
+            ]);
+        } else {
+            \App\Models\Tenant::where('room_id', $room->id)->update(['room_id' => null]);
+        }
+
         \App\Models\Finance::where('room_id', $room->id)->update(['room_id' => null]);
         \App\Models\MaintenanceTicket::where('room_id', $room->id)->update(['room_id' => null]);
         \App\Models\RoomTransfer::where('current_room_id', $room->id)->update(['current_room_id' => null]);

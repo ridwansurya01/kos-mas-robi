@@ -600,16 +600,18 @@
   <main class="tp-main">
 
     @if(session('success'))
-      <div class="tp-alert success">
+      <div class="tp-alert success tp-flash-alert" id="tenantFlashAlertSuccess">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>{{ session('success') }}</span>
+        <span style="flex: 1;">{{ session('success') }}</span>
+        <button type="button" class="tp-alert-close" onclick="this.closest('.tp-alert').remove()" title="Tutup notifikasi">&times;</button>
       </div>
     @endif
 
     @if(isset($errors) && $errors->any())
-      <div class="tp-alert error">
+      <div class="tp-alert error tp-flash-alert" id="tenantFlashAlertError">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <span>{{ $errors->first() }}</span>
+        <span style="flex: 1;">{{ $errors->first() }}</span>
+        <button type="button" class="tp-alert-close" onclick="this.closest('.tp-alert').remove()" title="Tutup notifikasi">&times;</button>
       </div>
     @endif
 
@@ -831,10 +833,10 @@
             @if($hasRealAvatar)
               <img src="{{ asset($user->avatar) }}"
                    alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg">
-              <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial" style="display:none;">{{ $userInitial }}</div>
+              <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial" style="display:none !important;">{{ $userInitial }}</div>
             @else
               <img src=""
-                   alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg" style="display:none;">
+                   alt="{{ $user->name }}" class="tp-welcome-avatar" id="welcomeAvatarImg" style="display:none !important;">
               <div class="tp-welcome-avatar tp-welcome-avatar-initial" id="welcomeAvatarInitial">{{ $userInitial }}</div>
             @endif
             <span class="tp-welcome-edit-badge" title="Ubah profil">
@@ -2734,7 +2736,9 @@ document.addEventListener('click', function(e) {
             });
             ['navAvatarInitial', 'welcomeAvatarInitial', 'avatarPreviewInitial'].forEach(function(id) {
               var el = document.getElementById(id);
-              if (el) el.style.display = 'none';
+              if (el) {
+                el.style.setProperty('display', 'none', 'important');
+              }
             });
           }
           if (data.user.name) {
@@ -3779,9 +3783,26 @@ function viewDetailedReceipt(code, date, timeWithTz, tenantName, roomNumber, des
   document.getElementById('modalDigitalReceiptDetail')?.classList.add('open');
 }
 
-// Inisialisasi Deteksi Zona Waktu Otomatis di Latar Belakang saat Dokumen Siap
+// Inisialisasi Deteksi Zona Waktu Otomatis & Auto-Dismiss Alert saat Dokumen Siap
 document.addEventListener('DOMContentLoaded', function() {
   initTimezoneDetection();
+
+  // Auto-dismiss notifikasi flash setelah sekitar 10 detik
+  document.querySelectorAll('.tp-flash-alert').forEach(function(el) {
+    setTimeout(function() {
+      if (!el || !el.parentNode) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(-10px)';
+      el.style.maxHeight = '0';
+      el.style.paddingTop = '0';
+      el.style.paddingBottom = '0';
+      el.style.marginTop = '0';
+      el.style.marginBottom = '0';
+      setTimeout(function() {
+        if (el && el.parentNode) el.remove();
+      }, 550);
+    }, 10000);
+  });
 });
 
 // ─── Foto Bukti Transfer Preview ─────────────────────────────────
@@ -3812,7 +3833,7 @@ function previewSelectedAvatar(event) {
         preview.src = e.target.result;
         preview.style.display = 'block';
       }
-      if (previewInit) previewInit.style.display = 'none';
+      if (previewInit) previewInit.style.setProperty('display', 'none', 'important');
     };
     reader.readAsDataURL(file);
   }

@@ -142,7 +142,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/rooms/{id}/delete', function (\Illuminate\Http\Request $req, $id) {
             if (!Auth::user()->isStaffOrOwner()) abort(403);
-            return app(DashboardController::class)->deleteRoom($id);
+            return app(DashboardController::class)->deleteRoom($id, $req);
         })->name('api.rooms.delete');
 
         Route::post('/floors/{floor}/delete', function (\Illuminate\Http\Request $req, $floor) {
@@ -288,6 +288,17 @@ Route::middleware(['auth'])->group(function () {
             return app(DashboardController::class)->updateAdminBranch($req, $id);
         })->name('api.admins.branch');
     });
+
+    // Fallback direct routes for backward compatibility
+    Route::post('/rooms/{id}/delete', function (\Illuminate\Http\Request $req, $id) {
+        if (!Auth::user()->isStaffOrOwner()) abort(403);
+        return app(DashboardController::class)->deleteRoom($id, $req);
+    })->name('rooms.delete');
+
+    Route::post('/floors/{floor}/delete', function (\Illuminate\Http\Request $req, $floor) {
+        if (!Auth::user()->isStaffOrOwner()) abort(403);
+        return app(DashboardController::class)->deleteFloor($req, $floor);
+    })->name('floors.delete');
 });
 
 // =========================================================================
