@@ -98,8 +98,9 @@ class AuthController extends Controller
         } else {
             session()->forget(['google_oauth_intent', 'google_connect_user_id']);
         }
+        session()->save();
 
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     /**
@@ -119,8 +120,9 @@ class AuthController extends Controller
             'google_oauth_intent' => 'connect',
             'google_connect_user_id' => Auth::id()
         ]);
+        session()->save();
 
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     /**
@@ -137,9 +139,10 @@ class AuthController extends Controller
         $intent = session('google_oauth_intent');
         $connectUserId = session('google_connect_user_id');
         session()->forget(['google_oauth_intent', 'google_connect_user_id']);
+        session()->save();
 
         // ── ALUR 1: SIMPAN / HUBUNGKAN AKUN GOOGLE DARI PROFIL ANAK KOS ──
-        if ($intent === 'connect' || (Auth::check() && $connectUserId)) {
+        if ($intent === 'connect' || Auth::check() || $connectUserId) {
             $currentUser = Auth::user() ?: User::find($connectUserId);
 
             if (!$currentUser) {

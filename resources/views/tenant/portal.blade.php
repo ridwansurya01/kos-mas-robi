@@ -2379,13 +2379,13 @@
                     <label for="inputNewPassword" class="form-label" style="font-size: 0.78rem; font-weight: 700;">
                       <span>Password Baru (Min. 8 Karakter) *</span>
                     </label>
-                    <input type="password" id="inputNewPassword" class="form-control" placeholder="Minimal 8 karakter" minlength="8" required style="font-size: 16px;">
+                    <input type="password" id="inputNewPassword" class="form-control" placeholder="Minimal 8 karakter" minlength="8" style="font-size: 16px;">
                   </div>
                   <div class="form-group" style="margin-bottom: 0;">
                     <label for="inputNewPasswordConfirm" class="form-label" style="font-size: 0.78rem; font-weight: 700;">
                       <span>Ulangi Password Baru *</span>
                     </label>
-                    <input type="password" id="inputNewPasswordConfirm" class="form-control" placeholder="Ketik ulang password" minlength="8" required style="font-size: 16px;">
+                    <input type="password" id="inputNewPasswordConfirm" class="form-control" placeholder="Ketik ulang password" minlength="8" style="font-size: 16px;">
                   </div>
                 </div>
 
@@ -2754,50 +2754,60 @@ document.addEventListener('click', function(e) {
   });
 
   // ─── SIMPAN DENGAN GOOGLE (HUBUNGKAN AKUN GOOGLE DARI PROFIL) ─────────
-  window.saveProfileAndConnectGoogle = function() {
-    var form = document.getElementById('formProfile');
-    if (!form) {
-      window.location.href = "{{ route('tenant.google.connect') }}";
-      return;
-    }
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
+  window.saveProfileAndConnectGoogle = function(e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
     var btn1 = document.getElementById('btnSaveWithGoogle');
     var btn2 = document.getElementById('btnCardSaveWithGoogle');
-    var orig1 = btn1 ? btn1.innerHTML : '';
-    var orig2 = btn2 ? btn2.innerHTML : '';
+    if (btn1) {
+      btn1.disabled = true;
+      btn1.style.opacity = '0.75';
+      btn1.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
+    }
+    if (btn2) {
+      btn2.disabled = true;
+      btn2.style.opacity = '0.75';
+      btn2.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
+    }
 
-    if (btn1) { btn1.disabled = true; btn1.innerHTML = '<span class="tp-spinner"></span> Menyimpan...'; }
-    if (btn2) { btn2.disabled = true; btn2.innerHTML = '<span class="tp-spinner"></span> Menyimpan...'; }
+    var form = document.getElementById('formProfile');
+    var redirectTarget = "{{ route('tenant.google.connect') }}";
 
-    fetch(form.action, {
-      method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') || {}).content || '{{ csrf_token() }}'
-      },
-      body: new FormData(form)
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data && data.success) {
-        if (btn1) btn1.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
-        if (btn2) btn2.innerHTML = '<span class="tp-spinner"></span> Menghubungkan Google...';
-        window.location.href = "{{ route('tenant.google.connect') }}";
-      } else {
-        if (btn1) { btn1.disabled = false; btn1.innerHTML = orig1; }
-        if (btn2) { btn2.disabled = false; btn2.innerHTML = orig2; }
-        showPortalToast((data && data.message) ? data.message : 'Gagal menyimpan profil sebelum menghubungkan Google.', 'error');
+    // Jika ada perubahan form profil, coba simpan via background fetch
+    if (form) {
+      try {
+        var formData = new FormData(form);
+        var hasRedirected = false;
+
+        var doRedirect = function() {
+          if (!hasRedirected) {
+            hasRedirected = true;
+            window.location.href = redirectTarget;
+          }
+        };
+
+        fetch(form.action, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': (document.querySelector('meta[name=csrf-token]') || {}).content || '{{ csrf_token() }}'
+          },
+          body: formData
+        })
+        .finally(function() {
+          doRedirect();
+        });
+
+        // Timeout pengaman maks 1 detik agar tidak menunggu lama
+        setTimeout(doRedirect, 1000);
+        return;
+      } catch (err) {
+        console.warn('Form profile background save caught:', err);
       }
-    })
-    .catch(function(err) {
-      console.warn('Profile save before google redirect caught:', err);
-      window.location.href = "{{ route('tenant.google.connect') }}";
-    });
+    }
+
+    // Fallback langsung arahkan ke Google OAuth
+    window.location.href = redirectTarget;
   };
 
   // ─── ALUR GANTI PASSWORD VIA VERIFIKASI OTP GMAIL ───────────────────
