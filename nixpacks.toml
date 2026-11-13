@@ -1,3 +1,7 @@
+[variables]
+COMPOSER_ALLOW_SUPERUSER = "1"
+NIXPACKS_PHP_VERSION = "8.3"
+
 [phases.setup]
 nixPkgs = [
     "php83",
@@ -9,5 +13,5 @@ nixPkgs = [
 cmds = [
     "mkdir -p /app/node_modules/.cache",
     "npm install",
-    "composer install --optimize-autoloader --no-scripts --no-interaction"
+    "composer install --optimize-autoloader --no-dev --no-scripts --no-interaction --ignore-platform-reqs"
 ]
