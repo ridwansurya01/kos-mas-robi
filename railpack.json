@@ -21,7 +21,9 @@
     "libfreetype6",
     "libfreetype6-dev",
     "libxml2",
-    "libxml2-dev"
+    "libxml2-dev",
+    "libicu76",
+    "libicu-dev"
   ],
   "deploy": {
     "aptPackages": [
@@ -30,7 +32,8 @@
       "libpng16-16",
       "libjpeg62-turbo",
       "libfreetype6",
-      "libxml2"
+      "libxml2",
+      "libicu76"
     ]
   }
 }
