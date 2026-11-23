@@ -11,6 +11,14 @@
     "libonig-dev",
     "libzip-dev",
     "libcurl4-openssl-dev",
-    "libsodium-dev"
-  ]
+    "libsodium-dev",
+    "libpq5",
+    "libpq-dev"
+  ],
+  "deploy": {
+    "aptPackages": [
+      "...",
+      "libpq5"
+    ]
+  }
 }
