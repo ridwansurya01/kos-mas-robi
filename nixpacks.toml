@@ -1,6 +1,7 @@
 [variables]
 COMPOSER_ALLOW_SUPERUSER = "1"
 NIXPACKS_PHP_VERSION = "8.3"
+PHP_VERSION = "8.3"
 
 [phases.setup]
 nixPkgs = [
@@ -9,7 +10,7 @@ nixPkgs = [
     "nodejs_20"
 ]
 
-[phases.build]
+[phases.install]
 cmds = [
     "mkdir -p /app/node_modules/.cache",
     "npm install",
