@@ -13,12 +13,24 @@
     "libcurl4-openssl-dev",
     "libsodium-dev",
     "libpq5",
-    "libpq-dev"
+    "libpq-dev",
+    "libpng16-16",
+    "libpng-dev",
+    "libjpeg62-turbo",
+    "libjpeg-dev",
+    "libfreetype6",
+    "libfreetype6-dev",
+    "libxml2",
+    "libxml2-dev"
   ],
   "deploy": {
     "aptPackages": [
       "...",
-      "libpq5"
+      "libpq5",
+      "libpng16-16",
+      "libjpeg62-turbo",
+      "libfreetype6",
+      "libxml2"
     ]
   }
 }
