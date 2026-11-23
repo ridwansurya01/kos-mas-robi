@@ -1794,8 +1794,23 @@
     $b1Image = $allBranchesGlobal['lokasi_1']['image'] ?? 'assets/images/kos_exterior.webp';
     $b2Image = $allBranchesGlobal['lokasi_2']['image'] ?? 'assets/images/landing/hero_corridor_teal.webp';
     $existingFloors = collect([1, 2])->merge($rooms->pluck('floor')->map(fn($f) => (int)$f)->filter(fn($f) => $f > 0))->unique()->sort()->values();
-    $ownerInitials = collect(preg_split('/\s+/', trim($setting->owner_name ?? 'Mas Robi')))
-      ->filter()->take(2)->map(fn($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('') ?: 'MR';
+    $userInitials = Auth::user()?->initials ?? (function() use ($setting) {
+        $rawName = trim((string)($setting->owner_name ?? 'Admin'));
+        $words = array_values(array_filter(preg_split('/\s+/', $rawName !== '' ? $rawName : 'Admin')));
+        if (empty($words)) return 'AD';
+        $firstWord = $words[0];
+        $firstChar = mb_strtoupper(mb_substr($firstWord, 0, 1));
+        if (isset($words[1])) {
+            $secondWord = $words[1];
+            $secondChar = mb_strlen($secondWord) >= 2 ? mb_strtoupper(mb_substr($secondWord, 1, 1)) : mb_strtoupper(mb_substr($secondWord, 0, 1));
+        } elseif (mb_strlen($firstWord) >= 2) {
+            $secondChar = mb_strtoupper(mb_substr($firstWord, 1, 1));
+        } else {
+            $secondChar = $firstChar;
+        }
+        return $firstChar . $secondChar;
+    })();
+    $ownerInitials = $userInitials;
   @endphp
 
   <!-- =========================================================================
@@ -2167,18 +2182,37 @@
                 <span class="hero-res-label">Total Penghuni</span>
               </div>
               <div class="hero-res-val">{{ $occupiedRooms }} Penghuni</div>
-              <span class="hero-res-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
-                <span>+12% dari bulan lalu</span>
-              </span>
+              @if($occupiedRooms > 0 && isset($tenantGrowthLabel))
+                <span class="hero-res-badge" style="{{ $tenantGrowthTrend === 'down' ? 'background: rgba(239, 68, 68, 0.2); color: #fca5a5;' : ($tenantGrowthTrend === 'neutral' ? 'background: rgba(148, 163, 184, 0.2); color: #cbd5e1;' : '') }}">
+                  @if($tenantGrowthTrend === 'down')
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                  @elseif($tenantGrowthTrend === 'up')
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                  @else
+                    <span style="font-weight: 800; font-size: 11px; margin-right: 2px;">•</span>
+                  @endif
+                  <span>{{ $tenantGrowthLabel }}</span>
+                </span>
+              @else
+                <span class="hero-res-badge" style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1;">
+                  <span style="font-weight: 800; font-size: 11px; margin-right: 2px;">•</span>
+                  <span>{{ $tenantGrowthLabel ?? '0% dari bulan lalu' }}</span>
+                </span>
+              @endif
             </div>
             <div class="hero-mini-barchart" aria-hidden="true">
-              <span class="mini-bar" style="height: 18px;"></span>
-              <span class="mini-bar" style="height: 28px;"></span>
-              <span class="mini-bar" style="height: 34px;"></span>
-              <span class="mini-bar" style="height: 42px;"></span>
-              <span class="mini-bar" style="height: 48px;"></span>
-              <span class="mini-bar" style="height: 54px;"></span>
+              @if(!empty($heroBars))
+                @foreach($heroBars as $bar)
+                  <span class="mini-bar" style="height: {{ $bar['height'] }}px; opacity: {{ $bar['opacity'] }};" title="{{ $bar['label'] }}"></span>
+                @endforeach
+              @else
+                <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
+                <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
+                <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
+                <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
+                <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
+                <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
+              @endif
             </div>
           </div>
         </div>
@@ -2200,7 +2234,7 @@
             </div>
             <div class="stat-card-value" id="statOccupancyRate">{{ $occupancyRate }}%</div>
             <div class="stat-card-meta">
-              <span class="stat-trend-pill mint">&uarr; +2.5%</span>
+              <span class="stat-trend-pill {{ $occupancyRate > 0 ? 'mint' : 'purple' }}">{{ $occupancyRate > 0 ? '&uarr; Aktif' : '- Kosong' }}</span>
             </div>
             <!-- Teal Smooth Area Wave -->
             <svg viewBox="0 0 140 45" class="stat-sparkline" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
@@ -2444,64 +2478,32 @@
             </div>
 
             <div class="activity-timeline-list">
-              <!-- Item 1: Penghuni baru mendaftar -->
-              <div class="activity-timeline-item" onclick="window.switchTab('tab-tenants')" style="cursor: pointer;" title="Buka Daftar Penghuni">
-                <div class="activity-icon mint">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="8.5" cy="7" r="4"></circle>
-                    <line x1="20" y1="8" x2="20" y2="14"></line>
-                    <line x1="23" y1="11" x2="17" y2="11"></line>
-                  </svg>
+              @if(isset($recentActivities) && $recentActivities->isNotEmpty())
+                @foreach($recentActivities as $act)
+                  <div class="activity-timeline-item" onclick="window.switchTab('{{ $act['tab'] }}')" style="cursor: pointer;" title="Buka detail aktivitas">
+                    <div class="activity-icon {{ $act['icon'] }}">
+                      @if($act['type'] === 'tenant')
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+                      @elseif($act['type'] === 'finance')
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                      @elseif($act['type'] === 'maintenance')
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                      @else
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
+                      @endif
+                    </div>
+                    <div class="activity-content">
+                      <div class="activity-title">{{ $act['title'] }}</div>
+                      <div class="activity-meta">{{ $act['meta'] }}</div>
+                    </div>
+                  </div>
+                @endforeach
+              @else
+                <div style="padding: 24px 16px; text-align: center; color: var(--text-secondary); background: #f8fafc; border-radius: 12px; border: 1.5px dashed #cbd5e1;">
+                  <div style="font-weight: 700; color: #334155; font-size: 0.88rem;">Belum Ada Riwayat Aktivitas</div>
+                  <div style="font-size: 0.78rem; color: #64748b; margin-top: 3px;">Aktivitas baru penyewa, tagihan, servis, atau mutasi kamar akan muncul otomatis di sini.</div>
                 </div>
-                <div class="activity-content">
-                  <div class="activity-title">Penghuni baru mendaftar</div>
-                  <div class="activity-meta">2 jam yang lalu &bull; Diterima di Kamar {{ $allTenants->first()?->room?->number ?? '101' }}</div>
-                </div>
-              </div>
-
-              <!-- Item 2: Tagihan berhasil dibayar -->
-              <div class="activity-timeline-item" onclick="window.switchTab('tab-bills')" style="cursor: pointer;" title="Buka Tagihan Sewa">
-                <div class="activity-icon blue">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                    <line x1="1" y1="10" x2="23" y2="10"></line>
-                  </svg>
-                </div>
-                <div class="activity-content">
-                  <div class="activity-title">Tagihan berhasil dibayar</div>
-                  <div class="activity-meta">3 jam yang lalu &bull; Pembayaran Kamar {{ $billingList->first()?->number ?? '105' }}</div>
-                </div>
-              </div>
-
-              <!-- Item 3: Kamar dalam perbaikan -->
-              <div class="activity-timeline-item" onclick="window.switchTab('tab-maintenance')" style="cursor: pointer;" title="Buka Servis Kamar">
-                <div class="activity-icon amber">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                  </svg>
-                </div>
-                <div class="activity-content">
-                  <div class="activity-title">Kamar dalam perbaikan</div>
-                  <div class="activity-meta">5 jam yang lalu &bull; Kamar {{ $allMaintenance->first()?->room?->number ?? '104' }}</div>
-                </div>
-              </div>
-
-              <!-- Item 4: Penghuni pindah kamar -->
-              <div class="activity-timeline-item" onclick="window.switchTab('tab-transfers')" style="cursor: pointer;" title="Buka Pindah Kamar">
-                <div class="activity-icon purple">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="16 3 21 3 21 8"></polyline>
-                    <line x1="4" y1="20" x2="21" y2="3"></line>
-                    <polyline points="21 16 21 21 16 21"></polyline>
-                    <line x1="15" y1="15" x2="21" y2="21"></line>
-                  </svg>
-                </div>
-                <div class="activity-content">
-                  <div class="activity-title">Penghuni pindah kamar</div>
-                  <div class="activity-meta">1 hari yang lalu &bull; Dari Kamar {{ $roomTransfers->first()?->currentRoom?->number ?? '102' }} ke {{ $roomTransfers->first()?->targetRoom?->number ?? '106' }}</div>
-                </div>
-              </div>
+              @endif
             </div>
           </div>
         </div>
@@ -2641,15 +2643,23 @@
                     ? asset('assets/images/tenant_avatar.jpg')
                     : asset('assets/images/room_sample.jpg');
               @endphp
-              <div class="upcoming-bill-row" onclick="window.switchTab('tab-bills')" title="Buka Tagihan Sewa" style="cursor: pointer;">
-                <img src="{{ $tenantAvatar }}" class="upcoming-tenant-avatar" alt="Avatar Penghuni">
-                <div class="upcoming-tenant-info">
-                  <div class="upcoming-tenant-name">{{ $upcomingDue?->activeTenant?->name ?? 'Budi Santoso' }}</div>
-                  <div class="upcoming-tenant-room">Kamar {{ $upcomingDue?->number ?? '107' }}</div>
+              @if($upcomingDue && $upcomingDue->activeTenant)
+                <div class="upcoming-bill-row" onclick="window.switchTab('tab-bills')" title="Buka Tagihan Sewa" style="cursor: pointer;">
+                  <img src="{{ $tenantAvatar }}" class="upcoming-tenant-avatar" alt="Avatar Penghuni">
+                  <div class="upcoming-tenant-info">
+                    <div class="upcoming-tenant-name">{{ $upcomingDue->activeTenant->name }}</div>
+                    <div class="upcoming-tenant-room">Kamar #{{ $upcomingDue->number }}</div>
+                  </div>
+                  <span class="upcoming-due-badge">{{ $upcomingDue->status === 'due' ? 'Jatuh Tempo' : 'Mendatang' }}</span>
+                  <div class="upcoming-bill-amount">Rp {{ number_format($upcomingDue->activeTenant->rent_amount ?: ($upcomingDue->price ?? 0), 0, ',', '.') }}</div>
                 </div>
-                <span class="upcoming-due-badge">Hari Ini</span>
-                <div class="upcoming-bill-amount">Rp {{ number_format($upcomingDue?->price ?? 750000, 0, ',', '.') }}</div>
-              </div>
+              @else
+                <div style="padding: 24px 16px; text-align: center; color: var(--text-secondary); background: #f8fafc; border-radius: 12px; border: 1.5px dashed #cbd5e1; margin-top: 6px;">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" style="margin-bottom: 6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <div style="font-weight: 700; color: #334155; font-size: 0.88rem;">Tidak Ada Tagihan Mendatang</div>
+                  <div style="font-size: 0.78rem; color: #64748b; margin-top: 3px;">Seluruh tagihan sewa tertagih atau belum ada data sewa aktif.</div>
+                </div>
+              @endif
             </div>
           </div>
         </div>
@@ -3944,9 +3954,11 @@
                       <button type="button" class="btn-secondary" onclick="openEditAdminModal({{ $admin->id }}, '{{ addslashes($admin->name) }}', '{{ addslashes($admin->email) }}', '{{ addslashes($admin->phone ?? '') }}', '{{ $admin->branch_assignment ?? 'all' }}')" style="font-size: 0.76rem; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer;" title="Edit Data & Ganti Password">
                         Edit
                       </button>
-                      <button type="button" class="btn-secondary" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ addslashes($admin->name) }}')" style="font-size: 0.76rem; padding: 6px 10px; border-radius: 8px; font-weight: 700; color: #ef4444; border-color: #fecaca; cursor: pointer;" title="Hapus Akses Admin">
-                        Hapus
-                      </button>
+                      @if(Auth::user()->isOwner() && (int)$admin->id !== (int)Auth::id())
+                        <button type="button" class="btn-secondary" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ addslashes($admin->name) }}')" style="font-size: 0.76rem; padding: 6px 10px; border-radius: 8px; font-weight: 700; color: #ef4444; border-color: #fecaca; cursor: pointer;" title="Hapus Akses Admin">
+                          Hapus
+                        </button>
+                      @endif
                     </div>
                   </td>
                 </tr>
@@ -4041,10 +4053,12 @@
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   <span>Edit Data</span>
                 </button>
+                @if(Auth::user()->isOwner() && (int)$admin->id !== (int)Auth::id())
                 <button type="button" class="btn-secondary" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ addslashes($admin->name) }}')" style="font-size: 0.8rem; padding: 9px 14px; border-radius: 10px; font-weight: 700; color: #ef4444; border-color: #fecaca; background: #fff5f5; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                   <span>Hapus</span>
                 </button>
+                @endif
               </div>
             </div>
             @empty
@@ -5966,10 +5980,13 @@
         <hr style="border: none; border-top: 1px solid var(--border-color); margin: 22px 0;">
 
         <div>
-          <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data & Cadangan</h4>
-          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database Laravel. Anda dapat mengekspor cadangan JSON sewaktu-waktu.</p>
+          <h4 style="margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; color: var(--text-primary);">Manajemen Data &amp; Export Laporan</h4>
+          <p style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 14px;">Data tersimpan aman di database Laravel. Anda dapat mengekspor rekapitulasi data lengkap ke spreadsheet Excel (.csv) sewaktu-waktu.</p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700;">Unduh Cadangan JSON</button>
+            <button type="button" class="btn-secondary" id="btnExportData" style="border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Export Data Excel (.csv)</span>
+            </button>
             <button type="button" class="btn-secondary" id="btnResetData" style="color: #f87171; border-radius: 10px; font-weight: 700;">Reset Data Sampel</button>
           </div>
           <button type="button" class="btn-primary" onclick="window.closeModal('modalAkunPengelola'); window.switchTab('tab-admins');" style="margin-top: 12px; width: 100%; border-radius: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px;">
@@ -11096,6 +11113,15 @@
     };
 
     window.confirmDeleteAdmin = async function(adminId, adminName) {
+      @if(!Auth::user()->isOwner())
+        window.showModernAlert('Akses ditolak: Hanya Owner yang berhak menghapus akun staf Admin.', 'error', 'Akses Ditolak');
+        return;
+      @endif
+
+      if (parseInt(adminId) === {{ (int)Auth::id() }}) {
+        window.showModernAlert('Tidak dapat menghapus akun Anda sendiri yang sedang aktif login.', 'error', 'Tindakan Ditolak');
+        return;
+      }
       var confirmed = await window.showModernConfirm(
         'Apakah Anda yakin ingin menghapus hak akses dan akun staf Admin "' + adminName + '"? Staf tidak akan dapat login lagi ke sistem.',
         {

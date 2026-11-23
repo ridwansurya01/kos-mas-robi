@@ -274,12 +274,22 @@ Route::middleware(['auth'])->group(function () {
         })->name('api.admins.save');
 
         Route::delete('/admins/{id}', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isStaffOrOwner()) abort(403, 'Akses khusus Pengelola Kos.');
+            if (!Auth::user()->isOwner()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akses ditolak: Hanya Owner yang berhak menghapus akun staf Admin.'
+                ], 403);
+            }
             return app(DashboardController::class)->deleteAdmin($req, $id);
         })->name('api.admins.delete');
 
         Route::post('/admins/{id}/delete', function (\Illuminate\Http\Request $req, $id) {
-            if (!Auth::user()->isStaffOrOwner()) abort(403, 'Akses khusus Pengelola Kos.');
+            if (!Auth::user()->isOwner()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akses ditolak: Hanya Owner yang berhak menghapus akun staf Admin.'
+                ], 403);
+            }
             return app(DashboardController::class)->deleteAdmin($req, $id);
         })->name('api.admins.delete_post');
 

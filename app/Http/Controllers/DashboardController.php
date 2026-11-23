@@ -134,7 +134,115 @@ class DashboardController extends Controller
         // Data Penghuni Kos Aktif (Terbaru di paling atas)
         $allTenants = Tenant::with('room')->where('status', 'active')->orderBy('id', 'desc')->get();
 
+        // Aktivitas Terbaru Otomatis dari Database Nyata
+        $activities = collect();
+
+        foreach ($allTenants->take(4) as $t) {
+            $activities->push([
+                'type' => 'tenant',
+                'title' => 'Penghuni baru mendaftar',
+                'meta' => ($t->created_at ? $t->created_at->diffForHumans() : 'Tercatat') . ' • Diterima di Kamar ' . ($t->room?->number ?? '-'),
+                'icon' => 'mint',
+                'timestamp' => $t->created_at ?? now(),
+                'tab' => 'tab-tenants',
+            ]);
+        }
+
+        foreach ($allFinances->take(4) as $f) {
+            $activities->push([
+                'type' => 'finance',
+                'title' => $f->type === 'income' ? 'Tagihan berhasil dibayar' : 'Pengeluaran operasional dicatat',
+                'meta' => ($f->date ? \Carbon\Carbon::parse($f->date)->diffForHumans() : 'Tercatat') . ' • Pembayaran Kamar ' . ($f->room?->number ?? '-') . ' (Rp ' . number_format($f->amount, 0, ',', '.') . ')',
+                'icon' => 'blue',
+                'timestamp' => $f->date ? \Carbon\Carbon::parse($f->date) : ($f->created_at ?? now()),
+                'tab' => 'tab-bills',
+            ]);
+        }
+
+        foreach ($allMaintenance->take(4) as $m) {
+            $activities->push([
+                'type' => 'maintenance',
+                'title' => 'Kamar dalam perbaikan',
+                'meta' => ($m->report_date ? \Carbon\Carbon::parse($m->report_date)->diffForHumans() : 'Tercatat') . ' • Kamar ' . ($m->room?->number ?? '-') . ' (' . ($m->category ?? 'Servis') . ')',
+                'icon' => 'amber',
+                'timestamp' => $m->report_date ? \Carbon\Carbon::parse($m->report_date) : ($m->created_at ?? now()),
+                'tab' => 'tab-maintenance',
+            ]);
+        }
+
+        foreach ($roomTransfers->take(4) as $rt) {
+            $activities->push([
+                'type' => 'transfer',
+                'title' => 'Penghuni pindah kamar',
+                'meta' => ($rt->created_at ? $rt->created_at->diffForHumans() : 'Tercatat') . ' • Dari Kamar ' . ($rt->currentRoom?->number ?? '-') . ' ke ' . ($rt->targetRoom?->number ?? '-'),
+                'icon' => 'purple',
+                'timestamp' => $rt->created_at ?? now(),
+                'tab' => 'tab-transfers',
+            ]);
+        }
+
+        $recentActivities = $activities->sortByDesc('timestamp')->take(5)->values();
+
+        // Perhitungan Pertumbuhan Penghuni Realistis (Bulan Ini vs Bulan Lalu)
+        $now = now();
+        $startOfThisMonth = $now->copy()->startOfMonth();
+        $endOfLastMonth = $now->copy()->subMonth()->endOfMonth();
+
+        $currentTenantsCount = $occupiedRooms; // Total penghuni aktif riil
+        $lastMonthTenantsCount = $allTenants->filter(function ($t) use ($endOfLastMonth) {
+            $date = $t->start_date ?? $t->created_at;
+            return $date ? \Carbon\Carbon::parse($date)->lte($endOfLastMonth) : false;
+        })->count();
+
+        if ($currentTenantsCount === 0) {
+            $tenantGrowthPct = 0;
+            $tenantGrowthLabel = '0% dari bulan lalu';
+            $tenantGrowthTrend = 'neutral';
+        } elseif ($lastMonthTenantsCount === 0) {
+            $tenantGrowthPct = 100;
+            $tenantGrowthLabel = '+' . $currentTenantsCount . ' baru bulan ini';
+            $tenantGrowthTrend = 'up';
+        } else {
+            $diff = $currentTenantsCount - $lastMonthTenantsCount;
+            $pct = round(($diff / $lastMonthTenantsCount) * 100, 1);
+            $tenantGrowthPct = $pct;
+            if ($pct > 0) {
+                $tenantGrowthLabel = '+' . $pct . '% dari bulan lalu';
+                $tenantGrowthTrend = 'up';
+            } elseif ($pct < 0) {
+                $tenantGrowthLabel = $pct . '% dari bulan lalu';
+                $tenantGrowthTrend = 'down';
+            } else {
+                $tenantGrowthLabel = '0% dari bulan lalu';
+                $tenantGrowthTrend = 'neutral';
+            }
+        }
+
+        // Data 6 Bulan Terakhir untuk Mini Bar Chart Hero
+        $heroBars = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
+            $mCount = $allTenants->filter(function ($t) use ($monthEnd) {
+                $date = $t->start_date ?? $t->created_at;
+                return $date ? \Carbon\Carbon::parse($date)->lte($monthEnd) : false;
+            })->count();
+
+            if ($totalRooms > 0 && $mCount > 0) {
+                $h = max(10, min(54, round(($mCount / $totalRooms) * 54)));
+                $op = 1.0;
+            } else {
+                $h = 6; // Flat baseline saat data kosong
+                $op = 0.35;
+            }
+            $heroBars[] = ['height' => $h, 'opacity' => $op, 'count' => $mCount];
+        }
+
         return view('dashboard', compact(
+            'tenantGrowthPct',
+            'tenantGrowthLabel',
+            'tenantGrowthTrend',
+            'heroBars',
+            'recentActivities',
             'allTenants',
             'allAdmins',
             'totalAdminsCount',
@@ -1499,21 +1607,123 @@ class DashboardController extends Controller
     }
 
     /**
-     * Export all data as JSON file download.
+     * Export all data as Excel-compatible CSV download with UTF-8 BOM.
+     * Compatible with Microsoft Excel, Google Sheets, and LibreOffice.
      */
     public function exportData()
     {
-        $data = [
-            'settings' => Setting::first(),
-            'rooms' => Room::with('activeTenant')->get(),
-            'finances' => Finance::all(),
-            'maintenance' => MaintenanceTicket::all(),
-            'exported_at' => now()->toIso8601String(),
+        $setting = Setting::first();
+        $kosName = $setting->kos_name ?? 'Kos Mas Robi';
+        $rooms = Room::with('activeTenant')->orderBy('number')->get();
+        $finances = Finance::with('room')->orderBy('date', 'desc')->get();
+        $maintenance = MaintenanceTicket::with('room')->orderBy('report_date', 'desc')->get();
+        $tenants = Tenant::with('room')->orderBy('name')->get();
+
+        $filename = 'Laporan_Data_' . \Illuminate\Support\Str::slug($kosName, '_') . '_' . date('Y-m-d') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
-        return response()->json($data, 200, [
-            'Content-Disposition' => 'attachment; filename="kos_mas_robi_backup_' . date('Y-m-d') . '.json"',
-        ]);
+        $callback = function() use ($kosName, $setting, $rooms, $tenants, $finances, $maintenance) {
+            $output = fopen('php://output', 'w');
+            
+            // UTF-8 BOM for full Microsoft Excel compatibility
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Judul Dokumen
+            fputcsv($output, ['REKAPITULASI DATA SISTEM MANAJEMEN KOS']);
+            fputcsv($output, ['Nama Properti', $kosName]);
+            fputcsv($output, ['Pemilik / Pengelola', $setting->owner_name ?? '-']);
+            fputcsv($output, ['Kontak WhatsApp', $setting->owner_phone ?? '-']);
+            fputcsv($output, ['Waktu Export', now()->translatedFormat('d F Y, H:i:s') . ' WIB']);
+            fputcsv($output, []);
+
+            // TABEL 1: DAFTAR KAMAR & STATUS
+            fputcsv($output, ['=== 1. DAFTAR UNIT KAMAR & STATUS PENGHUNI ===']);
+            fputcsv($output, ['No. Kamar', 'Cabang / Lokasi', 'Lantai', 'Tipe Kamar', 'Harga Sewa (Rp)', 'Status Kamar', 'Nama Penghuni', 'No. WhatsApp', 'Jatuh Tempo']);
+            foreach ($rooms as $r) {
+                $tenant = $r->activeTenant;
+                $statusLabel = match($r->status) {
+                    'occupied' => 'Terisi',
+                    'available' => 'Kosong',
+                    'due' => 'Jatuh Tempo',
+                    'repair' => 'Perbaikan',
+                    default => ucfirst($r->status),
+                };
+                fputcsv($output, [
+                    '#' . $r->number,
+                    $r->location ?? 'Lokasi 1',
+                    'Lantai ' . ($r->floor ?? 1),
+                    $r->type ?? '-',
+                    number_format($r->price ?? 0, 0, ',', '.'),
+                    $statusLabel,
+                    $tenant->name ?? '-',
+                    $tenant->phone ?? '-',
+                    $tenant && $tenant->due_date ? \Carbon\Carbon::parse($tenant->due_date)->format('d/m/Y') : '-',
+                ]);
+            }
+            fputcsv($output, []);
+
+            // TABEL 2: DAFTAR SELURUH PENGHUNI
+            fputcsv($output, ['=== 2. DATA LENGKAP PENGHUNI KOS ===']);
+            fputcsv($output, ['Nama Lengkap', 'Unit Kamar', 'No. WhatsApp', 'Alamat Email', 'No. Identitas (KTP/KTM)', 'Kota Asal', 'Kontak Darurat', 'Tanggal Masuk', 'Status Sewa']);
+            foreach ($tenants as $t) {
+                fputcsv($output, [
+                    $t->name,
+                    $t->room ? ('#' . $t->room->number) : '-',
+                    $t->phone ?? '-',
+                    $t->email ?? '-',
+                    $t->id_card_number ?? '-',
+                    $t->origin_address ?? '-',
+                    $t->emergency_contact ?? '-',
+                    $t->entry_date ? \Carbon\Carbon::parse($t->entry_date)->format('d/m/Y') : '-',
+                    $t->status === 'active' ? 'Aktif' : 'Nonaktif',
+                ]);
+            }
+            fputcsv($output, []);
+
+            // TABEL 3: ARSIP TRANSAKSI KEUANGAN
+            fputcsv($output, ['=== 3. ARSIP BUKU KAS & TRANSAKSI KEUANGAN ===']);
+            fputcsv($output, ['No', 'Tanggal', 'Tipe Transaksi', 'Kategori', 'Kamar Terkait', 'Nominal (Rp)', 'Keterangan']);
+            $no = 1;
+            foreach ($finances as $f) {
+                fputcsv($output, [
+                    $no++,
+                    $f->date ? \Carbon\Carbon::parse($f->date)->format('d/m/Y') : '-',
+                    $f->type === 'income' ? 'Pemasukan' : 'Pengeluaran',
+                    $f->category ?? '-',
+                    $f->room ? ('#' . $f->room->number) : '-',
+                    number_format($f->amount ?? 0, 0, ',', '.'),
+                    $f->description ?? '-',
+                ]);
+            }
+            fputcsv($output, []);
+
+            // TABEL 4: TIKET SERVIS & PEMELIHARAAN
+            fputcsv($output, ['=== 4. REKAPITULASI SERVIS & PEMELIHARAAN KAMAR ===']);
+            fputcsv($output, ['No', 'Tanggal Lapor', 'Unit Kamar', 'Kategori Kerusakan', 'Tingkat Urgensi', 'Status', 'Deskripsi Masalah']);
+            $mNo = 1;
+            foreach ($maintenance as $m) {
+                fputcsv($output, [
+                    $mNo++,
+                    $m->report_date ? \Carbon\Carbon::parse($m->report_date)->format('d/m/Y') : '-',
+                    $m->room ? ('#' . $m->room->number) : '-',
+                    $m->category ?? '-',
+                    ucfirst($m->urgency ?? 'normal'),
+                    $m->status === 'done' ? 'Selesai' : 'Sedang Diproses',
+                    $m->description ?? '-',
+                ]);
+            }
+
+            fclose($output);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -1978,21 +2188,28 @@ class DashboardController extends Controller
     }
 
     /**
-     * Hapus Akun Staf Admin (Khusus Role Pengelola: Owner & Admin)
+     * Hapus Akun Staf Admin (Khusus Role Owner)
      */
     public function deleteAdmin(Request $request, $id): JsonResponse
     {
-        if (!auth()->check() || !auth()->user()->isStaffOrOwner()) {
+        if (!auth()->check()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Akses ditolak: Hanya Pengelola yang berhak mengelola akun Admin.'
+                'message' => 'Silakan login terlebih dahulu.'
+            ], 401);
+        }
+
+        if (!auth()->user()->isOwner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak: Hanya Owner yang berhak menghapus akun staf Admin.'
             ], 403);
         }
 
-        if ((int)$id === auth()->id()) {
+        if ((int)$id === (int)auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Tidak dapat menghapus akun Anda sendiri yang sedang aktif.'
+                'message' => 'Tidak dapat menghapus akun Anda sendiri yang sedang aktif login.'
             ], 422);
         }
 

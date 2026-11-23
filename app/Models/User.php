@@ -91,4 +91,39 @@ class User extends Authenticatable
     {
         return $this->role === 'tenant';
     }
+
+    /**
+     * Inisial 2 huruf user:
+     * - Huruf pertama: huruf ke-1 dari kata ke-1 (kapital).
+     * - Huruf kedua: huruf ke-2 dari kata ke-2 (kapital).
+     * - Edge cases: jika kata ke-2 tidak ada atau panjang < 2, gunakan huruf ke-2 kata ke-1
+     *   (atau huruf ke-1 kata ke-2 jika hanya ada 1 huruf).
+     */
+    public function getInitialsAttribute(): string
+    {
+        $rawName = trim((string)($this->name ?? 'Admin'));
+        $words = array_values(array_filter(preg_split('/\s+/', $rawName !== '' ? $rawName : 'Admin')));
+
+        if (empty($words)) {
+            return 'AD';
+        }
+
+        $firstWord = $words[0];
+        $firstChar = mb_strtoupper(mb_substr($firstWord, 0, 1));
+
+        if (isset($words[1])) {
+            $secondWord = $words[1];
+            if (mb_strlen($secondWord) >= 2) {
+                $secondChar = mb_strtoupper(mb_substr($secondWord, 1, 1));
+            } else {
+                $secondChar = mb_strtoupper(mb_substr($secondWord, 0, 1));
+            }
+        } elseif (mb_strlen($firstWord) >= 2) {
+            $secondChar = mb_strtoupper(mb_substr($firstWord, 1, 1));
+        } else {
+            $secondChar = $firstChar;
+        }
+
+        return $firstChar . $secondChar;
+    }
 }
