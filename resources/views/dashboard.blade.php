@@ -2203,7 +2203,7 @@
             <div class="hero-mini-barchart" aria-hidden="true">
               @if(!empty($heroBars))
                 @foreach($heroBars as $bar)
-                  <span class="mini-bar" style="height: {{ $bar['height'] }}px; opacity: {{ $bar['opacity'] }};" title="{{ $bar['label'] }}"></span>
+                  <span class="mini-bar" style="height: {{ $bar['height'] ?? 6 }}px; opacity: {{ $bar['opacity'] ?? 0.35 }};" title="{{ $bar['label'] ?? '' }}"></span>
                 @endforeach
               @else
                 <span class="mini-bar" style="height: 6px; opacity: 0.35;"></span>
@@ -2480,21 +2480,21 @@
             <div class="activity-timeline-list">
               @if(isset($recentActivities) && $recentActivities->isNotEmpty())
                 @foreach($recentActivities as $act)
-                  <div class="activity-timeline-item" onclick="window.switchTab('{{ $act['tab'] }}')" style="cursor: pointer;" title="Buka detail aktivitas">
-                    <div class="activity-icon {{ $act['icon'] }}">
-                      @if($act['type'] === 'tenant')
+                  <div class="activity-timeline-item" onclick="window.switchTab('{{ $act['tab'] ?? 'tab-tenants' }}')" style="cursor: pointer;" title="Buka detail aktivitas">
+                    <div class="activity-icon {{ $act['icon'] ?? 'mint' }}">
+                      @if(($act['type'] ?? '') === 'tenant')
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                      @elseif($act['type'] === 'finance')
+                      @elseif(($act['type'] ?? '') === 'finance')
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                      @elseif($act['type'] === 'maintenance')
+                      @elseif(($act['type'] ?? '') === 'maintenance')
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                       @else
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line></svg>
                       @endif
                     </div>
                     <div class="activity-content">
-                      <div class="activity-title">{{ $act['title'] }}</div>
-                      <div class="activity-meta">{{ $act['meta'] }}</div>
+                      <div class="activity-title">{{ $act['title'] ?? 'Aktivitas' }}</div>
+                      <div class="activity-meta">{{ $act['meta'] ?? 'Tercatat' }}</div>
                     </div>
                   </div>
                 @endforeach

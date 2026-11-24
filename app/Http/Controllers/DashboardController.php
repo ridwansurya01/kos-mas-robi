@@ -138,45 +138,73 @@ class DashboardController extends Controller
         $activities = collect();
 
         foreach ($allTenants->take(4) as $t) {
+            try {
+                $timeText = $t->created_at ? \Carbon\Carbon::parse($t->created_at)->diffForHumans() : 'Tercatat';
+                $timestamp = $t->created_at ? \Carbon\Carbon::parse($t->created_at) : now();
+            } catch (\Throwable $e) {
+                $timeText = 'Tercatat';
+                $timestamp = now();
+            }
             $activities->push([
                 'type' => 'tenant',
                 'title' => 'Penghuni baru mendaftar',
-                'meta' => ($t->created_at ? $t->created_at->diffForHumans() : 'Tercatat') . ' • Diterima di Kamar ' . ($t->room?->number ?? '-'),
+                'meta' => $timeText . ' • Diterima di Kamar ' . ($t->room?->number ?? '-'),
                 'icon' => 'mint',
-                'timestamp' => $t->created_at ?? now(),
+                'timestamp' => $timestamp,
                 'tab' => 'tab-tenants',
             ]);
         }
 
         foreach ($allFinances->take(4) as $f) {
+            try {
+                $timeText = $f->date ? \Carbon\Carbon::parse($f->date)->diffForHumans() : 'Tercatat';
+                $timestamp = $f->date ? \Carbon\Carbon::parse($f->date) : ($f->created_at ? \Carbon\Carbon::parse($f->created_at) : now());
+            } catch (\Throwable $e) {
+                $timeText = 'Tercatat';
+                $timestamp = now();
+            }
             $activities->push([
                 'type' => 'finance',
                 'title' => $f->type === 'income' ? 'Tagihan berhasil dibayar' : 'Pengeluaran operasional dicatat',
-                'meta' => ($f->date ? \Carbon\Carbon::parse($f->date)->diffForHumans() : 'Tercatat') . ' • Pembayaran Kamar ' . ($f->room?->number ?? '-') . ' (Rp ' . number_format($f->amount, 0, ',', '.') . ')',
+                'meta' => $timeText . ' • Pembayaran Kamar ' . ($f->room?->number ?? '-') . ' (Rp ' . number_format($f->amount ?? 0, 0, ',', '.') . ')',
                 'icon' => 'blue',
-                'timestamp' => $f->date ? \Carbon\Carbon::parse($f->date) : ($f->created_at ?? now()),
+                'timestamp' => $timestamp,
                 'tab' => 'tab-bills',
             ]);
         }
 
         foreach ($allMaintenance->take(4) as $m) {
+            try {
+                $timeText = $m->report_date ? \Carbon\Carbon::parse($m->report_date)->diffForHumans() : 'Tercatat';
+                $timestamp = $m->report_date ? \Carbon\Carbon::parse($m->report_date) : ($m->created_at ? \Carbon\Carbon::parse($m->created_at) : now());
+            } catch (\Throwable $e) {
+                $timeText = 'Tercatat';
+                $timestamp = now();
+            }
             $activities->push([
                 'type' => 'maintenance',
                 'title' => 'Kamar dalam perbaikan',
-                'meta' => ($m->report_date ? \Carbon\Carbon::parse($m->report_date)->diffForHumans() : 'Tercatat') . ' • Kamar ' . ($m->room?->number ?? '-') . ' (' . ($m->category ?? 'Servis') . ')',
+                'meta' => $timeText . ' • Kamar ' . ($m->room?->number ?? '-') . ' (' . ($m->category ?? 'Servis') . ')',
                 'icon' => 'amber',
-                'timestamp' => $m->report_date ? \Carbon\Carbon::parse($m->report_date) : ($m->created_at ?? now()),
+                'timestamp' => $timestamp,
                 'tab' => 'tab-maintenance',
             ]);
         }
 
         foreach ($roomTransfers->take(4) as $rt) {
+            try {
+                $timeText = $rt->created_at ? \Carbon\Carbon::parse($rt->created_at)->diffForHumans() : 'Tercatat';
+                $timestamp = $rt->created_at ? \Carbon\Carbon::parse($rt->created_at) : now();
+            } catch (\Throwable $e) {
+                $timeText = 'Tercatat';
+                $timestamp = now();
+            }
             $activities->push([
                 'type' => 'transfer',
                 'title' => 'Penghuni pindah kamar',
-                'meta' => ($rt->created_at ? $rt->created_at->diffForHumans() : 'Tercatat') . ' • Dari Kamar ' . ($rt->currentRoom?->number ?? '-') . ' ke ' . ($rt->targetRoom?->number ?? '-'),
+                'meta' => $timeText . ' • Dari Kamar ' . ($rt->currentRoom?->number ?? '-') . ' ke ' . ($rt->targetRoom?->number ?? '-'),
                 'icon' => 'purple',
-                'timestamp' => $rt->created_at ?? now(),
+                'timestamp' => $timestamp,
                 'tab' => 'tab-transfers',
             ]);
         }
@@ -191,7 +219,12 @@ class DashboardController extends Controller
         $currentTenantsCount = $occupiedRooms; // Total penghuni aktif riil
         $lastMonthTenantsCount = $allTenants->filter(function ($t) use ($endOfLastMonth) {
             $date = $t->start_date ?? $t->created_at;
-            return $date ? \Carbon\Carbon::parse($date)->lte($endOfLastMonth) : false;
+            if (!$date) return false;
+            try {
+                return \Carbon\Carbon::parse($date)->lte($endOfLastMonth);
+            } catch (\Throwable $e) {
+                return false;
+            }
         })->count();
 
         if ($currentTenantsCount === 0) {
@@ -224,17 +257,27 @@ class DashboardController extends Controller
             $monthEnd = $now->copy()->subMonths($i)->endOfMonth();
             $mCount = $allTenants->filter(function ($t) use ($monthEnd) {
                 $date = $t->start_date ?? $t->created_at;
-                return $date ? \Carbon\Carbon::parse($date)->lte($monthEnd) : false;
+                if (!$date) return false;
+                try {
+                    return \Carbon\Carbon::parse($date)->lte($monthEnd);
+                } catch (\Throwable $e) {
+                    return false;
+                }
             })->count();
 
             if ($totalRooms > 0 && $mCount > 0) {
-                $h = max(10, min(54, round(($mCount / $totalRooms) * 54)));
+                $h = max(10, min(54, (int)round(($mCount / $totalRooms) * 54)));
                 $op = 1.0;
             } else {
                 $h = 6; // Flat baseline saat data kosong
                 $op = 0.35;
             }
-            $heroBars[] = ['height' => $h, 'opacity' => $op, 'count' => $mCount];
+            $heroBars[] = [
+                'height' => $h,
+                'opacity' => $op,
+                'count' => $mCount,
+                'label' => $monthEnd->translatedFormat('F Y') . ': ' . $mCount . ' penghuni',
+            ];
         }
 
         return view('dashboard', compact(
